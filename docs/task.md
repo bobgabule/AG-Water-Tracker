@@ -1,4 +1,4 @@
-# Task List: AG Well Tracker PWA
+# Task List: AG Water Tracker PWA
 
 ## Quick Start
 **Current Phase**: Phase 1 - Project Setup
@@ -60,7 +60,7 @@
     - Add PWA icons to `public/icons/`
   - **Acceptance Criteria**:
     - [ ] Plugin configured in `vite.config.ts` with `registerType: 'autoUpdate'`
-    - [ ] Manifest includes app name "AG Well Tracker", theme color #4A5D23
+    - [ ] Manifest includes app name "AG Water Tracker", theme color #4A5D23
     - [ ] 192x192 and 512x512 icons present
     - [ ] Service worker registered in production build
   - **Dependencies**: Task 1
