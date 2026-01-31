@@ -1,6 +1,6 @@
-# Development Setup Guide - AG Well Tracker
+# Development Setup Guide - AG Water Tracker
 
-This guide walks you through setting up your local development environment for the AG Well Tracker PWA.
+This guide walks you through setting up your local development environment for the AG Water Tracker PWA.
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ You'll need accounts and API keys from three services. Follow these sub-steps ca
 4. Navigate to **Access Tokens**
 5. Click **Create a token**
 6. Configure:
-   - **Name**: `AG Well Tracker Development`
+   - **Name**: `AG Water Tracker Development`
    - **Scopes**: Check `styles:read`, `fonts:read`, `styles:tiles`
 7. Click **Create token**
 8. Copy the token (starts with `pk.eyJ...`)
@@ -186,7 +186,7 @@ VITE v6.x.x  ready in xxx ms
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-**You should see:** The AG Well Tracker login page (once implemented) or the default Vite React page (if starting from scratch).
+**You should see:** The AG Water Tracker login page (once implemented) or the default Vite React page (if starting from scratch).
 
 ## Step 7: Verification Checklist
 

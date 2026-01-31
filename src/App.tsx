@@ -4,7 +4,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-primary text-white p-4">
-        <h1 className="text-2xl font-bold">AG Well Tracker</h1>
+        <h1 className="text-2xl font-bold">AG Water Tracker</h1>
       </header>
       <main className="p-4">
         <div className="bg-secondary text-white p-4 rounded-lg mb-4">

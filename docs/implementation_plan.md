@@ -1,4 +1,4 @@
-# Implementation Plan - AG Well Tracker
+# Implementation Plan - AG Water Tracker
 
 ## Goal
 Build a mobile-first Progressive Web App (PWA) for tracking water well usage with offline capabilities, GPS verification, and multi-user organization support.

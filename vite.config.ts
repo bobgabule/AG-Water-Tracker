@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
       manifest: {
-        name: 'AG Well Tracker',
+        name: 'AG Water Tracker',
         short_name: 'Well Tracker',
         description: 'Track and manage agricultural water well usage',
         theme_color: '#4A5D23',

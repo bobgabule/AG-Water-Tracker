@@ -1,6 +1,6 @@
-# Architecture Documentation - AG Well Tracker
+# Architecture Documentation - AG Water Tracker
 
-This document provides a deep dive into the technical architecture, design decisions, and implementation patterns for the AG Well Tracker PWA.
+This document provides a deep dive into the technical architecture, design decisions, and implementation patterns for the AG Water Tracker PWA.
 
 ## Table of Contents
 1. [System Architecture Overview](#system-architecture-overview)

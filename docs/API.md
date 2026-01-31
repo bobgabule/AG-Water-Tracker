@@ -1,4 +1,4 @@
-# API & Database Reference - AG Well Tracker
+# API & Database Reference - AG Water Tracker
 
 This document provides complete database schema, SQL migrations, Row Level Security policies, and API endpoint documentation.
 
