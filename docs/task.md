@@ -171,7 +171,7 @@
 
 ---
 
-## Phase 3: Authentication & Organization
+## Phase 3: Authentication & Farm Setup
 
 ### 3.1 Authentication Pages
 - [ ] **Create Login Page** (Size: M) <!-- id: 13 -->
@@ -209,18 +209,18 @@
   - **Dependencies**: Task 8
   - **Verification**: Sign in, refresh page, verify still authenticated
 
-### 3.2 Organization Management
-- [ ] **Create Organization Setup Page** (Size: M) <!-- id: 16 -->
-  - **What**: Build page for creating or joining an organization
-  - **Files**: Create `src/pages/OrganizationSetupPage.tsx`
+### 3.2 Farm Management
+- [ ] **Create Farm Setup Page** (Size: M) <!-- id: 16 -->
+  - **What**: Build page for registering or joining a farm
+  - **Files**: Create `src/pages/FarmSetupPage.tsx`
   - **Acceptance Criteria**:
-    - [ ] Tab for "Create Organization" and "Join Organization"
-    - [ ] Create form: organization name, description
+    - [ ] Tab for Register a Farm and Join a Farm
+    - [ ] Create form: farm name, description
     - [ ] Join form: invite code input
-    - [ ] Creates organization record in Supabase
-    - [ ] Associates user with organization
+    - [ ] Creates farm record in Supabase
+    - [ ] Associates user with farm
   - **Dependencies**: Task 6, Task 15
-  - **Verification**: Create org, verify record in database, verify user association
+  - **Verification**: Create farm, verify record in database, verify user association
 
 - [ ] **Implement Protected Routes** (Size: M) <!-- id: 17 -->
   - **What**: Set up React Router with protected routes
@@ -230,10 +230,10 @@
     - Create `src/components/ProtectedRoute.tsx`
   - **Acceptance Criteria**:
     - [ ] Unauthenticated users redirected to /login
-    - [ ] Users without org redirected to /setup
+    - [ ] Users without farm redirected to /setup
     - [ ] Authenticated users with org can access /dashboard
   - **Dependencies**: Task 15
-  - **Verification**: Test navigation as unauthenticated, authenticated without org, and authenticated with org
+  - **Verification**: Test navigation as unauthenticated, authenticated without farm, and authenticated with farm
 
 ---
 
@@ -244,7 +244,7 @@
   - **What**: Build main application layout shell
   - **Files**: Create `src/components/Layout.tsx`
   - **Acceptance Criteria**:
-    - [ ] Header with organization name
+    - [ ] Header with farm name
     - [ ] Offline status indicator in header
     - [ ] Responsive sidebar (desktop) / drawer (mobile)
     - [ ] Main content area
@@ -256,7 +256,7 @@
   - **What**: Build application header with navigation
   - **Files**: Create `src/components/Header.tsx`
   - **Acceptance Criteria**:
-    - [ ] Displays organization name from context
+    - [ ] Displays farm name from context
     - [ ] User menu with sign out option
     - [ ] Offline indicator (red dot when offline)
     - [ ] Mobile menu toggle button
@@ -765,7 +765,7 @@
   - **What**: Create end-user documentation
   - **Files**: Create `docs/USER_GUIDE.md`
   - **Acceptance Criteria**:
-    - [ ] How to create an organization
+    - [ ] How to create a farm
     - [ ] How to add wells
     - [ ] How to record readings
     - [ ] How to use offline mode

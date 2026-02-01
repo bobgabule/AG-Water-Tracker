@@ -12,9 +12,14 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
+    "@journeyapps/wa-sqlite": "^1.4.1",
+    "@powersync/react": "^1.8.2",
+    "@powersync/web": "^1.32.0",
+    "@supabase/supabase-js": "^2.93.3",
     "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-router": "^7.13.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
