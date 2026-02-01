@@ -1,7 +1,7 @@
 # Implementation Plan - AG Water Tracker
 
 ## Goal
-Build a mobile-first Progressive Web App (PWA) for tracking water well usage with offline capabilities, GPS verification, and multi-user organization support.
+Build a mobile-first Progressive Web App (PWA) for tracking water well usage with offline capabilities, GPS verification, and multi-farm support.
 
 ## Setup Prerequisites Checklist
 
@@ -54,7 +54,7 @@ Once complete, proceed to [SETUP.md](SETUP.md) for development environment setup
 
 ### Database Schema (Supabase PostgreSQL)
 Tables to be created (I will provide `.sql` files):
-1.  `organizations`
+1.  `organizations` (represents Farms in the UI)
 2.  `users` (extends auth.users)
 3.  `wells` (PostGIS geometry for location)
 4.  `allocations`
@@ -104,8 +104,15 @@ This approach ensures the app works completely offline while maintaining data co
 - `useSupabase`: Hook for Auth and API.
 - `Schema`: Define `powersync-schema.ts` matching the Postgres schema.
 
+### Authentication Flow
+- **Method**: Passwordless phone OTP via Supabase Auth
+- **Login**: User enters phone number → receives SMS OTP → verifies code
+- **New users**: After OTP verification, redirected to profile registration (first name, last name, email; phone saved automatically)
+- **Existing users**: After OTP verification, redirected to dashboard (or farm setup if no farm)
+- **Phone format**: US numbers only (+1 prefix hardcoded)
+
 ### 3. Components
-- `Layout`: Header with Org Name, Offline Indicator.
+- `Layout`: Header with Farm Name, Offline Indicator.
 - `MapView`: Central component.
 - `WellForm`: Reusable form for Add/Edit.
 - `AllocationGauge`: Custom SVG/Canvas component for the "gas gauge" visual.

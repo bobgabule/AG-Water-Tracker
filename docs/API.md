@@ -6,28 +6,28 @@ This document provides complete database schema, SQL migrations, Row Level Secur
 
 ### Overview
 
-The database consists of 5 main tables organized to support multi-tenant organizations with wells, allocations, and readings.
+The database consists of 5 main tables organized to support multi-tenant farms with wells, allocations, and readings.
 
 ```
 organizations (multi-tenant root)
-    ↓
+    â†“
   users (members of organizations)
-    ↓
+    â†“
   wells (located via GPS, belong to organizations)
-    ↓
+    â†“
   allocations (annual water allocation per well)
-    ↓
+    â†“
   readings (meter readings with GPS verification)
 ```
 
-### Table: `organizations`
+### Table: `organizations` (represents Farms in the UI)
 
-Organizations are the multi-tenant root. Each organization has multiple users and wells.
+Farms are the multi-tenant root (stored in the `organizations` table). Each farm has multiple users and wells.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique organization ID |
-| `name` | `text` | NOT NULL | Organization name |
+| `name` | `text` | NOT NULL | Farm name |
 | `description` | `text` | NULL | Optional description |
 | `invite_code` | `text` | UNIQUE | 6-character code for joining org |
 | `created_at` | `timestamptz` | DEFAULT now() | Creation timestamp |
@@ -40,12 +40,12 @@ Organizations are the multi-tenant root. Each organization has multiple users an
 
 ### Table: `users`
 
-Extends Supabase `auth.users` with organization membership.
+Extends Supabase `auth.users` with farm membership.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PRIMARY KEY, REFERENCES auth.users(id) | User ID (matches auth.users) |
-| `organization_id` | `uuid` | REFERENCES organizations(id) ON DELETE CASCADE | Organization membership |
+| `organization_id` | `uuid` | REFERENCES organizations(id) ON DELETE CASCADE | farm membership |
 | `role` | `text` | NOT NULL, DEFAULT 'member' | Role: 'admin' or 'member' |
 | `display_name` | `text` | NULL | Optional display name |
 | `created_at` | `timestamptz` | DEFAULT now() | Creation timestamp |
@@ -67,7 +67,7 @@ Water wells with GPS location (PostGIS geometry).
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique well ID |
-| `organization_id` | `uuid` | NOT NULL, REFERENCES organizations(id) ON DELETE CASCADE | Owner organization |
+| `organization_id` | `uuid` | NOT NULL, REFERENCES organizations(id) ON DELETE CASCADE | Owner farm |
 | `name` | `text` | NOT NULL | Well name/identifier |
 | `meter_id` | `text` | NULL | Physical meter ID |
 | `location` | `geography(Point, 4326)` | NOT NULL | GPS coordinates (PostGIS) |
@@ -327,7 +327,7 @@ CREATE POLICY "Admins can update their organization"
 
 -- Users policies
 -- Users can view members of their organization
-CREATE POLICY "Users can view org members"
+CREATE POLICY "Users can view farm members"
     ON users FOR SELECT
     USING (
         organization_id IN (
@@ -347,7 +347,7 @@ CREATE POLICY "Users can update own record"
 
 -- Wells policies
 -- Users can view wells in their organization
-CREATE POLICY "Users can view org wells"
+CREATE POLICY "Users can view farm wells"
     ON wells FOR SELECT
     USING (
         organization_id IN (
@@ -387,7 +387,7 @@ CREATE POLICY "Admins can delete wells"
 
 -- Allocations policies
 -- Users can view allocations for wells in their org
-CREATE POLICY "Users can view org allocations"
+CREATE POLICY "Users can view farm allocations"
     ON allocations FOR SELECT
     USING (
         well_id IN (
@@ -433,7 +433,7 @@ CREATE POLICY "Admins can delete allocations"
 
 -- Readings policies
 -- Users can view readings for wells in their org
-CREATE POLICY "Users can view org readings"
+CREATE POLICY "Users can view farm readings"
     ON readings FOR SELECT
     USING (
         well_id IN (
@@ -443,8 +443,8 @@ CREATE POLICY "Users can view org readings"
         )
     );
 
--- All org members can create readings
-CREATE POLICY "Org members can create readings"
+-- All farm members can create readings
+CREATE POLICY "farm members can create readings"
     ON readings FOR INSERT
     WITH CHECK (
         well_id IN (
@@ -487,7 +487,7 @@ CREATE POLICY "Creator or admin can delete readings"
 
 PowerSync needs sync rules to determine what data to sync to each user's device.
 
-**Configuration** (PowerSync Dashboard → Sync Rules):
+**Configuration** (PowerSync Dashboard â†’ Sync Rules):
 
 ```yaml
 bucket_definitions:
@@ -501,7 +501,7 @@ bucket_definitions:
       - SELECT o.* FROM organizations o
         WHERE o.id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
 
-      # Sync org members
+      # Sync farm members
       - SELECT u.* FROM users u
         WHERE u.organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
 
@@ -509,11 +509,11 @@ bucket_definitions:
       - SELECT w.* FROM wells w
         WHERE w.organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
 
-      # Sync all allocations for org wells
+      # Sync all allocations for farm wells
       - SELECT a.* FROM allocations a
         WHERE a.well_id IN (SELECT id FROM wells WHERE organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id))
 
-      # Sync all readings for org wells
+      # Sync all readings for farm wells
       - SELECT r.* FROM readings r
         WHERE r.well_id IN (SELECT id FROM wells WHERE organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id))
 ```
@@ -521,7 +521,7 @@ bucket_definitions:
 **Notes**:
 - `request.user_id()` returns the authenticated user's ID from the JWT subject claim
 - `bucket.user_id` references the parameter defined in the `parameters` query
-- PowerSync sync rules use a subset of SQL — no JOIN, GROUP BY, ORDER BY, or LIMIT
+- PowerSync sync rules use a subset of SQL â€” no JOIN, GROUP BY, ORDER BY, or LIMIT
 - See [PowerSync Sync Rules docs](https://docs.powersync.com/usage/sync-rules) for full syntax reference
 
 ---
@@ -573,9 +573,9 @@ const { data, error } = await supabase.auth.signInWithPassword({
 const { error } = await supabase.auth.signOut();
 ```
 
-### Organizations
+### Farms
 
-**Create Organization**
+**Register Farm**
 ```javascript
 const { data, error } = await supabase
   .from('organizations')
@@ -589,7 +589,7 @@ const { data, error } = await supabase
 // Returns: { id, name, description, invite_code, created_at, updated_at }
 ```
 
-**Get Organization by Invite Code**
+**Get Farm by Invite Code**
 ```javascript
 const { data, error } = await supabase
   .from('organizations')
@@ -598,7 +598,7 @@ const { data, error } = await supabase
   .single();
 ```
 
-**Update Organization**
+**Update Farm**
 ```javascript
 const { data, error } = await supabase
   .from('organizations')

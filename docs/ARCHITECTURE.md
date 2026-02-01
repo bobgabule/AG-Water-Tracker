@@ -172,13 +172,13 @@ App.tsx (Router)
 ├─ Public Routes
 │  ├─ LoginPage
 │  ├─ RegisterPage
-│  └─ OrganizationSetupPage
+│  └─ FarmSetupPage
 │
-└─ Protected Routes (Requires auth + org)
+└─ Protected Routes (Requires auth + farm)
    │
    └─ Layout
       ├─ Header
-      │  ├─ OrganizationName
+      │  ├─ FarmName
       │  ├─ OfflineIndicator
       │  └─ UserMenu
       │
@@ -228,7 +228,7 @@ App.tsx (Router)
 | Component | Responsibility | State/Data Source |
 |-----------|----------------|-------------------|
 | `Layout` | Overall app structure, responsive layout | None |
-| `Header` | Navigation, org name, offline status | AuthContext |
+| `Header` | Navigation, farm name, offline status | AuthContext |
 | `OfflineIndicator` | Show online/offline status | useOnlineStatus hook |
 | `MapView` | Display map with well markers | useWells hook (PowerSync) |
 | `WellList` | List all wells with filters | useWells hook (PowerSync) |
@@ -292,7 +292,7 @@ AG-Water-Tracker/
 │   ├── pages/                  # Page components (route targets)
 │   │   ├── LoginPage.tsx
 │   │   ├── RegisterPage.tsx
-│   │   ├── OrganizationSetupPage.tsx
+│   │   ├── FarmSetupPage.tsx
 │   │   ├── DashboardPage.tsx
 │   │   ├── WellDetailPage.tsx
 │   │   ├── AddWellPage.tsx
@@ -594,7 +594,7 @@ When two users edit the same record offline and sync later:
 
 RLS ensures multi-tenant data isolation:
 
-**Example**: Users can only see wells from their organization
+**Example**: Users can only see wells from their farm
 
 ```sql
 CREATE POLICY "Users can view org wells"

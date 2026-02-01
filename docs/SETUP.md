@@ -43,7 +43,7 @@ You'll need accounts and API keys from three services. Follow these sub-steps ca
 2. Click **Start your project** → Sign up (GitHub/Google/Email)
 3. Click **New Project**
 4. Fill in:
-   - **Name**: `ag-well-tracker` (or your preference)
+   - **Name**: `ag-water-tracker` (or your preference)
    - **Database Password**: Generate strong password (save it!)
    - **Region**: Choose closest to your location
    - **Pricing Plan**: Free tier is sufficient for development
@@ -52,6 +52,19 @@ You'll need accounts and API keys from three services. Follow these sub-steps ca
 7. Copy these values:
    - **Project URL** (looks like `https://xxxxx.supabase.co`)
    - **anon/public key** (long string starting with `eyJ...`)
+
+### 2.1.1 Enable Phone Auth (Required for OTP Login)
+
+The app uses passwordless phone OTP authentication. You must enable the Phone provider in Supabase:
+
+1. In your Supabase project, go to **Authentication** → **Providers**
+2. Find **Phone** and click to enable it
+3. Choose your SMS provider:
+   - **Twilio** (recommended for production): Enter your Twilio Account SID, Auth Token, and Messaging Service SID
+   - **Test mode** (for development): Enable "Enable test OTP" and add test phone numbers with static OTP codes
+4. Click **Save**
+
+**Development Tip:** Use Supabase's test OTP feature to avoid needing real SMS during development. Add a test phone number (e.g., `+15555550100`) with a static code (e.g., `123456`).
 
 ### 2.2 Mapbox (Maps & Geolocation)
 
@@ -75,7 +88,7 @@ If you prefer not to use Mapbox, you can use Leaflet with OpenStreetMap (complet
 2. Click **Sign Up** → Create account
 3. Click **New Instance**
 4. Configure instance:
-   - **Name**: `ag-well-tracker-dev`
+   - **Name**: `ag-water-tracker-dev`
    - **Region**: Choose closest region
 5. Click **Create**
 6. Navigate to **Connections** → **Add Connection**
@@ -131,6 +144,8 @@ Now we'll create the database tables using the migration scripts.
 7. Click **Run** (bottom-right)
 8. Verify success: You should see "Success. No rows returned"
 9. Repeat for `supabase/migrations/002_rls_policies.sql`
+10. Repeat for `supabase/migrations/003_phone_otp_user_fields.sql`
+11. Repeat for `supabase/migrations/004_add_phone_column.sql`
 
 **Verify Tables Created:**
 1. Go to **Table Editor** (left sidebar)
