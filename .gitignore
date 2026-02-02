@@ -29,3 +29,6 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Supabase local temp files
+supabase/.temp/
