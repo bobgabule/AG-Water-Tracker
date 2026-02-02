@@ -1,32 +1,17 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/react';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 
 export default function FarmSetupPage() {
-  const { user, userProfile, loading, signOut, refreshProfile } = useAuth();
+  const { user, setFarmOnProfile, signOut } = useAuth();
   const navigate = useNavigate();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!userProfile) {
-    return <Navigate to="/register" replace />;
-  }
-
-  if (userProfile.organization_id) {
-    return <Navigate to="/" replace />;
+  function handleFarmSet(farmId: string, role: string) {
+    setFarmOnProfile(farmId, role);
+    navigate('/');
   }
 
   return (
@@ -73,19 +58,13 @@ export default function FarmSetupPage() {
             <TabPanel>
               <CreateFarmForm
                 userId={user!.id}
-                onSuccess={async () => {
-                  await refreshProfile();
-                  navigate('/');
-                }}
+                onSuccess={handleFarmSet}
               />
             </TabPanel>
             <TabPanel>
               <JoinFarmForm
                 userId={user!.id}
-                onSuccess={async () => {
-                  await refreshProfile();
-                  navigate('/');
-                }}
+                onSuccess={handleFarmSet}
               />
             </TabPanel>
           </TabPanels>
@@ -102,7 +81,7 @@ export default function FarmSetupPage() {
   );
 }
 
-function CreateFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () => void }) {
+function CreateFarmForm({ userId, onSuccess }: { userId: string; onSuccess: (farmId: string, role: string) => void }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -114,12 +93,13 @@ function CreateFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () =
     setSubmitting(true);
 
     try {
-      // Create farm (stored in "organizations" table)
-      const { data: farm, error: farmError } = await supabase
-        .from('organizations')
-        .insert({ name, description: description || null })
-        .select()
-        .single();
+      // Generate ID client-side to avoid needing a SELECT after INSERT
+      // (the farms SELECT RLS policy requires user.farm_id to be set first)
+      const farmId = crypto.randomUUID();
+
+      const { error: farmError } = await supabase
+        .from('farms')
+        .insert({ id: farmId, name, description: description || null });
 
       if (farmError) throw farmError;
 
@@ -127,14 +107,14 @@ function CreateFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () =
       const { error: userError } = await supabase
         .from('users')
         .update({
-          organization_id: farm.id,
+          farm_id: farmId,
           role: 'admin',
         })
         .eq('id', userId);
 
       if (userError) throw userError;
 
-      onSuccess();
+      onSuccess(farmId, 'admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to register farm');
     } finally {
@@ -199,7 +179,7 @@ function CreateFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () =
   );
 }
 
-function JoinFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () => void }) {
+function JoinFarmForm({ userId, onSuccess }: { userId: string; onSuccess: (farmId: string, role: string) => void }) {
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -210,9 +190,8 @@ function JoinFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () => 
     setSubmitting(true);
 
     try {
-      // Look up farm by invite code (stored in "organizations" table)
       const { data: farm, error: farmError } = await supabase
-        .from('organizations')
+        .from('farms')
         .select('id, name')
         .eq('invite_code', inviteCode.trim().toUpperCase())
         .single();
@@ -225,14 +204,14 @@ function JoinFarmForm({ userId, onSuccess }: { userId: string; onSuccess: () => 
       const { error: userError } = await supabase
         .from('users')
         .update({
-          organization_id: farm.id,
+          farm_id: farm.id,
           role: 'member',
         })
         .eq('id', userId);
 
       if (userError) throw userError;
 
-      onSuccess();
+      onSuccess(farm.id, 'member');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join farm');
     } finally {

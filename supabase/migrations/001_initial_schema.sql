@@ -4,8 +4,8 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create organizations table (displayed as "Farms" in the application UI)
-CREATE TABLE organizations (
+-- Create farms table
+CREATE TABLE farms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT,
@@ -15,12 +15,12 @@ CREATE TABLE organizations (
 );
 
 -- Create index on invite_code for fast lookups
-CREATE INDEX idx_organizations_invite_code ON organizations(invite_code);
+CREATE INDEX idx_farms_invite_code ON farms(invite_code);
 
 -- Create users table (extends auth.users)
 CREATE TABLE users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
     role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
     display_name TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -28,13 +28,13 @@ CREATE TABLE users (
 );
 
 -- Indexes for users
-CREATE INDEX idx_users_organization_id ON users(organization_id);
-CREATE INDEX idx_users_org_role ON users(organization_id, role);
+CREATE INDEX idx_users_farm_id ON users(farm_id);
+CREATE INDEX idx_users_farm_role ON users(farm_id, role);
 
 -- Create wells table
 CREATE TABLE wells (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    farm_id UUID NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     meter_id TEXT,
     location GEOGRAPHY(Point, 4326) NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE wells (
 );
 
 -- Indexes for wells
-CREATE INDEX idx_wells_organization_id ON wells(organization_id);
+CREATE INDEX idx_wells_farm_id ON wells(farm_id);
 CREATE INDEX idx_wells_status ON wells(status);
 CREATE INDEX idx_wells_location ON wells USING GIST(location);
 
@@ -96,7 +96,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Attach updated_at triggers to all tables
-CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations
+CREATE TRIGGER update_farms_updated_at BEFORE UPDATE ON farms
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
@@ -126,8 +126,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to auto-generate invite code on organization creation
-CREATE OR REPLACE FUNCTION set_organization_invite_code()
+-- Trigger to auto-generate invite code on farm creation
+CREATE OR REPLACE FUNCTION set_farm_invite_code()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.invite_code IS NULL THEN
@@ -137,5 +137,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_invite_code BEFORE INSERT ON organizations
-    FOR EACH ROW EXECUTE FUNCTION set_organization_invite_code();
+CREATE TRIGGER set_invite_code BEFORE INSERT ON farms
+    FOR EACH ROW EXECUTE FUNCTION set_farm_invite_code();

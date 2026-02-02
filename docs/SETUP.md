@@ -150,7 +150,7 @@ Now we'll create the database tables using the migration scripts.
 **Verify Tables Created:**
 1. Go to **Table Editor** (left sidebar)
 2. You should see tables:
-   - `organizations`
+   - `farms`
    - `users`
    - `wells`
    - `allocations`
