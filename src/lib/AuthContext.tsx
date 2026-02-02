@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const isVerifyingRef = useRef(false);
 
   const loadProfile = useCallback(async (authUser: User | null) => {
     if (!authUser) {
@@ -103,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           case 'SIGNED_IN': {
             setSessionExpired(false);
+            if (isVerifyingRef.current) break; // verifyOtp handles user + profile
             setUser(authUser);
             await loadProfile(authUser);
             break;
@@ -138,17 +140,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const verifyOtp = async (phone: string, token: string): Promise<{ isNewUser: boolean }> => {
-    const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
-    if (error) throw error;
+    isVerifyingRef.current = true;
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
+      if (error) throw error;
 
-    const authUser = data.user;
-    if (!authUser) throw new Error('Verification failed');
+      const authUser = data.user;
+      if (!authUser) throw new Error('Verification failed');
 
-    setUser(authUser);
-    const profile = await fetchUserProfile(authUser.id);
-    setUserProfile(profile);
+      const profile = await fetchUserProfile(authUser.id);
+      // Set both together — no intermediate render with user but no profile
+      setUser(authUser);
+      setUserProfile(profile);
 
-    return { isNewUser: profile === null };
+      return { isNewUser: profile === null };
+    } finally {
+      isVerifyingRef.current = false;
+    }
   };
 
   const createProfile = async (data: { firstName: string; lastName: string; email: string }) => {
