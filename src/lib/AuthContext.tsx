@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 
 interface UserProfile {
   id: string;
-  organization_id: string | null; // Maps to DB column; displayed as "farm" in UI
+  farm_id: string | null;
   role: string;
   display_name: string | null;
   first_name: string | null;
@@ -18,9 +18,11 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
+  sessionExpired: boolean;
   sendOtp: (phone: string) => Promise<void>;
   verifyOtp: (phone: string, token: string) => Promise<{ isNewUser: boolean }>;
   createProfile: (data: { firstName: string; lastName: string; email: string }) => Promise<void>;
+  setFarmOnProfile: (farmId: string, role: string) => void;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -30,7 +32,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
     .from('users')
-    .select('id, organization_id, role, display_name, first_name, last_name, email, phone')
+    .select('id, farm_id, role, display_name, first_name, last_name, email, phone')
     .eq('id', userId)
     .single();
 
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const loadProfile = useCallback(async (authUser: User | null) => {
     if (!authUser) {
@@ -53,19 +56,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const authUser = session?.user ?? null;
-      setUser(authUser);
-      loadProfile(authUser).finally(() => setLoading(false));
-    });
+    // Subscribe to auth changes — INITIAL_SESSION fires immediately with cached session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const authUser = session?.user ?? null;
 
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const authUser = session?.user ?? null;
-      setUser(authUser);
-      loadProfile(authUser);
-    });
+        switch (event) {
+          case 'INITIAL_SESSION': {
+            if (authUser && navigator.onLine) {
+              // Validate session with a network roundtrip when online (with timeout)
+              try {
+                const timeoutMs = 8000;
+                const getUserPromise = supabase.auth.getUser();
+                const timeoutPromise = new Promise<never>((_, reject) =>
+                  setTimeout(() => reject(new Error('Session validation timed out')), timeoutMs)
+                );
+
+                const { data: { user: validatedUser }, error } = await Promise.race([
+                  getUserPromise,
+                  timeoutPromise,
+                ]);
+                if (error || !validatedUser) {
+                  // Session is invalid or expired — sign out cleanly
+                  setSessionExpired(true);
+                  await supabase.auth.signOut().catch(() => {});
+                  setUser(null);
+                  setUserProfile(null);
+                  setLoading(false);
+                  return;
+                }
+                setUser(validatedUser);
+                await loadProfile(validatedUser);
+              } catch {
+                // Network error or timeout — trust local session
+                setUser(authUser);
+                await loadProfile(authUser);
+              }
+            } else {
+              // Offline or no user — use whatever we have from storage
+              setUser(authUser);
+              await loadProfile(authUser);
+            }
+            setLoading(false);
+            break;
+          }
+
+          case 'SIGNED_IN': {
+            setSessionExpired(false);
+            setUser(authUser);
+            await loadProfile(authUser);
+            break;
+          }
+
+          case 'TOKEN_REFRESHED': {
+            // Update user object; no need to re-fetch profile
+            setUser(authUser);
+            break;
+          }
+
+          case 'SIGNED_OUT': {
+            setUser(null);
+            setUserProfile(null);
+            break;
+          }
+
+          case 'USER_UPDATED': {
+            setUser(authUser);
+            await loadProfile(authUser);
+            break;
+          }
+        }
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, [loadProfile]);
@@ -94,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { error } = await supabase
       .from('users')
-      .insert({
+      .upsert({
         id: user.id,
         first_name: data.firstName,
         last_name: data.lastName,
@@ -105,14 +167,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) throw error;
 
-    // Refresh profile after creation
-    const profile = await fetchUserProfile(user.id);
-    setUserProfile(profile);
+    // Set profile from the data we just wrote (avoids RLS SELECT timing issues)
+    const newProfile: UserProfile = {
+      id: user.id,
+      farm_id: null,
+      role: 'member',
+      display_name: `${data.firstName} ${data.lastName}`,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      phone: user.phone ?? null,
+    };
+    setUserProfile(newProfile);
   };
 
+  const setFarmOnProfile = useCallback((farmId: string, role: string) => {
+    setUserProfile((prev) => prev ? { ...prev, farm_id: farmId, role } : prev);
+  }, []);
+
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Even if the server call fails (e.g. offline), clear local state
+    }
     setUser(null);
     setUserProfile(null);
   };
@@ -125,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, sendOtp, verifyOtp, createProfile, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, userProfile, loading, sessionExpired, sendOtp, verifyOtp, createProfile, setFarmOnProfile, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

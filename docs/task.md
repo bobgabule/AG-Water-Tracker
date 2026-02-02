@@ -91,7 +91,7 @@
   - **What**: Write complete SQL migration for all tables
   - **Files**: Create `supabase/migrations/001_initial_schema.sql`
   - **Acceptance Criteria**:
-    - [ ] Tables defined: `organizations`, `users`, `wells`, `allocations`, `readings`
+    - [ ] Tables defined: `farms`, `users`, `wells`, `allocations`, `readings`
     - [ ] PostGIS extension enabled for `wells.location` geometry column
     - [ ] Foreign key constraints defined
     - [ ] Indexes on commonly queried columns
@@ -103,9 +103,9 @@
   - **What**: Write Row Level Security policies for each table
   - **Files**: Create `supabase/migrations/002_rls_policies.sql`
   - **Acceptance Criteria**:
-    - [ ] Users can only see data from their organization
-    - [ ] Only org admins can create/delete wells
-    - [ ] All users in org can add readings
+    - [ ] Users can only see data from their farm
+    - [ ] Only farm admins can create/delete wells
+    - [ ] All users in farm can add readings
     - [ ] Policies tested for edge cases
   - **Dependencies**: Task 6
   - **Verification**: Test queries as different users, verify correct data access
@@ -139,7 +139,7 @@
   - **What**: Create PowerSync schema matching Supabase tables
   - **Files**: Create `src/lib/powersync-schema.ts`
   - **Acceptance Criteria**:
-    - [ ] Schema includes all tables: organizations, users, wells, allocations, readings
+    - [ ] Schema includes all tables: farms, users, wells, allocations, readings
     - [ ] Column types match Supabase schema
     - [ ] Indexes defined for queries
   - **Dependencies**: Task 6, Task 9
@@ -194,7 +194,7 @@
     - [ ] Password strength indicator
     - [ ] Email validation
     - [ ] Creates user in Supabase Auth
-    - [ ] Redirects to organization setup after registration
+    - [ ] Redirects to farm setup after registration
   - **Dependencies**: Task 8
   - **Verification**: Register new user, verify user created in Supabase Auth
 
@@ -231,7 +231,7 @@
   - **Acceptance Criteria**:
     - [ ] Unauthenticated users redirected to /login
     - [ ] Users without farm redirected to /setup
-    - [ ] Authenticated users with org can access /dashboard
+    - [ ] Authenticated users with farm can access /dashboard
   - **Dependencies**: Task 15
   - **Verification**: Test navigation as unauthenticated, authenticated without farm, and authenticated with farm
 
@@ -291,7 +291,7 @@
   - **Acceptance Criteria**:
     - [ ] Map loads with Mapbox API key from env
     - [ ] Centers on user's location or default coordinates
-    - [ ] Shows markers for all wells in organization
+    - [ ] Shows markers for all wells in farm
     - [ ] Clicking marker shows well summary popup
     - [ ] Responsive and fills available space
   - **Dependencies**: Task 21, Task 12
@@ -310,7 +310,7 @@
 
 ### 4.3 Well List View
 - [ ] **Create Well List Component** (Size: M) <!-- id: 24 -->
-  - **What**: Build list view of all wells in organization
+  - **What**: Build list view of all wells in farm
   - **Files**: Create `src/components/WellList.tsx`
   - **Acceptance Criteria**:
     - [ ] Lists all wells from PowerSync

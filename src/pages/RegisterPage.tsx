@@ -1,32 +1,16 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useAuth } from '../lib/AuthContext';
 
 export default function RegisterPage() {
-  const { user, userProfile, loading, createProfile } = useAuth();
+  const { createProfile } = useAuth();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (userProfile) {
-    return <Navigate to={userProfile.organization_id ? '/' : '/setup'} replace />;
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

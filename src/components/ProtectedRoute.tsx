@@ -1,9 +1,11 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../lib/AuthContext';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function ProtectedRoute() {
   const { user, userProfile, loading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   if (loading) {
     return (
@@ -21,10 +23,21 @@ export default function ProtectedRoute() {
   }
 
   if (!userProfile) {
+    // If offline, profile fetch may have failed — don't redirect to register
+    if (!isOnline) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center px-4">
+            <p className="text-gray-600 font-medium">Unable to load your profile while offline.</p>
+            <p className="text-gray-500 text-sm mt-2">Please connect to the internet to continue.</p>
+          </div>
+        </div>
+      );
+    }
     return <Navigate to="/register" replace />;
   }
 
-  if (!userProfile.organization_id) {
+  if (!userProfile.farm_id) {
     return <Navigate to="/setup" replace />;
   }
 

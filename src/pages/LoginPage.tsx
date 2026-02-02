@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../lib/AuthContext';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function LoginPage() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -9,8 +10,9 @@ export default function LoginPage() {
   const [otpCode, setOtpCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const { sendOtp, verifyOtp } = useAuth();
+  const { sendOtp, verifyOtp, sessionExpired } = useAuth();
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
 
   function formatPhoneDisplay(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 10);
@@ -107,6 +109,20 @@ export default function LoginPage() {
           <h2 className="text-4xl font-bold text-white -mt-1">Tracker</h2>
         </div>
 
+        {/* Offline banner */}
+        {!isOnline && (
+          <div className="bg-amber-900/60 border border-amber-500/40 text-amber-200 text-sm rounded-lg p-3 mb-4">
+            You are currently offline. An internet connection is required to sign in.
+          </div>
+        )}
+
+        {/* Session expired message */}
+        {sessionExpired && (
+          <div className="bg-amber-900/60 border border-amber-500/40 text-amber-200 text-sm rounded-lg p-3 mb-4">
+            Your session has expired. Please sign in again.
+          </div>
+        )}
+
         {step === 'phone' ? (
           <>
             {/* Sign In heading */}
@@ -134,7 +150,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || !isOnline}
                 className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {submitting ? (
@@ -205,7 +221,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={handleResendCode}
-                  disabled={submitting}
+                  disabled={submitting || !isOnline}
                   className="text-green-300 text-sm hover:underline disabled:opacity-50"
                 >
                   Resend code

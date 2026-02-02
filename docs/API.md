@@ -9,27 +9,27 @@ This document provides complete database schema, SQL migrations, Row Level Secur
 The database consists of 5 main tables organized to support multi-tenant farms with wells, allocations, and readings.
 
 ```
-organizations (multi-tenant root)
+farms (multi-tenant root)
     â†“
-  users (members of organizations)
+  users (members of farms)
     â†“
-  wells (located via GPS, belong to organizations)
+  wells (located via GPS, belong to farms)
     â†“
   allocations (annual water allocation per well)
     â†“
   readings (meter readings with GPS verification)
 ```
 
-### Table: `organizations` (represents Farms in the UI)
+### Table: `farms`
 
-Farms are the multi-tenant root (stored in the `organizations` table). Each farm has multiple users and wells.
+Farms are the multi-tenant root. Each farm has multiple users and wells.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | `uuid` | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique organization ID |
+| `id` | `uuid` | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique farm ID |
 | `name` | `text` | NOT NULL | Farm name |
 | `description` | `text` | NULL | Optional description |
-| `invite_code` | `text` | UNIQUE | 6-character code for joining org |
+| `invite_code` | `text` | UNIQUE | 6-character code for joining farm |
 | `created_at` | `timestamptz` | DEFAULT now() | Creation timestamp |
 | `updated_at` | `timestamptz` | DEFAULT now() | Last update timestamp |
 
@@ -45,7 +45,7 @@ Extends Supabase `auth.users` with farm membership.
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PRIMARY KEY, REFERENCES auth.users(id) | User ID (matches auth.users) |
-| `organization_id` | `uuid` | REFERENCES organizations(id) ON DELETE CASCADE | farm membership |
+| `farm_id` | `uuid` | REFERENCES farms(id) ON DELETE CASCADE | farm membership |
 | `role` | `text` | NOT NULL, DEFAULT 'member' | Role: 'admin' or 'member' |
 | `display_name` | `text` | NULL | Optional display name |
 | `created_at` | `timestamptz` | DEFAULT now() | Creation timestamp |
@@ -53,8 +53,8 @@ Extends Supabase `auth.users` with farm membership.
 
 **Indexes:**
 - PRIMARY KEY on `id`
-- INDEX on `organization_id` for filtering
-- INDEX on `(organization_id, role)` for permission checks
+- INDEX on `farm_id` for filtering
+- INDEX on `(farm_id, role)` for permission checks
 
 **Roles:**
 - `admin`: Can create/edit/delete wells, manage users
@@ -67,7 +67,7 @@ Water wells with GPS location (PostGIS geometry).
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique well ID |
-| `organization_id` | `uuid` | NOT NULL, REFERENCES organizations(id) ON DELETE CASCADE | Owner farm |
+| `farm_id` | `uuid` | NOT NULL, REFERENCES farms(id) ON DELETE CASCADE | Owner farm |
 | `name` | `text` | NOT NULL | Well name/identifier |
 | `meter_id` | `text` | NULL | Physical meter ID |
 | `location` | `geography(Point, 4326)` | NOT NULL | GPS coordinates (PostGIS) |
@@ -79,7 +79,7 @@ Water wells with GPS location (PostGIS geometry).
 
 **Indexes:**
 - PRIMARY KEY on `id`
-- INDEX on `organization_id`
+- INDEX on `farm_id`
 - SPATIAL INDEX on `location` (for GPS range queries)
 - INDEX on `status`
 
@@ -153,8 +153,8 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create organizations table
-CREATE TABLE organizations (
+-- Create farms table
+CREATE TABLE farms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT,
@@ -164,12 +164,12 @@ CREATE TABLE organizations (
 );
 
 -- Create index on invite_code for fast lookups
-CREATE INDEX idx_organizations_invite_code ON organizations(invite_code);
+CREATE INDEX idx_farms_invite_code ON farms(invite_code);
 
 -- Create users table (extends auth.users)
 CREATE TABLE users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
     role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
     display_name TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -177,13 +177,13 @@ CREATE TABLE users (
 );
 
 -- Indexes for users
-CREATE INDEX idx_users_organization_id ON users(organization_id);
-CREATE INDEX idx_users_org_role ON users(organization_id, role);
+CREATE INDEX idx_users_farm_id ON users(farm_id);
+CREATE INDEX idx_users_farm_role ON users(farm_id, role);
 
 -- Create wells table
 CREATE TABLE wells (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    farm_id UUID NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     meter_id TEXT,
     location GEOGRAPHY(Point, 4326) NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE wells (
 );
 
 -- Indexes for wells
-CREATE INDEX idx_wells_organization_id ON wells(organization_id);
+CREATE INDEX idx_wells_farm_id ON wells(farm_id);
 CREATE INDEX idx_wells_status ON wells(status);
 CREATE INDEX idx_wells_location ON wells USING GIST(location);
 
@@ -245,7 +245,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Attach updated_at triggers to all tables
-CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations
+CREATE TRIGGER update_farms_updated_at BEFORE UPDATE ON farms
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
@@ -275,8 +275,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to auto-generate invite code on organization creation
-CREATE OR REPLACE FUNCTION set_organization_invite_code()
+-- Trigger to auto-generate invite code on farm creation
+CREATE OR REPLACE FUNCTION set_farm_invite_code()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.invite_code IS NULL THEN
@@ -286,8 +286,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_invite_code BEFORE INSERT ON organizations
-    FOR EACH ROW EXECUTE FUNCTION set_organization_invite_code();
+CREATE TRIGGER set_invite_code BEFORE INSERT ON farms
+    FOR EACH ROW EXECUTE FUNCTION set_farm_invite_code();
 ```
 
 ### Migration 002: Row Level Security (RLS) Policies
@@ -296,42 +296,42 @@ CREATE TRIGGER set_invite_code BEFORE INSERT ON organizations
 
 ```sql
 -- Enable RLS on all tables
-ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE farms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wells ENABLE ROW LEVEL SECURITY;
 ALTER TABLE allocations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE readings ENABLE ROW LEVEL SECURITY;
 
--- Organizations policies
--- Users can only see their own organization
-CREATE POLICY "Users can view their organization"
-    ON organizations FOR SELECT
+-- Farms policies
+-- Users can only see their own farm
+CREATE POLICY "Users can view their farm"
+    ON farms FOR SELECT
     USING (id IN (
-        SELECT organization_id FROM users WHERE id = auth.uid()
+        SELECT farm_id FROM users WHERE id = auth.uid()
     ));
 
--- Only authenticated users can create organizations (during signup)
-CREATE POLICY "Authenticated users can create organizations"
-    ON organizations FOR INSERT
+-- Only authenticated users can create farms (during signup)
+CREATE POLICY "Authenticated users can create farms"
+    ON farms FOR INSERT
     WITH CHECK (auth.role() = 'authenticated');
 
--- Only admins can update their organization
-CREATE POLICY "Admins can update their organization"
-    ON organizations FOR UPDATE
+-- Only admins can update their farm
+CREATE POLICY "Admins can update their farm"
+    ON farms FOR UPDATE
     USING (
         id IN (
-            SELECT organization_id FROM users
+            SELECT farm_id FROM users
             WHERE id = auth.uid() AND role = 'admin'
         )
     );
 
 -- Users policies
--- Users can view members of their organization
+-- Users can view members of their farm
 CREATE POLICY "Users can view farm members"
     ON users FOR SELECT
     USING (
-        organization_id IN (
-            SELECT organization_id FROM users WHERE id = auth.uid()
+        farm_id IN (
+            SELECT farm_id FROM users WHERE id = auth.uid()
         )
     );
 
@@ -346,12 +346,12 @@ CREATE POLICY "Users can update own record"
     USING (id = auth.uid());
 
 -- Wells policies
--- Users can view wells in their organization
+-- Users can view wells in their farm
 CREATE POLICY "Users can view farm wells"
     ON wells FOR SELECT
     USING (
-        organization_id IN (
-            SELECT organization_id FROM users WHERE id = auth.uid()
+        farm_id IN (
+            SELECT farm_id FROM users WHERE id = auth.uid()
         )
     );
 
@@ -359,8 +359,8 @@ CREATE POLICY "Users can view farm wells"
 CREATE POLICY "Admins can create wells"
     ON wells FOR INSERT
     WITH CHECK (
-        organization_id IN (
-            SELECT organization_id FROM users
+        farm_id IN (
+            SELECT farm_id FROM users
             WHERE id = auth.uid() AND role = 'admin'
         )
     );
@@ -369,8 +369,8 @@ CREATE POLICY "Admins can create wells"
 CREATE POLICY "Admins can update wells"
     ON wells FOR UPDATE
     USING (
-        organization_id IN (
-            SELECT organization_id FROM users
+        farm_id IN (
+            SELECT farm_id FROM users
             WHERE id = auth.uid() AND role = 'admin'
         )
     );
@@ -379,20 +379,20 @@ CREATE POLICY "Admins can update wells"
 CREATE POLICY "Admins can delete wells"
     ON wells FOR DELETE
     USING (
-        organization_id IN (
-            SELECT organization_id FROM users
+        farm_id IN (
+            SELECT farm_id FROM users
             WHERE id = auth.uid() AND role = 'admin'
         )
     );
 
 -- Allocations policies
--- Users can view allocations for wells in their org
+-- Users can view allocations for wells in their farm
 CREATE POLICY "Users can view farm allocations"
     ON allocations FOR SELECT
     USING (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users WHERE id = auth.uid()
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users WHERE id = auth.uid()
             )
         )
     );
@@ -402,8 +402,8 @@ CREATE POLICY "Admins can create allocations"
     ON allocations FOR INSERT
     WITH CHECK (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users
                 WHERE id = auth.uid() AND role = 'admin'
             )
         )
@@ -413,8 +413,8 @@ CREATE POLICY "Admins can update allocations"
     ON allocations FOR UPDATE
     USING (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users
                 WHERE id = auth.uid() AND role = 'admin'
             )
         )
@@ -424,21 +424,21 @@ CREATE POLICY "Admins can delete allocations"
     ON allocations FOR DELETE
     USING (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users
                 WHERE id = auth.uid() AND role = 'admin'
             )
         )
     );
 
 -- Readings policies
--- Users can view readings for wells in their org
+-- Users can view readings for wells in their farm
 CREATE POLICY "Users can view farm readings"
     ON readings FOR SELECT
     USING (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users WHERE id = auth.uid()
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users WHERE id = auth.uid()
             )
         )
     );
@@ -448,8 +448,8 @@ CREATE POLICY "farm members can create readings"
     ON readings FOR INSERT
     WITH CHECK (
         well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users WHERE id = auth.uid()
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users WHERE id = auth.uid()
             )
         )
     );
@@ -460,8 +460,8 @@ CREATE POLICY "Creator or admin can update readings"
     USING (
         created_by = auth.uid()
         OR well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users
                 WHERE id = auth.uid() AND role = 'admin'
             )
         )
@@ -473,8 +473,8 @@ CREATE POLICY "Creator or admin can delete readings"
     USING (
         created_by = auth.uid()
         OR well_id IN (
-            SELECT id FROM wells WHERE organization_id IN (
-                SELECT organization_id FROM users
+            SELECT id FROM wells WHERE farm_id IN (
+                SELECT farm_id FROM users
                 WHERE id = auth.uid() AND role = 'admin'
             )
         )
@@ -491,31 +491,31 @@ PowerSync needs sync rules to determine what data to sync to each user's device.
 
 ```yaml
 bucket_definitions:
-  user_org_data:
+  user_farm_data:
     # Parameter query: determines which bucket(s) the user belongs to
     parameters: SELECT request.user_id() as user_id
 
     # Data queries: what data is synced into this bucket
     data:
-      # Sync user's organization
-      - SELECT o.* FROM organizations o
-        WHERE o.id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
+      # Sync user's farm
+      - SELECT o.* FROM farms o
+        WHERE o.id IN (SELECT farm_id FROM users WHERE id = bucket.user_id)
 
       # Sync farm members
       - SELECT u.* FROM users u
-        WHERE u.organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
+        WHERE u.farm_id IN (SELECT farm_id FROM users WHERE id = bucket.user_id)
 
-      # Sync all wells from user's organization
+      # Sync all wells from user's farm
       - SELECT w.* FROM wells w
-        WHERE w.organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id)
+        WHERE w.farm_id IN (SELECT farm_id FROM users WHERE id = bucket.user_id)
 
       # Sync all allocations for farm wells
       - SELECT a.* FROM allocations a
-        WHERE a.well_id IN (SELECT id FROM wells WHERE organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id))
+        WHERE a.well_id IN (SELECT id FROM wells WHERE farm_id IN (SELECT farm_id FROM users WHERE id = bucket.user_id))
 
       # Sync all readings for farm wells
       - SELECT r.* FROM readings r
-        WHERE r.well_id IN (SELECT id FROM wells WHERE organization_id IN (SELECT organization_id FROM users WHERE id = bucket.user_id))
+        WHERE r.well_id IN (SELECT id FROM wells WHERE farm_id IN (SELECT farm_id FROM users WHERE id = bucket.user_id))
 ```
 
 **Notes**:
@@ -578,7 +578,7 @@ const { error } = await supabase.auth.signOut();
 **Register Farm**
 ```javascript
 const { data, error } = await supabase
-  .from('organizations')
+  .from('farms')
   .insert({
     name: 'Acme Farms',
     description: 'Family-owned farm in Central Valley'
@@ -592,7 +592,7 @@ const { data, error } = await supabase
 **Get Farm by Invite Code**
 ```javascript
 const { data, error } = await supabase
-  .from('organizations')
+  .from('farms')
   .select('*')
   .eq('invite_code', 'ABC123')
   .single();
@@ -601,9 +601,9 @@ const { data, error } = await supabase
 **Update Farm**
 ```javascript
 const { data, error } = await supabase
-  .from('organizations')
+  .from('farms')
   .update({ name: 'New Name' })
-  .eq('id', organizationId)
+  .eq('id', farmId)
   .select()
   .single();
 ```
@@ -616,7 +616,7 @@ const { data, error } = await supabase
   .from('users')
   .insert({
     id: authUserId,  // From auth.users
-    organization_id: orgId,
+    farm_id: farmId,
     role: 'member',
     display_name: 'John Doe'
   })
@@ -628,17 +628,17 @@ const { data, error } = await supabase
 ```javascript
 const { data, error } = await supabase
   .from('users')
-  .select('*, organization:organizations(*)')
+  .select('*, farm:farms(*)')
   .eq('id', authUserId)
   .single();
 ```
 
-**List Organization Members**
+**List Farm Members**
 ```javascript
 const { data, error } = await supabase
   .from('users')
   .select('id, display_name, role, created_at')
-  .eq('organization_id', orgId);
+  .eq('farm_id', farmId);
 ```
 
 ### Wells
@@ -648,7 +648,7 @@ const { data, error } = await supabase
 const { data, error } = await supabase
   .from('wells')
   .insert({
-    organization_id: orgId,
+    farm_id: farmId,
     name: 'North Field Well #1',
     meter_id: 'M-12345',
     location: `POINT(${longitude} ${latitude})`,  // PostGIS format
@@ -659,12 +659,12 @@ const { data, error } = await supabase
   .single();
 ```
 
-**List Wells for Organization**
+**List Wells for Farm**
 ```javascript
 const { data, error } = await supabase
   .from('wells')
   .select('*')
-  .eq('organization_id', orgId)
+  .eq('farm_id', farmId)
   .order('name');
 ```
 
@@ -806,12 +806,12 @@ $$ LANGUAGE SQL;
 */
 ```
 
-### Get Usage Summary for Organization
+### Get Usage Summary for Farm
 
 ```javascript
 const { data, error } = await supabase
-  .rpc('get_org_usage_summary', {
-    org_id: organizationId,
+  .rpc('get_farm_usage_summary', {
+    farm_id: farmId,
     year: 2024
   });
 
@@ -840,7 +840,7 @@ new row violates row-level security policy for table "wells"
 ```
 insert or update on table "wells" violates foreign key constraint
 ```
-**Solution**: Referenced organization/user doesn't exist. Verify IDs.
+**Solution**: Referenced farm/user doesn't exist. Verify IDs.
 
 ---
 

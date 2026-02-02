@@ -54,7 +54,7 @@ Once complete, proceed to [SETUP.md](SETUP.md) for development environment setup
 
 ### Database Schema (Supabase PostgreSQL)
 Tables to be created (I will provide `.sql` files):
-1.  `organizations` (represents Farms in the UI)
+1.  `farms`
 2.  `users` (extends auth.users)
 3.  `wells` (PostGIS geometry for location)
 4.  `allocations`

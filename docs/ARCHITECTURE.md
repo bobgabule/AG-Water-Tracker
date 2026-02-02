@@ -363,11 +363,11 @@ import { useAuth } from '../context/AuthContext';
 
 export const useWells = (filters?: WellFilters) => {
   const db = usePowerSync();
-  const { currentOrgId } = useAuth();
+  const { currentFarmId } = useAuth();
 
   const query = useMemo(() => {
-    let sql = 'SELECT * FROM wells WHERE organization_id = ?';
-    const params = [currentOrgId];
+    let sql = 'SELECT * FROM wells WHERE farm_id = ?';
+    const params = [currentFarmId];
 
     if (filters?.status) {
       sql += ' AND status = ?';
@@ -597,11 +597,11 @@ RLS ensures multi-tenant data isolation:
 **Example**: Users can only see wells from their farm
 
 ```sql
-CREATE POLICY "Users can view org wells"
+CREATE POLICY "Users can view farm wells"
   ON wells FOR SELECT
   USING (
-    organization_id IN (
-      SELECT organization_id FROM users WHERE id = auth.uid()
+    farm_id IN (
+      SELECT farm_id FROM users WHERE id = auth.uid()
     )
   );
 ```
@@ -609,7 +609,7 @@ CREATE POLICY "Users can view org wells"
 **How it works**:
 1. User makes query: `SELECT * FROM wells`
 2. Supabase automatically appends RLS filter
-3. Effective query: `SELECT * FROM wells WHERE organization_id = (user's org)`
+3. Effective query: `SELECT * FROM wells WHERE farm_id = (user's farm)`
 4. User cannot bypass this (enforced at database level)
 
 ### API Key Security
@@ -641,8 +641,8 @@ CREATE POLICY "Users can view org wells"
 Critical indexes for performance:
 
 ```sql
--- Well queries by organization
-CREATE INDEX idx_wells_organization_id ON wells(organization_id);
+-- Well queries by farm
+CREATE INDEX idx_wells_farm_id ON wells(farm_id);
 
 -- Latest reading for a well
 CREATE INDEX idx_readings_well_date ON readings(well_id, reading_date DESC);
