@@ -10,7 +10,13 @@
 - **Routing**: React Router v7
 - **PWA**: vite-plugin-pwa
 
-## Subagent Workflow
+## Subagents
+
+Sub-agent definitions live in `.claude/agents/`. Claude Code auto-discovers and delegates to them.
+
+- **`web-researcher`** — Fetches and summarizes real-time information from the internet using FireCrawl MCP tools. Used for docs lookups, library research, fact verification, and anything requiring up-to-date data.
+
+### Code Reviewer Agent
 
 After every major write process (creating or modifying multiple files), invoke the `code-reviewer` subagent before moving on. This is mandatory.
 
