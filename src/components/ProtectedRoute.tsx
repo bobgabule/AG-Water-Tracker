@@ -4,7 +4,7 @@ import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function ProtectedRoute() {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, refreshProfile } = useAuth();
   const isOnline = useOnlineStatus();
 
   if (loading) {
@@ -19,7 +19,7 @@ export default function ProtectedRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   if (!userProfile) {
@@ -30,15 +30,21 @@ export default function ProtectedRoute() {
           <div className="text-center px-4">
             <p className="text-gray-600 font-medium">Unable to load your profile while offline.</p>
             <p className="text-gray-500 text-sm mt-2">Please connect to the internet to continue.</p>
+            <button
+              onClick={refreshProfile}
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
+            >
+              Retry
+            </button>
           </div>
         </div>
       );
     }
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   if (!userProfile.farm_id) {
-    return <Navigate to="/setup" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   return (
