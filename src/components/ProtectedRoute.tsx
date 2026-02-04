@@ -1,11 +1,22 @@
+import { useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../lib/AuthContext';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function ProtectedRoute() {
-  const { user, userProfile, loading, refreshProfile } = useAuth();
+  const { user, userProfile, loading, profileFetchFailed, profileError, refreshProfile } = useAuth();
   const isOnline = useOnlineStatus();
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    try {
+      await refreshProfile();
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -22,24 +33,42 @@ export default function ProtectedRoute() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!userProfile) {
-    // If offline, profile fetch may have failed — don't redirect to register
-    if (!isOnline) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center px-4">
-            <p className="text-gray-600 font-medium">Unable to load your profile while offline.</p>
-            <p className="text-gray-500 text-sm mt-2">Please connect to the internet to continue.</p>
-            <button
-              onClick={refreshProfile}
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
+  // Profile fetch failed (existing user) or offline - show retry UI instead of redirecting
+  // profileFetchFailed distinguishes between "fetch threw error" vs "profile doesn't exist (new user)"
+  if (!userProfile && (profileFetchFailed || !isOnline)) {
+    const message = !isOnline
+      ? 'Unable to load your profile while offline.'
+      : 'Unable to load your profile.';
+    const subMessage = !isOnline
+      ? 'Please connect to the internet to continue.'
+      : profileError;
+
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center px-4">
+          <p className="text-gray-600 font-medium">{message}</p>
+          {subMessage && <p className="text-gray-500 text-sm mt-2">{subMessage}</p>}
+          <button
+            onClick={handleRetry}
+            disabled={retrying}
+            className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {retrying ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                Retrying...
+              </span>
+            ) : (
+              'Retry'
+            )}
+          </button>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  // No profile and no error - legitimate new user, redirect to complete registration
+  if (!userProfile) {
     return <Navigate to="/auth" replace />;
   }
 

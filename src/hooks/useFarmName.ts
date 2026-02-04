@@ -1,14 +1,35 @@
-import { useQuery } from '@powersync/react';
-
-interface FarmRow {
-  name: string;
-}
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 export function useFarmName(farmId: string | null): string | null {
-  const { data } = useQuery<FarmRow>(
-    farmId ? 'SELECT name FROM farms WHERE id = ?' : 'SELECT NULL AS name WHERE 0',
-    farmId ? [farmId] : [],
-  );
+  const [farmName, setFarmName] = useState<string | null>(null);
 
-  return data?.[0]?.name ?? null;
+  useEffect(() => {
+    if (!farmId) {
+      setFarmName(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchFarmName() {
+      const { data, error } = await supabase
+        .from('farms')
+        .select('name')
+        .eq('id', farmId)
+        .single();
+
+      if (!cancelled && !error && data) {
+        setFarmName(data.name);
+      }
+    }
+
+    fetchFarmName();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [farmId]);
+
+  return farmName;
 }
