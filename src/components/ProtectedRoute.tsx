@@ -1,22 +1,30 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../lib/AuthContext';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useFarmName } from '../hooks/useFarmName';
+import Header from './Header';
+import SideMenu from './SideMenu';
 
 export default function ProtectedRoute() {
   const { user, userProfile, loading, profileFetchFailed, profileError, refreshProfile } = useAuth();
   const isOnline = useOnlineStatus();
   const [retrying, setRetrying] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const farmName = useFarmName(userProfile?.farm_id ?? null);
 
-  const handleRetry = async () => {
+  const handleMenuOpen = useCallback(() => setMenuOpen(true), []);
+  const handleMenuClose = useCallback(() => setMenuOpen(false), []);
+
+  const handleRetry = useCallback(async () => {
     setRetrying(true);
     try {
       await refreshProfile();
     } finally {
       setRetrying(false);
     }
-  };
+  }, [refreshProfile]);
 
   if (loading) {
     return (
@@ -78,6 +86,8 @@ export default function ProtectedRoute() {
 
   return (
     <PowerSyncProvider>
+      <Header farmName={farmName} onMenuOpen={handleMenuOpen} />
+      <SideMenu open={menuOpen} onClose={handleMenuClose} />
       <Outlet />
     </PowerSyncProvider>
   );
