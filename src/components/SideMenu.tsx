@@ -7,7 +7,6 @@ import {
   ChartBarIcon,
   CreditCardIcon,
   GlobeAltIcon,
-  Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router';
@@ -24,7 +23,6 @@ const navItems = [
   { label: 'Reports', icon: ChartBarIcon, path: '/reports' },
   { label: 'Subscription', icon: CreditCardIcon, path: '/subscription' },
   { label: 'Language', icon: GlobeAltIcon, path: '/language' },
-  { label: 'Settings', icon: Cog6ToothIcon, path: '/settings' },
 ];
 
 export default function SideMenu({ open, onClose }: SideMenuProps) {
@@ -43,7 +41,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
       setSignOutError(null);
       await signOut();
       onClose();
-      navigate('/login');
+      navigate('/auth');
     } catch {
       setSignOutError('Failed to sign out. Please try again.');
     }

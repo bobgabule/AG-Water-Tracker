@@ -113,9 +113,103 @@ This approach ensures the app works completely offline while maintaining data co
 
 ### 3. Components
 - `Layout`: Header with Farm Name, Offline Indicator.
-- `MapView`: Central component.
+- `MapView`: Central component with geolocation features.
 - `WellForm`: Reusable form for Add/Edit.
 - `AllocationGauge`: Custom SVG/Canvas component for the "gas gauge" visual.
+
+## Dashboard Map Features
+
+### Geolocation & Auto-Centering
+
+The dashboard map (`MapView` component) automatically centers on the user's current location when loaded.
+
+**Implementation Details:**
+
+1. **Geolocation Request on Mount** (`src/components/MapView.tsx`)
+   - Geolocation is requested BEFORE the map renders (not after)
+   - Uses `navigator.geolocation.getCurrentPosition()` directly
+   - Timeout: 5 seconds for fast feedback
+   - Options: `{ enableHighAccuracy: true, timeout: 5000 }`
+
+2. **Loading State**
+   - Shows a loading spinner with "Getting your location..." message
+   - Dark background (`bg-gray-900`) to match map aesthetic
+   - Prevents the "USA flash" (map briefly showing default view before centering)
+
+3. **Initial View State Priority**
+   ```
+   1. User's current location (zoom 18 - street level)
+   2. Wells center (if user has wells with locations)
+   3. USA center fallback (lat: 38.5, lng: -98.5, zoom: 4)
+   ```
+
+4. **Key Files:**
+   - `src/components/MapView.tsx` - Main map component
+   - `src/hooks/useGeolocationPermission.ts` - Permission state tracking hook
+   - `src/components/LocationPermissionBanner.tsx` - Permission denied UI
+
+### Geolocation Permission Handling
+
+**Permission States:**
+
+| State | Behavior |
+|-------|----------|
+| `prompt` | Browser shows permission dialog during loading |
+| `granted` | Map loads at user's location (zoom 18) |
+| `denied` | Map loads at wells/default view, banner appears |
+
+**Permission Banner (`LocationPermissionBanner.tsx`):**
+- Shown when geolocation permission is denied
+- Amber/warning styling with dismiss button
+- Explains why location is needed
+- Dismissible (stored in `sessionStorage` for session persistence)
+- Key: `location-banner-dismissed`
+
+**Permission Hook (`useGeolocationPermission.ts`):**
+```typescript
+// Returns: 'prompt' | 'granted' | 'denied'
+const permission = useGeolocationPermission();
+```
+- Uses the browser Permissions API
+- Listens for permission changes in real-time
+- Falls back to 'prompt' if Permissions API unavailable
+- Handles cleanup to prevent memory leaks
+
+### Map Configuration
+
+**Zoom Levels:**
+- `USER_LOCATION_ZOOM = 18` - Street-level detail for user location
+- Wells view: 14-15 (single well), 6-15 (multiple wells based on spread)
+- Default USA view: zoom 4
+
+**Map Style:** `mapbox://styles/mapbox/satellite-streets-v12`
+
+**Controls:**
+- `NavigationControl` - Zoom in/out buttons (top-right, marginTop: 80)
+- `GeolocateControl` - Re-center on location button (top-right, marginTop: 120)
+  - Shows blue dot at user location
+  - Shows accuracy circle
+  - Manual re-centering available anytime
+
+### Location Picker Mode
+
+The map supports a location picker mode for selecting well locations:
+
+**Props:**
+```typescript
+interface MapViewProps {
+  wells: WellWithReading[];
+  onWellClick?: (wellId: string) => void;
+  onMapClick?: (lngLat: { lng: number; lat: number }) => void;
+  pickedLocation?: { latitude: number; longitude: number } | null;
+  isPickingLocation?: boolean;
+}
+```
+
+**Behavior:**
+- When `isPickingLocation` is true, map clicks call `onMapClick` with coordinates
+- `LocationPickerMarker` component shows the picked location
+- Used by well creation/editing flow
 
 ## Design System Implementation
 ### Color Palette (from Screenshot)
@@ -184,6 +278,17 @@ Before beginning implementation, verify:
 5. Set location far from well (>100m)
 6. Capture GPS again
 7. Verify "Out of Range" warning appears (yellow/red)
+
+**Dashboard Map Geolocation Test**:
+1. Clear browser site data (to reset permission)
+2. Open dashboard - should see "Getting your location..." spinner
+3. Grant permission - map should load directly at your location (zoom 18)
+4. Verify no "USA flash" (map shouldn't briefly show USA before centering)
+5. Clear site data again and reload
+6. Deny permission - should see amber permission banner
+7. Dismiss banner - should not reappear during session
+8. Verify GeolocateControl button (top-right) works for manual re-centering
+9. Test with DevTools Sensors to simulate different locations
 
 **PWA Installation Test**:
 1. Build production bundle: `npm run build`

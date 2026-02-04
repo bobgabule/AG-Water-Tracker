@@ -1,0 +1,180 @@
+import { useState, useCallback } from 'react';
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
+import { MapPinIcon } from '@heroicons/react/24/outline';
+
+interface LocationPickerBottomSheetProps {
+  open: boolean;
+  onClose: () => void;
+  onNext: (location: { latitude: number; longitude: number }) => void;
+  location: { latitude: number; longitude: number } | null;
+  onLocationChange: (location: { latitude: number; longitude: number }) => void;
+}
+
+export default function LocationPickerBottomSheet({
+  open,
+  onClose,
+  onNext,
+  location,
+  onLocationChange,
+}: LocationPickerBottomSheetProps) {
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
+  const handleGetLocation = useCallback(() => {
+    setGpsLoading(true);
+    setGpsError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGpsLoading(false);
+        onLocationChange({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        setGpsLoading(false);
+        const message =
+          error.code === error.PERMISSION_DENIED
+            ? 'Location permission denied. Please enable location access.'
+            : error.code === error.TIMEOUT
+              ? 'Location request timed out. Try again.'
+              : 'Unable to get location. Please enter manually.';
+        setGpsError(message);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [onLocationChange]);
+
+  const handleLatitudeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const lat = parseFloat(e.target.value);
+      if (!isNaN(lat)) {
+        onLocationChange({
+          latitude: lat,
+          longitude: location?.longitude ?? 0,
+        });
+      }
+    },
+    [location?.longitude, onLocationChange]
+  );
+
+  const handleLongitudeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const lng = parseFloat(e.target.value);
+      if (!isNaN(lng)) {
+        onLocationChange({
+          latitude: location?.latitude ?? 0,
+          longitude: lng,
+        });
+      }
+    },
+    [location?.latitude, onLocationChange]
+  );
+
+  const handleNext = useCallback(() => {
+    if (location) {
+      onNext(location);
+    }
+  }, [location, onNext]);
+
+  const isNextDisabled = !location;
+
+  return (
+    <Dialog open={open} onClose={onClose} className="relative z-50">
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-black/40 transition-opacity duration-300 ease-out data-[closed]:opacity-0"
+      />
+      <div className="fixed inset-0 flex items-end">
+        <DialogPanel
+          transition
+          className="w-full bg-white rounded-t-3xl shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full pb-[env(safe-area-inset-bottom)]"
+        >
+          {/* Header */}
+          <div className="bg-[#4a5d4a] p-4 pt-6 rounded-t-3xl">
+            <h2 className="text-white font-bold text-lg tracking-wide">
+              PICK WELL LOCATION
+            </h2>
+            <p className="text-white/70 text-sm mt-1">
+              Tap on the map or enter coordinates
+            </p>
+          </div>
+
+          {/* Content */}
+          <div className="p-4">
+            <div className="flex gap-3 items-end">
+              {/* Latitude input */}
+              <div className="flex-1">
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Latitude*
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={location?.latitude?.toFixed(6) ?? ''}
+                  onChange={handleLatitudeChange}
+                  placeholder="0.000000"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Longitude input */}
+              <div className="flex-1">
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Longitude*
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={location?.longitude?.toFixed(6) ?? ''}
+                  onChange={handleLongitudeChange}
+                  placeholder="0.000000"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* GPS button */}
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={gpsLoading}
+                className="p-2.5 bg-[#5a9494] rounded-lg text-white hover:bg-[#4a8484] transition-colors disabled:opacity-50"
+                aria-label="Get current location"
+              >
+                {gpsLoading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <MapPinIcon className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+
+            {/* GPS Error message */}
+            {gpsError && (
+              <p className="text-red-500 text-xs mt-2">{gpsError}</p>
+            )}
+          </div>
+
+          {/* Footer buttons */}
+          <div className="flex justify-between items-center px-4 pb-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 text-gray-600 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={isNextDisabled}
+              className="px-6 py-2.5 bg-[#5a9494] text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+}
