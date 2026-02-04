@@ -7,16 +7,16 @@ interface HeaderProps {
 
 export default function Header({ farmName, onMenuOpen }: HeaderProps) {
   return (
-    <header className="absolute top-0 inset-x-0 z-30 bg-black/40 backdrop-blur-sm">
+    <header className="absolute top-0 inset-x-0 z-30 bg-[#5f7248]">
       <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div>
-          <h1 className="text-lg font-bold leading-tight">
-            <span className="text-green-400">AG</span>
-            <span className="text-white"> Well Tracker</span>
-          </h1>
-          {farmName && (
-            <p className="text-white/70 text-sm">{farmName}</p>
-          )}
+        <div className="flex items-center gap-1">
+          <img src="/ag-logo-white.png" alt="AG" className="h-10" />
+          <div className="flex flex-col justify-center leading-tight">
+            <span className="text-white text-xs">Water Tracker</span>
+            {farmName && (
+              <p className="text-white text-lg font-bold -mt-0.9">{farmName}</p>
+            )}
+          </div>
         </div>
         <button
           onClick={onMenuOpen}

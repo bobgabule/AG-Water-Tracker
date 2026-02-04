@@ -77,7 +77,7 @@ export default function AuthPage() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(20, 40, 60, 0.3), rgba(10, 30, 20, 0.7)),
+          backgroundImage: `linear-gradient(to bottom, rgba(20, 40, 60, 0.9), rgba(10, 30, 20, 0.7)),
             url('/bg-farm.jpg')`,
           backgroundColor: '#1a3a2a',
         }}
@@ -87,11 +87,11 @@ export default function AuthPage() {
       <div className="relative z-10 w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold">
-            <span className="text-green-400">AG</span>{' '}
-            <span className="text-white">Water</span>
-          </h1>
-          <h2 className="text-4xl font-bold text-white -mt-1">Tracker</h2>
+          <img
+            src="/logo.svg"
+            alt="AG Water Tracker"
+            className="h-20 mx-auto"
+          />
         </div>
 
         {/* Banners */}

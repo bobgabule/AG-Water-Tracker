@@ -34,6 +34,7 @@ const wells = new TableV2({
 
 const allocations = new TableV2({
   well_id: column.text,
+  farm_id: column.text,
   year: column.integer,
   acre_feet: column.real,
   notes: column.text,
@@ -43,6 +44,7 @@ const allocations = new TableV2({
 
 const readings = new TableV2({
   well_id: column.text,
+  farm_id: column.text,
   meter_value: column.real,
   reading_date: column.text,
   gps_latitude: column.real,
