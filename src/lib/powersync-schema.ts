@@ -43,11 +43,31 @@ const farm_invites = new TableV2({
   created_at: column.text,
 });
 
+const wells = new TableV2({
+  farm_id: column.text,
+  name: column.text,
+  meter_serial_number: column.text,
+  wmis_number: column.text,
+  latitude: column.real,
+  longitude: column.real,
+  units: column.text,
+  multiplier: column.text,
+  send_monthly_report: column.integer, // boolean as 0/1
+  battery_state: column.text,
+  pump_state: column.text,
+  meter_status: column.text,
+  status: column.text,
+  created_by: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 export const AppSchema = new Schema({
   farms,
   users,
   farm_members,
   farm_invites,
+  wells,
 });
 
 export type Database = (typeof AppSchema)['types'];
@@ -55,3 +75,4 @@ export type Farm = Database['farms'];
 export type User = Database['users'];
 export type FarmMember = Database['farm_members'];
 export type FarmInvite = Database['farm_invites'];
+export type Well = Database['wells'];

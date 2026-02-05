@@ -55,7 +55,7 @@ export default function AddWellFormBottomSheet({
   const [longitude, setLongitude] = useState(initialLocation.longitude);
   const [units, setUnits] = useState<'AF' | 'GAL' | 'CF'>('AF');
   const [multiplier, setMultiplier] = useState<'0.01' | '1' | '10' | '1000' | 'MG'>('1');
-  const [sendMonthlyReport, setSendMonthlyReport] = useState(false);
+  const [sendMonthlyReport, setSendMonthlyReport] = useState(true);
   const [batteryState, setBatteryState] = useState<WellFormData['batteryState']>('Unknown');
   const [pumpState, setPumpState] = useState<WellFormData['pumpState']>('Unknown');
   const [meterStatus, setMeterStatus] = useState<WellFormData['meterStatus']>('Unknown');
@@ -72,7 +72,7 @@ export default function AddWellFormBottomSheet({
       setLongitude(initialLocation.longitude);
       setUnits('AF');
       setMultiplier('1');
-      setSendMonthlyReport(false);
+      setSendMonthlyReport(true);
       setBatteryState('Unknown');
       setPumpState('Unknown');
       setMeterStatus('Unknown');
@@ -104,14 +104,14 @@ export default function AddWellFormBottomSheet({
 
   const handleLatitudeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
-    if (!isNaN(val)) {
+    if (!isNaN(val) && val >= -90 && val <= 90) {
       setLatitude(val);
     }
   }, []);
 
   const handleLongitudeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
-    if (!isNaN(val)) {
+    if (!isNaN(val) && val >= -180 && val <= 180) {
       setLongitude(val);
     }
   }, []);

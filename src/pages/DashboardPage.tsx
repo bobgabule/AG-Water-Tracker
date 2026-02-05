@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import { usePowerSync } from '@powersync/react';
 import { ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
@@ -10,7 +11,8 @@ import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWell
 export default function DashboardPage() {
   const { wells } = useWells();
   const navigate = useNavigate();
-  const { onboardingStatus } = useAuth();
+  const db = usePowerSync();
+  const { user, onboardingStatus } = useAuth();
   const farmName = onboardingStatus?.farmName ?? null;
 
   // Bottom sheet flow state
@@ -53,12 +55,52 @@ export default function DashboardPage() {
     setCurrentStep('form');
   }, []);
 
-  const handleSaveWell = useCallback((wellData: WellFormData) => {
-    // TODO: Save well via PowerSync
-    console.log('Save well:', wellData);
-    setCurrentStep('closed');
-    setPickedLocation(null);
-  }, []);
+  const handleSaveWell = useCallback(async (wellData: WellFormData) => {
+    const farmId = onboardingStatus?.farmId;
+    if (!farmId || !user) {
+      console.error('Cannot save well: missing farmId or user');
+      return;
+    }
+
+    const wellId = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    try {
+      await db.execute(
+        `INSERT INTO wells (
+          id, farm_id, name, meter_serial_number, wmis_number,
+          latitude, longitude, units, multiplier, send_monthly_report,
+          battery_state, pump_state, meter_status, status, created_by,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          wellId,
+          farmId,
+          wellData.name,
+          wellData.meterSerialNumber,
+          wellData.wmisNumber,
+          wellData.latitude,
+          wellData.longitude,
+          wellData.units,
+          wellData.multiplier,
+          wellData.sendMonthlyReport ? 1 : 0,
+          wellData.batteryState,
+          wellData.pumpState,
+          wellData.meterStatus,
+          'active',
+          user.id,
+          now,
+          now,
+        ]
+      );
+
+      setCurrentStep('closed');
+      setPickedLocation(null);
+    } catch (error) {
+      console.error('Failed to save well:', error);
+      alert('Failed to save well. Please try again.');
+    }
+  }, [db, onboardingStatus?.farmId, user]);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden">

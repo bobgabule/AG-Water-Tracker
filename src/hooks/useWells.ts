@@ -12,44 +12,34 @@ export interface WellWithReading {
   name: string;
   status: string;
   location: WellLocation | null;
-  meter_id: string | null;
-  notes: string | null;
-  lastReadingDate: string | null;
+  meterSerialNumber: string | null;
+  wmisNumber: string | null;
+  units: string;
+  multiplier: string;
+  sendMonthlyReport: boolean;
+  batteryState: string;
+  pumpState: string;
+  meterStatus: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface WellRow {
   id: string;
   name: string;
   status: string;
-  location: string | null;
-  meter_id: string | null;
-  notes: string | null;
-  last_reading_date: string | null;
-}
-
-function parseLocation(raw: string | null): WellLocation | null {
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    // GeoJSON Point format from ST_AsGeoJSON: {"type":"Point","coordinates":[lng, lat]}
-    if (parsed.type === 'Point' && Array.isArray(parsed.coordinates)) {
-      const [lng, lat] = parsed.coordinates;
-      if (typeof lat === 'number' && typeof lng === 'number') {
-        return { latitude: lat, longitude: lng };
-      }
-    }
-    // Legacy format: {"lat": number, "lng": number}
-    if (typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
-      return { latitude: parsed.lat, longitude: parsed.lng };
-    }
-  } catch {
-    // Try comma-separated format: "lat,lng"
-    const parts = raw.split(',').map((s) => parseFloat(s.trim()));
-    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-      return { latitude: parts[0], longitude: parts[1] };
-    }
-  }
-  return null;
+  latitude: number;
+  longitude: number;
+  meter_serial_number: string | null;
+  wmis_number: string | null;
+  units: string;
+  multiplier: string;
+  send_monthly_report: number;
+  battery_state: string;
+  pump_state: string;
+  meter_status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useWells() {
@@ -58,12 +48,10 @@ export function useWells() {
 
   // Guard against empty farmId to avoid unnecessary database queries
   const query = farmId
-    ? `SELECT
-        w.id, w.name, w.status, w.location, w.meter_id, w.notes,
-        (SELECT MAX(r.reading_date) FROM readings r WHERE r.well_id = w.id) as last_reading_date
-      FROM wells w
-      WHERE w.farm_id = ?
-      ORDER BY w.name`
+    ? `SELECT id, name, status, latitude, longitude, meter_serial_number,
+       wmis_number, units, multiplier, send_monthly_report, battery_state,
+       pump_state, meter_status, created_at, updated_at
+       FROM wells WHERE farm_id = ? ORDER BY name`
     : 'SELECT NULL WHERE 0';
 
   const { data, isLoading, error } = useQuery<WellRow>(query, farmId ? [farmId] : []);
@@ -74,10 +62,20 @@ export function useWells() {
         id: row.id,
         name: row.name,
         status: row.status || 'active',
-        location: parseLocation(row.location),
-        meter_id: row.meter_id,
-        notes: row.notes,
-        lastReadingDate: row.last_reading_date,
+        location:
+          row.latitude != null && row.longitude != null
+            ? { latitude: row.latitude, longitude: row.longitude }
+            : null,
+        meterSerialNumber: row.meter_serial_number,
+        wmisNumber: row.wmis_number,
+        units: row.units,
+        multiplier: row.multiplier,
+        sendMonthlyReport: row.send_monthly_report === 1,
+        batteryState: row.battery_state,
+        pumpState: row.pump_state,
+        meterStatus: row.meter_status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
       })),
     [data],
   );

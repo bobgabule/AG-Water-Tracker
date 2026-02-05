@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { Marker } from 'react-map-gl/mapbox';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import type { WellWithReading } from '../hooks/useWells';
@@ -8,38 +8,53 @@ interface WellMarkerProps {
   onClick?: (wellId: string) => void;
 }
 
-function timeAgo(dateString: string | null): string {
-  if (!dateString) return 'No readings';
-  const now = Date.now();
-  const then = new Date(dateString).getTime();
-  if (isNaN(then)) return 'No readings';
-  const diffMs = now - then;
-  if (diffMs < 0) return 'Just now';
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `Updated ${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Updated ${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `Updated ${days}d ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `Updated ${weeks} week${weeks > 1 ? 's' : ''} ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `Updated ${months} month${months > 1 ? 's' : ''} ago`;
-  return `Updated ${Math.floor(days / 365)}y ago`;
-}
+/**
+ * Calculate status text based on createdAt and updatedAt timestamps.
+ * - Same timestamps = "Newly added"
+ * - Updated within 24h = "Updated Today"
+ * - Updated 24-48h ago = "Updated Yesterday"
+ * - Older = "Updated N days ago" or "Updated N weeks ago"
+ */
+function getStatusText(createdAt: string, updatedAt: string): string {
+  // If createdAt and updatedAt are the same, it's a new well
+  const createdTime = new Date(createdAt).getTime();
+  const updatedTime = new Date(updatedAt).getTime();
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'active':
-      return 'bg-status-ok';
-    case 'inactive':
-      return 'bg-accent';
-    case 'needs_attention':
-      return 'bg-status-warning';
-    default:
-      return 'bg-gray-400';
+  // Handle invalid dates
+  if (isNaN(createdTime) || isNaN(updatedTime)) {
+    return 'Newly added';
   }
+
+  // If timestamps are equal (within 1 second tolerance), show "Newly added"
+  if (Math.abs(updatedTime - createdTime) < 1000) {
+    return 'Newly added';
+  }
+
+  const now = Date.now();
+  const diffMs = now - updatedTime;
+
+  // Future date edge case
+  if (diffMs < 0) {
+    return 'Updated Today';
+  }
+
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+
+  if (hours < 24) {
+    return 'Updated Today';
+  }
+
+  if (hours < 48) {
+    return 'Updated Yesterday';
+  }
+
+  if (days < 7) {
+    return `Updated ${days} days ago`;
+  }
+
+  const weeks = Math.floor(days / 7);
+  return `Updated ${weeks} week${weeks > 1 ? 's' : ''} ago`;
 }
 
 export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
@@ -47,28 +62,54 @@ export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
     onClick?.(well.id);
   }, [onClick, well.id]);
 
+  // Calculate allocation percentage (100% for all wells for now)
+  const allocationPercentage = useMemo(() => {
+    // Future: calculate from used / allocated
+    return 100;
+  }, []);
+
+  // Get status text based on timestamps
+  const statusText = useMemo(() => {
+    return getStatusText(well.createdAt, well.updatedAt);
+  }, [well.createdAt, well.updatedAt]);
+
   if (!well.location) return null;
 
   return (
     <Marker
       latitude={well.location.latitude}
       longitude={well.location.longitude}
-      anchor="bottom"
+      anchor="bottom-left"
     >
       <button
         type="button"
         onClick={handleClick}
-        className="flex flex-col items-center cursor-pointer group"
+        className="flex items-end cursor-pointer group"
         aria-label={`Well: ${well.name}`}
       >
-        <div
-          className={`w-9 h-9 rounded-full ${getStatusColor(well.status)} flex items-center justify-center shadow-lg border-2 border-white group-hover:scale-110 transition-transform`}
-        >
-          <MapPinIcon className="w-5 h-5 text-white" />
+        {/* Map Pin - at exact coordinates */}
+        <div className="group-hover:scale-110 transition-transform">
+          <MapPinIcon className="w-8 h-10 text-teal-500 drop-shadow-lg" />
         </div>
-        <div className="mt-1 bg-black/70 rounded-lg px-2.5 py-1 text-center whitespace-nowrap backdrop-blur-sm">
-          <p className="text-white text-xs font-semibold">{well.name}</p>
-          <p className="text-white/70 text-[10px] leading-tight">{timeAgo(well.lastReadingDate)}</p>
+
+        {/* Small gap */}
+        <div className="w-0.5" />
+
+        {/* Gauge + Info Overlay - connected as one unit */}
+        <div className="flex items-stretch">
+          {/* Water Gauge - cylinder/tube shape with grey border */}
+          <div className="w-2.5 h-10 bg-gray-700 rounded-full overflow-hidden flex flex-col justify-end border border-white/50">
+            <div
+              className="w-full bg-blue-500 rounded-b-full transition-all duration-300"
+              style={{ height: `${allocationPercentage}%` }}
+            />
+          </div>
+
+          {/* Info Overlay - attached to gauge */}
+          <div className="bg-gray-900/80 rounded-r-lg px-2.5 py-1 flex flex-col justify-center whitespace-nowrap backdrop-blur-sm shadow-lg">
+            <p className="text-white text-xs font-bold leading-tight text-left">{well.name}</p>
+            <p className="text-white/60 text-[10px] leading-tight text-left">{statusText}</p>
+          </div>
         </div>
       </button>
     </Marker>
