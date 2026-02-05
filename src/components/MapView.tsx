@@ -8,6 +8,7 @@ import UserLocationCircle from './UserLocationCircle';
 import LocationPermissionBanner from './LocationPermissionBanner';
 import type { WellWithReading } from '../hooks/useWells';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 
 interface MapViewProps {
@@ -59,7 +60,6 @@ export default function MapView({
   isPickingLocation,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
-  const isMountedRef = useRef(true);
 
   // Long-press detection refs
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -67,9 +67,12 @@ export default function MapView({
   const pressStartScreenPos = useRef<{ x: number; y: number } | null>(null);
   const longPressTimestampRef = useRef<number>(0);
 
-  // State for user's geolocation (fetched before map renders)
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationLoading, setLocationLoading] = useState(true);
+  // Fetch user's geolocation with proper StrictMode handling
+  const { location: userLocation, retry: retryGeolocation } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 10000, // Longer timeout to allow for permission prompt
+    enableCache: true,
+  });
 
   // Track geolocation permission state
   const permission = useGeolocationPermission();
@@ -82,13 +85,30 @@ export default function MapView({
     sessionStorage.setItem(BANNER_DISMISSED_KEY, 'true');
   }, []);
 
-  // Track mounted state for cleanup
+  // Re-fetch location when permission changes from 'prompt' to 'granted'
+  // This handles the case where the initial request timed out while waiting for user
+  const prevPermissionRef = useRef(permission);
   useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+    if (prevPermissionRef.current === 'prompt' && permission === 'granted' && !userLocation) {
+      retryGeolocation();
+    }
+    prevPermissionRef.current = permission;
+  }, [permission, userLocation, retryGeolocation]);
+
+  // Track if we've already flown to user location (to avoid flying on every re-render)
+  const hasFlyToUserLocation = useRef(false);
+
+  // Fly to user location when it becomes available after the map has rendered
+  useEffect(() => {
+    if (userLocation && mapRef.current && !hasFlyToUserLocation.current) {
+      hasFlyToUserLocation.current = true;
+      mapRef.current.flyTo({
+        center: [userLocation.lng, userLocation.lat],
+        zoom: DEFAULT_ZOOM,
+        duration: 1500,
+      });
+    }
+  }, [userLocation]);
 
   // Cleanup long-press timer on unmount
   useEffect(() => {
@@ -97,33 +117,6 @@ export default function MapView({
         clearTimeout(pressTimerRef.current);
       }
     };
-  }, []);
-
-  // Request geolocation on mount BEFORE rendering map
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (isMountedRef.current) {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationLoading(false);
-        }
-      },
-      () => {
-        // Permission denied or error - fall back to wells/default
-        if (isMountedRef.current) {
-          setLocationLoading(false);
-        }
-      },
-      { enableHighAccuracy: true, timeout: 5000 }
-    );
   }, []);
 
   // Compute initial view - prioritize user location over wells/default
@@ -238,18 +231,6 @@ export default function MapView({
     },
     [clearPressTimer]
   );
-
-  // Show loading indicator while getting user location
-  if (locationLoading) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-white text-sm">Getting your location...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="absolute inset-0">

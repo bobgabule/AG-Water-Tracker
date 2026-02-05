@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
+import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 
 interface LocationPickerBottomSheetProps {
   open: boolean;
@@ -19,8 +20,15 @@ export default function LocationPickerBottomSheet({
 }: LocationPickerBottomSheetProps) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
+  const permission = useGeolocationPermission();
 
   const handleGetLocation = useCallback(() => {
+    // If permission is denied, show error immediately without calling API
+    if (permission === 'denied') {
+      setGpsError('Location permission denied. Please enable location access in your browser settings.');
+      return;
+    }
+
     setGpsLoading(true);
     setGpsError(null);
     navigator.geolocation.getCurrentPosition(
@@ -35,7 +43,7 @@ export default function LocationPickerBottomSheet({
         setGpsLoading(false);
         const message =
           error.code === error.PERMISSION_DENIED
-            ? 'Location permission denied. Please enable location access.'
+            ? 'Location permission denied. Please enable location access in your browser settings.'
             : error.code === error.TIMEOUT
               ? 'Location request timed out. Try again.'
               : 'Unable to get location. Please enter manually.';
@@ -43,7 +51,7 @@ export default function LocationPickerBottomSheet({
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, [onLocationChange]);
+  }, [onLocationChange, permission]);
 
   const handleLatitudeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,16 +96,13 @@ export default function LocationPickerBottomSheet({
       <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full bg-white rounded-t-3xl shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full pb-[env(safe-area-inset-bottom)]"
+          className="w-full bg-[#5f7248] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full pb-[env(safe-area-inset-bottom)]"
         >
           {/* Header */}
-          <div className="bg-[#4a5d4a] p-4 pt-6 rounded-t-3xl">
-            <h2 className="text-white font-bold text-lg tracking-wide">
+          <div className="bg-[#5f7248] p-4 pt-4 pb-0">
+            <h2 className="text-white font-semibold text-lg tracking-wide">
               PICK WELL LOCATION
             </h2>
-            <p className="text-white/70 text-sm mt-1">
-              Tap on the map or enter coordinates
-            </p>
           </div>
 
           {/* Content */}
@@ -105,8 +110,8 @@ export default function LocationPickerBottomSheet({
             <div className="flex gap-3 items-end">
               {/* Latitude input */}
               <div className="flex-1">
-                <label className="text-xs text-gray-500 mb-1 block">
-                  Latitude*
+                <label className="text-xs text-white mb-1 block">
+                  Latitude
                 </label>
                 <input
                   type="text"
@@ -114,14 +119,14 @@ export default function LocationPickerBottomSheet({
                   value={location?.latitude?.toFixed(6) ?? ''}
                   onChange={handleLatitudeChange}
                   placeholder="0.000000"
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               {/* Longitude input */}
               <div className="flex-1">
-                <label className="text-xs text-gray-500 mb-1 block">
-                  Longitude*
+                <label className="text-xs text-white mb-1 block">
+                  Longitude
                 </label>
                 <input
                   type="text"
@@ -129,7 +134,7 @@ export default function LocationPickerBottomSheet({
                   value={location?.longitude?.toFixed(6) ?? ''}
                   onChange={handleLongitudeChange}
                   placeholder="0.000000"
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -138,7 +143,7 @@ export default function LocationPickerBottomSheet({
                 type="button"
                 onClick={handleGetLocation}
                 disabled={gpsLoading}
-                className="p-2.5 bg-[#5a9494] rounded-lg text-white hover:bg-[#4a8484] transition-colors disabled:opacity-50"
+                className="p-2.5 bg-white rounded-lg text-blue hover:bg-[#4a8484] transition-colors disabled:opacity-50"
                 aria-label="Get current location"
               >
                 {gpsLoading ? (
@@ -160,7 +165,7 @@ export default function LocationPickerBottomSheet({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-gray-600 font-medium"
+              className="px-6 py-2.5 text-white font-medium"
             >
               Cancel
             </button>
@@ -168,7 +173,7 @@ export default function LocationPickerBottomSheet({
               type="button"
               onClick={handleNext}
               disabled={isNextDisabled}
-              className="px-6 py-2.5 bg-[#5a9494] text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-[#cdf2fb] text-[#5e8f94] rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
