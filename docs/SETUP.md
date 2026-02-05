@@ -143,9 +143,15 @@ Now we'll create the database tables using the migration scripts.
 6. Paste into Supabase SQL Editor
 7. Click **Run** (bottom-right)
 8. Verify success: You should see "Success. No rows returned"
-9. Repeat for `supabase/migrations/002_rls_policies.sql`
-10. Repeat for `supabase/migrations/003_phone_otp_user_fields.sql`
-11. Repeat for `supabase/migrations/004_add_phone_column.sql`
+9. Repeat for these migration files in order:
+   - `supabase/migrations/002_rls_policies.sql`
+   - `supabase/migrations/003_phone_otp_user_fields.sql`
+   - `supabase/migrations/004_add_phone_column.sql`
+   - `supabase/migrations/007_farm_members.sql` (user-farm relationships)
+   - `supabase/migrations/008_farm_invites.sql` (invite code management)
+   - `supabase/migrations/009_update_users_table.sql` (removes farm_id/role from users)
+   - `supabase/migrations/010_auth_rpcs.sql` (atomic RPC functions)
+   - `supabase/migrations/011_new_rls_policies.sql` (updated RLS for new tables)
 
 **Verify Tables Created:**
 1. Go to **Table Editor** (left sidebar)
@@ -155,6 +161,8 @@ Now we'll create the database tables using the migration scripts.
    - `wells`
    - `allocations`
    - `readings`
+   - `farm_members` (NEW - user-farm relationships)
+   - `farm_invites` (NEW - invite codes)
 
 **Alternative (Using Supabase CLI):**
 ```bash

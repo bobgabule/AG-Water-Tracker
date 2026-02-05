@@ -1,27 +1,65 @@
 import { Routes, Route, Navigate } from 'react-router';
-import AuthPage from './pages/AuthPage';
+import RequireAuth from './components/RequireAuth';
+import RequireOnboarded from './components/RequireOnboarded';
+
+// Auth pages
+import PhonePage from './pages/auth/PhonePage';
+import VerifyPage from './pages/auth/VerifyPage';
+
+// Onboarding pages
+import ProfilePage from './pages/onboarding/ProfilePage';
+import FarmChoicePage from './pages/onboarding/FarmChoicePage';
+import CreateFarmPage from './pages/onboarding/CreateFarmPage';
+import JoinFarmPage from './pages/onboarding/JoinFarmPage';
+
+// App pages
+import AppLayout from './components/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import WellListPage from './pages/WellListPage';
 import ReportsPage from './pages/ReportsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import LanguagePage from './pages/LanguagePage';
-import ProtectedRoute from './components/ProtectedRoute';
+import SettingsPage from './pages/SettingsPage';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/auth" element={<AuthPage />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/wells" element={<WellListPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/subscription" element={<SubscriptionPage />} />
-        <Route path="/language" element={<LanguagePage />} />
-      </Route>
+      {/* Auth routes - redirect if already logged in (handled by PhonePage) */}
+      <Route path="/auth/phone" element={<PhonePage />} />
+      <Route path="/auth/verify" element={<VerifyPage />} />
+
       {/* Legacy redirects */}
-      <Route path="/login" element={<Navigate to="/auth" replace />} />
-      <Route path="/register" element={<Navigate to="/auth" replace />} />
-      <Route path="/setup" element={<Navigate to="/auth" replace />} />
+      <Route path="/auth" element={<Navigate to="/auth/phone" replace />} />
+      <Route path="/login" element={<Navigate to="/auth/phone" replace />} />
+      <Route path="/register" element={<Navigate to="/auth/phone" replace />} />
+      <Route path="/setup" element={<Navigate to="/auth/phone" replace />} />
+
+      {/* Onboarding routes - require session only */}
+      <Route element={<RequireAuth />}>
+        <Route path="/onboarding/profile" element={<ProfilePage />} />
+        <Route path="/onboarding/farm" element={<FarmChoicePage />} />
+        <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
+        <Route path="/onboarding/farm/join" element={<JoinFarmPage />} />
+      </Route>
+
+      {/* Protected app routes - require session + completed onboarding */}
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireOnboarded />}>
+          {/* Wrap with layout that includes Header/SideMenu */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/app/dashboard" element={<DashboardPage />} />
+            <Route path="/wells" element={<WellListPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/language" element={<LanguagePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+        </Route>
+      </Route>
+
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

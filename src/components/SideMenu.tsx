@@ -7,10 +7,12 @@ import {
   ChartBarIcon,
   CreditCardIcon,
   GlobeAltIcon,
+  Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../lib/AuthContext';
+import { useAuth } from '../lib/AuthProvider';
+import { useUserProfile } from '../hooks/useUserProfile';
 
 interface SideMenuProps {
   open: boolean;
@@ -23,11 +25,13 @@ const navItems = [
   { label: 'Reports', icon: ChartBarIcon, path: '/reports' },
   { label: 'Subscription', icon: CreditCardIcon, path: '/subscription' },
   { label: 'Language', icon: GlobeAltIcon, path: '/language' },
+  { label: 'Settings', icon: Cog6ToothIcon, path: '/settings' },
 ];
 
 export default function SideMenu({ open, onClose }: SideMenuProps) {
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const userProfile = useUserProfile();
 
   const handleNav = (path: string) => {
     onClose();
@@ -41,7 +45,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
       setSignOutError(null);
       await signOut();
       onClose();
-      navigate('/auth');
+      navigate('/auth/phone');
     } catch {
       setSignOutError('Failed to sign out. Please try again.');
     }

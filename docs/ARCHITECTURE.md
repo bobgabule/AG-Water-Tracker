@@ -166,79 +166,58 @@ This document provides a deep dive into the technical architecture, design decis
 ```
 App.tsx (Router)
 │
-├─ AuthContext (Wraps entire app)
-│  └─ PowerSyncContext (Wraps entire app)
+├─ AuthProvider (Wraps entire app - provides user, session, isAuthReady)
 │
-├─ Public Routes
-│  ├─ LoginPage
-│  ├─ RegisterPage
-│  └─ FarmSetupPage
+├─ Auth Routes (No guard - redirect if logged in)
+│  ├─ PhonePage (/auth/phone)
+│  │  └─ AuthLayout
+│  └─ VerifyPage (/auth/verify)
+│     └─ AuthLayout
+│        └─ OtpInput
 │
-└─ Protected Routes (Requires auth + farm)
+├─ Onboarding Routes (RequireAuth guard)
+│  ├─ ProfilePage (/onboarding/profile)
+│  ├─ FarmChoicePage (/onboarding/farm)
+│  ├─ CreateFarmPage (/onboarding/farm/create)
+│  └─ JoinFarmPage (/onboarding/farm/join)
+│
+└─ Protected App Routes (RequireAuth + RequireOnboarded guards)
    │
-   └─ Layout
-      ├─ Header
-      │  ├─ FarmName
-      │  ├─ OfflineIndicator
-      │  └─ UserMenu
+   └─ AppLayout (wraps with PowerSyncProvider, Header, SideMenu)
       │
-      ├─ Sidebar (Desktop) / Drawer (Mobile)
-      │  ├─ Navigation
-      │  └─ WellList
-      │     ├─ WellListItem (repeating)
-      │     └─ WellListFilters
+      ├─ DashboardPage (/)
+      │  └─ MapView
+      │     ├─ MapboxMap
+      │     └─ WellMarker (for each well)
       │
-      └─ Main Content Area
-         │
-         ├─ DashboardPage
-         │  └─ MapView
-         │     ├─ MapboxMap
-         │     └─ WellMarker (for each well)
-         │
-         ├─ WellDetailPage
-         │  ├─ WellDetail
-         │  │  ├─ AllocationGauge
-         │  │  ├─ ReadingsList
-         │  │  │  └─ ReadingsListItem (repeating)
-         │  │  └─ MapSnippet
-         │  └─ AddReadingButton → Opens Modal
-         │
-         ├─ AddWellPage (Modal or Full Page)
-         │  └─ WellForm
-         │     ├─ TextInput (name, meter_id)
-         │     ├─ GPSCapture
-         │     └─ SubmitButton
-         │
-         ├─ ReadingHistoryPage
-         │  ├─ ReadingsTable
-         │  ├─ DateRangeFilter
-         │  └─ ExportButton
-         │
-         └─ AddReadingPage (Modal or Full Page)
-            └─ ReadingForm
-               ├─ NumberInput (meter_value)
-               ├─ DateTimePicker
-               ├─ GPSCapture
-               ├─ GPSVerificationBadge
-               └─ SubmitButton
+      ├─ WellListPage (/wells)
+      │
+      ├─ SettingsPage (/settings)
+      │  ├─ InviteCodeManager (for owners/admins)
+      │  └─ GenerateInviteModal
+      │
+      └─ ... other pages
 ```
+
+### Route Guards
+
+| Guard | Location | Purpose |
+|-------|----------|---------|
+| `RequireAuth` | `src/components/RequireAuth.tsx` | Checks `isAuthReady` and `session`, shows loader or offline message |
+| `RequireOnboarded` | `src/components/RequireOnboarded.tsx` | Checks `onboardingStatus.hasProfile` and `hasFarmMembership` |
 
 ### Component Responsibilities
 
 | Component | Responsibility | State/Data Source |
 |-----------|----------------|-------------------|
-| `Layout` | Overall app structure, responsive layout | None |
-| `Header` | Navigation, farm name, offline status | AuthContext |
+| `AuthProvider` | Auth state, session, OTP methods | Supabase Auth |
+| `AppLayout` | Wraps protected routes with Header/SideMenu/PowerSync | AuthProvider |
+| `Header` | Navigation, farm name, offline status | useAuth, useFarmName |
 | `OfflineIndicator` | Show online/offline status | useOnlineStatus hook |
 | `MapView` | Display map with well markers | useWells hook (PowerSync) |
-| `WellList` | List all wells with filters | useWells hook (PowerSync) |
-| `WellDetail` | Show well details and readings | useWell hook, useReadings hook |
-| `AllocationGauge` | Visual gauge for allocation usage | Props (allocation, used) |
-| `ReadingsList` | Display reading history | useReadings hook |
-| `WellForm` | Create/edit well form | Local state + mutations |
-| `ReadingForm` | Add reading form | Local state + mutations |
-| `GPSCapture` | Capture GPS coordinates | useGeolocation hook |
-| `ErrorBoundary` | Catch and display component errors | Local state |
+| `InviteCodeManager` | List/manage invite codes | PowerSync query |
+| `GenerateInviteModal` | Create new invite codes | Supabase RPC |
+| `OtpInput` | 6-digit code input with auto-advance | Local state |
 
 ---
 

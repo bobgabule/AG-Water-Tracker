@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Marker } from 'react-map-gl/mapbox';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import type { WellWithReading } from '../hooks/useWells';
@@ -43,6 +43,10 @@ function getStatusColor(status: string): string {
 }
 
 export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
+  const handleClick = useCallback(() => {
+    onClick?.(well.id);
+  }, [onClick, well.id]);
+
   if (!well.location) return null;
 
   return (
@@ -52,7 +56,8 @@ export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
       anchor="bottom"
     >
       <button
-        onClick={() => onClick?.(well.id)}
+        type="button"
+        onClick={handleClick}
         className="flex flex-col items-center cursor-pointer group"
         aria-label={`Well: ${well.name}`}
       >

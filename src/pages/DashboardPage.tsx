@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
-import { useAuth } from '../lib/AuthContext';
-import { useFarmName } from '../hooks/useFarmName';
+import { useAuth } from '../lib/AuthProvider';
 import MapView from '../components/MapView';
 import LocationPickerBottomSheet from '../components/LocationPickerBottomSheet';
 import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWellFormBottomSheet';
@@ -11,8 +10,8 @@ import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWell
 export default function DashboardPage() {
   const { wells } = useWells();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
-  const farmName = useFarmName(userProfile?.farm_id ?? null);
+  const { onboardingStatus } = useAuth();
+  const farmName = onboardingStatus?.farmName ?? null;
 
   // Bottom sheet flow state
   const [currentStep, setCurrentStep] = useState<'closed' | 'location' | 'form'>('closed');
@@ -39,10 +38,6 @@ export default function DashboardPage() {
     setCurrentStep('form');
   }, []);
 
-  const handleFormBack = useCallback(() => {
-    setCurrentStep('location');
-  }, []);
-
   const handleFormClose = useCallback(() => {
     setCurrentStep('closed');
     setPickedLocation(null);
@@ -50,6 +45,12 @@ export default function DashboardPage() {
 
   const handleMapClick = useCallback((lngLat: { lng: number; lat: number }) => {
     setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
+  }, []);
+
+  // Long-press: skip location picker and go straight to form
+  const handleMapLongPress = useCallback((lngLat: { lng: number; lat: number }) => {
+    setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
+    setCurrentStep('form');
   }, []);
 
   const handleSaveWell = useCallback((wellData: WellFormData) => {
@@ -66,6 +67,7 @@ export default function DashboardPage() {
         wells={wells}
         onWellClick={handleWellClick}
         onMapClick={handleMapClick}
+        onMapLongPress={handleMapLongPress}
         pickedLocation={pickedLocation}
         isPickingLocation={currentStep === 'location'}
       />
@@ -112,7 +114,6 @@ export default function DashboardPage() {
         <AddWellFormBottomSheet
           open={currentStep === 'form'}
           onClose={handleFormClose}
-          onBack={handleFormBack}
           onSave={handleSaveWell}
           initialLocation={pickedLocation}
           farmName={farmName}

@@ -4,6 +4,10 @@ const farms = new TableV2({
   name: column.text,
   description: column.text,
   invite_code: column.text,
+  street_address: column.text,
+  city: column.text,
+  state: column.text,
+  zip_code: column.text,
   created_at: column.text,
   updated_at: column.text,
 });
@@ -20,53 +24,34 @@ const users = new TableV2({
   updated_at: column.text,
 });
 
-const wells = new TableV2({
+const farm_members = new TableV2({
   farm_id: column.text,
-  name: column.text,
-  meter_id: column.text,
-  location: column.text,
-  status: column.text,
-  notes: column.text,
-  created_by: column.text,
+  user_id: column.text,
+  role: column.text,
+  full_name: column.text, // Denormalized from users.display_name
   created_at: column.text,
-  updated_at: column.text,
 });
 
-const allocations = new TableV2({
-  well_id: column.text,
+const farm_invites = new TableV2({
+  code: column.text,
   farm_id: column.text,
-  year: column.integer,
-  acre_feet: column.real,
-  notes: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const readings = new TableV2({
-  well_id: column.text,
-  farm_id: column.text,
-  meter_value: column.real,
-  reading_date: column.text,
-  gps_latitude: column.real,
-  gps_longitude: column.real,
-  gps_verified: column.integer,
-  notes: column.text,
+  role: column.text,
+  expires_at: column.text,
+  max_uses: column.integer,
+  uses_count: column.integer,
   created_by: column.text,
   created_at: column.text,
-  updated_at: column.text,
 });
 
 export const AppSchema = new Schema({
   farms,
   users,
-  wells,
-  allocations,
-  readings,
+  farm_members,
+  farm_invites,
 });
 
 export type Database = (typeof AppSchema)['types'];
 export type Farm = Database['farms'];
 export type User = Database['users'];
-export type Well = Database['wells'];
-export type Allocation = Database['allocations'];
-export type Reading = Database['readings'];
+export type FarmMember = Database['farm_members'];
+export type FarmInvite = Database['farm_invites'];

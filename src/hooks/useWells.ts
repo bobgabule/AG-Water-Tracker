@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthContext';
+import { useAuth } from '../lib/AuthProvider';
 
 export interface WellLocation {
   latitude: number;
@@ -31,6 +31,14 @@ function parseLocation(raw: string | null): WellLocation | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
+    // GeoJSON Point format from ST_AsGeoJSON: {"type":"Point","coordinates":[lng, lat]}
+    if (parsed.type === 'Point' && Array.isArray(parsed.coordinates)) {
+      const [lng, lat] = parsed.coordinates;
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+    // Legacy format: {"lat": number, "lng": number}
     if (typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
       return { latitude: parsed.lat, longitude: parsed.lng };
     }
@@ -45,18 +53,20 @@ function parseLocation(raw: string | null): WellLocation | null {
 }
 
 export function useWells() {
-  const { userProfile } = useAuth();
-  const farmId = userProfile?.farm_id ?? '';
+  const { onboardingStatus } = useAuth();
+  const farmId = onboardingStatus?.farmId ?? null;
 
-  const { data, isLoading, error } = useQuery<WellRow>(
-    `SELECT
-      w.id, w.name, w.status, w.location, w.meter_id, w.notes,
-      (SELECT MAX(r.reading_date) FROM readings r WHERE r.well_id = w.id) as last_reading_date
-    FROM wells w
-    WHERE w.farm_id = ?
-    ORDER BY w.name`,
-    [farmId],
-  );
+  // Guard against empty farmId to avoid unnecessary database queries
+  const query = farmId
+    ? `SELECT
+        w.id, w.name, w.status, w.location, w.meter_id, w.notes,
+        (SELECT MAX(r.reading_date) FROM readings r WHERE r.well_id = w.id) as last_reading_date
+      FROM wells w
+      WHERE w.farm_id = ?
+      ORDER BY w.name`
+    : 'SELECT NULL WHERE 0';
+
+  const { data, isLoading, error } = useQuery<WellRow>(query, farmId ? [farmId] : []);
 
   const wells = useMemo<WellWithReading[]>(
     () =>

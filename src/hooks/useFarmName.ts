@@ -1,35 +1,27 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useMemo } from 'react';
+import { useQuery } from '@powersync/react';
 
+interface FarmRow {
+  name: string;
+}
+
+/**
+ * Hook to get farm name from PowerSync (offline-first).
+ * Uses local SQLite database for instant access even when offline.
+ */
 export function useFarmName(farmId: string | null): string | null {
-  const [farmName, setFarmName] = useState<string | null>(null);
+  // Query farm name from PowerSync local database
+  const query = farmId
+    ? 'SELECT name FROM farms WHERE id = ? LIMIT 1'
+    : 'SELECT NULL WHERE 0';
 
-  useEffect(() => {
-    if (!farmId) {
-      setFarmName(null);
-      return;
-    }
+  const { data } = useQuery<FarmRow>(query, farmId ? [farmId] : []);
 
-    let cancelled = false;
-
-    async function fetchFarmName() {
-      const { data, error } = await supabase
-        .from('farms')
-        .select('name')
-        .eq('id', farmId)
-        .single();
-
-      if (!cancelled && !error && data) {
-        setFarmName(data.name);
-      }
-    }
-
-    fetchFarmName();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [farmId]);
+  // Memoize the result to prevent unnecessary re-renders
+  const farmName = useMemo(() => {
+    if (!data || data.length === 0) return null;
+    return data[0].name;
+  }, [data]);
 
   return farmName;
 }

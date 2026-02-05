@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
-import { MapPinIcon, ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, CheckIcon } from '@heroicons/react/24/outline';
 import SegmentedControl from './SegmentedControl';
 
 export interface WellFormData {
@@ -20,7 +20,6 @@ export interface WellFormData {
 interface AddWellFormBottomSheetProps {
   open: boolean;
   onClose: () => void;
-  onBack: () => void;
   onSave: (wellData: WellFormData) => void;
   initialLocation: { latitude: number; longitude: number };
   farmName: string | null;
@@ -45,7 +44,6 @@ const stateOptions = ['Ok', 'Low', 'Critical', 'Dead', 'Unknown'] as const;
 export default function AddWellFormBottomSheet({
   open,
   onClose,
-  onBack,
   onSave,
   initialLocation,
   farmName,
@@ -171,23 +169,13 @@ export default function AddWellFormBottomSheet({
         >
           {/* Header */}
           <div className="bg-[#4a5d4a] p-4 pt-6 rounded-t-3xl flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onBack}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeftIcon className="w-5 h-5 text-white" />
-              </button>
-              <div>
-                {farmName && (
-                  <p className="text-white/70 text-xs">{farmName}</p>
-                )}
-                <h2 className="text-white font-bold text-lg tracking-wide">
-                  ADD NEW WELL
-                </h2>
-              </div>
+            <div>
+              {farmName && (
+                <p className="text-white/70 text-xs">{farmName}</p>
+              )}
+              <h2 className="text-white font-bold text-lg tracking-wide">
+                ADD NEW WELL
+              </h2>
             </div>
           </div>
 
