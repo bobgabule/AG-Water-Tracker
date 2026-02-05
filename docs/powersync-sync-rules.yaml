@@ -1,0 +1,117 @@
+# =============================================================================
+# PowerSync Sync Rules Configuration
+# =============================================================================
+# AG Water Tracker - Sync Rules for PowerSync Dashboard
+#
+# These rules control which data is synced to each client based on the
+# authenticated user's identity and farm memberships.
+#
+# IMPORTANT: These rules must be configured in the PowerSync dashboard.
+# This file is for documentation purposes only.
+#
+# Syntax: Modern PowerSync format using request.user_id()
+# =============================================================================
+
+bucket_definitions:
+
+  # ---------------------------------------------------------------------------
+  # Farms (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs farms where the user has a membership.
+  # Uses farm_id from farm_members as the parameter.
+  # ---------------------------------------------------------------------------
+  user_farms:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, name, street_address, city, state, zip_code, created_at, updated_at FROM farms WHERE id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Members (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs all farm_members rows for farms the user belongs to.
+  # Includes full_name (denormalized from users.display_name) for display.
+  # ---------------------------------------------------------------------------
+  farm_members:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Invites (for Owners only)
+  # ---------------------------------------------------------------------------
+  # Syncs farm_invites for farms where the user is an owner.
+  # Regular members and admins should not see invite codes.
+  # Note: PowerSync doesn't support IN (literal list), so we use role = 'owner'
+  # ---------------------------------------------------------------------------
+  farm_invites_owner:
+    parameters: |
+      SELECT farm_id FROM farm_members
+      WHERE user_id = request.user_id()
+      AND role = 'owner'
+    data:
+      - SELECT code AS id, farm_id, created_by, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Invites (for Admins)
+  # ---------------------------------------------------------------------------
+  # Separate bucket for admin role since IN (literal list) is not supported.
+  # ---------------------------------------------------------------------------
+  farm_invites_admin:
+    parameters: |
+      SELECT farm_id FROM farm_members
+      WHERE user_id = request.user_id()
+      AND role = 'admin'
+    data:
+      - SELECT code AS id, farm_id, created_by, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # User Profile (Own)
+  # ---------------------------------------------------------------------------
+  # Syncs the user's own profile. This ensures users always have their
+  # profile synced even before joining any farm (e.g., during onboarding).
+  # ---------------------------------------------------------------------------
+  user_profile:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT id, phone, display_name, created_at, updated_at FROM users WHERE id = bucket.user_id
+
+# =============================================================================
+# Implementation Notes
+# =============================================================================
+#
+# 1. Token Configuration:
+#    PowerSync uses request.user_id() to get the JWT subject ('sub' claim).
+#    Ensure your Supabase JWT is properly configured in the PowerSync dashboard.
+#
+# 2. Parameter Query Pattern:
+#    All buckets use a simple pattern: SELECT farm_id FROM farm_members
+#    This avoids subqueries which are not supported by PowerSync.
+#
+# 3. Denormalized Columns:
+#    - farm_members.full_name: Copied from users.display_name via trigger
+#
+# 4. Data Query Requirements:
+#    - Must SELECT from a single table (no joins)
+#    - Must include the table's primary key column (usually 'id', but 'code' for farm_invites)
+#    - Use bucket.<param> to filter
+#
+# 5. Bucket Granularity:
+#    - user_profile: 1 bucket per user
+#    - All other buckets: 1 bucket per farm membership
+#
+# 6. Security:
+#    - These sync rules work in conjunction with Supabase RLS policies
+#    - Invite codes use separate buckets for owner/admin roles
+#
+# =============================================================================
+# Dashboard Configuration Steps
+# =============================================================================
+#
+# 1. Log in to the PowerSync dashboard
+# 2. Navigate to your project's Sync Rules section
+# 3. Copy the bucket_definitions section from this file
+# 4. Verify request.user_id() maps correctly to your JWT subject claim
+# 5. Test the sync rules using the dashboard's testing tools
+# 6. Deploy the sync rules
+#
+# =============================================================================

@@ -106,10 +106,50 @@ This approach ensures the app works completely offline while maintaining data co
 
 ### Authentication Flow
 - **Method**: Passwordless phone OTP via Supabase Auth
-- **Login**: User enters phone number → receives SMS OTP → verifies code
-- **New users**: After OTP verification, redirected to profile registration (first name, last name, email; phone saved automatically)
-- **Existing users**: After OTP verification, redirected to dashboard (or farm setup if no farm)
+- **Provider**: `AuthProvider` (`src/lib/AuthProvider.tsx`) with `isAuthReady` gate
+- **Route Structure**:
+  ```
+  /auth/phone              → Phone input page
+  /auth/verify             → OTP verification page
+  /onboarding/profile      → Profile creation (name, email)
+  /onboarding/farm         → Farm choice (create vs join)
+  /onboarding/farm/create  → Create new farm form
+  /onboarding/farm/join    → Join with invite code form
+  /app/*                   → Protected app routes
+  ```
+- **Guards**:
+  - `RequireAuth` - Checks session, shows offline message if needed
+  - `RequireOnboarded` - Checks profile + farm membership complete
+- **Route Resolver**: `resolveNextRoute(onboardingStatus)` determines next step
+- **PowerSync Lifecycle**: Connect on login, disconnect + clear local DB on logout
 - **Phone format**: US numbers only (+1 prefix hardcoded)
+
+### New Data Model (Auth/Membership)
+
+**farm_members** (replaces users.farm_id):
+```sql
+farm_id UUID REFERENCES farms(id)
+user_id UUID REFERENCES auth.users(id)
+role TEXT ('owner' | 'admin' | 'member')
+created_at TIMESTAMPTZ
+```
+
+**farm_invites** (invite code management):
+```sql
+code TEXT PRIMARY KEY (6-char alphanumeric)
+farm_id UUID REFERENCES farms(id)
+role TEXT ('admin' | 'member')
+expires_at TIMESTAMPTZ
+max_uses INTEGER (nullable = unlimited)
+uses_count INTEGER
+created_by UUID
+```
+
+**Atomic RPCs**:
+- `create_farm_and_membership(farm_name, whim_number)` → UUID
+- `join_farm_with_code(code)` → UUID
+- `create_invite_code(farm_id, role, expires_days, max_uses)` → TEXT
+- `get_onboarding_status()` → JSON
 
 ### 3. Components
 - `Layout`: Header with Farm Name, Offline Indicator.

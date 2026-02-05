@@ -28,3 +28,10 @@ export async function setupPowerSync(): Promise<PowerSyncDatabase> {
 export function getPowerSyncInstance(): PowerSyncDatabase | null {
   return powerSyncInstance;
 }
+
+export async function disconnectAndClear(): Promise<void> {
+  if (powerSyncInstance) {
+    await powerSyncInstance.disconnectAndClear();
+    powerSyncInstance = null;
+  }
+}
