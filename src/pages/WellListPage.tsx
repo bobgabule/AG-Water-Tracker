@@ -19,12 +19,12 @@ interface WellDisplayData {
 }
 
 function computeWellDisplayData(well: WellWithReading): WellDisplayData {
-  const { lastReadingDate, status } = well;
+  const { updatedAt, status } = well;
 
   // Parse date and compute diff
   let diffDays: number | null = null;
-  if (lastReadingDate) {
-    const date = new Date(lastReadingDate);
+  if (updatedAt) {
+    const date = new Date(updatedAt);
     if (!isNaN(date.getTime())) {
       const now = new Date();
       diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -59,7 +59,8 @@ function computeWellDisplayData(well: WellWithReading): WellDisplayData {
   // Determine status bar width
   let statusWidth = 'w-1/4';
   if (diffDays !== null) {
-    if (diffDays <= 1) statusWidth = 'w-3/4';
+    if (diffDays === 0) statusWidth = 'w-full';
+    else if (diffDays <= 1) statusWidth = 'w-3/4';
     else if (diffDays <= RECENT_THRESHOLD) statusWidth = 'w-2/3';
     else if (diffDays <= WEEK_THRESHOLD) statusWidth = 'w-1/2';
     else if (diffDays <= TWO_WEEKS_THRESHOLD) statusWidth = 'w-1/3';

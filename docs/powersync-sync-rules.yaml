@@ -65,6 +65,17 @@ bucket_definitions:
       - SELECT code AS id, farm_id, created_by, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
+  # Wells (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs wells for farms where the user has a membership.
+  # Uses farm_id from farm_members as the parameter.
+  # ---------------------------------------------------------------------------
+  farm_wells:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, send_monthly_report, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
   # User Profile (Own)
   # ---------------------------------------------------------------------------
   # Syncs the user's own profile. This ensures users always have their
