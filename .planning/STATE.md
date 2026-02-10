@@ -30,7 +30,7 @@ Progress: [█████░░░░░] 50%
 | 01-session-stability | 5 | 21min | 4min |
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
-| 04-permission-enforcement | 1 | 2min | 2min |
+| 04-permission-enforcement | 2 | 4min | 2min |
 
 **Recent Trend:**
 - Last 5 plans: 04-02 (2min), 02-03 (5min), 01-05 (4min), 01-04 (3min), 03-04 (3min)
@@ -80,6 +80,9 @@ Recent decisions affecting current work:
 - [01-05]: useWebWorker:false forces WASM in main thread where service worker intercepts fetch -- safe for simple query workloads
 - [01-05]: retryCount pattern re-triggers useEffect without needing to modify setupPowerSync singleton logic
 - [01-05]: No technical error details shown to user in DB init error UI -- friendly messaging only
+- [04-01]: RequireRole returns null during loading (not redirect) to avoid flash-redirect while PowerSync loads
+- [04-01]: Only /subscription route protected by RequireRole -- other routes accessible to all authenticated users
+- [04-01]: NavItem interface with optional requiredAction field for extensible per-item permission checks
 - [04-02]: Conditional rendering (not CSS display:none) for all permission gates
 - [04-02]: Defense-in-depth pattern: UI gate + handler gate + write guard in DashboardPage
 - [04-02]: Long-press handler gated at function level (early return) rather than removing callback from MapView
