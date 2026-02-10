@@ -1,14 +1,17 @@
 import { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import Map from 'react-map-gl/mapbox';
-import type { MapRef, MapMouseEvent, MapTouchEvent } from 'react-map-gl/mapbox';
+import type { MapRef, MapMouseEvent, MapTouchEvent, ErrorEvent } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { debugWarn } from '../lib/debugLog';
 import WellMarker from './WellMarker';
 import LocationPickerMarker from './LocationPickerMarker';
 import UserLocationCircle from './UserLocationCircle';
 import LocationPermissionBanner from './LocationPermissionBanner';
+import MapOfflineOverlay from './MapOfflineOverlay';
 import type { WellWithReading } from '../hooks/useWells';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useMapTileStatus } from '../hooks/useMapTileStatus';
 
 
 interface MapViewProps {
@@ -80,10 +83,39 @@ export default function MapView({
     sessionStorage.getItem(BANNER_DISMISSED_KEY) === 'true'
   );
 
+  // Track map tile loading status for offline handling
+  const { isOnline, hasTileError, setTileError } = useMapTileStatus();
+
   const handleDismissBanner = useCallback(() => {
     setBannerDismissed(true);
     sessionStorage.setItem(BANNER_DISMISSED_KEY, 'true');
   }, []);
+
+  // Handle map tile loading errors
+  const handleMapError = useCallback(
+    (event: ErrorEvent) => {
+      debugWarn('Map', 'Map error:', event.error);
+
+      // Check if it's a tile/network related error
+      const message = event.error?.message?.toLowerCase() || '';
+      if (
+        message.includes('tile') ||
+        message.includes('fetch') ||
+        message.includes('network') ||
+        message.includes('failed to fetch')
+      ) {
+        setTileError(true);
+      }
+    },
+    [setTileError]
+  );
+
+  // Retry loading map tiles
+  const handleRetry = useCallback(() => {
+    setTileError(false);
+    // Trigger map to refetch tiles by forcing a resize
+    mapRef.current?.resize();
+  }, [setTileError]);
 
   // Re-fetch location when permission changes from 'prompt' to 'granted'
   // This handles the case where the initial request timed out while waiting for user
@@ -244,6 +276,7 @@ export default function MapView({
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+        onError={handleMapError}
         onClick={handleMapClick}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -276,6 +309,15 @@ export default function MapView({
           />
         )}
       </Map>
+
+      {/* Offline/error overlay */}
+      {hasTileError && (
+        <MapOfflineOverlay
+          isOnline={isOnline}
+          wellCount={wells.filter((w) => w.location).length}
+          onRetry={handleRetry}
+        />
+      )}
     </div>
   );
 }

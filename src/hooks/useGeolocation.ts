@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { debugWarn } from '../lib/debugLog';
 
 const LOCATION_CACHE_KEY = 'user-geolocation-cache';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
@@ -102,7 +103,7 @@ export function useGeolocation(
 
   const fetchLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      console.warn('[useGeolocation] Geolocation API not available');
+      debugWarn('Geolocation', 'Geolocation API not available');
       setLoading(false);
       return;
     }
@@ -138,7 +139,7 @@ export function useGeolocation(
           return;
         }
 
-        console.warn('[useGeolocation] Error:', {
+        debugWarn('Geolocation', 'Error:', {
           code: err.code,
           message: err.message,
         });

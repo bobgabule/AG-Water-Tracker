@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ListBulletIcon, PlusIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
+import { debugError } from '../lib/debugLog';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
@@ -76,7 +77,7 @@ export default function DashboardPage() {
 
     const farmId = onboardingStatus?.farmId;
     if (!farmId || !user) {
-      console.error('Cannot save well: missing farmId or user');
+      debugError('Dashboard', 'Cannot save well: missing farmId or user');
       return;
     }
 
@@ -117,7 +118,7 @@ export default function DashboardPage() {
       setCurrentStep('closed');
       setPickedLocation(null);
     } catch (error) {
-      console.error('Failed to save well:', error);
+      debugError('Dashboard', 'Failed to save well:', error);
       clearTimeout(errorTimeoutRef.current);
       setSaveError('Failed to save well. Please try again.');
       errorTimeoutRef.current = setTimeout(() => setSaveError(null), 5000);
