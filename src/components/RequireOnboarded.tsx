@@ -8,7 +8,7 @@ interface RequireOnboardedProps {
 }
 
 export default function RequireOnboarded({ children }: RequireOnboardedProps) {
-  const { onboardingStatus, isAuthReady, session, refreshOnboardingStatus } = useAuth();
+  const { onboardingStatus, isAuthReady, isFetchingOnboarding, session, refreshOnboardingStatus } = useAuth();
   const location = useLocation();
   const [showSlowMessage, setShowSlowMessage] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -35,8 +35,19 @@ export default function RequireOnboarded({ children }: RequireOnboardedProps) {
     );
   }
 
-  // Auth ready but RPC failed (null status with active session) - show retry UI
-  if (!onboardingStatus && session) {
+  // Auth ready but onboarding fetch still in-flight - show loading spinner (not error UI)
+  if (!onboardingStatus && session && isFetchingOnboarding) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+        </div>
+      </div>
+    );
+  }
+
+  // Auth ready and fetch completed but RPC failed (null status with active session) - show retry UI
+  if (!onboardingStatus && session && !isFetchingOnboarding) {
     const handleRetry = async () => {
       setIsRetrying(true);
       try {
