@@ -5,6 +5,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ListBulletIcon, PlusIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
+import { useUserRole } from '../hooks/useUserRole';
+import { hasPermission } from '../lib/permissions';
 import { debugError } from '../lib/debugLog';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
@@ -17,6 +19,8 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const db = usePowerSync();
   const { user, onboardingStatus } = useAuth();
+  const role = useUserRole();
+  const canCreateWell = hasPermission(role, 'create_well');
   const farmName = onboardingStatus?.farmName ?? null;
 
   // MapView error recovery: increment key to force remount (WebGL context recovery)
@@ -66,13 +70,18 @@ export default function DashboardPage() {
     setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
   }, []);
 
-  // Long-press: skip location picker and go straight to form
+  // Long-press: skip location picker and go straight to form (gated by permission)
   const handleMapLongPress = useCallback((lngLat: { lng: number; lat: number }) => {
+    if (!canCreateWell) return;
     setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
     setCurrentStep('form');
-  }, []);
+  }, [canCreateWell]);
 
   const handleSaveWell = useCallback(async (wellData: WellFormData) => {
+    if (!hasPermission(role, 'create_well')) {
+      debugError('Dashboard', 'Attempted well creation without permission');
+      return;
+    }
     if (isSaving) return;
 
     const farmId = onboardingStatus?.farmId;
@@ -125,7 +134,7 @@ export default function DashboardPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [db, isSaving, onboardingStatus?.farmId, user]);
+  }, [db, isSaving, onboardingStatus?.farmId, role, user]);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden">
@@ -183,16 +192,18 @@ export default function DashboardPage() {
           <ListBulletIcon className="w-5 h-5" />
           Well List
         </button>
-        <button
-          onClick={handleNewWell}
-          className="px-5 py-3 rounded-full flex items-center gap-2 bg-[#bfe8d9]
-         text-[#5a9494] text-sm font-semibold
-         shadow-xl
-         active:scale-95 transition"
-        >
-          <PlusIcon className="w-5 h-5" />
-          New Well
-        </button>
+        {canCreateWell && (
+          <button
+            onClick={handleNewWell}
+            className="px-5 py-3 rounded-full flex items-center gap-2 bg-[#bfe8d9]
+           text-[#5a9494] text-sm font-semibold
+           shadow-xl
+           active:scale-95 transition"
+          >
+            <PlusIcon className="w-5 h-5" />
+            New Well
+          </button>
+        )}
       </div>
 
       {/* Location Picker Bottom Sheet */}
