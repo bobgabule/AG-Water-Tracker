@@ -2,6 +2,34 @@ import type { AbstractPowerSyncDatabase, PowerSyncBackendConnector } from '@powe
 import { UpdateType } from '@powersync/web';
 import type { CrudEntry } from '@powersync/web';
 import { supabase } from './supabase.ts';
+import { debugError, debugWarn } from './debugLog';
+
+/** Tables the connector is allowed to write to Supabase */
+const ALLOWED_TABLES = new Set(['farms', 'users', 'farm_members', 'farm_invites', 'wells']);
+
+/**
+ * Returns true if the error is permanent (non-retryable).
+ * Permanent errors should complete the transaction to avoid infinite retry loops.
+ */
+function isPermanentError(error: unknown): boolean {
+  // Network errors are retryable
+  if (error instanceof TypeError) return false;
+
+  if (typeof error === 'object' && error !== null) {
+    const err = error as { code?: string };
+
+    // PostgreSQL constraint violations (23xxx) are permanent
+    if (err.code?.startsWith('23')) return true;
+
+    // RLS / permission violations are permanent
+    if (err.code === '42501') return true;
+
+    // PostgREST errors are permanent (bad request, not found, etc.)
+    if (err.code?.startsWith('PGRST')) return true;
+  }
+
+  return false;
+}
 
 export class SupabaseConnector implements PowerSyncBackendConnector {
   async fetchCredentials() {
@@ -10,7 +38,15 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     } = await supabase.auth.getSession();
 
     if (!session) {
-      throw new Error('Not authenticated');
+      // Token may be expired after offline — try refreshing
+      const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+      if (!refreshed) {
+        throw new Error('Not authenticated');
+      }
+      return {
+        endpoint: import.meta.env.VITE_POWERSYNC_URL,
+        token: refreshed.access_token,
+      };
     }
 
     return {
@@ -29,29 +65,53 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       }
       await transaction.complete();
     } catch (error: unknown) {
-      const status = (error as { status?: number })?.status;
-      if (status !== undefined && status >= 500) {
+      if (isPermanentError(error)) {
+        debugError('PowerSync', 'Permanent upload error, discarding transaction:', error);
+        await transaction.complete();
+      } else {
+        debugWarn('PowerSync', 'Retryable upload error:', error);
         throw error;
       }
-      console.error('Upload error (non-retryable):', error);
-      await transaction.complete();
     }
+  }
+
+  /**
+   * Normalizes data types before sending to Supabase.
+   * Converts PowerSync integer booleans (0/1) to actual booleans.
+   */
+  private normalizeForSupabase(
+    table: string,
+    data: Record<string, unknown>,
+  ): Record<string, unknown> {
+    if (table === 'wells' && 'send_monthly_report' in data) {
+      return { ...data, send_monthly_report: Boolean(data.send_monthly_report) };
+    }
+    return data;
   }
 
   private async applyOperation(op: CrudEntry): Promise<void> {
     const table = op.table;
 
+    if (!ALLOWED_TABLES.has(table)) {
+      debugError('PowerSync', 'Unexpected table in CRUD operation:', table);
+      return;
+    }
+
     switch (op.op) {
       case UpdateType.PUT: {
-        const data = { ...op.opData, id: op.id };
-        const { error } = await supabase.from(table).upsert(data);
+        let data: Record<string, unknown> = { ...op.opData, id: op.id };
+        data = this.normalizeForSupabase(table, data);
+
+        const { error } = await supabase.from(table).upsert(data).select();
         if (error) throw error;
         break;
       }
       case UpdateType.PATCH: {
+        if (!op.opData) return;
+        const data = this.normalizeForSupabase(table, op.opData);
         const { error } = await supabase
           .from(table)
-          .update(op.opData!)
+          .update(data)
           .eq('id', op.id);
         if (error) throw error;
         break;

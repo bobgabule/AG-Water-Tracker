@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { disconnectAndClear } from './powersync';
+import { debugError } from './debugLog';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data, error } = await supabase.rpc('get_onboarding_status');
 
         if (error) {
-          console.error('Failed to fetch onboarding status:', error);
+          debugError('Auth', 'Failed to fetch onboarding status:', error);
           return null;
         }
 
@@ -80,7 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         return status;
       } catch (err) {
-        console.error('Error fetching onboarding status:', err);
+        debugError('Auth', 'Error fetching onboarding status:', err);
         return null;
       }
     }, []);
@@ -186,7 +187,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Manually trigger INITIAL_SESSION handling
         await handleAuthStateChange('INITIAL_SESSION', initialSession);
       } catch (error) {
-        console.error('Failed to get initial session:', error);
+        debugError('Auth', 'Failed to get initial session:', error);
         // Even on error, mark auth as ready so the app can proceed
         setIsAuthReady(true);
       }
@@ -258,14 +259,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await supabase.auth.signOut();
     } catch (error) {
       // Log but continue with local cleanup even if server call fails
-      console.error('Sign out error:', error);
+      debugError('Auth', 'Sign out error:', error);
     }
 
     // Clear PowerSync local database
     try {
       await disconnectAndClear();
     } catch (error) {
-      console.error('Failed to clear PowerSync:', error);
+      debugError('Auth', 'Failed to clear PowerSync:', error);
     }
 
     // Clear local state
