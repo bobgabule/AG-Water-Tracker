@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { MapIcon, PlusIcon, PlayIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
+import { useUserRole } from '../hooks/useUserRole';
+import { hasPermission } from '../lib/permissions';
 
 // Date threshold constants (in days)
 const RECENT_THRESHOLD = 3;
@@ -72,6 +74,8 @@ function computeWellDisplayData(well: WellWithReading): WellDisplayData {
 export default function WellListPage() {
   const { wells, loading } = useWells();
   const navigate = useNavigate();
+  const role = useUserRole();
+  const canCreateWell = hasPermission(role, 'create_well');
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleWellClick = useCallback(
@@ -178,13 +182,15 @@ export default function WellListPage() {
             <MapIcon className="w-5 h-5" />
             Well Map
           </button>
-          <button
-            onClick={handleNewWell}
-            className="flex items-center gap-2 px-5 py-3 bg-[#5a9494] rounded-full text-white font-medium shadow-sm hover:bg-[#4a8484] transition-colors"
-          >
-            <PlusIcon className="w-5 h-5" />
-            New Well
-          </button>
+          {canCreateWell && (
+            <button
+              onClick={handleNewWell}
+              className="flex items-center gap-2 px-5 py-3 bg-[#5a9494] rounded-full text-white font-medium shadow-sm hover:bg-[#4a8484] transition-colors"
+            >
+              <PlusIcon className="w-5 h-5" />
+              New Well
+            </button>
+          )}
         </div>
       </div>
     </div>
