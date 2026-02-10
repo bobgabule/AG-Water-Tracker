@@ -234,15 +234,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 if (status) setOnboardingStatus(status);
               }).catch(() => { /* non-critical: cached status is sufficient */ });
             } else {
-              // No cache (new user): wait for RPC with auto-retry
+              // No cache (new user / post-sign-out): mark auth ready immediately
+              // and fetch in background. RequireOnboarded shows a clean spinner
+              // via isFetchingOnboarding, then retry UI if fetch fails.
               setIsFetchingOnboarding(true);
-              try {
-                const status = await fetchWithRetry(fetchOnboardingStatus);
-                if (status) setOnboardingStatus(status);
-              } finally {
-                setIsFetchingOnboarding(false);
-              }
               setIsAuthReady(true);
+              fetchOnboardingStatus()
+                .then((status) => {
+                  if (status) setOnboardingStatus(status);
+                })
+                .catch(() => { /* RequireOnboarded retry UI handles this */ })
+                .finally(() => setIsFetchingOnboarding(false));
             }
           } else {
             setOnboardingStatus(null);
@@ -317,9 +319,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const initializeAuth = async () => {
       try {
-        const {
-          data: { session: initialSession },
-        } = await supabase.auth.getSession();
+        // Timeout getSession so a cold/unreachable Supabase can't block forever
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000)),
+        ]);
+
+        const initialSession = sessionResult?.data?.session ?? null;
 
         // Manually trigger INITIAL_SESSION handling
         await handleAuthStateChange('INITIAL_SESSION', initialSession);
