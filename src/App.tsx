@@ -8,9 +8,7 @@ import VerifyPage from './pages/auth/VerifyPage';
 
 // Onboarding pages
 import ProfilePage from './pages/onboarding/ProfilePage';
-import FarmChoicePage from './pages/onboarding/FarmChoicePage';
 import CreateFarmPage from './pages/onboarding/CreateFarmPage';
-import JoinFarmPage from './pages/onboarding/JoinFarmPage';
 
 // App pages
 import AppLayout from './components/AppLayout';
@@ -37,9 +35,8 @@ export default function App() {
       {/* Onboarding routes - require session only */}
       <Route element={<RequireAuth />}>
         <Route path="/onboarding/profile" element={<ProfilePage />} />
-        <Route path="/onboarding/farm" element={<FarmChoicePage />} />
+        <Route path="/onboarding/farm" element={<Navigate to="/onboarding/farm/create" replace />} />
         <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
-        <Route path="/onboarding/farm/join" element={<JoinFarmPage />} />
       </Route>
 
       {/* Protected app routes - require session + completed onboarding */}
