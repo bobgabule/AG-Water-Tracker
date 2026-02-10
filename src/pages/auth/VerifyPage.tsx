@@ -181,9 +181,9 @@ export default function VerifyPage() {
     navigate('/auth/phone', { replace: true });
   }, [navigate]);
 
-  // Don't render if already logged in or no phone (will redirect)
+  // Don't render if already logged in or no phone (will redirect shortly)
   if (user || !phone) {
-    return null;
+    return <div className="min-h-screen bg-gray-900" />;
   }
 
   const isCodeComplete = code.every((d) => d !== '') && code.join('').length === 4;

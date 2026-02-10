@@ -23,7 +23,12 @@ export async function setupPowerSync(): Promise<PowerSyncDatabase> {
   });
 
   await db.init();
-  await db.connect(connector);
+
+  // Connect in background — db is usable for local queries after init().
+  // Remote sync starts asynchronously; no need to block the UI.
+  db.connect(connector).catch((err) => {
+    debugLog('PowerSync', 'Background connect error (will auto-retry):', err);
+  });
 
   // Add sync status listener for debugging
   db.registerListener({
