@@ -13,7 +13,7 @@ interface AddUserModalProps {
   onClose: () => void;
 }
 
-type Role = 'member' | 'admin';
+type Role = 'meter_checker' | 'admin';
 
 function formatPhoneDisplay(digits: string): string {
   if (digits.length <= 3) return digits;
@@ -26,7 +26,7 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
 
   const [name, setName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
-  const [role, setRole] = useState<Role>('member');
+  const [role, setRole] = useState<Role>('meter_checker');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -114,7 +114,7 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
   const handleClose = useCallback(() => {
     setName('');
     setPhoneDigits('');
-    setRole('member');
+    setRole('meter_checker');
     setError('');
     setSuccess(false);
     setSmsWarning(false);
@@ -209,14 +209,14 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
                 <div className="flex rounded-lg border border-gray-600 overflow-hidden">
                   <button
                     type="button"
-                    onClick={() => handleRoleChange('member')}
+                    onClick={() => handleRoleChange('meter_checker')}
                     className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                      role === 'member'
+                      role === 'meter_checker'
                         ? 'bg-primary text-white'
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
-                    Member
+                    Meter Checker
                   </button>
                   <button
                     type="button"
@@ -233,7 +233,7 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
                 <p className="text-xs text-gray-500 mt-1">
                   {role === 'admin'
                     ? 'Admins can manage wells, team members, and settings'
-                    : 'Members can view and record meter readings'}
+                    : 'Meter checkers can view wells and record readings'}
                 </p>
               </div>
 
