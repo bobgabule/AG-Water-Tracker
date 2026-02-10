@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 2 - Offline Session Resilience
+**Current focus:** Phase 2 - Offline Session Resilience (COMPLETE)
 
 ## Current Position
 
-Phase: 2 of 8 (Offline Session Resilience)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-10 -- Completed 02-01-PLAN.md (Offline Session Cache & Connector Error Semantics)
+Phase: 2 of 8 (Offline Session Resilience) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-10 -- Completed 02-02-PLAN.md (Session Expired Messaging & Auth Connectivity Guards)
 
-Progress: [████░░░░░░] 15%
+Progress: [██░░░░░░░░] 19%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 6min
-- Total execution time: 0.4 hours
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-session-stability | 3 | 14min | 5min |
-| 02-offline-session-resilience | 1 | 8min | 8min |
+| 02-offline-session-resilience | 2 | 13min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (8min), 01-03 (8min), 01-02 (2min), 01-01 (4min)
+- Last 5 plans: 02-02 (5min), 02-01 (8min), 01-03 (8min), 01-02 (2min), 01-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -59,6 +59,9 @@ Recent decisions affecting current work:
 - [02-01]: localStorage cache-aside pattern for onboarding status -- cache on success, serve from cache on failure
 - [02-01]: PowerSync connector returns null for permanent auth errors, throws for retryable -- stops infinite retry loops
 - [02-01]: Onboarding cache cleared before state setters in signOut for guaranteed cleanup
+- [02-02]: useRef for userInitiatedSignOut (not state) -- only needs synchronous reads during auth events
+- [02-02]: Session expired UI in RequireAuth rather than separate route -- simpler, no URL change
+- [02-02]: Dual connectivity check: useOnlineStatus pre-submit guard + navigator.onLine catch fallback
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-01-PLAN.md (Offline Session Cache & Connector Error Semantics)
+Stopped at: Completed 02-02-PLAN.md (Session Expired Messaging & Auth Connectivity Guards) -- Phase 02 Complete
 Resume file: None
