@@ -10,7 +10,7 @@ import type { OnboardingStatus } from './AuthProvider';
  * Route priority (in order):
  * 1. No status / not authenticated -> /auth/phone
  * 2. No profile created yet -> /onboarding/profile
- * 3. No farm membership yet -> /onboarding/farm
+ * 3. No farm membership yet -> /onboarding/farm/create
  * 4. Fully onboarded -> /app/dashboard
  *
  * @param status - The user's current onboarding status, or null if not authenticated
@@ -29,7 +29,7 @@ export function resolveNextRoute(status: OnboardingStatus | null): string {
 
   // User has profile but isn't associated with a farm yet
   if (!status.hasFarmMembership) {
-    return '/onboarding/farm';
+    return '/onboarding/farm/create';
   }
 
   // User is fully onboarded - send to main app

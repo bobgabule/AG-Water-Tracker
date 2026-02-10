@@ -36,6 +36,8 @@ const farm_invites = new TableV2({
   code: column.text,
   farm_id: column.text,
   role: column.text,
+  invited_phone: column.text,
+  invited_name: column.text,
   expires_at: column.text,
   max_uses: column.integer,
   uses_count: column.integer,
