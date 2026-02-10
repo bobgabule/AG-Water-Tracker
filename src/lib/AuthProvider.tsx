@@ -19,6 +19,27 @@ import { debugError, debugLog } from './debugLog';
 const ONBOARDING_CACHE_KEY = 'ag-onboarding-status';
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if an RPC error indicates an invalid/expired session.
+ * Auth errors should trigger session expiry, not fall back to cache.
+ */
+const isAuthRpcError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const errObj = error as { code?: string; message?: string };
+  // PGRST301: JWT expired (PostgREST)
+  if (errObj.code === 'PGRST301') return true;
+  // HTTP 401 returned as error code string
+  if (errObj.code === '401') return true;
+  // JWT-related error messages from Supabase/PostgREST (specific patterns only)
+  const msg = errObj.message?.toLowerCase() ?? '';
+  if (msg.includes('jwt expired') || msg.includes('invalid jwt') || msg.includes('invalid claim')) return true;
+  return false;
+};
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -82,7 +103,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (error) {
           debugError('Auth', 'Failed to fetch onboarding status:', error);
-          // Attempt to serve from cache
+
+          // Auth errors mean the session itself is invalid -- don't mask with cache
+          if (isAuthRpcError(error)) {
+            debugLog('Auth', 'RPC failed due to invalid session, triggering session expiry');
+            setSessionExpired(true);
+            setSession(null);
+            setUser(null);
+            setOnboardingStatus(null);
+            // Clear the stale onboarding cache too
+            try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+            return null;
+          }
+
+          // Non-auth errors: attempt to serve from cache (existing behavior)
           try {
             const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
             if (cached) {
@@ -114,7 +148,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return status;
       } catch (err) {
         debugError('Auth', 'Error fetching onboarding status:', err);
-        // Attempt to serve from cache
+
+        // Check if the thrown error is auth-related
+        if (isAuthRpcError(err)) {
+          debugLog('Auth', 'RPC threw auth error, triggering session expiry');
+          setSessionExpired(true);
+          setSession(null);
+          setUser(null);
+          setOnboardingStatus(null);
+          try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+          return null;
+        }
+
+        // Non-auth errors: attempt to serve from cache (existing behavior)
         try {
           const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
           if (cached) {
