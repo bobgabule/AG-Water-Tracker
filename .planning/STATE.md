@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 5 (Grower Onboarding) -- plan 1 complete
+**Current focus:** Phase 5 complete -- ready for Phase 6
 
 ## Current Position
 
-Phase: 5 of 8 (Grower Onboarding)
-Plan: 1 of 2 in phase 05
-Status: In progress
-Last activity: 2026-02-11 -- Completed 05-01-PLAN.md (Fix Onboarding Flow Issues)
+Phase: 5 of 8 (Grower Onboarding) -- COMPLETE
+Plan: 2 of 2 in phase 05
+Status: Phase 5 complete
+Last activity: 2026-02-11 -- Completed 05-02-PLAN.md (Verify Routing & Clean Up Dead Code)
 
-Progress: [██████░░░░] 57%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 5min
 - Total execution time: 1.2 hours
 
@@ -31,10 +31,10 @@ Progress: [██████░░░░] 57%
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
 | 04-permission-enforcement | 4 | 9min | 2min |
-| 05-grower-onboarding | 1 | 4min | 4min |
+| 05-grower-onboarding | 2 | 6min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (4min), 04-04 (2min), 04-03 (3min), 04-02 (2min), 02-03 (5min)
+- Last 5 plans: 05-02 (2min), 05-01 (4min), 04-04 (2min), 04-03 (3min), 04-02 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -97,6 +97,9 @@ Recent decisions affecting current work:
 - [05-01]: OtpInput uses configurable length prop (default 6) for reusability
 - [05-01]: RequireNotOnboarded only redirects when BOTH hasProfile AND hasFarmMembership are true
 - [05-01]: CreateFarmPage back navigates to profile (not sign out) for non-destructive UX
+- [05-02]: VerifyPage redirect uses resolveNextRoute(onboardingStatus) for consistent routing across all entry points
+- [05-02]: CreateFarmPage navigates to '/' instead of '/app/dashboard' for canonical route handling
+- [05-02]: 3-attempt retry with 500ms delay for refreshOnboardingStatus; self-corrects on next app load if all fail
 
 ### Pending Todos
 
@@ -111,5 +114,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 05-01-PLAN.md (Fix Onboarding Flow Issues)
+Stopped at: Completed 05-02-PLAN.md (Verify Routing & Clean Up Dead Code) -- Phase 5 complete
 Resume file: None
