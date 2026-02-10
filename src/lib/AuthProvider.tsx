@@ -106,8 +106,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(authUser);
 
           if (authUser) {
-            // Fetch onboarding status for authenticated user
-            const status = await fetchOnboardingStatus();
+            // Fetch onboarding status with 5-second timeout to prevent infinite hang
+            const status = await Promise.race([
+              fetchOnboardingStatus(),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+            ]);
             setOnboardingStatus(status);
           } else {
             setOnboardingStatus(null);
@@ -126,7 +129,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(authUser);
 
           if (authUser) {
-            const status = await fetchOnboardingStatus();
+            const status = await Promise.race([
+              fetchOnboardingStatus(),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+            ]);
             setOnboardingStatus(status);
           }
           break;
@@ -152,7 +158,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Refresh onboarding status in case user data changed
           if (authUser) {
-            const status = await fetchOnboardingStatus();
+            const status = await Promise.race([
+              fetchOnboardingStatus(),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+            ]);
             setOnboardingStatus(status);
           }
           break;
