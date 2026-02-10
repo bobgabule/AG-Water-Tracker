@@ -35,6 +35,7 @@ export interface AuthContextType {
   session: Session | null;
   isAuthReady: boolean;
   onboardingStatus: OnboardingStatus | null;
+  isFetchingOnboarding: boolean;
   sessionExpired: boolean;
 
   // Methods
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [onboardingStatus, setOnboardingStatus] =
     useState<OnboardingStatus | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [isFetchingOnboarding, setIsFetchingOnboarding] = useState(false);
 
   // Track if we're in the middle of OTP verification to prevent race conditions
   const isVerifyingRef = useRef(false);
@@ -148,11 +150,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           if (authUser) {
             // Fetch onboarding status with 5-second timeout to prevent infinite hang
-            const status = await Promise.race([
-              fetchOnboardingStatus(),
-              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-            ]);
-            setOnboardingStatus(status);
+            setIsFetchingOnboarding(true);
+            try {
+              const status = await Promise.race([
+                fetchOnboardingStatus(),
+                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+              ]);
+              setOnboardingStatus(status);
+            } finally {
+              setIsFetchingOnboarding(false);
+            }
           } else {
             setOnboardingStatus(null);
           }
@@ -170,11 +177,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(authUser);
 
           if (authUser) {
-            const status = await Promise.race([
-              fetchOnboardingStatus(),
-              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-            ]);
-            setOnboardingStatus(status);
+            setIsFetchingOnboarding(true);
+            try {
+              const status = await Promise.race([
+                fetchOnboardingStatus(),
+                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+              ]);
+              setOnboardingStatus(status);
+            } finally {
+              setIsFetchingOnboarding(false);
+            }
           }
           break;
         }
@@ -203,11 +215,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Refresh onboarding status in case user data changed
           if (authUser) {
-            const status = await Promise.race([
-              fetchOnboardingStatus(),
-              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-            ]);
-            setOnboardingStatus(status);
+            setIsFetchingOnboarding(true);
+            try {
+              const status = await Promise.race([
+                fetchOnboardingStatus(),
+                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+              ]);
+              setOnboardingStatus(status);
+            } finally {
+              setIsFetchingOnboarding(false);
+            }
           }
           break;
         }
@@ -288,8 +305,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(authUser);
 
         // Fetch onboarding status for the newly verified user
-        const status = await fetchOnboardingStatus();
-        setOnboardingStatus(status);
+        setIsFetchingOnboarding(true);
+        try {
+          const status = await fetchOnboardingStatus();
+          setOnboardingStatus(status);
+        } finally {
+          setIsFetchingOnboarding(false);
+        }
       } finally {
         isVerifyingRef.current = false;
       }
@@ -343,6 +365,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     session,
     isAuthReady,
     onboardingStatus,
+    isFetchingOnboarding,
     sessionExpired,
     sendOtp,
     verifyOtp,
