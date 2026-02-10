@@ -43,6 +43,53 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        runtimeCaching: [
+          // Mapbox API (raster/satellite tiles, styles)
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-api-v1',
+              expiration: {
+                maxEntries: 800,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          // Mapbox vector tiles (separate subdomain)
+          {
+            urlPattern: /^https:\/\/.*\.tiles\.mapbox\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-tiles-v1',
+              expiration: {
+                maxEntries: 1000,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          // Mapbox static assets (sprites, glyphs, fonts)
+          {
+            urlPattern: /^https:\/\/.*\.mapbox\.com\/(fonts|sprites)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-assets-v1',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+        ],
       },
     }),
   ],
