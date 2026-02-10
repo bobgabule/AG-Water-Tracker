@@ -1,6 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { useQuery } from '@powersync/react';
 import {
   ArrowLeftIcon,
   UserGroupIcon,
@@ -9,12 +8,11 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
-import InviteCodeManager from '../components/InviteCodeManager';
-import GenerateInviteModal from '../components/GenerateInviteModal';
-
-interface FarmMembership {
-  role: string;
-}
+import { useUserRole } from '../hooks/useUserRole';
+import { isAdminOrAbove, ROLE_DISPLAY_NAMES } from '../lib/permissions';
+import type { Role } from '../lib/permissions';
+import PendingInvitesList from '../components/PendingInvitesList';
+import AddUserModal from '../components/AddUserModal';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -23,19 +21,9 @@ export default function SettingsPage() {
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
-  // Query current user's role in the farm
-  const { data: membershipData } = useQuery<FarmMembership>(
-    onboardingStatus?.farmId && user?.id
-      ? `SELECT role FROM farm_members WHERE farm_id = ? AND user_id = ?`
-      : 'SELECT NULL WHERE 0',
-    onboardingStatus?.farmId && user?.id ? [onboardingStatus.farmId, user.id] : []
-  );
-
-  // Memoize role check
-  const isAdminOrOwner = useMemo(() => {
-    const role = membershipData?.[0]?.role;
-    return role === 'owner' || role === 'admin';
-  }, [membershipData]);
+  // Get current user's role from permission module
+  const userRole = useUserRole();
+  const canManageTeam = isAdminOrAbove(userRole);
 
   const handleBack = useCallback(() => {
     navigate(-1);
@@ -84,8 +72,8 @@ export default function SettingsPage() {
 
       {/* Content */}
       <main className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        {/* Team Management Section - only for owners/admins */}
-        {isAdminOrOwner && (
+        {/* Team Management Section - only for admin-level roles */}
+        {canManageTeam && (
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -97,10 +85,10 @@ export default function SettingsPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-sm font-medium text-white transition-colors"
               >
                 <PlusIcon className="h-4 w-4" />
-                Generate Invite
+                Add User
               </button>
             </div>
-            <InviteCodeManager />
+            <PendingInvitesList />
           </section>
         )}
 
@@ -125,19 +113,21 @@ export default function SettingsPage() {
             )}
 
             {/* Role info */}
-            {membershipData?.[0]?.role && (
+            {userRole && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Role</p>
                 <span
                   className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                    membershipData[0].role === 'owner'
+                    userRole === 'super_admin'
                       ? 'bg-purple-500/20 text-purple-400'
-                      : membershipData[0].role === 'admin'
-                        ? 'bg-yellow-500/20 text-yellow-400'
-                        : 'bg-blue-500/20 text-blue-400'
+                      : userRole === 'grower'
+                        ? 'bg-green-500/20 text-green-400'
+                        : userRole === 'admin'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-blue-500/20 text-blue-400'
                   }`}
                 >
-                  {membershipData[0].role}
+                  {ROLE_DISPLAY_NAMES[userRole as Role]}
                 </span>
               </div>
             )}
@@ -174,8 +164,8 @@ export default function SettingsPage() {
         </section>
       </main>
 
-      {/* Generate Invite Modal */}
-      <GenerateInviteModal
+      {/* Add User Modal */}
+      <AddUserModal
         open={showInviteModal}
         onClose={handleCloseInviteModal}
       />
