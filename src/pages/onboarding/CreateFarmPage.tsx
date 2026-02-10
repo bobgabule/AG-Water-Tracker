@@ -67,7 +67,7 @@ const US_STATES = [
  * Uses RPC to atomically create farm and farm membership.
  */
 export default function CreateFarmPage() {
-  const { refreshOnboardingStatus, signOut } = useAuth();
+  const { refreshOnboardingStatus } = useAuth();
   const navigate = useNavigate();
 
   const [farmName, setFarmName] = useState('');
@@ -140,9 +140,9 @@ export default function CreateFarmPage() {
     [farmName, streetAddress, city, state, zipCode, refreshOnboardingStatus, navigate]
   );
 
-  const handleBack = useCallback(async () => {
-    await signOut();
-  }, [signOut]);
+  const handleBack = useCallback(() => {
+    navigate('/onboarding/profile', { replace: true });
+  }, [navigate]);
 
   const inputClassName =
     'w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
@@ -289,7 +289,7 @@ export default function CreateFarmPage() {
         className="mt-6 w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-gray-300 transition-colors"
       >
         <ArrowLeftIcon className="h-4 w-4" />
-        Sign out
+        Back
       </button>
     </AuthLayout>
   );

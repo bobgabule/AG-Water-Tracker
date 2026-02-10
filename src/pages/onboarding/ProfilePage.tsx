@@ -88,7 +88,11 @@ export default function ProfilePage() {
 
       <form onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm mb-4">
+          <div
+            role="alert"
+            aria-live="polite"
+            className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm mb-4"
+          >
             {error}
           </div>
         )}
