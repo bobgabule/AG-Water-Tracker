@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 4 (Permission Enforcement) -- executing plan 04-02
+**Current focus:** Phase 4 (Permission Enforcement) -- executing plan 04-03
 
 ## Current Position
 
 Phase: 4 of 8 (Permission Enforcement)
-Plan: 2 of 4 in phase 04
+Plan: 3 of 4 in phase 04
 Status: Executing Phase 04 plans
-Last activity: 2026-02-11 -- Completed 04-02-PLAN.md (Role-gated well creation UI)
+Last activity: 2026-02-11 -- Completed 04-03-PLAN.md (Super Admin Cross-Farm Access)
 
 Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 5min
-- Total execution time: 1.0 hours
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [█████░░░░░] 50%
 | 01-session-stability | 5 | 21min | 4min |
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
-| 04-permission-enforcement | 2 | 4min | 2min |
+| 04-permission-enforcement | 3 | 7min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2min), 02-03 (5min), 01-05 (4min), 01-04 (3min), 03-04 (3min)
+- Last 5 plans: 04-03 (3min), 04-02 (2min), 02-03 (5min), 01-05 (4min), 01-04 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -86,10 +86,14 @@ Recent decisions affecting current work:
 - [04-02]: Conditional rendering (not CSS display:none) for all permission gates
 - [04-02]: Defense-in-depth pattern: UI gate + handler gate + write guard in DashboardPage
 - [04-02]: Long-press handler gated at function level (early return) rather than removing callback from MapView
+- [04-03]: Zustand v5 installed as new dependency (was in tech stack docs but not in package.json)
+- [04-03]: FarmSelector uses Headless UI Listbox with anchor positioning for dropdown
+- [04-03]: Own farm shown first in dropdown with (my farm) label
+- [04-03]: Override indicator (viewing) in yellow-300 for visual distinction
 
 ### Pending Todos
 
-None yet.
+- [04-03]: PowerSync Dashboard sync rules for farms table need manual verification for super_admin cross-farm access
 
 ### Blockers/Concerns
 
@@ -100,5 +104,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-02-PLAN.md (Role-gated well creation UI)
+Stopped at: Completed 04-03-PLAN.md (Super Admin Cross-Farm Access)
 Resume file: None
