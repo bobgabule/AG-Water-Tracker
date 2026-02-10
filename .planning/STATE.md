@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 2 - Offline Session Resilience (COMPLETE)
+**Current focus:** Phase 3 - Role Foundation
 
 ## Current Position
 
-Phase: 2 of 8 (Offline Session Resilience) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-02-10 -- Completed 02-02-PLAN.md (Session Expired Messaging & Auth Connectivity Guards)
+Phase: 3 of 8 (Role Foundation)
+Plan: 1 of 4 in current phase
+Status: In Progress
+Last activity: 2026-02-10 -- Completed 03-01-PLAN.md (Permission Matrix & useUserRole)
 
-Progress: [██░░░░░░░░] 19%
+Progress: [██░░░░░░░░] 23%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 6min
+- Total plans completed: 6
+- Average duration: 5min
 - Total execution time: 0.5 hours
 
 **By Phase:**
@@ -29,9 +29,10 @@ Progress: [██░░░░░░░░] 19%
 |-------|-------|-------|----------|
 | 01-session-stability | 3 | 14min | 5min |
 | 02-offline-session-resilience | 2 | 13min | 7min |
+| 03-role-foundation | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (5min), 02-01 (8min), 01-03 (8min), 01-02 (2min), 01-01 (4min)
+- Last 5 plans: 03-01 (4min), 02-02 (5min), 02-01 (8min), 01-03 (8min), 01-02 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -62,6 +63,10 @@ Recent decisions affecting current work:
 - [02-02]: useRef for userInitiatedSignOut (not state) -- only needs synchronous reads during auth events
 - [02-02]: Session expired UI in RequireAuth rather than separate route -- simpler, no URL change
 - [02-02]: Dual connectivity check: useOnlineStatus pre-submit guard + navigator.onLine catch fallback
+- [03-01]: String literal unions over enums for Role/Action types -- zero runtime overhead
+- [03-01]: Set<Action> for PERMISSION_MATRIX -- O(1) lookup performance
+- [03-01]: farm_members.role is authoritative role source, not users.role -- deliberate separation
+- [03-01]: Four-role hierarchy: super_admin > grower > admin > meter_checker
 
 ### Pending Todos
 
@@ -76,5 +81,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-02-PLAN.md (Session Expired Messaging & Auth Connectivity Guards) -- Phase 02 Complete
+Stopped at: Completed 03-01-PLAN.md (Permission Matrix & useUserRole)
 Resume file: None
