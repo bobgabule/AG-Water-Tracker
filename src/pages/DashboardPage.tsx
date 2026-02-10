@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { usePowerSync } from '@powersync/react';
-import { ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ListBulletIcon, PlusIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
 import MapView from '../components/MapView';
+import { MapErrorFallback } from '../components/ErrorFallback';
+import SyncStatusBanner from '../components/SyncStatusBanner';
 import LocationPickerBottomSheet from '../components/LocationPickerBottomSheet';
 import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWellFormBottomSheet';
 
@@ -14,6 +17,19 @@ export default function DashboardPage() {
   const db = usePowerSync();
   const { user, onboardingStatus } = useAuth();
   const farmName = onboardingStatus?.farmName ?? null;
+
+  // MapView error recovery: increment key to force remount (WebGL context recovery)
+  const [mapKey, setMapKey] = useState(0);
+  const handleMapReset = useCallback(() => setMapKey(k => k + 1), []);
+
+  // Save state
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => { clearTimeout(errorTimeoutRef.current); };
+  }, []);
 
   // Bottom sheet flow state
   const [currentStep, setCurrentStep] = useState<'closed' | 'location' | 'form'>('closed');
@@ -56,12 +72,15 @@ export default function DashboardPage() {
   }, []);
 
   const handleSaveWell = useCallback(async (wellData: WellFormData) => {
+    if (isSaving) return;
+
     const farmId = onboardingStatus?.farmId;
     if (!farmId || !user) {
       console.error('Cannot save well: missing farmId or user');
       return;
     }
 
+    setIsSaving(true);
     const wellId = crypto.randomUUID();
     const now = new Date().toISOString();
 
@@ -94,25 +113,58 @@ export default function DashboardPage() {
         ]
       );
 
+      setSaveError(null);
       setCurrentStep('closed');
       setPickedLocation(null);
     } catch (error) {
       console.error('Failed to save well:', error);
-      alert('Failed to save well. Please try again.');
+      clearTimeout(errorTimeoutRef.current);
+      setSaveError('Failed to save well. Please try again.');
+      errorTimeoutRef.current = setTimeout(() => setSaveError(null), 5000);
+    } finally {
+      setIsSaving(false);
     }
-  }, [db, onboardingStatus?.farmId, user]);
+  }, [db, isSaving, onboardingStatus?.farmId, user]);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden">
       {/* Map layer */}
-      <MapView
-        wells={wells}
-        onWellClick={handleWellClick}
-        onMapClick={handleMapClick}
-        onMapLongPress={handleMapLongPress}
-        pickedLocation={pickedLocation}
-        isPickingLocation={currentStep === 'location'}
-      />
+      <ErrorBoundary
+        FallbackComponent={MapErrorFallback}
+        onReset={handleMapReset}
+      >
+        <MapView
+          key={mapKey}
+          wells={wells}
+          onWellClick={handleWellClick}
+          onMapClick={handleMapClick}
+          onMapLongPress={handleMapLongPress}
+          pickedLocation={pickedLocation}
+          isPickingLocation={currentStep === 'location'}
+        />
+      </ErrorBoundary>
+
+      {/* Sync status */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pt-[env(safe-area-inset-top)]">
+        <SyncStatusBanner />
+      </div>
+
+      {/* Save error notification */}
+      {saveError && (
+        <div className="absolute bottom-24 left-4 right-4 z-30 flex justify-center pb-[env(safe-area-inset-bottom)]">
+          <div role="alert" className="px-4 py-2.5 rounded-xl bg-red-500/90 backdrop-blur-sm text-white text-sm font-medium shadow-lg flex items-center gap-2">
+            <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
+            {saveError}
+            <button
+              onClick={() => setSaveError(null)}
+              className="ml-2 p-0.5 rounded-full hover:bg-white/20 transition-colors"
+              aria-label="Dismiss error"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Floating action buttons */}
       <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-between pb-[env(safe-area-inset-bottom)]">
