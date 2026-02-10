@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 3 - Role Foundation
+**Current focus:** Phase 1 - Gap Closure (01-04, 01-05)
 
 ## Current Position
 
-Phase: 3 of 8 (Role Foundation)
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-02-10 -- Completed 03-04-PLAN.md (Custom Access Token Hook)
+Phase: 1 of 8 (Session Stability - Gap Closure)
+Plan: 4 of 5 in phase 01
+Status: Executing gap closure plans
+Last activity: 2026-02-10 -- Completed 01-04-PLAN.md (Auth Fetch Tracking & Scoped Error Boundary)
 
-Progress: [████░░░░░░] 32%
+Progress: [████░░░░░░] 36%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 5min
-- Total execution time: 0.7 hours
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-session-stability | 3 | 14min | 5min |
+| 01-session-stability | 4 | 17min | 4min |
 | 02-offline-session-resilience | 2 | 13min | 7min |
 | 03-role-foundation | 4 | 14min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (3min), 03-03 (3min), 03-02 (4min), 03-01 (4min), 02-02 (5min)
+- Last 5 plans: 01-04 (3min), 03-04 (3min), 03-03 (3min), 03-02 (4min), 03-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -74,6 +74,8 @@ Recent decisions affecting current work:
 - [03-04]: Hook in public schema (Supabase Auth requirement) with REVOKE from authenticated/anon/public for security
 - [03-04]: Primary farm selection via ORDER BY created_at ASC LIMIT 1 for users with multiple memberships
 - [03-04]: Null claims for users without farm membership -- onboarding-safe, no errors
+- [01-04]: isFetchingOnboarding as separate boolean state -- simpler API, one concern per flag
+- [01-04]: resetKeys={[location.pathname]} on ErrorBoundary for automatic reset on route navigation
 
 ### Pending Todos
 
@@ -88,5 +90,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-04-PLAN.md (Custom Access Token Hook) -- Phase 3 complete
+Stopped at: Completed 01-04-PLAN.md (Auth Fetch Tracking & Scoped Error Boundary)
 Resume file: None
