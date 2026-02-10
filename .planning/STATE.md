@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 1 of 8 (Session Stability)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-02-10 -- Roadmap created (8 phases, 30 plans, 28 requirements mapped)
+Plan: 2 of 3 in current phase
+Status: Executing
+Last activity: 2026-02-10 -- Completed 01-02-PLAN.md (Error Boundaries)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 3%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 2min
+- Total execution time: 0.03 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-session-stability | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: -
+- Last 5 plans: 01-02 (2min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -45,6 +45,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Stabilization before features -- fix session bugs and security issues before adding roles/invites
 - [Roadmap]: 8 phases derived from 28 requirements across 5 categories (AUTH, ONBD, ROLE, USER, SUBS)
 - [Roadmap]: Research recommends Custom Access Token Hook over app_metadata for role injection into JWT
+- [01-02]: Two-tier error boundary: route-level in AppLayout + component-level around MapView
+- [01-02]: Map recovery via key increment forces WebGL canvas remount
+- [01-02]: No technical error details shown to users -- friendly icon + message only
 
 ### Pending Todos
 
@@ -59,5 +62,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Roadmap created, ready to plan Phase 1
+Stopped at: Completed 01-02-PLAN.md (Error Boundaries)
 Resume file: None
