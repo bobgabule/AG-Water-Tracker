@@ -13,17 +13,26 @@ import {
 import { useNavigate } from 'react-router';
 import { useAuth } from '../lib/AuthProvider';
 import { useUserProfile } from '../hooks/useUserProfile';
+import { useUserRole } from '../hooks/useUserRole';
+import { hasPermission, type Action } from '../lib/permissions';
 
 interface SideMenuProps {
   open: boolean;
   onClose: () => void;
 }
 
-const navItems = [
+interface NavItem {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  requiredAction?: Action;
+}
+
+const navItems: NavItem[] = [
   { label: 'Map', icon: MapIcon, path: '/' },
   { label: 'Well List', icon: ListBulletIcon, path: '/wells' },
   { label: 'Reports', icon: ChartBarIcon, path: '/reports' },
-  { label: 'Subscription', icon: CreditCardIcon, path: '/subscription' },
+  { label: 'Subscription', icon: CreditCardIcon, path: '/subscription', requiredAction: 'manage_farm' },
   { label: 'Language', icon: GlobeAltIcon, path: '/language' },
   { label: 'Settings', icon: Cog6ToothIcon, path: '/settings' },
 ];
@@ -32,6 +41,11 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const userProfile = useUserProfile();
+  const role = useUserRole();
+
+  const visibleItems = navItems.filter(
+    (item) => !item.requiredAction || hasPermission(role, item.requiredAction)
+  );
 
   const handleNav = (path: string) => {
     onClose();
@@ -88,7 +102,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
 
           {/* Nav items */}
           <nav className="flex-1 py-2 overflow-y-auto">
-            {navItems.map((item) => (
+            {visibleItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => handleNav(item.path)}
