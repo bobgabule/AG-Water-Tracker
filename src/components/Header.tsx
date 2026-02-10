@@ -1,4 +1,7 @@
 import { Bars3Icon } from '@heroicons/react/24/outline';
+import { useUserRole } from '../hooks/useUserRole';
+import { hasPermission } from '../lib/permissions';
+import FarmSelector from './FarmSelector';
 
 interface HeaderProps {
   farmName: string | null;
@@ -6,6 +9,9 @@ interface HeaderProps {
 }
 
 export default function Header({ farmName, onMenuOpen }: HeaderProps) {
+  const role = useUserRole();
+  const canCrossFarm = hasPermission(role, 'cross_farm_access');
+
   return (
     <header className="absolute top-0 inset-x-0 z-30 bg-[#5f7248]">
       <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
@@ -13,8 +19,12 @@ export default function Header({ farmName, onMenuOpen }: HeaderProps) {
           <img src="/ag-logo-white.png" alt="AG" className="h-10" />
           <div className="flex flex-col justify-center leading-tight">
             <span className="text-white text-xs">Water Tracker</span>
-            {farmName && (
-              <p className="text-white text-lg font-bold -mt-0.9">{farmName}</p>
+            {canCrossFarm ? (
+              <FarmSelector />
+            ) : (
+              farmName && (
+                <p className="text-white text-lg font-bold -mt-0.9">{farmName}</p>
+              )
             )}
           </div>
         </div>
