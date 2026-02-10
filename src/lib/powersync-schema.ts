@@ -3,7 +3,6 @@ import { column, Schema, TableV2 } from '@powersync/web';
 const farms = new TableV2({
   name: column.text,
   description: column.text,
-  invite_code: column.text,
   street_address: column.text,
   city: column.text,
   state: column.text,
