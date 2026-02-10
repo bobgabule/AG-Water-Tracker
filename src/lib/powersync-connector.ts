@@ -1,6 +1,7 @@
 import type { AbstractPowerSyncDatabase, PowerSyncBackendConnector } from '@powersync/web';
 import { UpdateType } from '@powersync/web';
 import type { CrudEntry } from '@powersync/web';
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from './supabase.ts';
 import { debugError, debugWarn } from './debugLog';
 
@@ -37,21 +38,35 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       data: { session },
     } = await supabase.auth.getSession();
 
-    if (!session) {
-      // Token may be expired after offline — try refreshing
-      const { data: { session: refreshed } } = await supabase.auth.refreshSession();
-      if (!refreshed) {
-        throw new Error('Not authenticated');
-      }
+    if (session) {
       return {
         endpoint: import.meta.env.VITE_POWERSYNC_URL,
-        token: refreshed.access_token,
+        token: session.access_token,
       };
+    }
+
+    // No session in memory -- try refreshing the token
+    const { data: { session: refreshed }, error } = await supabase.auth.refreshSession();
+
+    if (error) {
+      if (isAuthRetryableFetchError(error)) {
+        // Network/5xx error -- throw so PowerSync retries later
+        throw error;
+      }
+      // Permanent auth failure (revoked token, invalid refresh token)
+      // Return null to signal "not authenticated" -- PowerSync will stop connecting
+      debugWarn('PowerSync', 'Permanent auth error in fetchCredentials:', error.message);
+      return null;
+    }
+
+    if (!refreshed) {
+      // No error but no session -- treat as not authenticated
+      return null;
     }
 
     return {
       endpoint: import.meta.env.VITE_POWERSYNC_URL,
-      token: session.access_token,
+      token: refreshed.access_token,
     };
   }
 
