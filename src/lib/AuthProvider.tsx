@@ -68,6 +68,27 @@ export interface AuthContextType {
   clearSessionExpired: () => void;
 }
 
+/**
+ * Fetch onboarding status with timeout and one auto-retry.
+ * Returns null only if both attempts fail/timeout.
+ */
+async function fetchWithRetry(
+  fetchFn: () => Promise<OnboardingStatus | null>,
+  timeout = 10000
+): Promise<OnboardingStatus | null> {
+  const attempt = () =>
+    Promise.race([
+      fetchFn().catch(() => null),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeout)),
+    ]);
+
+  const status = await attempt();
+  if (status) return status;
+
+  // Auto-retry once if first attempt timed out or returned null
+  return attempt();
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // ---------------------------------------------------------------------------
@@ -196,23 +217,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(authUser);
 
           if (authUser) {
-            // Fetch onboarding status with 5-second timeout to prevent infinite hang
-            setIsFetchingOnboarding(true);
+            // Serve cached status immediately for instant rendering (returning users)
+            let hasCachedStatus = false;
             try {
-              const status = await Promise.race([
-                fetchOnboardingStatus(),
-                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-              ]);
-              setOnboardingStatus(status);
-            } finally {
-              setIsFetchingOnboarding(false);
+              const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+              if (cached) {
+                setOnboardingStatus(JSON.parse(cached) as OnboardingStatus);
+                hasCachedStatus = true;
+              }
+            } catch { /* ignore cache read errors */ }
+
+            if (hasCachedStatus) {
+              // Cache available: mark auth ready immediately, refresh in background
+              setIsAuthReady(true);
+              fetchOnboardingStatus().then(status => {
+                if (status) setOnboardingStatus(status);
+              }).catch(() => { /* non-critical: cached status is sufficient */ });
+            } else {
+              // No cache (new user): wait for RPC with auto-retry
+              setIsFetchingOnboarding(true);
+              try {
+                const status = await fetchWithRetry(fetchOnboardingStatus);
+                if (status) setOnboardingStatus(status);
+              } finally {
+                setIsFetchingOnboarding(false);
+              }
+              setIsAuthReady(true);
             }
           } else {
             setOnboardingStatus(null);
+            setIsAuthReady(true);
           }
-
-          // Mark auth as ready after initial session check completes
-          setIsAuthReady(true);
           break;
         }
 
@@ -226,11 +261,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (authUser) {
             setIsFetchingOnboarding(true);
             try {
-              const status = await Promise.race([
-                fetchOnboardingStatus(),
-                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-              ]);
-              setOnboardingStatus(status);
+              const status = await fetchWithRetry(fetchOnboardingStatus);
+              if (status) setOnboardingStatus(status);
             } finally {
               setIsFetchingOnboarding(false);
             }
@@ -264,11 +296,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (authUser) {
             setIsFetchingOnboarding(true);
             try {
-              const status = await Promise.race([
-                fetchOnboardingStatus(),
-                new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-              ]);
-              setOnboardingStatus(status);
+              const status = await fetchWithRetry(fetchOnboardingStatus);
+              if (status) setOnboardingStatus(status);
             } finally {
               setIsFetchingOnboarding(false);
             }
