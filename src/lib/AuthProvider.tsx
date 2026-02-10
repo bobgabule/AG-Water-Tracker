@@ -11,6 +11,7 @@ import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { disconnectAndClear } from './powersync';
 import { debugError, debugLog } from './debugLog';
+import { useActiveFarmStore } from '../stores/activeFarmStore';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -382,6 +383,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       debugError('Auth', 'Failed to clear PowerSync:', error);
     }
+
+    // Clear active farm override (super admin cross-farm state)
+    useActiveFarmStore.getState().clearOverride();
 
     // Clear onboarding status cache BEFORE state setters
     try {

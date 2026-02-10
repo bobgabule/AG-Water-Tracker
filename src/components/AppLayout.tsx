@@ -6,6 +6,7 @@ import SideMenu from './SideMenu';
 import { ErrorFallback } from './ErrorFallback';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useAuth } from '../lib/AuthProvider';
+import { useRoleChangeDetector } from '../hooks/useRoleChangeDetector';
 
 /**
  * Inner component rendered inside PowerSyncProvider.
@@ -20,6 +21,9 @@ function AppLayoutContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { onboardingStatus } = useAuth();
   const location = useLocation();
+
+  // Detect server-side role changes and force data refresh
+  useRoleChangeDetector();
 
   // Farm name comes directly from auth state - no need for PowerSync query
   const farmName = onboardingStatus?.farmName ?? null;
