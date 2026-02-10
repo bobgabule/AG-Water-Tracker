@@ -12,7 +12,7 @@ This roadmap delivers role-based user management and phone-based invite flows fo
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
+- [ ] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
 - [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [x] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
@@ -31,12 +31,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. User reloads the app and sees either the dashboard or a login screen within 3 seconds -- never an infinite spinner
   2. User refreshes the dashboard page and it renders correctly with their wells and map visible
   3. When a component crashes (map error, PowerSync failure), user sees a "Something went wrong" recovery screen with a retry button instead of a blank white page
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
 - [x] 01-01-PLAN.md -- Session recovery with 5s timeout on RPC + loading state cleanup (spinner-only, slow-load detection)
 - [x] 01-02-PLAN.md -- Error boundaries (route-level + MapView-specific) with friendly retry UI
 - [x] 01-03-PLAN.md -- Security hardening (SECURITY DEFINER to private schema) + console.log cleanup (debugLog utility)
+- [ ] 01-04-PLAN.md -- Gap closure: fix auth loading flash (isFetchingOnboarding flag) + scope ErrorBoundary to Outlet only
+- [ ] 01-05-PLAN.md -- Gap closure: add retry mechanism to PowerSync database initialization failure
 
 ### Phase 2: Offline Session Resilience
 **Goal**: Logged-in users can use the app reliably in areas with no connectivity
@@ -163,9 +165,9 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Session Stability | 3/3 | ✓ Complete | 2026-02-10 |
-| 2. Offline Session Resilience | 2/2 | ✓ Complete | 2026-02-10 |
-| 3. Role Foundation | 4/4 | ✓ Complete | 2026-02-10 |
+| 1. Session Stability | 3/5 | Gap closure | - |
+| 2. Offline Session Resilience | 2/2 | Complete | 2026-02-10 |
+| 3. Role Foundation | 4/4 | Complete | 2026-02-10 |
 | 4. Permission Enforcement | 0/5 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
 | 6. Invite System | 0/5 | Not started | - |
