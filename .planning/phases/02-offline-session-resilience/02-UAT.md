@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 02-offline-session-resilience
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md]
 started: 2026-02-10T12:00:00Z
-updated: 2026-02-10T12:25:00Z
+updated: 2026-02-10T12:35:00Z
 ---
 
 ## Current Test
@@ -49,7 +49,14 @@ skipped: 0
   reason: "User reported: Shows 'Something went wrong / We couldn't load your account info' retry screen instead of session expired UI. Onboarding RPC failure caught before auth layer detects session revocation."
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Race condition: getSession() returns stale session from localStorage without server validation. fetchOnboardingStatus fires RPC with stale JWT, server rejects it, but error is treated as generic failure (cache fallback or null). RequireOnboarded shows 'Something went wrong' retry UI. The Supabase SIGNED_OUT event fires later via deferred auto-refresh tick, but user already sees wrong screen."
+  artifacts:
+    - path: "src/lib/AuthProvider.tsx"
+      issue: "fetchOnboardingStatus treats all RPC errors identically — no auth error detection (lines 83-96)"
+    - path: "src/components/RequireOnboarded.tsx"
+      issue: "Shows generic error UI when onboardingStatus is null, blocking session expired UI"
+  missing:
+    - "Detect auth-related RPC errors (HTTP 401, PGRST301, JWT errors) in fetchOnboardingStatus"
+    - "Immediately set sessionExpired=true + session=null + user=null on auth errors instead of cache fallback"
+    - "Non-auth errors (network, 500s) should continue using existing cache fallback + retry UI"
+  debug_session: ".planning/debug/session-expired-not-showing.md"
