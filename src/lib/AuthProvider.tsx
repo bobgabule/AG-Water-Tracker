@@ -35,12 +35,14 @@ export interface AuthContextType {
   session: Session | null;
   isAuthReady: boolean;
   onboardingStatus: OnboardingStatus | null;
+  sessionExpired: boolean;
 
   // Methods
   sendOtp: (phone: string) => Promise<void>;
   verifyOtp: (phone: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshOnboardingStatus: () => Promise<OnboardingStatus | null>;
+  clearSessionExpired: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,9 +61,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [onboardingStatus, setOnboardingStatus] =
     useState<OnboardingStatus | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   // Track if we're in the middle of OTP verification to prevent race conditions
   const isVerifyingRef = useRef(false);
+
+  // Track user-initiated sign-out to distinguish from forced sign-out (revoked account)
+  const userInitiatedSignOut = useRef(false);
 
   // ---------------------------------------------------------------------------
   // Onboarding Status
@@ -181,6 +187,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         case 'SIGNED_OUT': {
+          // Detect forced sign-out (revoked account, expired refresh token)
+          if (!userInitiatedSignOut.current) {
+            setSessionExpired(true);
+          }
           setSession(null);
           setUser(null);
           setOnboardingStatus(null);
@@ -288,6 +298,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const signOut = useCallback(async (): Promise<void> => {
+    userInitiatedSignOut.current = true;
+
     try {
       // Sign out from Supabase
       await supabase.auth.signOut();
@@ -314,6 +326,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSession(null);
     setUser(null);
     setOnboardingStatus(null);
+
+    userInitiatedSignOut.current = false;
+  }, []);
+
+  const clearSessionExpired = useCallback(() => {
+    setSessionExpired(false);
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -325,10 +343,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     session,
     isAuthReady,
     onboardingStatus,
+    sessionExpired,
     sendOtp,
     verifyOtp,
     signOut,
     refreshOnboardingStatus,
+    clearSessionExpired,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
