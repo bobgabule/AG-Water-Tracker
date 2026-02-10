@@ -17,6 +17,9 @@ export async function setupPowerSync(): Promise<PowerSyncDatabase> {
     database: {
       dbFilename: 'ag-water-tracker.db',
     },
+    flags: {
+      useWebWorker: false,
+    },
   });
 
   await db.init();
