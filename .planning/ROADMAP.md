@@ -61,14 +61,13 @@ Plans:
   2. Supabase RLS policies block a user from querying or modifying another farm's data (wells, members, invites) even via direct API call
   3. PowerSync syncs only the current user's farm data to their device -- a user on Farm A never sees Farm B's wells or members in their local database
   4. A centralized TypeScript permission matrix defines which roles can perform which actions, and all client code references it
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: Role type definitions, permission matrix, and useUserRole hook
-- [ ] 03-02: Database migrations (role constraints, optimized RLS helper functions, indexes)
-- [ ] 03-03: Supabase RLS policies for wells, farm_members, and farm_invites
-- [ ] 03-04: PowerSync sync rules updated for role-based data filtering
-- [ ] 03-05: Custom Access Token Hook injecting role and farm_id into JWT claims
+- [ ] 03-01-PLAN.md -- Permission matrix TypeScript module (Role, Action, hasPermission) and useUserRole hook
+- [ ] 03-02-PLAN.md -- Database migration: role rename (owner->grower, member->meter_checker), CHECK constraints, helper function updates
+- [ ] 03-03-PLAN.md -- Client code role references update (SettingsPage, AddUserModal) and PowerSync sync rules documentation
+- [ ] 03-04-PLAN.md -- Custom Access Token Hook (JWT claims injection) with dashboard enablement checkpoint
 
 ### Phase 4: Permission Enforcement
 **Goal**: Users only see and can interact with features their role permits
@@ -166,7 +165,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 |-------|----------------|--------|-----------|
 | 1. Session Stability | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Offline Session Resilience | 2/2 | ✓ Complete | 2026-02-10 |
-| 3. Role Foundation | 0/5 | Not started | - |
+| 3. Role Foundation | 0/4 | Not started | - |
 | 4. Permission Enforcement | 0/5 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
 | 6. Invite System | 0/5 | Not started | - |
