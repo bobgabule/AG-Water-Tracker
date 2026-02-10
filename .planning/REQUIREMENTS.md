@@ -85,40 +85,40 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| ONBD-01 | — | Pending |
-| ONBD-02 | — | Pending |
-| ONBD-03 | — | Pending |
-| ONBD-04 | — | Pending |
-| ROLE-01 | — | Pending |
-| ROLE-02 | — | Pending |
-| ROLE-03 | — | Pending |
-| ROLE-04 | — | Pending |
-| ROLE-05 | — | Pending |
-| ROLE-06 | — | Pending |
-| ROLE-07 | — | Pending |
-| USER-01 | — | Pending |
-| USER-02 | — | Pending |
-| USER-03 | — | Pending |
-| USER-04 | — | Pending |
-| USER-05 | — | Pending |
-| USER-06 | — | Pending |
-| USER-07 | — | Pending |
-| USER-08 | — | Pending |
-| SUBS-01 | — | Pending |
-| SUBS-02 | — | Pending |
-| SUBS-03 | — | Pending |
+| AUTH-01 | Phase 1: Session Stability | Pending |
+| AUTH-02 | Phase 1: Session Stability | Pending |
+| AUTH-03 | Phase 1: Session Stability | Pending |
+| AUTH-04 | Phase 2: Offline Session Resilience | Pending |
+| AUTH-05 | Phase 2: Offline Session Resilience | Pending |
+| AUTH-06 | Phase 2: Offline Session Resilience | Pending |
+| ONBD-01 | Phase 5: Grower Onboarding | Pending |
+| ONBD-02 | Phase 6: Invite System | Pending |
+| ONBD-03 | Phase 6: Invite System | Pending |
+| ONBD-04 | Phase 5: Grower Onboarding | Pending |
+| ROLE-01 | Phase 3: Role Foundation | Pending |
+| ROLE-02 | Phase 3: Role Foundation | Pending |
+| ROLE-03 | Phase 3: Role Foundation | Pending |
+| ROLE-04 | Phase 4: Permission Enforcement | Pending |
+| ROLE-05 | Phase 4: Permission Enforcement | Pending |
+| ROLE-06 | Phase 4: Permission Enforcement | Pending |
+| ROLE-07 | Phase 4: Permission Enforcement | Pending |
+| USER-01 | Phase 7: User Management | Pending |
+| USER-02 | Phase 7: User Management | Pending |
+| USER-03 | Phase 6: Invite System | Pending |
+| USER-04 | Phase 6: Invite System | Pending |
+| USER-05 | Phase 6: Invite System | Pending |
+| USER-06 | Phase 7: User Management | Pending |
+| USER-07 | Phase 7: User Management | Pending |
+| USER-08 | Phase 7: User Management | Pending |
+| SUBS-01 | Phase 8: Subscription Gating | Pending |
+| SUBS-02 | Phase 8: Subscription Gating | Pending |
+| SUBS-03 | Phase 8: Subscription Gating | Pending |
 
 **Coverage:**
 - v1 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28 (roadmap pending)
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after initial definition*
+*Last updated: 2026-02-10 after roadmap creation*
