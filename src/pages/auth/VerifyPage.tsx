@@ -31,7 +31,7 @@ const RESEND_COOLDOWN = 30;
  * Features auto-advance, auto-submit, and resend with cooldown.
  */
 export default function VerifyPage() {
-  const { verifyOtp, sendOtp, refreshOnboardingStatus, user, isAuthReady } = useAuth();
+  const { verifyOtp, sendOtp, refreshOnboardingStatus, user, isAuthReady, onboardingStatus } = useAuth();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,9 +50,10 @@ export default function VerifyPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (isAuthReady && user) {
-      navigate('/', { replace: true });
+      const nextRoute = resolveNextRoute(onboardingStatus);
+      navigate(nextRoute, { replace: true });
     }
-  }, [isAuthReady, user, navigate]);
+  }, [isAuthReady, user, onboardingStatus, navigate]);
 
   // Redirect if no phone in state (and not logged in)
   useEffect(() => {
