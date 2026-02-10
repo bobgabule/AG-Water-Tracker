@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 1 - Session Stability
+**Current focus:** Phase 2 - Offline Session Resilience
 
 ## Current Position
 
