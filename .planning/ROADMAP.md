@@ -12,7 +12,7 @@ This roadmap delivers role-based user management and phone-based invite flows fo
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
+- [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
 - [ ] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [ ] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Session recovery with 5s timeout on RPC + loading state cleanup (spinner-only, slow-load detection)
-- [ ] 01-02-PLAN.md -- Error boundaries (route-level + MapView-specific) with friendly retry UI
-- [ ] 01-03-PLAN.md -- Security hardening (SECURITY DEFINER to private schema) + console.log cleanup (debugLog utility)
+- [x] 01-01-PLAN.md -- Session recovery with 5s timeout on RPC + loading state cleanup (spinner-only, slow-load detection)
+- [x] 01-02-PLAN.md -- Error boundaries (route-level + MapView-specific) with friendly retry UI
+- [x] 01-03-PLAN.md -- Security hardening (SECURITY DEFINER to private schema) + console.log cleanup (debugLog utility)
 
 ### Phase 2: Offline Session Resilience
 **Goal**: Logged-in users can use the app reliably in areas with no connectivity
@@ -165,7 +165,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Session Stability | 0/3 | Not started | - |
+| 1. Session Stability | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Offline Session Resilience | 0/3 | Not started | - |
 | 3. Role Foundation | 0/5 | Not started | - |
 | 4. Permission Enforcement | 0/5 | Not started | - |
