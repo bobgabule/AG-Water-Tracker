@@ -82,14 +82,13 @@ Plans:
   3. Super admin can navigate to any farm and see its wells, members, and settings
   4. Unauthorized route access (e.g., meter_checker navigating to /users via URL) redirects to dashboard with no error
   5. When a user's role changes on the server (e.g., downgrade from admin to meter_checker), their local data refreshes and UI updates on next sync
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: RequireRole route guard component
-- [ ] 04-02: Role-based UI gating in navigation, dashboard, and settings
-- [ ] 04-03: Super admin cross-farm access (farm selector, data routing)
-- [ ] 04-04: Role change detection and local data refresh (disconnectAndClear on role change)
-- [ ] 04-05: Client-side write guards (prevent offline writes that RLS will reject)
+- [ ] 04-01-PLAN.md -- RequireRole route guard component + SideMenu navigation filtering by role
+- [ ] 04-02-PLAN.md -- Role-gated well creation UI (New Well buttons, long-press, write guards) in Dashboard and WellList
+- [ ] 04-03-PLAN.md -- Super admin cross-farm access (Zustand store, useActiveFarm hook, FarmSelector, Header integration)
+- [ ] 04-04-PLAN.md -- Role change detection (useRoleChangeDetector hook) + active farm store cleanup on sign-out
 
 ### Phase 5: Grower Onboarding
 **Goal**: A new farm owner can register and reach their dashboard with a fully set up farm
@@ -169,7 +168,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 1. Session Stability | 5/5 | Complete | 2026-02-10 |
 | 2. Offline Session Resilience | 3/3 | Complete | 2026-02-10 |
 | 3. Role Foundation | 4/4 | Complete | 2026-02-10 |
-| 4. Permission Enforcement | 0/5 | Not started | - |
+| 4. Permission Enforcement | 0/4 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
 | 6. Invite System | 0/5 | Not started | - |
 | 7. User Management | 0/4 | Not started | - |
