@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 4 (Permission Enforcement) -- completed all plans
+**Current focus:** Phase 5 (Grower Onboarding) -- plan 1 complete
 
 ## Current Position
 
-Phase: 4 of 8 (Permission Enforcement)
-Plan: 4 of 4 in phase 04
-Status: Phase 04 complete
-Last activity: 2026-02-11 -- Completed 04-04-PLAN.md (Role Change Detection + Active Farm Store Cleanup)
+Phase: 5 of 8 (Grower Onboarding)
+Plan: 1 of 2 in phase 05
+Status: In progress
+Last activity: 2026-02-11 -- Completed 05-01-PLAN.md (Fix Onboarding Flow Issues)
 
-Progress: [██████░░░░] 53%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 5min
-- Total execution time: 1.1 hours
+- Total execution time: 1.2 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [██████░░░░] 53%
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
 | 04-permission-enforcement | 4 | 9min | 2min |
+| 05-grower-onboarding | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 04-04 (2min), 04-03 (3min), 04-02 (2min), 02-03 (5min), 01-05 (4min)
+- Last 5 plans: 05-01 (4min), 04-04 (2min), 04-03 (3min), 04-02 (2min), 02-03 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [04-04]: Three-state ref (undefined | null | Role) for first-render detection vs role-loading vs known-role
 - [04-04]: Only known-to-different-known transitions trigger reload to avoid false positives
 - [04-04]: useActiveFarmStore.getState() pattern for Zustand access inside callback (not hook)
+- [05-01]: OtpInput uses configurable length prop (default 6) for reusability
+- [05-01]: RequireNotOnboarded only redirects when BOTH hasProfile AND hasFarmMembership are true
+- [05-01]: CreateFarmPage back navigates to profile (not sign out) for non-destructive UX
 
 ### Pending Todos
 
@@ -107,5 +111,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-04-PLAN.md (Role Change Detection + Active Farm Store Cleanup) -- Phase 04 complete
+Stopped at: Completed 05-01-PLAN.md (Fix Onboarding Flow Issues)
 Resume file: None
