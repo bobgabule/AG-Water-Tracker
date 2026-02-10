@@ -9,29 +9,30 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 1 of 8 (Session Stability) -- COMPLETE
-Plan: 3 of 3 in current phase -- ALL PLANS COMPLETE
-Status: Phase Complete
-Last activity: 2026-02-10 -- Completed 01-03-PLAN.md (Security & Debug Logging)
+Phase: 2 of 8 (Offline Session Resilience)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-02-10 -- Completed 02-01-PLAN.md (Offline Session Cache & Connector Error Semantics)
 
-Progress: [███░░░░░░░] 11%
+Progress: [████░░░░░░] 15%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 5min
-- Total execution time: 0.2 hours
+- Total plans completed: 4
+- Average duration: 6min
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-session-stability | 3 | 14min | 5min |
+| 02-offline-session-resilience | 1 | 8min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (8min), 01-02 (2min), 01-01 (4min)
-- Trend: -
+- Last 5 plans: 02-01 (8min), 01-03 (8min), 01-02 (2min), 01-01 (4min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -55,6 +56,9 @@ Recent decisions affecting current work:
 - [01-03]: generate_random_code fully private (no public wrapper) to prevent API exposure
 - [01-03]: Debug logging gated behind localStorage.__ag_debug flag, checked once at module load
 - [01-03]: HIGH-sensitivity upsert data logs deleted entirely rather than gated
+- [02-01]: localStorage cache-aside pattern for onboarding status -- cache on success, serve from cache on failure
+- [02-01]: PowerSync connector returns null for permanent auth errors, throws for retryable -- stops infinite retry loops
+- [02-01]: Onboarding cache cleared before state setters in signOut for guaranteed cleanup
 
 ### Pending Todos
 
@@ -69,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 01-03-PLAN.md (Security & Debug Logging) -- Phase 1 complete
+Stopped at: Completed 02-01-PLAN.md (Offline Session Cache & Connector Error Semantics)
 Resume file: None
