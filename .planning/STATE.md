@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 3 of 8 (Role Foundation)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-10 -- Completed 03-01-PLAN.md (Permission Matrix & useUserRole)
+Last activity: 2026-02-10 -- Completed 03-02-PLAN.md (Database Role Migration)
 
-Progress: [██░░░░░░░░] 23%
+Progress: [██░░░░░░░░] 27%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 5min
-- Total execution time: 0.5 hours
+- Total execution time: 0.6 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██░░░░░░░░] 23%
 |-------|-------|-------|----------|
 | 01-session-stability | 3 | 14min | 5min |
 | 02-offline-session-resilience | 2 | 13min | 7min |
-| 03-role-foundation | 1 | 4min | 4min |
+| 03-role-foundation | 2 | 8min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4min), 02-02 (5min), 02-01 (8min), 01-03 (8min), 01-02 (2min)
+- Last 5 plans: 03-02 (4min), 03-01 (4min), 02-02 (5min), 02-01 (8min), 01-03 (8min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - [03-01]: Set<Action> for PERMISSION_MATRIX -- O(1) lookup performance
 - [03-01]: farm_members.role is authoritative role source, not users.role -- deliberate separation
 - [03-01]: Four-role hierarchy: super_admin > grower > admin > meter_checker
+- [03-02]: Updated DEFAULT parameter values from 'member' to 'meter_checker' on public wrappers and private impls
+- [03-02]: super_admin in farm_members but excluded from farm_invites CHECK (not assignable via invite)
 
 ### Pending Todos
 
@@ -81,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-01-PLAN.md (Permission Matrix & useUserRole)
+Stopped at: Completed 03-02-PLAN.md (Database Role Migration)
 Resume file: None
