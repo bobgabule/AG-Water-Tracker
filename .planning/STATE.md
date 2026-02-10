@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 4 (Permission Enforcement) -- executing plan 04-03
+**Current focus:** Phase 4 (Permission Enforcement) -- completed all plans
 
 ## Current Position
 
 Phase: 4 of 8 (Permission Enforcement)
-Plan: 3 of 4 in phase 04
-Status: Executing Phase 04 plans
-Last activity: 2026-02-11 -- Completed 04-03-PLAN.md (Super Admin Cross-Farm Access)
+Plan: 4 of 4 in phase 04
+Status: Phase 04 complete
+Last activity: 2026-02-11 -- Completed 04-04-PLAN.md (Role Change Detection + Active Farm Store Cleanup)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 5min
 - Total execution time: 1.1 hours
 
@@ -30,10 +30,10 @@ Progress: [█████░░░░░] 50%
 | 01-session-stability | 5 | 21min | 4min |
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
-| 04-permission-enforcement | 3 | 7min | 2min |
+| 04-permission-enforcement | 4 | 9min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (3min), 04-02 (2min), 02-03 (5min), 01-05 (4min), 01-04 (3min)
+- Last 5 plans: 04-04 (2min), 04-03 (3min), 04-02 (2min), 02-03 (5min), 01-05 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - [04-03]: FarmSelector uses Headless UI Listbox with anchor positioning for dropdown
 - [04-03]: Own farm shown first in dropdown with (my farm) label
 - [04-03]: Override indicator (viewing) in yellow-300 for visual distinction
+- [04-04]: Three-state ref (undefined | null | Role) for first-render detection vs role-loading vs known-role
+- [04-04]: Only known-to-different-known transitions trigger reload to avoid false positives
+- [04-04]: useActiveFarmStore.getState() pattern for Zustand access inside callback (not hook)
 
 ### Pending Todos
 
@@ -104,5 +107,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-03-PLAN.md (Super Admin Cross-Farm Access)
+Stopped at: Completed 04-04-PLAN.md (Role Change Detection + Active Farm Store Cleanup) -- Phase 04 complete
 Resume file: None
