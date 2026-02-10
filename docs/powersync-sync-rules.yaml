@@ -37,24 +37,37 @@ bucket_definitions:
       - SELECT id, farm_id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
-  # Farm Invites (for Owners only)
+  # Farm Invites (for Super Admins)
   # ---------------------------------------------------------------------------
-  # Syncs farm_invites for farms where the user is an owner.
-  # Regular members and admins should not see invite codes.
-  # Note: PowerSync doesn't support IN (literal list), so we use role = 'owner'
+  # Syncs farm_invites for farms where the user is a super_admin.
+  # Note: PowerSync doesn't support IN (literal list), so we use separate buckets.
   # ---------------------------------------------------------------------------
-  farm_invites_owner:
+  farm_invites_super_admin:
     parameters: |
       SELECT farm_id FROM farm_members
       WHERE user_id = request.user_id()
-      AND role = 'owner'
+      AND role = 'super_admin'
     data:
-      - SELECT code AS id, farm_id, created_by, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Invites (for Growers)
+  # ---------------------------------------------------------------------------
+  # Syncs farm_invites for farms where the user is a grower.
+  # Separate bucket since PowerSync doesn't support IN (literal list).
+  # ---------------------------------------------------------------------------
+  farm_invites_grower:
+    parameters: |
+      SELECT farm_id FROM farm_members
+      WHERE user_id = request.user_id()
+      AND role = 'grower'
+    data:
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Farm Invites (for Admins)
   # ---------------------------------------------------------------------------
-  # Separate bucket for admin role since IN (literal list) is not supported.
+  # Separate bucket for admin role since PowerSync doesn't support IN (literal list).
   # ---------------------------------------------------------------------------
   farm_invites_admin:
     parameters: |
@@ -62,7 +75,7 @@ bucket_definitions:
       WHERE user_id = request.user_id()
       AND role = 'admin'
     data:
-      - SELECT code AS id, farm_id, created_by, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Wells (via farm_members join table)
@@ -112,7 +125,7 @@ bucket_definitions:
 #
 # 6. Security:
 #    - These sync rules work in conjunction with Supabase RLS policies
-#    - Invite codes use separate buckets for owner/admin roles
+#    - Invite codes use separate buckets for super_admin/grower/admin roles
 #
 # =============================================================================
 # Dashboard Configuration Steps
