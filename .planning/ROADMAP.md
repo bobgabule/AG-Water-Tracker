@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
 - [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
-- [ ] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
+- [x] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
 - [ ] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
 - [ ] **Phase 6: Invite System** - Invite form, farm_invites backend, SMS delivery, and invited user auto-onboarding
@@ -64,10 +64,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Permission matrix TypeScript module (Role, Action, hasPermission) and useUserRole hook
-- [ ] 03-02-PLAN.md -- Database migration: role rename (owner->grower, member->meter_checker), CHECK constraints, helper function updates
-- [ ] 03-03-PLAN.md -- Client code role references update (SettingsPage, AddUserModal) and PowerSync sync rules documentation
-- [ ] 03-04-PLAN.md -- Custom Access Token Hook (JWT claims injection) with dashboard enablement checkpoint
+- [x] 03-01-PLAN.md -- Permission matrix TypeScript module (Role, Action, hasPermission) and useUserRole hook
+- [x] 03-02-PLAN.md -- Database migration: role rename (owner->grower, member->meter_checker), CHECK constraints, helper function updates
+- [x] 03-03-PLAN.md -- Client code role references update (SettingsPage, AddUserModal) and PowerSync sync rules documentation
+- [x] 03-04-PLAN.md -- Custom Access Token Hook (JWT claims injection) with dashboard enablement checkpoint
 
 ### Phase 4: Permission Enforcement
 **Goal**: Users only see and can interact with features their role permits
@@ -165,7 +165,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 |-------|----------------|--------|-----------|
 | 1. Session Stability | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Offline Session Resilience | 2/2 | ✓ Complete | 2026-02-10 |
-| 3. Role Foundation | 0/4 | Not started | - |
+| 3. Role Foundation | 4/4 | ✓ Complete | 2026-02-10 |
 | 4. Permission Enforcement | 0/5 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
 | 6. Invite System | 0/5 | Not started | - |
