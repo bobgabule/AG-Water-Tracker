@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { resolveNextRoute } from '../../lib/resolveNextRoute';
 import AuthLayout from '../../components/auth/AuthLayout';
 
@@ -22,6 +23,7 @@ function formatPhoneDisplay(value: string): string {
  */
 export default function PhonePage() {
   const { session, onboardingStatus, sendOtp, isAuthReady } = useAuth();
+  const isOnline = useOnlineStatus();
   const navigate = useNavigate();
 
   const [phone, setPhone] = useState('');
@@ -56,6 +58,12 @@ export default function PhonePage() {
         return;
       }
 
+      // Connectivity guard -- OTP requires internet
+      if (!isOnline) {
+        setError('No internet connection. Connect to the internet to sign in.');
+        return;
+      }
+
       try {
         setLoading(true);
         setError('');
@@ -63,14 +71,18 @@ export default function PhonePage() {
         // Navigate to verify page with phone in state
         navigate('/auth/verify', { state: { phone: `+1${cleanPhone}` } });
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to send verification code';
-        setError(message);
+        if (!navigator.onLine) {
+          setError('No internet connection. Connect to the internet to sign in.');
+        } else {
+          const message =
+            err instanceof Error ? err.message : 'Failed to send verification code';
+          setError(message);
+        }
       } finally {
         setLoading(false);
       }
     },
-    [phone, sendOtp, navigate]
+    [phone, isOnline, sendOtp, navigate]
   );
 
   // Show loading spinner while auth is initializing

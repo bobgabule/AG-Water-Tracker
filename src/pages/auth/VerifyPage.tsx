@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { resolveNextRoute } from '../../lib/resolveNextRoute';
 import AuthLayout from '../../components/auth/AuthLayout';
 import OtpInput from '../../components/auth/OtpInput';
@@ -31,6 +32,7 @@ const RESEND_COOLDOWN = 30;
  */
 export default function VerifyPage() {
   const { verifyOtp, sendOtp, refreshOnboardingStatus, user, isAuthReady } = useAuth();
+  const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -98,6 +100,12 @@ export default function VerifyPage() {
     async (fullCode: string) => {
       if (!phone || verifyingRef.current) return;
 
+      // Connectivity guard -- verification requires internet
+      if (!isOnline) {
+        setError('No internet connection. Connect to the internet to verify your code.');
+        return;
+      }
+
       try {
         verifyingRef.current = true;
         setLoading(true);
@@ -107,9 +115,13 @@ export default function VerifyPage() {
         const nextRoute = resolveNextRoute(status);
         navigate(nextRoute, { replace: true });
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Invalid verification code';
-        setError(message);
+        if (!navigator.onLine) {
+          setError('No internet connection. Connect to the internet to verify your code.');
+        } else {
+          const message =
+            err instanceof Error ? err.message : 'Invalid verification code';
+          setError(message);
+        }
         // Clear code and focus first input on error
         setCode(['', '', '', '']);
       } finally {
@@ -117,7 +129,7 @@ export default function VerifyPage() {
         verifyingRef.current = false;
       }
     },
-    [phone, verifyOtp, refreshOnboardingStatus, navigate]
+    [phone, isOnline, verifyOtp, refreshOnboardingStatus, navigate]
   );
 
   // Auto-submit when all 6 digits are entered
@@ -132,6 +144,12 @@ export default function VerifyPage() {
   const handleResend = useCallback(async () => {
     if (!phone || resendCooldown > 0) return;
 
+    // Connectivity guard -- resend requires internet
+    if (!isOnline) {
+      setError('No internet connection. Connect to the internet to resend the code.');
+      return;
+    }
+
     try {
       setError('');
       await sendOtp(phone);
@@ -139,11 +157,15 @@ export default function VerifyPage() {
       // Clear existing code
       setCode(['', '', '', '']);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to resend code';
-      setError(message);
+      if (!navigator.onLine) {
+        setError('No internet connection. Connect to the internet to resend the code.');
+      } else {
+        const message =
+          err instanceof Error ? err.message : 'Failed to resend code';
+        setError(message);
+      }
     }
-  }, [phone, resendCooldown, sendOtp]);
+  }, [phone, isOnline, resendCooldown, sendOtp]);
 
   // Handle manual submit (for accessibility / button click)
   const handleSubmit = useCallback(() => {
