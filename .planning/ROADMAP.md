@@ -13,7 +13,7 @@ This roadmap delivers role-based user management and phone-based invite flows fo
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
-- [ ] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
+- [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [ ] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
 - [ ] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
@@ -49,8 +49,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Onboarding status caching with offline fallback + connector error semantics fix
-- [ ] 02-02-PLAN.md -- Session expired UI for forced sign-outs + offline registration guards
+- [x] 02-01-PLAN.md -- Onboarding status caching with offline fallback + connector error semantics fix
+- [x] 02-02-PLAN.md -- Session expired UI for forced sign-outs + offline registration guards
 
 ### Phase 3: Role Foundation
 **Goal**: The database correctly stores and enforces the 4-role system across all data access layers
@@ -165,7 +165,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Session Stability | 3/3 | ✓ Complete | 2026-02-10 |
-| 2. Offline Session Resilience | 0/2 | Not started | - |
+| 2. Offline Session Resilience | 2/2 | ✓ Complete | 2026-02-10 |
 | 3. Role Foundation | 0/5 | Not started | - |
 | 4. Permission Enforcement | 0/5 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
