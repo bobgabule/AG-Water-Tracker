@@ -10,7 +10,13 @@ import type { ReactNode } from 'react';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { disconnectAndClear } from './powersync';
-import { debugError } from './debugLog';
+import { debugError, debugLog } from './debugLog';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const ONBOARDING_CACHE_KEY = 'ag-onboarding-status';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,6 +74,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (error) {
           debugError('Auth', 'Failed to fetch onboarding status:', error);
+          // Attempt to serve from cache
+          try {
+            const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+            if (cached) {
+              debugLog('Auth', 'Serving onboarding status from cache (RPC error)');
+              return JSON.parse(cached) as OnboardingStatus;
+            }
+          } catch {
+            // Cache read failed (invalid JSON, etc.) -- fall through
+          }
           return null;
         }
 
@@ -79,9 +95,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
           farmName: data?.farm_name ?? null,
         };
 
+        // Cache successful result for offline fallback
+        try {
+          localStorage.setItem(ONBOARDING_CACHE_KEY, JSON.stringify(status));
+        } catch {
+          // localStorage may be full -- non-critical failure
+          debugError('Auth', 'Failed to cache onboarding status');
+        }
+
         return status;
       } catch (err) {
         debugError('Auth', 'Error fetching onboarding status:', err);
+        // Attempt to serve from cache
+        try {
+          const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+          if (cached) {
+            debugLog('Auth', 'Serving onboarding status from cache (network error)');
+            return JSON.parse(cached) as OnboardingStatus;
+          }
+        } catch {
+          // Cache read failed -- fall through
+        }
         return null;
       }
     }, []);
@@ -267,6 +301,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await disconnectAndClear();
     } catch (error) {
       debugError('Auth', 'Failed to clear PowerSync:', error);
+    }
+
+    // Clear onboarding status cache BEFORE state setters
+    try {
+      localStorage.removeItem(ONBOARDING_CACHE_KEY);
+    } catch {
+      // Non-critical -- localStorage may be unavailable
     }
 
     // Clear local state
