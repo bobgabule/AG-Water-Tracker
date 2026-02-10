@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router';
 import RequireAuth from './components/RequireAuth';
 import RequireOnboarded from './components/RequireOnboarded';
+import RequireRole from './components/RequireRole';
 
 // Auth pages
 import PhonePage from './pages/auth/PhonePage';
@@ -48,7 +49,9 @@ export default function App() {
             <Route path="/app/dashboard" element={<DashboardPage />} />
             <Route path="/wells" element={<WellListPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route element={<RequireRole action="manage_farm" />}>
+              <Route path="/subscription" element={<SubscriptionPage />} />
+            </Route>
             <Route path="/language" element={<LanguagePage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
