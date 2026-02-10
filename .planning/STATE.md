@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 2 Complete -- ready for Phase 4 (Permission Enforcement) or Phase 5 (Grower Onboarding)
+**Current focus:** Phase 4 (Permission Enforcement) -- executing plan 04-02
 
 ## Current Position
 
-Phase: 2 of 8 (Offline Session Resilience - Complete)
-Plan: 3 of 3 in phase 02
-Status: Phase 02 Complete (all 3 plans including gap closure done)
-Last activity: 2026-02-10 -- Completed 02-03-PLAN.md (Auth error detection in fetchOnboardingStatus)
+Phase: 4 of 8 (Permission Enforcement)
+Plan: 2 of 4 in phase 04
+Status: Executing Phase 04 plans
+Last activity: 2026-02-11 -- Completed 04-02-PLAN.md (Role-gated well creation UI)
 
-Progress: [████░░░░░░] 43%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 14
 - Average duration: 5min
 - Total execution time: 1.0 hours
 
@@ -30,9 +30,10 @@ Progress: [████░░░░░░] 43%
 | 01-session-stability | 5 | 21min | 4min |
 | 02-offline-session-resilience | 3 | 18min | 6min |
 | 03-role-foundation | 4 | 14min | 4min |
+| 04-permission-enforcement | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (5min), 01-05 (4min), 01-04 (3min), 03-04 (3min), 03-03 (3min)
+- Last 5 plans: 04-02 (2min), 02-03 (5min), 01-05 (4min), 01-04 (3min), 03-04 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [01-05]: useWebWorker:false forces WASM in main thread where service worker intercepts fetch -- safe for simple query workloads
 - [01-05]: retryCount pattern re-triggers useEffect without needing to modify setupPowerSync singleton logic
 - [01-05]: No technical error details shown to user in DB init error UI -- friendly messaging only
+- [04-02]: Conditional rendering (not CSS display:none) for all permission gates
+- [04-02]: Defense-in-depth pattern: UI gate + handler gate + write guard in DashboardPage
+- [04-02]: Long-press handler gated at function level (early return) rather than removing callback from MapView
 
 ### Pending Todos
 
@@ -92,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: Completed 02-03-PLAN.md (Auth error detection in fetchOnboardingStatus) -- Phase 02 complete
+Last session: 2026-02-11
+Stopped at: Completed 04-02-PLAN.md (Role-gated well creation UI)
 Resume file: None
