@@ -47,9 +47,9 @@ export default function VerifyPage() {
   // Track if verification is in progress to prevent double-submit
   const verifyingRef = useRef(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in (only when status is loaded to avoid flash)
   useEffect(() => {
-    if (isAuthReady && user) {
+    if (isAuthReady && user && onboardingStatus) {
       const nextRoute = resolveNextRoute(onboardingStatus);
       navigate(nextRoute, { replace: true });
     }
