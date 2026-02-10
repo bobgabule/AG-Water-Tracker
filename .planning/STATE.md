@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 3 of 8 (Role Foundation)
-Plan: 3 of 4 in current phase
-Status: In Progress
-Last activity: 2026-02-10 -- Completed 03-03-PLAN.md (Client Role References & Sync Rules)
+Plan: 4 of 4 in current phase
+Status: Phase Complete
+Last activity: 2026-02-10 -- Completed 03-04-PLAN.md (Custom Access Token Hook)
 
-Progress: [███░░░░░░░] 31%
+Progress: [████░░░░░░] 32%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 5min
-- Total execution time: 0.65 hours
+- Total execution time: 0.7 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [███░░░░░░░] 31%
 |-------|-------|-------|----------|
 | 01-session-stability | 3 | 14min | 5min |
 | 02-offline-session-resilience | 2 | 13min | 7min |
-| 03-role-foundation | 3 | 11min | 4min |
+| 03-role-foundation | 4 | 14min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (3min), 03-02 (4min), 03-01 (4min), 02-02 (5min), 02-01 (8min)
+- Last 5 plans: 03-04 (3min), 03-03 (3min), 03-02 (4min), 03-01 (4min), 02-02 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
 - [03-02]: super_admin in farm_members but excluded from farm_invites CHECK (not assignable via invite)
 - [03-03]: AddUserModal keeps local Role type limited to invitable roles (meter_checker/admin), not importing from permissions.ts
 - [03-03]: Three separate sync rule buckets for invite visibility: super_admin, grower, admin
+- [03-04]: Hook in public schema (Supabase Auth requirement) with REVOKE from authenticated/anon/public for security
+- [03-04]: Primary farm selection via ORDER BY created_at ASC LIMIT 1 for users with multiple memberships
+- [03-04]: Null claims for users without farm membership -- onboarding-safe, no errors
 
 ### Pending Todos
 
@@ -85,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-03-PLAN.md (Client Role References & Sync Rules)
+Stopped at: Completed 03-04-PLAN.md (Custom Access Token Hook) -- Phase 3 complete
 Resume file: None
