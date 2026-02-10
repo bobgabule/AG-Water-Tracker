@@ -13,7 +13,7 @@ This roadmap delivers role-based user management and phone-based invite flows fo
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
-- [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
+- [ ] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [x] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
 - [ ] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
@@ -48,11 +48,12 @@ Plans:
   1. User who previously logged in can open the app offline and see their dashboard with cached wells and map data
   2. User whose account has been revoked sees a clear "Your session has expired, please log in again" message when connectivity returns and token refresh fails
   3. User attempting to register (OTP) while offline sees a "No internet connection -- connect to sign in" message instead of a cryptic error
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [x] 02-01-PLAN.md -- Onboarding status caching with offline fallback + connector error semantics fix
 - [x] 02-02-PLAN.md -- Session expired UI for forced sign-outs + offline registration guards
+- [ ] 02-03-PLAN.md -- Gap closure: detect auth RPC errors in fetchOnboardingStatus and trigger immediate session expiry
 
 ### Phase 3: Role Foundation
 **Goal**: The database correctly stores and enforces the 4-role system across all data access layers
@@ -166,7 +167,7 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Session Stability | 5/5 | Complete | 2026-02-10 |
-| 2. Offline Session Resilience | 2/2 | Complete | 2026-02-10 |
+| 2. Offline Session Resilience | 2/3 | Gap closure | - |
 | 3. Role Foundation | 4/4 | Complete | 2026-02-10 |
 | 4. Permission Enforcement | 0/5 | Not started | - |
 | 5. Grower Onboarding | 0/2 | Not started | - |
