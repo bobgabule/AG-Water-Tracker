@@ -122,13 +122,19 @@ export default function CreateFarmPage() {
 
         if (rpcError) throw rpcError;
 
-        // Refresh status - catch separately to not block navigation
-        try {
-          await refreshOnboardingStatus();
-        } catch {
-          // Non-critical: navigation will still proceed
+        // Refresh status with retry logic to avoid stale-status redirect loops
+        let refreshed = false;
+        for (let attempt = 0; attempt < 3 && !refreshed; attempt++) {
+          try {
+            await refreshOnboardingStatus();
+            refreshed = true;
+          } catch {
+            if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+          }
         }
-        navigate('/app/dashboard', { replace: true });
+        // Navigate to root; RequireOnboarded will route to dashboard if status refreshed,
+        // or self-correct on next load if all retries failed
+        navigate('/', { replace: true });
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Failed to create farm';
