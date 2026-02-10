@@ -31,12 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. User reloads the app and sees either the dashboard or a login screen within 3 seconds -- never an infinite spinner
   2. User refreshes the dashboard page and it renders correctly with their wells and map visible
   3. When a component crashes (map error, PowerSync failure), user sees a "Something went wrong" recovery screen with a retry button instead of a blank white page
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Session recovery and onboarding status fallback
-- [ ] 01-02: Error boundaries and dashboard reload resilience
-- [ ] 01-03: Security hardening (SECURITY DEFINER functions to private schema, console.log cleanup)
+- [ ] 01-01-PLAN.md -- Session recovery with 5s timeout on RPC + loading state cleanup (spinner-only, slow-load detection)
+- [ ] 01-02-PLAN.md -- Error boundaries (route-level + MapView-specific) with friendly retry UI
+- [ ] 01-03-PLAN.md -- Security hardening (SECURITY DEFINER to private schema) + console.log cleanup (debugLog utility)
 
 ### Phase 2: Offline Session Resilience
 **Goal**: Logged-in users can use the app reliably in areas with no connectivity
