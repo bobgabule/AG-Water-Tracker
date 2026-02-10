@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router';
 import RequireAuth from './components/RequireAuth';
 import RequireOnboarded from './components/RequireOnboarded';
 import RequireRole from './components/RequireRole';
+import RequireNotOnboarded from './components/RequireNotOnboarded';
 
 // Auth pages
 import PhonePage from './pages/auth/PhonePage';
@@ -33,11 +34,13 @@ export default function App() {
       <Route path="/register" element={<Navigate to="/auth/phone" replace />} />
       <Route path="/setup" element={<Navigate to="/auth/phone" replace />} />
 
-      {/* Onboarding routes - require session only */}
+      {/* Onboarding routes - require session only + not already onboarded */}
       <Route element={<RequireAuth />}>
-        <Route path="/onboarding/profile" element={<ProfilePage />} />
-        <Route path="/onboarding/farm" element={<Navigate to="/onboarding/farm/create" replace />} />
-        <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
+        <Route element={<RequireNotOnboarded />}>
+          <Route path="/onboarding/profile" element={<ProfilePage />} />
+          <Route path="/onboarding/farm" element={<Navigate to="/onboarding/farm/create" replace />} />
+          <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
+        </Route>
       </Route>
 
       {/* Protected app routes - require session + completed onboarding */}
