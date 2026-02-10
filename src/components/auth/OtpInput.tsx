@@ -2,12 +2,14 @@ import { useRef, useEffect, useCallback } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
 
 interface OtpInputProps {
-  /** Array of 4 digit values */
+  /** Array of digit values */
   value: string[];
   /** Callback when a digit changes */
   onChange: (index: number, value: string) => void;
   /** Callback for keyboard events (backspace handling) */
   onKeyDown: (index: number, e: KeyboardEvent<HTMLInputElement>) => void;
+  /** Number of OTP digits (default: 6) */
+  length?: number;
   /** Disable all inputs */
   disabled?: boolean;
   /** Show error styling */
@@ -17,7 +19,7 @@ interface OtpInputProps {
 }
 
 /**
- * A 4-digit OTP input component with individual input boxes.
+ * A configurable-length OTP input component with individual input boxes.
  * Features:
  * - Auto-advance on digit entry
  * - Backspace navigation to previous input
@@ -29,6 +31,7 @@ export default function OtpInput({
   value,
   onChange,
   onKeyDown,
+  length = 6,
   disabled = false,
   error = false,
   autoFocus = true,
@@ -46,30 +49,30 @@ export default function OtpInput({
   const handlePaste = useCallback(
     (e: ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
-      const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+      const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
 
       if (pastedData.length > 0) {
         // Fill in each digit
         pastedData.split('').forEach((digit, idx) => {
-          if (idx < 4) {
+          if (idx < length) {
             onChange(idx, digit);
           }
         });
 
         // Focus the next empty input or last input
-        const nextEmptyIndex = pastedData.length < 4 ? pastedData.length : 3;
+        const nextEmptyIndex = pastedData.length < length ? pastedData.length : length - 1;
         inputRefs.current[nextEmptyIndex]?.focus();
       }
     },
-    [onChange]
+    [onChange, length]
   );
 
   // Focus a specific input programmatically
   const focusInput = useCallback((index: number) => {
-    if (index >= 0 && index < 4) {
+    if (index >= 0 && index < length) {
       inputRefs.current[index]?.focus();
     }
-  }, []);
+  }, [length]);
 
   return (
     <div className="flex justify-center gap-2 sm:gap-3">
@@ -90,7 +93,7 @@ export default function OtpInput({
             if (/^\d?$/.test(val)) {
               onChange(index, val);
               // Auto-advance to next input
-              if (val && index < 3) {
+              if (val && index < length - 1) {
                 focusInput(index + 1);
               }
             }
@@ -98,7 +101,7 @@ export default function OtpInput({
           onKeyDown={(e) => onKeyDown(index, e)}
           onPaste={handlePaste}
           disabled={disabled}
-          aria-label={`Digit ${index + 1} of 4`}
+          aria-label={`Digit ${index + 1} of ${length}`}
           className={`
             w-11 h-14 sm:w-12 sm:h-14 text-center text-2xl font-semibold
             bg-white/10 backdrop-blur-sm border rounded-lg
@@ -115,7 +118,7 @@ export default function OtpInput({
 }
 
 // Export a hook for managing OTP state
-export function useOtpState(length: number = 4) {
+export function useOtpState(length: number = 6) {
   const initialState = Array(length).fill('');
 
   return {
