@@ -1,7 +1,9 @@
 import { Outlet } from 'react-router';
 import { useState, useCallback } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import Header from './Header';
 import SideMenu from './SideMenu';
+import { ErrorFallback } from './ErrorFallback';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useAuth } from '../lib/AuthProvider';
 
@@ -39,8 +41,10 @@ function AppLayoutContent() {
  */
 export default function AppLayout() {
   return (
-    <PowerSyncProvider>
-      <AppLayoutContent />
-    </PowerSyncProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <PowerSyncProvider>
+        <AppLayoutContent />
+      </PowerSyncProvider>
+    </ErrorBoundary>
   );
 }
