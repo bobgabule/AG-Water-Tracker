@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 6 verified and complete -- ready for Phase 7
+**Current focus:** Phase 7 in progress -- User Management (disable/enable infrastructure done, UI next)
 
 ## Current Position
 
-Phase: 6 of 8 (Invite System) -- COMPLETE
-Plan: 2 of 2 in phase 06
-Status: Phase 6 complete
-Last activity: 2026-02-11 -- Completed 06-02-PLAN.md (End-to-End Verification)
+Phase: 7 of 8 (User Management)
+Plan: 1 of 2 in phase 07 -- COMPLETE
+Status: Executing phase 07
+Last activity: 2026-02-11 -- Completed 07-01-PLAN.md (Disable/Enable Infrastructure)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 5min
-- Total execution time: 1.5 hours
+- Total execution time: 1.55 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [███████░░░] 70%
 | 04-permission-enforcement | 4 | 9min | 2min |
 | 05-grower-onboarding | 2 | 6min | 3min |
 | 06-invite-system | 2 | 16min | 8min |
+| 07-user-management | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (11min), 06-01 (5min), 05-02 (2min), 05-01 (4min), 04-04 (2min)
+- Last 5 plans: 07-01 (3min), 06-02 (11min), 06-01 (5min), 05-02 (2min), 05-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -103,6 +104,10 @@ Recent decisions affecting current work:
 - [05-02]: 3-attempt retry with 500ms delay for refreshOnboardingStatus; self-corrects on next app load if all fail
 - [06-02]: SECURITY DEFINER (not INVOKER) required on all public wrappers delegating to private schema functions
 - [06-02]: Migration history repair: timestamped remote migrations marked reverted, numbered local migrations marked applied
+- [07-01]: INTEGER for is_disabled (not BOOLEAN) because PowerSync does not support BOOLEAN type
+- [07-01]: alert() for disabled-user message -- simple enough for rare edge case, avoids over-engineering
+- [07-01]: Same role hierarchy for enable as disable -- only those who can disable can re-enable
+- [07-01]: Disabled-user query in AppLayout (not AuthProvider) since it requires PowerSync inside PowerSyncProvider
 
 ### Pending Todos
 
@@ -119,5 +124,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 06-02-PLAN.md (End-to-End Verification) -- Phase 6 complete
+Stopped at: Completed 07-01-PLAN.md (Disable/Enable Infrastructure)
 Resume file: None
