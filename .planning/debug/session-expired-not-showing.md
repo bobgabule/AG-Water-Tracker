@@ -1,8 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Session expired UI doesn't show when auth.sessions deleted server-side and user reloads"
 created: 2026-02-10T00:00:00Z
-updated: 2026-02-10T00:01:00Z
+updated: 2026-02-11T00:00:00Z
+resolved_by: "5b18904 fix(auth): detect auth RPC errors and trigger immediate session expiry"
 ---
 
 ## Current Focus
@@ -162,4 +163,5 @@ verification: |
   6. Also test with cached onboarding data in localStorage to verify cache fallback is skipped for auth errors
   7. Also test offline scenario: ensure network errors still show retry UI (not session expired)
 
-files_changed: []
+files_changed:
+  - src/lib/AuthProvider.tsx (isAuthRpcError helper + auth error handling in fetchOnboardingStatus)

@@ -195,8 +195,8 @@ export default function DashboardPage() {
         {canCreateWell && (
           <button
             onClick={handleNewWell}
-            className="px-5 py-3 rounded-full flex items-center gap-2 bg-[#bfe8d9]
-           text-[#5a9494] text-sm font-semibold
+            className="px-5 py-3 rounded-full flex items-center gap-2 bg-[#5f7248]
+           text-white text-sm font-semibold
            shadow-xl
            active:scale-95 transition"
           >

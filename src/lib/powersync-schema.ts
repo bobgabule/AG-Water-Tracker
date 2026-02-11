@@ -28,7 +28,6 @@ const farm_members = new TableV2({
   user_id: column.text,
   role: column.text,
   full_name: column.text, // Denormalized from users.display_name
-  is_disabled: column.integer, // 0 = active, 1 = disabled
   created_at: column.text,
 });
 

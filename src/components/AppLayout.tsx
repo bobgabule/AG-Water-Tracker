@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useQuery } from '@powersync/react';
 import Header from './Header';
@@ -26,21 +26,30 @@ function AppLayoutContent() {
   // Detect server-side role changes and force data refresh
   useRoleChangeDetector();
 
-  // Check if current user is disabled in any of their farm memberships
-  const { data: disabledCheck } = useQuery<{ is_disabled: number }>(
-    user?.id
-      ? 'SELECT is_disabled FROM farm_members WHERE user_id = ? AND is_disabled = 1 LIMIT 1'
+  // Detect when current user's farm membership is deleted (user removed).
+  // User passed RequireOnboarded to reach here, so hasFarmMembership is true.
+  const hadMembershipRef = useRef(false);
+
+  const { data: membershipRows } = useQuery<{ cnt: number }>(
+    user?.id && onboardingStatus?.hasFarmMembership
+      ? 'SELECT COUNT(*) as cnt FROM farm_members WHERE user_id = ?'
       : 'SELECT NULL WHERE 0',
-    user?.id ? [user.id] : []
+    user?.id && onboardingStatus?.hasFarmMembership ? [user.id] : []
   );
 
   useEffect(() => {
-    if (disabledCheck && disabledCheck.length > 0) {
-      // User is disabled -- sign them out with a message
-      alert('Your account has been disabled. Please contact your farm administrator.');
+    if (!membershipRows || membershipRows.length === 0) return;
+    const count = membershipRows[0].cnt;
+
+    if (count > 0) {
+      hadMembershipRef.current = true;
+    } else if (hadMembershipRef.current) {
+      // Transition: had membership -> no membership = user was removed
+      hadMembershipRef.current = false;
+      alert('Your account has been removed from the farm. Please contact your farm administrator.');
       signOut();
     }
-  }, [disabledCheck, signOut]);
+  }, [membershipRows, signOut]);
 
   // Farm name comes directly from auth state - no need for PowerSync query
   const farmName = onboardingStatus?.farmName ?? null;
