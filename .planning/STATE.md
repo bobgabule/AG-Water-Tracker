@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 6 complete -- ready for Phase 7
+**Current focus:** Phase 6 verified and complete -- ready for Phase 7
 
 ## Current Position
 
@@ -107,8 +107,8 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 - [04-03]: PowerSync Dashboard sync rules for farms table need manual verification for super_admin cross-farm access
-- [06-02]: PowerSync Dashboard sync rules need manual update for farm_invites (invited_first_name/last_name) and user_profile (first_name/last_name/email) -- see docs/powersync-sync-rules.yaml
-- [06-02]: E2E manual testing of complete invite flow pending (see 06-02-SUMMARY.md for checklist)
+- [06-02]: PowerSync Dashboard sync rules updated -- DONE
+- [06-02]: E2E manual testing of complete invite flow -- DONE (verified by user)
 
 ### Blockers/Concerns
 
