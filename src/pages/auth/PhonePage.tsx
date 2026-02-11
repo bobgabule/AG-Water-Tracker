@@ -32,9 +32,8 @@ export default function PhonePage() {
 
   // If already logged in, redirect to the appropriate route
   useEffect(() => {
-    if (isAuthReady && session) {
-      const nextRoute = resolveNextRoute(onboardingStatus);
-      navigate(nextRoute, { replace: true });
+    if (isAuthReady && session && onboardingStatus) {
+      navigate(resolveNextRoute(onboardingStatus), { replace: true });
     }
   }, [isAuthReady, session, onboardingStatus, navigate]);
 
