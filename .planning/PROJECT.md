@@ -39,6 +39,13 @@ Field agents can reliably record water meter readings in areas with poor connect
 - [ ] Super admin view — see and manage all farms, users, wells
 - [ ] Subscription gating for user limits (basic: 1 admin + 2 meter checkers) — UI only, no Stripe yet
 
+### v1.1 Active
+
+- [ ] Smart map default center — farm's US state at whole-state zoom (satellite view)
+- [ ] Soft-ask location permission flow — FAB + custom modal before browser native dialog
+- [ ] Remove long-press → add well form behavior
+- [ ] Dashboard code quality — geolocation guards, validation consistency, tile cache, accessibility, form fixes
+
 ### Out of Scope
 
 - Stripe payment integration — deferred to future milestone, UI placeholder only
@@ -102,5 +109,10 @@ Field agents can reliably record water meter readings in areas with poor connect
 | Separate /users route | Users page is a distinct feature, not buried in settings | — Pending |
 | Skip profile for invited users | Grower fills in name during invite. Invited user just does OTP → dashboard | — Pending |
 
+| Static state lookup for map center | Simpler than Mapbox geocoding, no API calls, no latency. 50 entries covers all US states | — Pending |
+| Soft-ask before browser geolocation prompt | 40-80% higher acceptance rates. Browser "Block" is permanent. Custom modal gives context first | — Pending |
+| Remove long-press add well | Users accidentally trigger it while panning. New Well button flow is sufficient | — Pending |
+| meterSerialNumber optional | Business requirement — not all wells have serial numbers at registration time | — Pending |
+
 ---
-*Last updated: 2026-02-10 after initialization*
+*Last updated: 2026-02-11 after v1.1 milestone creation*

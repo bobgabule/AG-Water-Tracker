@@ -2,7 +2,9 @@
 
 ## Overview
 
-This roadmap delivers role-based user management and phone-based invite flows for the AG Water Tracker PWA. The work progresses from stabilizing existing session bugs, through building the role and permission infrastructure, to delivering the complete invite-to-onboard pipeline and user management UI. Eight phases move from foundation to features, with each phase delivering a verifiable capability that unblocks the next.
+**v1.0** (Complete): Role-based user management and phone-based invite flows. 8 phases, 25 plans, 28 requirements — all delivered.
+
+**v1.1** (Active): Dashboard and map view improvements. Smarter map default center using farm state, soft-ask location permission flow, long-press removal, and code quality fixes across all dashboard/map components. Three phases deliver UX improvements first, then quality hardening.
 
 ## Phases
 
@@ -20,6 +22,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Invite System** - Invite form, farm_invites backend, SMS delivery, and invited user auto-onboarding
 - [x] **Phase 7: User Management** - Users page, disable/enable users, profile editing, and disabled user filtering
 - [x] **Phase 8: Subscription Gating** - Seat limit display, invite blocking at capacity, and upgrade placeholder
+
+### v1.1 — Dashboard & Map
+
+- [x] **Phase 9: Map Default View** - Smart farm-state center, remove long-press, keep wells center and GPS fly-to
+- [x] **Phase 10: Location Permission Flow** - Soft-ask pattern with FAB button, custom modal, remove auto-request on load
+- [ ] **Phase 11: Dashboard Quality Fixes** - Geolocation guards, validation consistency, tile cache, accessibility, form fixes
 
 ## Phase Details
 
@@ -151,12 +159,58 @@ Plans:
 - [x] 08-02-PLAN.md -- Seat usage display on Users page (admin and meter checker counts with Full indicator)
 - [x] 08-03-PLAN.md -- Invite form role blocking when seats full + "Contact us to upgrade" placeholder
 
+### Phase 9: Map Default View
+**Goal**: Map shows a meaningful default view based on the farm's location instead of hardcoded Kansas center
+**Depends on**: Nothing (first v1.1 phase)
+**Requirements**: MAP-01, MAP-02, MAP-03, MAP-04
+**Success Criteria** (what must be TRUE):
+  1. User with no wells sees the map centered on their farm's US state at a zoom level showing the whole state in satellite view
+  2. User with wells sees the map centered on the average of all well coordinates (existing behavior preserved)
+  3. User who grants location permission sees the map fly to their GPS position with 1500ms animation (existing behavior preserved)
+  4. Long-pressing the map does nothing — no add well form appears, only normal pan/zoom behavior
+**Plans**: 1 plan
+
+Plans:
+- [x] 09-01-PLAN.md -- US state coordinates lookup, useFarmState hook, MapView center logic update, long-press removal
+
+### Phase 10: Location Permission Flow
+**Goal**: Location permission uses a user-friendly soft-ask pattern instead of auto-requesting on page load
+**Depends on**: Phase 9
+**Requirements**: LOC-01, LOC-02, LOC-03, LOC-04
+**Success Criteria** (what must be TRUE):
+  1. Opening the dashboard does NOT trigger the browser's native geolocation permission dialog
+  2. A "Use My Location" floating action button is visible on the map
+  3. Tapping the FAB shows a custom modal explaining why location is needed, with Allow/No Thanks options
+  4. Tapping "Allow" in the modal triggers the native browser permission prompt; granting it flies the map to user location
+  5. If permission was previously denied, tapping the FAB shows guidance on how to re-enable in browser settings
+**Plans**: 1 plan
+
+Plans:
+- [x] 10-01-PLAN.md -- useGeolocation autoRequest option, LocationSoftAskModal, MapView FAB + modal integration
+
+### Phase 11: Dashboard Quality Fixes
+**Goal**: All dashboard/map components follow consistent best practices for validation, error handling, and accessibility
+**Depends on**: Phase 9
+**Requirements**: QUAL-01 through QUAL-09
+**Success Criteria** (what must be TRUE):
+  1. Calling geolocation in any component is guarded by `navigator.geolocation` existence check — no crashes in environments without geolocation API
+  2. Well save handler does not attempt state updates after DashboardPage unmounts
+  3. LocationPickerBottomSheet rejects coordinates outside valid ranges (matching AddWellFormBottomSheet validation)
+  4. Service worker caches up to 2000 API entries and 3000 tile entries
+  5. AddWellFormBottomSheet allows saving with empty meter serial number (only name and WMIS required)
+  6. AddWellFormBottomSheet rejects coordinates outside valid ranges in form validation
+  7. WellMarker uses plain constant instead of useMemo for static value
+  8. LocationPermissionBanner is announced by screen readers via ARIA role
+  9. MapOfflineOverlay retry button does not have redundant aria-label
+**Plans**: Not yet planned
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+- v1.0: Phases 1 → 8 (complete)
+- v1.1: Phases 9 → 10 → 11
 
-Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in parallel, but sequential execution is recommended to avoid merge conflicts in auth-related code.
+Note: Phases 10 and 11 both depend on Phase 9. Phase 11 can run in parallel with Phase 10 since they touch different files.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -168,3 +222,6 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 6. Invite System | 2/2 | Complete | 2026-02-11 |
 | 7. User Management | 2/2 | Complete | 2026-02-11 |
 | 8. Subscription Gating | 3/3 | Complete | 2026-02-11 |
+| 9. Map Default View | 1/1 | Complete | 2026-02-12 |
+| 10. Location Permission Flow | 1/1 | Complete | 2026-02-12 |
+| 11. Dashboard Quality Fixes | 0/? | Not Started | — |
