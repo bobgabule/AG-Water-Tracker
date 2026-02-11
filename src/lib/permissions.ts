@@ -92,3 +92,14 @@ export const ROLE_DISPLAY_NAMES: Record<Role, string> = {
   admin: 'Admin',
   meter_checker: 'Meter Checker',
 };
+
+// ---------------------------------------------------------------------------
+// Role Badge Styles (Tailwind classes for colored role pills)
+// ---------------------------------------------------------------------------
+
+export const ROLE_BADGE_STYLES: Record<Role, string> = {
+  super_admin: 'bg-purple-100 text-purple-700',
+  grower: 'bg-green-100 text-green-700',
+  admin: 'bg-yellow-100 text-yellow-700',
+  meter_checker: 'bg-blue-100 text-blue-700',
+};

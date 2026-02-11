@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useQuery } from '@powersync/react';
 import Header from './Header';
 import SideMenu from './SideMenu';
 import { ErrorFallback } from './ErrorFallback';
@@ -19,11 +20,27 @@ import { useRoleChangeDetector } from '../hooks/useRoleChangeDetector';
  */
 function AppLayoutContent() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { onboardingStatus } = useAuth();
+  const { user, onboardingStatus, signOut } = useAuth();
   const location = useLocation();
 
   // Detect server-side role changes and force data refresh
   useRoleChangeDetector();
+
+  // Check if current user is disabled in any of their farm memberships
+  const { data: disabledCheck } = useQuery<{ is_disabled: number }>(
+    user?.id
+      ? 'SELECT is_disabled FROM farm_members WHERE user_id = ? AND is_disabled = 1 LIMIT 1'
+      : 'SELECT NULL WHERE 0',
+    user?.id ? [user.id] : []
+  );
+
+  useEffect(() => {
+    if (disabledCheck && disabledCheck.length > 0) {
+      // User is disabled -- sign them out with a message
+      alert('Your account has been disabled. Please contact your farm administrator.');
+      signOut();
+    }
+  }, [disabledCheck, signOut]);
 
   // Farm name comes directly from auth state - no need for PowerSync query
   const farmName = onboardingStatus?.farmName ?? null;
