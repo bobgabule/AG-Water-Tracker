@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 5 complete -- ready for Phase 6
+**Current focus:** Phase 6 complete -- ready for Phase 7
 
 ## Current Position
 
-Phase: 5 of 8 (Grower Onboarding) -- COMPLETE
-Plan: 2 of 2 in phase 05
-Status: Phase 5 complete
-Last activity: 2026-02-11 -- Completed 05-02-PLAN.md (Verify Routing & Clean Up Dead Code)
+Phase: 6 of 8 (Invite System) -- COMPLETE
+Plan: 2 of 2 in phase 06
+Status: Phase 6 complete
+Last activity: 2026-02-11 -- Completed 06-02-PLAN.md (End-to-End Verification)
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 20
 - Average duration: 5min
-- Total execution time: 1.2 hours
+- Total execution time: 1.5 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [██████░░░░] 60%
 | 03-role-foundation | 4 | 14min | 4min |
 | 04-permission-enforcement | 4 | 9min | 2min |
 | 05-grower-onboarding | 2 | 6min | 3min |
+| 06-invite-system | 2 | 16min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (2min), 05-01 (4min), 04-04 (2min), 04-03 (3min), 04-02 (2min)
+- Last 5 plans: 06-02 (11min), 06-01 (5min), 05-02 (2min), 05-01 (4min), 04-04 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -55,7 +56,7 @@ Recent decisions affecting current work:
 - [01-01]: Promise.race with 5s timeout on RPC calls instead of AbortController -- null result triggers retry UI
 - [01-01]: Extracted PowerSyncLoadingScreen component for clean useState/useEffect lifecycle
 - [01-01]: Spinner-only loading screens with "Taking longer than usual..." after 5 seconds
-- [01-03]: Private schema pattern: private._impl() with SECURITY DEFINER + public SECURITY INVOKER wrappers
+- [01-03]: Private schema pattern: private._impl() with SECURITY DEFINER + public SECURITY DEFINER wrappers (originally INVOKER, fixed in 06-02)
 - [01-03]: generate_random_code fully private (no public wrapper) to prevent API exposure
 - [01-03]: Debug logging gated behind localStorage.__ag_debug flag, checked once at module load
 - [01-03]: HIGH-sensitivity upsert data logs deleted entirely rather than gated
@@ -100,10 +101,14 @@ Recent decisions affecting current work:
 - [05-02]: VerifyPage redirect uses resolveNextRoute(onboardingStatus) for consistent routing across all entry points
 - [05-02]: CreateFarmPage navigates to '/' instead of '/app/dashboard' for canonical route handling
 - [05-02]: 3-attempt retry with 500ms delay for refreshOnboardingStatus; self-corrects on next app load if all fail
+- [06-02]: SECURITY DEFINER (not INVOKER) required on all public wrappers delegating to private schema functions
+- [06-02]: Migration history repair: timestamped remote migrations marked reverted, numbered local migrations marked applied
 
 ### Pending Todos
 
 - [04-03]: PowerSync Dashboard sync rules for farms table need manual verification for super_admin cross-farm access
+- [06-02]: PowerSync Dashboard sync rules need manual update for farm_invites (invited_first_name/last_name) and user_profile (first_name/last_name/email) -- see docs/powersync-sync-rules.yaml
+- [06-02]: E2E manual testing of complete invite flow pending (see 06-02-SUMMARY.md for checklist)
 
 ### Blockers/Concerns
 
@@ -114,5 +119,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 05-02-PLAN.md (Verify Routing & Clean Up Dead Code) -- Phase 5 complete
+Stopped at: Completed 06-02-PLAN.md (End-to-End Verification) -- Phase 6 complete
 Resume file: None
