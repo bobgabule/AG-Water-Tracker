@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
+import { useSeatUsage } from '../hooks/useSeatUsage';
 
 interface AddUserBottomSheetProps {
   open: boolean;
@@ -30,6 +31,21 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [smsWarning, setSmsWarning] = useState(false);
+
+  const seatUsage = useSeatUsage();
+  const adminFull = seatUsage?.admin.isFull ?? false;
+  const meterCheckerFull = seatUsage?.meter_checker.isFull ?? false;
+  const allSeatsFull = adminFull && meterCheckerFull;
+
+  // Auto-correct selected role if it becomes full
+  useEffect(() => {
+    if (!seatUsage) return;
+    if (role === 'admin' && adminFull && !meterCheckerFull) {
+      setRole('meter_checker');
+    } else if (role === 'meter_checker' && meterCheckerFull && !adminFull) {
+      setRole('admin');
+    }
+  }, [seatUsage, role, adminFull, meterCheckerFull]);
 
   const handleFirstNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFirstName(e.target.value);
@@ -162,6 +178,16 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                   </p>
                 )}
               </div>
+            ) : allSeatsFull ? (
+              <div className="py-8 text-center">
+                <p className="text-white font-medium mb-2">All seats are filled</p>
+                <p className="text-white/70 text-sm mb-4">
+                  Your plan allows {seatUsage?.admin.limit ?? 0} admin and {seatUsage?.meter_checker.limit ?? 0} meter checkers.
+                </p>
+                <p className="text-yellow-300 text-sm font-medium">
+                  Contact us to upgrade your plan
+                </p>
+              </div>
             ) : (
               <div className="space-y-6">
                 {/* Error */}
@@ -218,22 +244,24 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       <button
                         type="button"
                         onClick={() => handleRoleChange('meter_checker')}
-                        className={`flex-1 py-2.5 text-sm font-medium transition-colors ${role === 'meter_checker'
+                        disabled={meterCheckerFull}
+                        className={`flex-1 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${role === 'meter_checker'
                           ? 'bg-[#8ca074] text-white'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
-                        Meter Checker
+                        Meter Checker{meterCheckerFull ? ' (Full)' : ''}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleRoleChange('admin')}
-                        className={`flex-1 py-2.5 text-sm font-medium transition-colors ${role === 'admin'
+                        disabled={adminFull}
+                        className={`flex-1 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${role === 'admin'
                           ? 'bg-[#8ca074] text-white'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
-                        Admin
+                        Admin{adminFull ? ' (Full)' : ''}
                       </button>
                     </div>
                   </div>
@@ -241,7 +269,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Role</label>
                     <div className="py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
-                      Meter Checker
+                      Meter Checker{meterCheckerFull ? ' (Full)' : ''}
                     </div>
                   </div>
                 )}
@@ -262,7 +290,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || !onboardingStatus?.farmId}
+                disabled={loading || !onboardingStatus?.farmId || (role === 'admin' ? adminFull : meterCheckerFull)}
                 className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
               >
                 {loading ? (

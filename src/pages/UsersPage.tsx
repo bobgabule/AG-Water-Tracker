@@ -8,6 +8,8 @@ import { hasPermission, ROLE_DISPLAY_NAMES, ROLE_BADGE_STYLES } from '../lib/per
 import type { Role } from '../lib/permissions';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
+import { useSeatUsage } from '../hooks/useSeatUsage';
+import { PLAN_LIMITS } from '../lib/subscription';
 import PendingInvitesList from '../components/PendingInvitesList';
 import AddUserBottomSheet from '../components/AddUserModal';
 import ConfirmDeleteMemberDialog from '../components/ConfirmDeleteMemberDialog';
@@ -27,6 +29,7 @@ export default function UsersPage() {
   const userRole = useUserRole();
   const farmId = onboardingStatus?.farmId ?? null;
   const canManageUsers = hasPermission(userRole, 'manage_users');
+  const seatUsage = useSeatUsage();
 
   // Query farm members (including disabled -- filtering is client-side)
   const { data: rawMembers } = useQuery<FarmMemberRow>(
@@ -222,6 +225,37 @@ export default function UsersPage() {
       <div className="px-4 py-4">
         {/* Title */}
         <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-4">USERS</h1>
+
+        {/* Seat usage summary */}
+        {canManageUsers && seatUsage && (
+          <div className="bg-[#dfe4d4] rounded-lg p-3 mb-4">
+            <h2 className="text-xs font-semibold text-[#5f7248]/70 uppercase tracking-wider mb-2">
+              {PLAN_LIMITS.name} Plan
+            </h2>
+            <div className="space-y-1">
+              {/* Admin seats */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#5f7248]">Admins</span>
+                <span className={`text-sm font-medium ${seatUsage.admin.isFull ? 'text-red-600' : 'text-[#5f7248]'}`}>
+                  {seatUsage.admin.used} / {seatUsage.admin.limit}
+                  {seatUsage.admin.isFull && (
+                    <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Full</span>
+                  )}
+                </span>
+              </div>
+              {/* Meter Checker seats */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#5f7248]">Meter Checkers</span>
+                <span className={`text-sm font-medium ${seatUsage.meter_checker.isFull ? 'text-red-600' : 'text-[#5f7248]'}`}>
+                  {seatUsage.meter_checker.used} / {seatUsage.meter_checker.limit}
+                  {seatUsage.meter_checker.isFull && (
+                    <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Full</span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Show disabled users toggle */}
         {canManageUsers && (
