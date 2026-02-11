@@ -1,12 +1,15 @@
 import { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import Map from 'react-map-gl/mapbox';
-import type { MapRef, MapMouseEvent, MapTouchEvent, ErrorEvent } from 'react-map-gl/mapbox';
+import type { MapRef, MapMouseEvent, ErrorEvent } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 import { debugWarn } from '../lib/debugLog';
+import { US_STATE_COORDINATES } from '../lib/usStateCoordinates';
 import WellMarker from './WellMarker';
 import LocationPickerMarker from './LocationPickerMarker';
 import UserLocationCircle from './UserLocationCircle';
 import LocationPermissionBanner from './LocationPermissionBanner';
+import LocationSoftAskModal from './LocationSoftAskModal';
 import MapOfflineOverlay from './MapOfflineOverlay';
 import type { WellWithReading } from '../hooks/useWells';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
@@ -16,65 +19,67 @@ import { useMapTileStatus } from '../hooks/useMapTileStatus';
 
 interface MapViewProps {
   wells: WellWithReading[];
+  farmState?: string | null;
   onWellClick?: (wellId: string) => void;
   onMapClick?: (lngLat: { lng: number; lat: number }) => void;
-  onMapLongPress?: (lngLat: { lng: number; lat: number }) => void;
   pickedLocation?: { latitude: number; longitude: number } | null;
   isPickingLocation?: boolean;
 }
 
-const DEFAULT_ZOOM = 16;
+const WELL_ZOOM = 16;
 
-function computeInitialViewState(wells: WellWithReading[]) {
+function computeInitialViewState(
+  wells: WellWithReading[],
+  farmState: string | null,
+) {
   const located = wells.filter((w) => w.location !== null);
-
-  if (located.length === 0) {
-    return { latitude: 38.5, longitude: -98.5, zoom: DEFAULT_ZOOM };
-  }
 
   if (located.length === 1) {
     return {
       latitude: located[0].location!.latitude,
       longitude: located[0].location!.longitude,
-      zoom: DEFAULT_ZOOM,
+      zoom: WELL_ZOOM,
     };
   }
 
-  // Center on wells with fixed zoom
-  const lats = located.map((w) => w.location!.latitude);
-  const lngs = located.map((w) => w.location!.longitude);
-  const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-  const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+  if (located.length > 1) {
+    const lats = located.map((w) => w.location!.latitude);
+    const lngs = located.map((w) => w.location!.longitude);
+    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+    return { latitude: centerLat, longitude: centerLng, zoom: WELL_ZOOM };
+  }
 
-  return { latitude: centerLat, longitude: centerLng, zoom: DEFAULT_ZOOM };
+  // No wells — center on farm's US state
+  if (farmState) {
+    const stateView = US_STATE_COORDINATES[farmState.toUpperCase()];
+    if (stateView) {
+      return stateView;
+    }
+  }
+
+  // Fallback to central Kansas at state-level zoom
+  return { latitude: 38.5, longitude: -98.5, zoom: 7 };
 }
 
 const BANNER_DISMISSED_KEY = 'location-banner-dismissed';
 
-const LONG_PRESS_DURATION = 500;
-const LONG_PRESS_MOVE_THRESHOLD = 10; // pixels - cancel if user moves more than this
-
 export default function MapView({
   wells,
+  farmState,
   onWellClick,
   onMapClick,
-  onMapLongPress,
   pickedLocation,
   isPickingLocation,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
 
-  // Long-press detection refs
-  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pressStartPos = useRef<{ lng: number; lat: number } | null>(null);
-  const pressStartScreenPos = useRef<{ x: number; y: number } | null>(null);
-  const longPressTimestampRef = useRef<number>(0);
-
-  // Fetch user's geolocation with proper StrictMode handling
-  const { location: userLocation, retry: retryGeolocation } = useGeolocation({
+  // Fetch user's geolocation — no auto-request, triggered by FAB or permission state
+  const { location: userLocation, requestLocation } = useGeolocation({
     enableHighAccuracy: true,
-    timeout: 10000, // Longer timeout to allow for permission prompt
+    timeout: 10000,
     enableCache: true,
+    autoRequest: false,
   });
 
   // Track geolocation permission state
@@ -117,15 +122,13 @@ export default function MapView({
     mapRef.current?.resize();
   }, [setTileError]);
 
-  // Re-fetch location when permission changes from 'prompt' to 'granted'
-  // This handles the case where the initial request timed out while waiting for user
-  const prevPermissionRef = useRef(permission);
+  // Auto-request location when permission is already granted (no browser dialog triggered)
+  // Also handles the transition from prompt → granted after user approves via the modal
   useEffect(() => {
-    if (prevPermissionRef.current === 'prompt' && permission === 'granted' && !userLocation) {
-      retryGeolocation();
+    if (permission === 'granted' && !userLocation) {
+      requestLocation();
     }
-    prevPermissionRef.current = permission;
-  }, [permission, userLocation, retryGeolocation]);
+  }, [permission, userLocation, requestLocation]);
 
   // Track if we've already flown to user location (to avoid flying on every re-render)
   const hasFlyToUserLocation = useRef(false);
@@ -136,132 +139,76 @@ export default function MapView({
       hasFlyToUserLocation.current = true;
       mapRef.current.flyTo({
         center: [userLocation.lng, userLocation.lat],
-        zoom: DEFAULT_ZOOM,
+        zoom: WELL_ZOOM,
         duration: 1500,
       });
     }
   }, [userLocation]);
 
-  // Cleanup long-press timer on unmount
+  // Jump to farm state center if it arrives after Map already mounted with fallback
+  const hasJumpedToFarmState = useRef(false);
   useEffect(() => {
-    return () => {
-      if (pressTimerRef.current) {
-        clearTimeout(pressTimerRef.current);
+    if (
+      farmState &&
+      mapRef.current &&
+      !hasJumpedToFarmState.current &&
+      !userLocation &&
+      wells.filter((w) => w.location !== null).length === 0
+    ) {
+      const stateView = US_STATE_COORDINATES[farmState.toUpperCase()];
+      if (stateView) {
+        hasJumpedToFarmState.current = true;
+        mapRef.current.jumpTo({
+          center: [stateView.longitude, stateView.latitude],
+          zoom: stateView.zoom,
+        });
       }
-    };
-  }, []);
-
-  // Compute initial view - prioritize user location over wells/default
-  // Note: initialViewState is only used on Map's first render (react-map-gl behavior)
-  // Map maintains its own viewport state after mount, so wells updates won't re-center
-  const initialViewState = useMemo(() => {
-    if (userLocation) {
-      return {
-        latitude: userLocation.lat,
-        longitude: userLocation.lng,
-        zoom: DEFAULT_ZOOM,
-      };
     }
-    return computeInitialViewState(wells);
-  }, [userLocation, wells]);
+  }, [farmState, wells, userLocation]);
+
+  // Compute initial view from wells/farm state — user location handled via flyTo animation
+  const initialViewState = useMemo(
+    () => computeInitialViewState(wells, farmState ?? null),
+    [wells, farmState],
+  );
+
+  // Location soft-ask modal state
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
+  const handleLocationFabClick = useCallback(() => {
+    if (permission === 'granted') {
+      if (userLocation && mapRef.current) {
+        // Already have location — re-center
+        mapRef.current.flyTo({
+          center: [userLocation.lng, userLocation.lat],
+          zoom: WELL_ZOOM,
+          duration: 1500,
+        });
+      } else {
+        requestLocation();
+      }
+    } else {
+      setShowLocationModal(true);
+    }
+  }, [permission, requestLocation, userLocation]);
+
+  const handleLocationAllow = useCallback(() => {
+    setShowLocationModal(false);
+    requestLocation();
+  }, [requestLocation]);
+
+  const handleLocationModalClose = useCallback(() => {
+    setShowLocationModal(false);
+  }, []);
 
   // Handle map click for location picking
   const handleMapClick = useCallback(
     (event: MapMouseEvent) => {
-      // Don't trigger click if long-press was just triggered (within 100ms)
-      if (Date.now() - longPressTimestampRef.current < 100) {
-        return;
-      }
       if (isPickingLocation && onMapClick) {
         onMapClick(event.lngLat);
       }
     },
     [isPickingLocation, onMapClick]
-  );
-
-  // Clear long-press timer helper
-  const clearPressTimer = useCallback(() => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-    pressStartPos.current = null;
-    pressStartScreenPos.current = null;
-  }, []);
-
-  // Mouse long-press handlers
-  const handleMouseDown = useCallback(
-    (event: MapMouseEvent) => {
-      if (!onMapLongPress) return;
-      pressStartPos.current = event.lngLat;
-      pressStartScreenPos.current = { x: event.point.x, y: event.point.y };
-      pressTimerRef.current = setTimeout(() => {
-        if (pressStartPos.current) {
-          longPressTimestampRef.current = Date.now();
-          onMapLongPress(pressStartPos.current);
-          clearPressTimer();
-        }
-      }, LONG_PRESS_DURATION);
-    },
-    [onMapLongPress, clearPressTimer]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    clearPressTimer();
-  }, [clearPressTimer]);
-
-  const handleMouseMove = useCallback(
-    (event: MapMouseEvent) => {
-      // Only cancel if moved more than threshold (allows slight movement)
-      if (!pressStartScreenPos.current) return;
-      const dx = event.point.x - pressStartScreenPos.current.x;
-      const dy = event.point.y - pressStartScreenPos.current.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance > LONG_PRESS_MOVE_THRESHOLD) {
-        clearPressTimer();
-      }
-    },
-    [clearPressTimer]
-  );
-
-  // Touch long-press handlers (mobile)
-  const handleTouchStart = useCallback(
-    (event: MapTouchEvent) => {
-      if (!onMapLongPress) return;
-      // Ignore multi-touch (pinch-to-zoom)
-      if (event.originalEvent.touches.length > 1) {
-        clearPressTimer();
-        return;
-      }
-      pressStartPos.current = event.lngLat;
-      pressStartScreenPos.current = { x: event.point.x, y: event.point.y };
-      pressTimerRef.current = setTimeout(() => {
-        if (pressStartPos.current) {
-          longPressTimestampRef.current = Date.now();
-          onMapLongPress(pressStartPos.current);
-          clearPressTimer();
-        }
-      }, LONG_PRESS_DURATION);
-    },
-    [onMapLongPress, clearPressTimer]
-  );
-
-  const handleTouchEnd = useCallback(() => {
-    clearPressTimer();
-  }, [clearPressTimer]);
-
-  const handleTouchMove = useCallback(
-    (event: MapTouchEvent) => {
-      // Only cancel if moved more than threshold (allows slight movement)
-      if (!pressStartScreenPos.current) return;
-      const dx = event.point.x - pressStartScreenPos.current.x;
-      const dy = event.point.y - pressStartScreenPos.current.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance > LONG_PRESS_MOVE_THRESHOLD) {
-        clearPressTimer();
-      }
-    },
-    [clearPressTimer]
   );
 
   return (
@@ -278,14 +225,6 @@ export default function MapView({
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
         onError={handleMapError}
         onClick={handleMapClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-        onTouchCancel={handleTouchEnd}
       >
         {wells
           .filter((w) => w.location)
@@ -309,6 +248,25 @@ export default function MapView({
           />
         )}
       </Map>
+
+      {/* Use My Location FAB — hidden during location picking */}
+      {!isPickingLocation && (
+        <button
+          onClick={handleLocationFabClick}
+          className="absolute bottom-20 right-4 z-10 w-11 h-11 rounded-full bg-black/60 backdrop-blur-md border border-white/10 shadow-lg flex items-center justify-center active:scale-95 transition"
+          aria-label="Use my location"
+        >
+          <ViewfinderCircleIcon className="w-5 h-5 text-white" />
+        </button>
+      )}
+
+      {/* Location soft-ask modal */}
+      <LocationSoftAskModal
+        open={showLocationModal}
+        onClose={handleLocationModalClose}
+        onAllow={handleLocationAllow}
+        mode={permission === 'denied' ? 'denied' : 'prompt'}
+      />
 
       {/* Offline/error overlay */}
       {hasTileError && (

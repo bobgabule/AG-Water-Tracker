@@ -48,6 +48,34 @@
 - [ ] **SUBS-02**: Invite form blocked with message when seat limit reached for a role
 - [ ] **SUBS-03**: No Stripe integration — limits enforced in UI/DB only, "Contact us to upgrade" placeholder
 
+## v1.1 Requirements
+
+### Dashboard & Map
+
+- [ ] **MAP-01**: Map centers on farm's US state (whole-state satellite view) when no wells exist, using a static state→coordinates lookup
+- [ ] **MAP-02**: Map centers on average of all well coordinates when wells exist
+- [ ] **MAP-03**: User location fly-to with 1500ms animation when GPS is granted
+- [ ] **MAP-04**: Long-press on map does NOT trigger add well form — long-press behavior removed entirely
+
+### Location Permission
+
+- [ ] **LOC-01**: No automatic geolocation request on page load — location only requested after user action
+- [ ] **LOC-02**: "Use My Location" floating action button displayed on the map
+- [ ] **LOC-03**: Custom soft-ask modal shown before triggering the browser's native permission dialog
+- [ ] **LOC-04**: Settings guidance displayed when location permission is denied (keep existing LocationPermissionBanner pattern)
+
+### Code Quality
+
+- [ ] **QUAL-01**: Geolocation API existence checked (`navigator.geolocation`) before calling in all components
+- [ ] **QUAL-02**: Well save handler in DashboardPage guards against component unmount during async operation
+- [ ] **QUAL-03**: LocationPickerBottomSheet validates coordinate ranges (-90/90 lat, -180/180 lng) matching AddWellFormBottomSheet
+- [ ] **QUAL-04**: Service worker tile cache maxEntries increased for large farm areas (800→2000 API, 1000→3000 tiles)
+- [ ] **QUAL-05**: AddWellFormBottomSheet meterSerialNumber field is optional (not required for form validation)
+- [ ] **QUAL-06**: AddWellFormBottomSheet isFormValid includes coordinate range validation
+- [ ] **QUAL-07**: WellMarker removes unnecessary useMemo wrapping a constant value
+- [ ] **QUAL-08**: LocationPermissionBanner has proper ARIA role attribute for screen reader announcements
+- [ ] **QUAL-09**: MapOfflineOverlay removes redundant aria-label that duplicates visible button text
+
 ## v2 Requirements
 
 ### User Management Enhancements
@@ -114,11 +142,38 @@
 | SUBS-02 | Phase 8: Subscription Gating | Pending |
 | SUBS-03 | Phase 8: Subscription Gating | Pending |
 
-**Coverage:**
+**v1 Coverage:**
 - v1 requirements: 28 total
 - Mapped to phases: 28
 - Unmapped: 0
 
+### v1.1 Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MAP-01 | Phase 9: Map Default View | Pending |
+| MAP-02 | Phase 9: Map Default View | Pending |
+| MAP-03 | Phase 9: Map Default View | Pending |
+| MAP-04 | Phase 9: Map Default View | Pending |
+| LOC-01 | Phase 10: Location Permission Flow | Pending |
+| LOC-02 | Phase 10: Location Permission Flow | Pending |
+| LOC-03 | Phase 10: Location Permission Flow | Pending |
+| LOC-04 | Phase 10: Location Permission Flow | Pending |
+| QUAL-01 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-02 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-03 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-04 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-05 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-06 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-07 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-08 | Phase 11: Dashboard Quality Fixes | Pending |
+| QUAL-09 | Phase 11: Dashboard Quality Fixes | Pending |
+
+**v1.1 Coverage:**
+- v1.1 requirements: 17 total
+- Mapped to phases: 17
+- Unmapped: 0
+
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after roadmap creation*
+*Last updated: 2026-02-11 after v1.1 milestone creation*

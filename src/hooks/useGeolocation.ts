@@ -15,6 +15,7 @@ interface UseGeolocationOptions {
   timeout?: number;
   maximumAge?: number;
   enableCache?: boolean;
+  autoRequest?: boolean;
 }
 
 interface UseGeolocationResult {
@@ -22,6 +23,7 @@ interface UseGeolocationResult {
   loading: boolean;
   error: GeolocationPositionError | null;
   retry: () => void;
+  requestLocation: () => void;
 }
 
 function getCachedLocation(): { lat: number; lng: number } | null {
@@ -84,6 +86,7 @@ export function useGeolocation(
     timeout = 5000,
     maximumAge = 0,
     enableCache = true,
+    autoRequest = true,
   } = options;
 
   // Get cached location once during initialization
@@ -151,19 +154,25 @@ export function useGeolocation(
     );
   }, [enableHighAccuracy, timeout, maximumAge, enableCache]);
 
-  // Fetch location on mount
+  // Fetch location on mount (when autoRequest is true)
   useEffect(() => {
-    fetchLocation();
+    if (autoRequest) {
+      fetchLocation();
+    }
 
     // Cleanup: invalidate any pending requests when unmounting
     return () => {
       requestIdRef.current++;
     };
-  }, [fetchLocation]);
+  }, [fetchLocation, autoRequest]);
 
   const retry = useCallback(() => {
     fetchLocation();
   }, [fetchLocation]);
 
-  return { location, loading, error, retry };
+  const requestLocation = useCallback(() => {
+    fetchLocation();
+  }, [fetchLocation]);
+
+  return { location, loading, error, retry, requestLocation };
 }

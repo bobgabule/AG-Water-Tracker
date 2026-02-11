@@ -8,6 +8,7 @@ import { useAuth } from '../lib/AuthProvider';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 import { debugError } from '../lib/debugLog';
+import { useFarmState } from '../hooks/useFarmState';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
@@ -21,7 +22,9 @@ export default function DashboardPage() {
   const { user, onboardingStatus } = useAuth();
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
+  const farmId = onboardingStatus?.farmId ?? null;
   const farmName = onboardingStatus?.farmName ?? null;
+  const farmState = useFarmState(farmId);
 
   // MapView error recovery: increment key to force remount (WebGL context recovery)
   const [mapKey, setMapKey] = useState(0);
@@ -70,13 +73,6 @@ export default function DashboardPage() {
     setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
   }, []);
 
-  // Long-press: skip location picker and go straight to form (gated by permission)
-  const handleMapLongPress = useCallback((lngLat: { lng: number; lat: number }) => {
-    if (!canCreateWell) return;
-    setPickedLocation({ latitude: lngLat.lat, longitude: lngLat.lng });
-    setCurrentStep('form');
-  }, [canCreateWell]);
-
   const handleSaveWell = useCallback(async (wellData: WellFormData) => {
     if (!hasPermission(role, 'create_well')) {
       debugError('Dashboard', 'Attempted well creation without permission');
@@ -84,7 +80,6 @@ export default function DashboardPage() {
     }
     if (isSaving) return;
 
-    const farmId = onboardingStatus?.farmId;
     if (!farmId || !user) {
       debugError('Dashboard', 'Cannot save well: missing farmId or user');
       return;
@@ -134,7 +129,7 @@ export default function DashboardPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [db, isSaving, onboardingStatus?.farmId, role, user]);
+  }, [db, isSaving, farmId, role, user]);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden">
@@ -146,9 +141,9 @@ export default function DashboardPage() {
         <MapView
           key={mapKey}
           wells={wells}
+          farmState={farmState}
           onWellClick={handleWellClick}
           onMapClick={handleMapClick}
-          onMapLongPress={handleMapLongPress}
           pickedLocation={pickedLocation}
           isPickingLocation={currentStep === 'location'}
         />
