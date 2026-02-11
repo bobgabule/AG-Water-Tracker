@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 8 in progress -- Subscription Gating (plan 1 of 3 complete).
+**Current focus:** Phase 8 in progress -- Subscription Gating (plan 2 of 3 complete).
 
 ## Current Position
 
 Phase: 8 of 8 (Subscription Gating)
-Plan: 1 of 3 in phase 08 -- COMPLETE
+Plan: 2 of 3 in phase 08 -- COMPLETE
 Status: Executing phase 08
-Last activity: 2026-02-11 -- Completed 08-01-PLAN.md (Subscription Constants & Seat Usage)
+Last activity: 2026-02-11 -- Completed 08-02-PLAN.md (Seat Usage Display on Users Page)
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 5min
-- Total execution time: 1.61 hours
+- Total execution time: 1.66 hours
 
 **By Phase:**
 
@@ -34,10 +34,10 @@ Progress: [█████████░] 92%
 | 05-grower-onboarding | 2 | 6min | 3min |
 | 06-invite-system | 2 | 16min | 8min |
 | 07-user-management | 2 | 5min | 3min |
-| 08-subscription-gating | 1 | 2min | 2min |
+| 08-subscription-gating | 2 | 5min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 08-01 (2min), 07-02 (2min), 07-01 (3min), 06-02 (11min), 06-01 (5min)
+- Last 5 plans: 08-02 (3min), 08-01 (2min), 07-02 (2min), 07-01 (3min), 06-02 (11min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -112,6 +112,8 @@ Recent decisions affecting current work:
 - [08-01]: Hardcoded plan constants (no DB table) per SUBS-03 -- UI-only gating
 - [08-01]: SQL-level exempt role filtering (IN clause) rather than client-side post-filter
 - [08-01]: RoleSeatUsage interface with isFull boolean for simple downstream conditional rendering
+- [08-02]: Seat usage section placed between page title and show-disabled toggle for visibility without scrolling
+- [08-02]: Included uncommitted AddUserModal seat gating from 08-01 in this commit for clean build state
 
 ### Pending Todos
 
@@ -128,5 +130,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 08-01-PLAN.md (Subscription Constants & Seat Usage)
+Stopped at: Completed 08-02-PLAN.md (Seat Usage Display on Users Page)
 Resume file: None
