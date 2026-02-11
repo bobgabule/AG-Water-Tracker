@@ -48,7 +48,7 @@ bucket_definitions:
       WHERE user_id = request.user_id()
       AND role = 'super_admin'
     data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Farm Invites (for Growers)
@@ -62,7 +62,7 @@ bucket_definitions:
       WHERE user_id = request.user_id()
       AND role = 'grower'
     data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Farm Invites (for Admins)
@@ -75,7 +75,7 @@ bucket_definitions:
       WHERE user_id = request.user_id()
       AND role = 'admin'
     data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Wells (via farm_members join table)
@@ -97,7 +97,7 @@ bucket_definitions:
   user_profile:
     parameters: SELECT request.user_id() as user_id
     data:
-      - SELECT id, phone, display_name, created_at, updated_at FROM users WHERE id = bucket.user_id
+      - SELECT id, phone, display_name, first_name, last_name, email, created_at, updated_at FROM users WHERE id = bucket.user_id
 
 # =============================================================================
 # Implementation Notes

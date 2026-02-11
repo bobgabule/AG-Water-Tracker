@@ -181,9 +181,15 @@ export default function VerifyPage() {
     navigate('/auth/phone', { replace: true });
   }, [navigate]);
 
-  // Don't render if already logged in or no phone (will redirect shortly)
+  // Show branded loading while waiting for redirect (logged-in user or missing phone state)
   if (user || !phone) {
-    return <div className="min-h-screen bg-gray-900" />;
+    return (
+      <AuthLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      </AuthLayout>
+    );
   }
 
   const isCodeComplete = code.every((d) => d !== '') && code.join('').length === 4;

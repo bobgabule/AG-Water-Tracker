@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [x] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
 - [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
-- [ ] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
+- [x] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
 - [ ] **Phase 6: Invite System** - Invite form, farm_invites backend, SMS delivery, and invited user auto-onboarding
 - [ ] **Phase 7: User Management** - Users page, disable/enable users, profile editing, and disabled user filtering
 - [ ] **Phase 8: Subscription Gating** - Seat limit display, invite blocking at capacity, and upgrade placeholder
@@ -85,10 +85,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- RequireRole route guard component + SideMenu navigation filtering by role
-- [ ] 04-02-PLAN.md -- Role-gated well creation UI (New Well buttons, long-press, write guards) in Dashboard and WellList
-- [ ] 04-03-PLAN.md -- Super admin cross-farm access (Zustand store, useActiveFarm hook, FarmSelector, Header integration)
-- [ ] 04-04-PLAN.md -- Role change detection (useRoleChangeDetector hook) + active farm store cleanup on sign-out
+- [x] 04-01-PLAN.md -- RequireRole route guard component + SideMenu navigation filtering by role
+- [x] 04-02-PLAN.md -- Role-gated well creation UI (New Well buttons, long-press, write guards) in Dashboard and WellList
+- [x] 04-03-PLAN.md -- Super admin cross-farm access (Zustand store, useActiveFarm hook, FarmSelector, Header integration)
+- [x] 04-04-PLAN.md -- Role change detection (useRoleChangeDetector hook) + active farm store cleanup on sign-out
 
 ### Phase 5: Grower Onboarding
 **Goal**: A new farm owner can register and reach their dashboard with a fully set up farm
@@ -98,11 +98,11 @@ Plans:
   1. New user enters phone number, receives OTP, verifies, fills profile (first name, last name, email), creates farm (name, address), and lands on dashboard with their empty farm
   2. Unknown phone number (no existing account, no invite) automatically enters the grower onboarding flow -- never gets stuck at a "choose your path" screen
   3. User who partially completed onboarding (e.g., created profile but not farm) resumes from where they left off on next login
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Grower registration flow (OTP -> profile -> farm creation -> dashboard)
-- [ ] 05-02: Unknown phone number routing and partial onboarding resume logic
+- [x] 05-01-PLAN.md -- Fix PowerSync schema drift, OTP 6-digit, CreateFarmPage back nav, RequireNotOnboarded forward guard
+- [x] 05-02-PLAN.md -- VerifyPage redirect fix, resolveNextRoute verification, dead code cleanup, CreateFarmPage refresh retry
 
 ### Phase 6: Invite System
 **Goal**: Farm owners can invite users by phone and those users auto-join the farm on first login
@@ -114,14 +114,11 @@ Plans:
   3. Invited user opens app, enters their phone number, verifies OTP, and lands directly on the dashboard -- no profile creation or farm selection steps
   4. Invited user's profile is auto-created with the first name and last name provided by the grower during invite
   5. Invited user is assigned to the correct farm with the correct role (admin or meter_checker) without any manual selection
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: Invite form UI and farm_invites database record creation
-- [ ] 06-02: SMS delivery via Supabase Edge Function (send-invite-sms)
-- [ ] 06-03: Phone number auto-match in get_onboarding_status RPC
-- [ ] 06-04: Auto-profile and auto-membership creation for invited users
-- [ ] 06-05: Invited user onboarding bypass (OTP -> dashboard, no intermediate steps)
+- [x] 06-01-PLAN.md -- Split invited_name into first/last name, update RPCs, update AddUserModal + PendingInvitesList + PowerSync schema
+- [ ] 06-02-PLAN.md -- End-to-end verification: apply migration, update dashboard sync rules, test all scenarios
 
 ### Phase 7: User Management
 **Goal**: Farm owners and admins can view, manage, and maintain their team from a dedicated page
@@ -168,8 +165,8 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 1. Session Stability | 5/5 | Complete | 2026-02-10 |
 | 2. Offline Session Resilience | 3/3 | Complete | 2026-02-10 |
 | 3. Role Foundation | 4/4 | Complete | 2026-02-10 |
-| 4. Permission Enforcement | 0/4 | Not started | - |
-| 5. Grower Onboarding | 0/2 | Not started | - |
+| 4. Permission Enforcement | 4/4 | Complete | 2026-02-11 |
+| 5. Grower Onboarding | 2/2 | Complete | 2026-02-11 |
 | 6. Invite System | 0/5 | Not started | - |
 | 7. User Management | 0/4 | Not started | - |
 | 8. Subscription Gating | 0/3 | Not started | - |
