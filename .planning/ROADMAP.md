@@ -130,13 +130,11 @@ Plans:
   3. Grower or admin can disable a user from the list, and that user can no longer log in (but their historical data remains)
   4. Grower or admin can re-enable a previously disabled user, restoring their login access
   5. User can edit their own first name, last name, and email in the Settings page
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Users page layout with member list and role badges
-- [ ] 07-02: Disabled users toggle and visual indicators
-- [ ] 07-03: Disable and re-enable user actions with RPC calls
-- [ ] 07-04: Profile self-edit form in Settings page
+- [ ] 07-01-PLAN.md -- Database migration (is_disabled column + disable/enable RPCs), PowerSync schema update, ROLE_BADGE_STYLES, disabled-user session guard
+- [ ] 07-02-PLAN.md -- UsersPage UI overhaul: colored role badges, "Show disabled users" toggle, disable/enable actions with confirmation dialog
 
 ### Phase 8: Subscription Gating
 **Goal**: Farm owners see their plan limits and cannot exceed seat allocations
