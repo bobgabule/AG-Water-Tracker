@@ -167,6 +167,6 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 3. Role Foundation | 4/4 | Complete | 2026-02-10 |
 | 4. Permission Enforcement | 4/4 | Complete | 2026-02-11 |
 | 5. Grower Onboarding | 2/2 | Complete | 2026-02-11 |
-| 6. Invite System | 0/5 | Not started | - |
+| 6. Invite System | 2/2 | Complete | 2026-02-11 |
 | 7. User Management | 0/4 | Not started | - |
 | 8. Subscription Gating | 0/3 | Not started | - |

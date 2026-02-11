@@ -22,15 +22,23 @@
 ALTER TABLE farm_invites ADD COLUMN IF NOT EXISTS invited_first_name TEXT;
 ALTER TABLE farm_invites ADD COLUMN IF NOT EXISTS invited_last_name TEXT;
 
--- Migrate existing data: split "First Last" into separate columns
-UPDATE farm_invites
-SET
-    invited_first_name = SPLIT_PART(invited_name, ' ', 1),
-    invited_last_name = COALESCE(
-        NULLIF(SUBSTRING(invited_name FROM POSITION(' ' IN invited_name) + 1), ''),
-        ''
-    )
-WHERE invited_name IS NOT NULL AND invited_first_name IS NULL;
+-- Migrate existing data: split "First Last" into separate columns (if old column exists)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'farm_invites' AND column_name = 'invited_name'
+    ) THEN
+        UPDATE public.farm_invites
+        SET
+            invited_first_name = SPLIT_PART(invited_name, ' ', 1),
+            invited_last_name = COALESCE(
+                NULLIF(SUBSTRING(invited_name FROM POSITION(' ' IN invited_name) + 1), ''),
+                ''
+            )
+        WHERE invited_name IS NOT NULL AND invited_first_name IS NULL;
+    END IF;
+END $$;
 
 ALTER TABLE farm_invites DROP COLUMN IF EXISTS invited_name;
 
