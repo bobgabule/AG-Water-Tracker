@@ -133,8 +133,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Database migration (is_disabled column + disable/enable RPCs), PowerSync schema update, ROLE_BADGE_STYLES, disabled-user session guard
-- [ ] 07-02-PLAN.md -- UsersPage UI overhaul: colored role badges, "Show disabled users" toggle, disable/enable actions with confirmation dialog
+- [x] 07-01-PLAN.md -- Database migration (is_disabled column + disable/enable RPCs), PowerSync schema update, ROLE_BADGE_STYLES, disabled-user session guard
+- [x] 07-02-PLAN.md -- UsersPage UI overhaul: colored role badges, "Show disabled users" toggle, disable/enable actions with confirmation dialog
 
 ### Phase 8: Subscription Gating
 **Goal**: Farm owners see their plan limits and cannot exceed seat allocations
@@ -166,5 +166,5 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 4. Permission Enforcement | 4/4 | Complete | 2026-02-11 |
 | 5. Grower Onboarding | 2/2 | Complete | 2026-02-11 |
 | 6. Invite System | 2/2 | Complete | 2026-02-11 |
-| 7. User Management | 0/4 | Not started | - |
+| 7. User Management | 2/2 | Complete | 2026-02-11 |
 | 8. Subscription Gating | 0/3 | Not started | - |
