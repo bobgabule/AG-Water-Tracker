@@ -15,11 +15,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
 - [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
 - [x] **Phase 3: Role Foundation** - Database schema for 4-role system, RLS policies, and PowerSync sync rules
-- [ ] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
+- [x] **Phase 4: Permission Enforcement** - Client-side route guards, UI gating by role, and super admin cross-farm access
 - [x] **Phase 5: Grower Onboarding** - Complete grower registration flow and unknown phone number handling
-- [ ] **Phase 6: Invite System** - Invite form, farm_invites backend, SMS delivery, and invited user auto-onboarding
-- [ ] **Phase 7: User Management** - Users page, disable/enable users, profile editing, and disabled user filtering
-- [ ] **Phase 8: Subscription Gating** - Seat limit display, invite blocking at capacity, and upgrade placeholder
+- [x] **Phase 6: Invite System** - Invite form, farm_invites backend, SMS delivery, and invited user auto-onboarding
+- [x] **Phase 7: User Management** - Users page, disable/enable users, profile editing, and disabled user filtering
+- [x] **Phase 8: Subscription Gating** - Seat limit display, invite blocking at capacity, and upgrade placeholder
 
 ## Phase Details
 
@@ -118,7 +118,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md -- Split invited_name into first/last name, update RPCs, update AddUserModal + PendingInvitesList + PowerSync schema
-- [ ] 06-02-PLAN.md -- End-to-end verification: apply migration, update dashboard sync rules, test all scenarios
+- [x] 06-02-PLAN.md -- End-to-end verification: apply migration, update dashboard sync rules, test all scenarios
 
 ### Phase 7: User Management
 **Goal**: Farm owners and admins can view, manage, and maintain their team from a dedicated page
@@ -147,9 +147,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Subscription plan constants (hardcoded Basic: 1 admin + 3 meter checkers) and useSeatUsage hook
-- [ ] 08-02-PLAN.md -- Seat usage display on Users page (admin and meter checker counts with Full indicator)
-- [ ] 08-03-PLAN.md -- Invite form role blocking when seats full + "Contact us to upgrade" placeholder
+- [x] 08-01-PLAN.md -- Subscription plan constants (hardcoded Basic: 1 admin + 3 meter checkers) and useSeatUsage hook
+- [x] 08-02-PLAN.md -- Seat usage display on Users page (admin and meter checker counts with Full indicator)
+- [x] 08-03-PLAN.md -- Invite form role blocking when seats full + "Contact us to upgrade" placeholder
 
 ## Progress
 
@@ -167,4 +167,4 @@ Note: Phases 2 and 3 both depend on Phase 1 and could theoretically run in paral
 | 5. Grower Onboarding | 2/2 | Complete | 2026-02-11 |
 | 6. Invite System | 2/2 | Complete | 2026-02-11 |
 | 7. User Management | 2/2 | Complete | 2026-02-11 |
-| 8. Subscription Gating | 0/3 | Not started | - |
+| 8. Subscription Gating | 3/3 | Complete | 2026-02-11 |
