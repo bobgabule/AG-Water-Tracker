@@ -263,7 +263,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading || !onboardingStatus?.farmId}
-                className="px-6 py-2.5 bg-[#afe0cb] text-[#526640] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
+                className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
               >
                 {loading ? (
                   <>
