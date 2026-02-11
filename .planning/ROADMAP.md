@@ -144,12 +144,12 @@ Plans:
   1. Farm owner sees their current seat usage (e.g., "2 of 3 meter checkers used") on the Users page or Settings
   2. When seat limit is reached for a role, the invite form disables that role option and shows a message like "Meter checker seats full"
   3. A "Contact us to upgrade" or similar placeholder appears when limits are hit -- no Stripe or payment flow
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: Subscription plan definition and seat counting logic
-- [ ] 08-02: Seat limit display in Users page and Settings
-- [ ] 08-03: Invite form role blocking when seats are full and upgrade placeholder
+- [ ] 08-01-PLAN.md -- Subscription plan constants (hardcoded Basic: 1 admin + 3 meter checkers) and useSeatUsage hook
+- [ ] 08-02-PLAN.md -- Seat usage display on Users page (admin and meter checker counts with Full indicator)
+- [ ] 08-03-PLAN.md -- Invite form role blocking when seats full + "Contact us to upgrade" placeholder
 
 ## Progress
 
