@@ -92,7 +92,7 @@ CREATE OR REPLACE FUNCTION public.remove_farm_member(
 )
 RETURNS VOID
 LANGUAGE sql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = ''
 AS $$
     SELECT private.remove_farm_member_impl(p_farm_id, p_member_user_id);

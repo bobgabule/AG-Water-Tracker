@@ -258,7 +258,7 @@ CREATE OR REPLACE FUNCTION public.invite_user_by_phone(
 )
 RETURNS TEXT
 LANGUAGE sql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = ''
 AS $$
     SELECT private.invite_user_by_phone_impl(p_farm_id, p_phone, p_first_name, p_last_name, p_role);
