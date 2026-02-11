@@ -20,6 +20,7 @@ import ReportsPage from './pages/ReportsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import LanguagePage from './pages/LanguagePage';
 import SettingsPage from './pages/SettingsPage';
+import UsersPage from './pages/UsersPage';
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
             <Route element={<RequireRole action="manage_farm" />}>
               <Route path="/subscription" element={<SubscriptionPage />} />
             </Route>
+            <Route path="/users" element={<UsersPage />} />
             <Route path="/language" element={<LanguagePage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

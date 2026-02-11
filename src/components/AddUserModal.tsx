@@ -1,16 +1,14 @@
 import { useState, useCallback } from 'react';
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import {
-  CheckIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
+import { CheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 
-interface AddUserModalProps {
+interface AddUserBottomSheetProps {
   open: boolean;
   onClose: () => void;
+  callerRole: string | null;
 }
 
 type Role = 'meter_checker' | 'admin';
@@ -21,10 +19,11 @@ function formatPhoneDisplay(digits: string): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-export default function AddUserModal({ open, onClose }: AddUserModalProps) {
+export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
   const { onboardingStatus } = useAuth();
 
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
   const [role, setRole] = useState<Role>('meter_checker');
   const [loading, setLoading] = useState(false);
@@ -32,8 +31,12 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
   const [success, setSuccess] = useState(false);
   const [smsWarning, setSmsWarning] = useState(false);
 
-  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+  const handleFirstNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFirstName(e.target.value);
+  }, []);
+
+  const handleLastNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLastName(e.target.value);
   }, []);
 
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,13 +51,14 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
   const handleSubmit = useCallback(async () => {
     if (!onboardingStatus?.farmId) return;
 
-    // Validate name
-    if (!name.trim()) {
-      setError('Name is required');
+    if (!firstName.trim()) {
+      setError('First name is required');
       return;
     }
-
-    // Validate phone
+    if (!lastName.trim()) {
+      setError('Last name is required');
+      return;
+    }
     if (phoneDigits.length !== 10) {
       setError('Please enter a valid 10-digit phone number');
       return;
@@ -69,13 +73,14 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
       const { error: rpcError } = await supabase.rpc('invite_user_by_phone', {
         p_farm_id: onboardingStatus.farmId,
         p_phone: fullPhone,
-        p_name: name.trim(),
+        p_first_name: firstName.trim(),
+        p_last_name: lastName.trim(),
         p_role: role,
       });
 
       if (rpcError) throw rpcError;
 
-      // RPC succeeded — attempt to send SMS
+      // Attempt SMS
       try {
         const { error: smsError } = await supabase.functions.invoke('send-invite-sms', {
           body: {
@@ -109,10 +114,11 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
     } finally {
       setLoading(false);
     }
-  }, [onboardingStatus?.farmId, onboardingStatus?.farmName, name, phoneDigits, role]);
+  }, [onboardingStatus?.farmId, onboardingStatus?.farmName, firstName, lastName, phoneDigits, role]);
 
   const handleClose = useCallback(() => {
-    setName('');
+    setFirstName('');
+    setLastName('');
     setPhoneDigits('');
     setRole('meter_checker');
     setError('');
@@ -122,138 +128,154 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
     onClose();
   }, [onClose]);
 
+  const canSelectAdmin = callerRole === 'grower' || callerRole === 'super_admin';
+
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/50 transition-opacity duration-300 ease-out data-[closed]:opacity-0"
+        className="fixed inset-0 bg-black/40 transition-opacity duration-300 ease-out data-[closed]:opacity-0"
       />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
+      <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full max-w-md bg-gray-800 rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+          className="w-full bg-[#526640] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
         >
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-            aria-label="Close"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
+          {/* Header */}
+          <div className="bg-[#526640] p-4 pt-6 flex-shrink-0">
+            <h2 className="text-white font-bold text-lg tracking-wide">
+              {success ? 'INVITE SENT' : 'ADD NEW USER'}
+            </h2>
+          </div>
 
-          <DialogTitle className="text-xl font-semibold text-white mb-6">
-            {success ? 'Invite Sent' : 'Add User'}
-          </DialogTitle>
-
-          {success ? (
-            /* Success state */
-            <div className="space-y-6">
-              <div className="bg-gray-900 rounded-lg p-4 text-center">
-                <CheckIcon className="h-12 w-12 text-green-400 mx-auto mb-3" />
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-4 pb-[30px]">
+            {success ? (
+              <div className="py-6 text-center">
+                <CheckIcon className="h-12 w-12 text-green-600 mx-auto mb-3" />
                 <p className="text-white font-medium">
                   {smsWarning ? 'User added' : 'Invite sent to'} {formatPhoneDisplay(phoneDigits)}
                 </p>
                 {smsWarning && (
-                  <p className="text-yellow-400 text-sm mt-2">
+                  <p className="text-yellow-600 text-sm mt-2">
                     SMS could not be sent. Please notify the user manually.
                   </p>
                 )}
               </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Error */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-600 text-sm">{error}</p>
+                  </div>
+                )}
 
-              <button
-                onClick={handleClose}
-                className="w-full py-3 rounded-lg font-medium text-gray-300 hover:bg-gray-700 transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          ) : (
-            /* Form state */
-            <div className="space-y-5">
-              {/* Error message */}
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                  <p className="text-red-400 text-sm">{error}</p>
+                {/* Name inputs */}
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs text-white mb-2 block">First Name*</label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={handleFirstNameChange}
+                      placeholder="First name"
+                      autoComplete="given-name"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs text-white mb-2 block">Last Name*</label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={handleLastNameChange}
+                      placeholder="Last name"
+                      autoComplete="family-name"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                    />
+                  </div>
                 </div>
-              )}
 
-              {/* Name input */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={handleNameChange}
-                  placeholder="Enter name"
-                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              {/* Phone input */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  value={formatPhoneDisplay(phoneDigits)}
-                  onChange={handlePhoneChange}
-                  placeholder="(555) 123-4567"
-                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <p className="text-xs text-gray-500 mt-1">US phone number (10 digits)</p>
-              </div>
-
-              {/* Role selection */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Role</label>
-                <div className="flex rounded-lg border border-gray-600 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => handleRoleChange('meter_checker')}
-                    className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                      role === 'meter_checker'
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    Meter Checker
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRoleChange('admin')}
-                    className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                      role === 'admin'
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    Admin
-                  </button>
+                {/* Phone input */}
+                <div>
+                  <label className="text-xs text-white mb-2 block">Phone Number*</label>
+                  <input
+                    type="tel"
+                    value={formatPhoneDisplay(phoneDigits)}
+                    onChange={handlePhoneChange}
+                    placeholder="(555) 123-4567"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                  />
+                  <p className="text-xs text-white mt-2">US phone number (10 digits)</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {role === 'admin'
-                    ? 'Admins can manage wells, team members, and settings'
-                    : 'Meter checkers can view wells and record readings'}
-                </p>
-              </div>
 
-              {/* Submit button */}
+                {/* Role selection */}
+                {canSelectAdmin ? (
+                  <div>
+                    <label className="text-xs text-white mb-2 block">Role*</label>
+                    <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => handleRoleChange('meter_checker')}
+                        className={`flex-1 py-2.5 text-sm font-medium transition-colors ${role === 'meter_checker'
+                          ? 'bg-[#8ca074] text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                          }`}
+                      >
+                        Meter Checker
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRoleChange('admin')}
+                        className={`flex-1 py-2.5 text-sm font-medium transition-colors ${role === 'admin'
+                          ? 'bg-[#8ca074] text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                          }`}
+                      >
+                        Admin
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Role</label>
+                    <div className="py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
+                      Meter Checker
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer buttons */}
+          <div className="flex justify-between items-center px-4 py-6 border-0 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="px-6 py-2.5 text-white font-medium"
+            >
+              {success ? 'Done' : 'Cancel'}
+            </button>
+            {!success && (
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={loading || !onboardingStatus?.farmId}
-                className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="px-6 py-2.5 bg-[#afe0cb] text-[#526640] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending Invite...
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
                   </>
                 ) : (
                   'Send Invite'
                 )}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </DialogPanel>
       </div>
     </Dialog>

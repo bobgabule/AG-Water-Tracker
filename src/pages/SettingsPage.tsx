@@ -1,41 +1,56 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import {
   ArrowLeftIcon,
-  UserGroupIcon,
-  PlusIcon,
   ArrowRightStartOnRectangleIcon,
   Cog6ToothIcon,
+  PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { useUserRole } from '../hooks/useUserRole';
-import { isAdminOrAbove, ROLE_DISPLAY_NAMES } from '../lib/permissions';
+import { useUserProfile } from '../hooks/useUserProfile';
+import { ROLE_DISPLAY_NAMES } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
-import PendingInvitesList from '../components/PendingInvitesList';
-import AddUserModal from '../components/AddUserModal';
+import { supabase } from '../lib/supabase';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, onboardingStatus, signOut } = useAuth();
-  const [showInviteModal, setShowInviteModal] = useState(false);
+  const userRole = useUserRole();
+  const userProfile = useUserProfile();
+
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
-  // Get current user's role from permission module
-  const userRole = useUserRole();
-  const canManageTeam = isAdminOrAbove(userRole);
+  // Profile editing state
+  const [editing, setEditing] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Clean up success timer on unmount
+  useEffect(() => {
+    return () => clearTimeout(successTimerRef.current);
+  }, []);
+
+  // Initialize form from profile (once)
+  const hasInitRef = useRef(false);
+  useEffect(() => {
+    if (userProfile && !hasInitRef.current) {
+      setFirstName(userProfile.first_name ?? '');
+      setLastName(userProfile.last_name ?? '');
+      setEmail(userProfile.email ?? '');
+      hasInitRef.current = true;
+    }
+  }, [userProfile]);
 
   const handleBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
-
-  const handleOpenInviteModal = useCallback(() => {
-    setShowInviteModal(true);
-  }, []);
-
-  const handleCloseInviteModal = useCallback(() => {
-    setShowInviteModal(false);
-  }, []);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -50,6 +65,61 @@ export default function SettingsPage() {
       setSignOutLoading(false);
     }
   }, [signOut, navigate]);
+
+  const handleEditStart = useCallback(() => {
+    // Reset to current profile values when entering edit mode
+    setFirstName(userProfile?.first_name ?? '');
+    setLastName(userProfile?.last_name ?? '');
+    setEmail(userProfile?.email ?? '');
+    setSaveError(null);
+    setSaveSuccess(false);
+    setEditing(true);
+  }, [userProfile]);
+
+  const handleEditCancel = useCallback(() => {
+    setEditing(false);
+    setSaveError(null);
+  }, []);
+
+  const handleSaveProfile = useCallback(async () => {
+    if (!user?.id) return;
+
+    if (!firstName.trim()) {
+      setSaveError('First name is required');
+      return;
+    }
+    if (!lastName.trim()) {
+      setSaveError('Last name is required');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setSaveError(null);
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim() || null,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setSaveSuccess(true);
+      setEditing(false);
+      // Clear success message after 3 seconds
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update profile';
+      setSaveError(message);
+    } finally {
+      setSaving(false);
+    }
+  }, [user?.id, firstName, lastName, email]);
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -72,31 +142,115 @@ export default function SettingsPage() {
 
       {/* Content */}
       <main className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        {/* Team Management Section - only for admin-level roles */}
-        {canManageTeam && (
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <UserGroupIcon className="h-5 w-5 text-gray-400" />
-                <h2 className="text-lg font-semibold text-white">Team Management</h2>
-              </div>
+        {/* Profile Section */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white">Profile</h2>
+            {!editing && (
               <button
-                onClick={handleOpenInviteModal}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-sm font-medium text-white transition-colors"
+                onClick={handleEditStart}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
               >
-                <PlusIcon className="h-4 w-4" />
-                Add User
+                <PencilSquareIcon className="h-4 w-4" />
+                Edit
               </button>
+            )}
+          </div>
+
+          {saveSuccess && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4">
+              <p className="text-green-400 text-sm">Profile updated successfully</p>
             </div>
-            <PendingInvitesList />
-          </section>
-        )}
+          )}
+
+          {saveError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+              <p className="text-red-400 text-sm">{saveError}</p>
+            </div>
+          )}
+
+          <div className="bg-gray-800 rounded-lg border border-gray-700 divide-y divide-gray-700">
+            {editing ? (
+              /* Edit mode */
+              <div className="p-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1.5">First Name</label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1.5">Last Name</label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Optional"
+                    className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleEditCancel}
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-lg font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-lg font-medium text-white bg-primary hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save'
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Display mode */
+              <>
+                <div className="p-4">
+                  <p className="text-sm text-gray-400">Name</p>
+                  <p className="text-white">
+                    {userProfile?.first_name} {userProfile?.last_name}
+                  </p>
+                </div>
+                {userProfile?.email && (
+                  <div className="p-4">
+                    <p className="text-sm text-gray-400">Email</p>
+                    <p className="text-white">{userProfile.email}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </section>
 
         {/* Account Section */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-4">Account</h2>
           <div className="bg-gray-800 rounded-lg border border-gray-700 divide-y divide-gray-700">
-            {/* User info */}
             {user?.phone && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Phone Number</p>
@@ -104,7 +258,6 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Farm info */}
             {onboardingStatus?.farmId && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Farm ID</p>
@@ -112,7 +265,6 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Role info */}
             {userRole && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Role</p>
@@ -134,7 +286,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Danger Zone */}
+        {/* Sign Out */}
         <section>
           <h2 className="text-lg font-semibold text-white mb-4">Sign Out</h2>
 
@@ -163,12 +315,6 @@ export default function SettingsPage() {
           </button>
         </section>
       </main>
-
-      {/* Add User Modal */}
-      <AddUserModal
-        open={showInviteModal}
-        onClose={handleCloseInviteModal}
-      />
     </div>
   );
 }

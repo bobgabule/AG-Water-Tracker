@@ -2,17 +2,15 @@ import { useMemo, useState, useCallback } from 'react';
 import { useQuery } from '@powersync/react';
 import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
-import {
-  TrashIcon,
-  UserGroupIcon,
-} from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 interface FarmInviteRow {
   id: string;           // actually the invite code (mapped via sync rules: SELECT code AS id)
   farm_id: string;
   role: string;
   invited_phone: string;
-  invited_name: string;
+  invited_first_name: string;
+  invited_last_name: string;
   expires_at: string;
   uses_count: number;
   created_at: string;
@@ -40,7 +38,7 @@ export default function PendingInvitesList() {
   // Query phone-based invites from PowerSync
   const { data: rawInvites } = useQuery<FarmInviteRow>(
     farmId
-      ? `SELECT id, farm_id, role, invited_phone, invited_name, expires_at, uses_count, created_at FROM farm_invites WHERE farm_id = ? AND invited_phone IS NOT NULL ORDER BY created_at DESC`
+      ? `SELECT id, farm_id, role, invited_phone, invited_first_name, invited_last_name, expires_at, uses_count, created_at FROM farm_invites WHERE farm_id = ? AND invited_phone IS NOT NULL ORDER BY created_at DESC`
       : 'SELECT NULL WHERE 0',
     farmId ? [farmId] : []
   );
@@ -79,92 +77,66 @@ export default function PendingInvitesList() {
     }
   }, []);
 
-  // Empty state
-  if (invites.length === 0) {
-    return (
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
-        <UserGroupIcon className="h-12 w-12 text-gray-500 mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">
-          No invites yet. Add a user to invite team members.
-        </p>
-      </div>
-    );
-  }
+  if (invites.length === 0) return null;
+
+  const STATUS_CLASSES: Record<InviteStatus, string> = {
+    Joined: 'text-green-700',
+    Expired: 'text-gray-400',
+    Pending: 'text-yellow-600',
+  };
 
   return (
-    <div className="space-y-3">
+    <div>
+      <h2 className="text-lg font-semibold text-[#5f7248] mb-3">Pending Invites</h2>
+
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
+          <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
 
-      {invites.map((invite) => {
-        const isRevoking = revokingId === invite.id;
+      <div className="space-y-2">
+        {invites.map((invite) => {
+          const isRevoking = revokingId === invite.id;
 
-        return (
-          <div
-            key={invite.id}
-            className={`bg-gray-800 rounded-lg p-4 border ${
-              invite.status === 'Expired' ? 'border-gray-600 opacity-60' : 'border-gray-700'
-            }`}
-          >
-            {/* Header: Name and badges */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-medium">
-                {invite.invited_name}
-              </span>
-              <div className="flex items-center gap-2">
-                {/* Role badge */}
-                <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
-                    invite.role === 'admin'
-                      ? 'bg-yellow-500/20 text-yellow-400'
-                      : 'bg-blue-500/20 text-blue-400'
-                  }`}
-                >
-                  {invite.role}
+          return (
+            <div
+              key={invite.id}
+              className={`bg-[#dfe4d4] rounded-lg px-4 py-3 flex items-center justify-between ${
+                invite.status === 'Expired' ? 'opacity-60' : ''
+              }`}
+            >
+              <div className="min-w-0 flex-1">
+                <span className="text-[#5f7248] font-medium">
+                  {invite.invited_first_name} {invite.invited_last_name}
                 </span>
-                {/* Status badge */}
-                <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
-                    invite.status === 'Joined'
-                      ? 'bg-green-500/20 text-green-400'
-                      : invite.status === 'Expired'
-                        ? 'bg-gray-500/20 text-gray-400'
-                        : 'bg-yellow-500/20 text-yellow-400'
-                  }`}
-                >
+                <span className="text-[#5f7248]/50 text-xs ml-2">
+                  {formatPhone(invite.invited_phone)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`text-sm ${STATUS_CLASSES[invite.status]}`}>
                   {invite.status}
                 </span>
+                {invite.status === 'Pending' && (
+                  <button
+                    onClick={() => handleRevoke(invite.id)}
+                    disabled={isRevoking}
+                    className="p-1 rounded text-[#5f7248]/40 hover:text-red-600 transition-colors disabled:opacity-50"
+                    aria-label={`Revoke invite for ${invite.invited_first_name}`}
+                  >
+                    {isRevoking ? (
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <TrashIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
-
-            {/* Phone number */}
-            <div className="text-sm text-gray-400 mb-3">
-              {formatPhone(invite.invited_phone)}
-            </div>
-
-            {/* Revoke button — only for Pending invites */}
-            {invite.status === 'Pending' && (
-              <div className="flex justify-end">
-                <button
-                  onClick={() => handleRevoke(invite.id)}
-                  disabled={isRevoking}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 rounded-lg text-sm font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
-                >
-                  {isRevoking ? (
-                    <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <TrashIcon className="h-4 w-4" />
-                  )}
-                  Revoke
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
