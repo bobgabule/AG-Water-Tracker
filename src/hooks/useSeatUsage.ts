@@ -46,20 +46,19 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
 /**
  * Returns per-role seat usage for the current farm.
  *
- * Counts active (non-disabled) farm members AND pending (unused, non-expired)
- * invites per seat-limited role, then compares against PLAN_LIMITS.
+ * Counts farm members AND pending (unused, non-expired) invites per
+ * seat-limited role, then compares against PLAN_LIMITS.
  *
  * Exempt roles (grower, super_admin) are excluded from counting.
- * Disabled members (is_disabled = 1) are excluded.
  * Used or expired invites are excluded.
  */
 export function useSeatUsage(): SeatUsage {
   const { onboardingStatus } = useAuth();
   const farmId = onboardingStatus?.farmId ?? null;
 
-  // --- Active members query (non-disabled, seat-limited roles only) ---
+  // --- Active members query (seat-limited roles only) ---
   const membersQuery = farmId
-    ? `SELECT role, COUNT(*) as count FROM farm_members WHERE farm_id = ? AND is_disabled = 0 AND role IN (${ROLES_PLACEHOLDER}) GROUP BY role`
+    ? `SELECT role, COUNT(*) as count FROM farm_members WHERE farm_id = ? AND role IN (${ROLES_PLACEHOLDER}) GROUP BY role`
     : 'SELECT NULL WHERE 0';
 
   const membersParams = farmId ? [farmId, ...SEAT_LIMITED_ROLES] : [];
