@@ -113,7 +113,9 @@ export default function VerifyPage() {
         setError('');
         await verifyOtp(phone, fullCode);
         const status = await refreshOnboardingStatus();
-        const nextRoute = resolveNextRoute(status);
+        // After successful OTP, user IS authenticated. If status fetch failed,
+        // default to profile page — never send back to login.
+        const nextRoute = status ? resolveNextRoute(status) : '/onboarding/profile';
         navigate(nextRoute, { replace: true });
       } catch (err) {
         if (!navigator.onLine) {
