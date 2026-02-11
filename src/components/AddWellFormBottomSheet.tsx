@@ -165,13 +165,13 @@ export default function AddWellFormBottomSheet({
       <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full bg-white rounded-t-3xl shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
+          className="w-full bg-[#5f7248] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="bg-[#4a5d4a] p-4 pt-6 rounded-t-3xl flex-shrink-0">
+          <div className="bg-[#5f7248] p-4 pt-6 flex-shrink-0">
             <div>
               {farmName && (
-                <p className="text-white/70 text-xs">{farmName}</p>
+                <p className="text-white text-xs">{farmName}</p>
               )}
               <h2 className="text-white font-bold text-lg tracking-wide">
                 ADD NEW WELL
@@ -184,7 +184,7 @@ export default function AddWellFormBottomSheet({
             <div className="space-y-4">
               {/* Well Name */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Well Name*</label>
+                <label className="text-xs text-white mb-1 block">Well Name*</label>
                 <input
                   type="text"
                   value={name}
@@ -197,7 +197,7 @@ export default function AddWellFormBottomSheet({
               {/* Meter Serial Number and WMIS Number */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">Meter Serial Number*</label>
+                  <label className="text-xs text-white mb-1 block">Meter Serial Number*</label>
                   <input
                     type="text"
                     value={meterSerialNumber}
@@ -207,7 +207,7 @@ export default function AddWellFormBottomSheet({
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">WMIS Number*</label>
+                  <label className="text-xs text-white mb-1 block">WMIS Number*</label>
                   <input
                     type="text"
                     value={wmisNumber}
@@ -221,7 +221,7 @@ export default function AddWellFormBottomSheet({
               {/* Latitude, Longitude, GPS */}
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">Latitude*</label>
+                  <label className="text-xs text-white mb-1 block">Latitude*</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -232,7 +232,7 @@ export default function AddWellFormBottomSheet({
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">Longitude*</label>
+                  <label className="text-xs text-white mb-1 block">Longitude*</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -246,7 +246,7 @@ export default function AddWellFormBottomSheet({
                   type="button"
                   onClick={handleGetLocation}
                   disabled={gpsLoading}
-                  className="p-2.5 bg-[#5a9494] rounded-lg text-white hover:bg-[#4a8484] transition-colors disabled:opacity-50"
+                  className="p-2.5 bg-white rounded-lg text-[#6190d1] hover:bg-[#6190d1] transition-colors disabled:opacity-50"
                   aria-label="Get current location"
                 >
                   {gpsLoading ? (
@@ -261,7 +261,7 @@ export default function AddWellFormBottomSheet({
               )}
 
               {/* Allocations disabled card */}
-              <div className="bg-[#4a5d4a] rounded-lg p-4 opacity-80">
+              <div className="bg-[#5f7248] border border-white/50 rounded-lg p-4 opacity-80">
                 <h3 className="text-white font-medium text-sm">Allocations</h3>
                 <p className="text-white/70 text-xs mt-1">
                   Save the well first to add allocations
@@ -290,14 +290,14 @@ export default function AddWellFormBottomSheet({
                   type="checkbox"
                   checked={sendMonthlyReport}
                   onChange={(e) => setSendMonthlyReport(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 text-[#5a9494] focus:ring-[#5a9494]"
+                  className="w-5 h-5 rounded border-white-300 text-[#506741] focus:ring-white"
                 />
-                <span className="text-sm text-gray-700">Send monthly meter reading report</span>
+                <span className="text-sm text-white">Send monthly meter reading report</span>
               </label>
 
               {/* Battery State */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Battery State*</label>
+                <label className="text-xs text-white mb-1 block">Battery State*</label>
                 <select
                   value={batteryState}
                   onChange={(e) => setBatteryState(e.target.value as WellFormData['batteryState'])}
@@ -313,7 +313,7 @@ export default function AddWellFormBottomSheet({
 
               {/* Pump State */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Pump State*</label>
+                <label className="text-xs text-white mb-1 block">Pump State*</label>
                 <select
                   value={pumpState}
                   onChange={(e) => setPumpState(e.target.value as WellFormData['pumpState'])}
@@ -329,7 +329,7 @@ export default function AddWellFormBottomSheet({
 
               {/* Meter Status */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Meter Status*</label>
+                <label className="text-xs text-white mb-1 block">Meter Status*</label>
                 <select
                   value={meterStatus}
                   onChange={(e) => setMeterStatus(e.target.value as WellFormData['meterStatus'])}
@@ -346,11 +346,11 @@ export default function AddWellFormBottomSheet({
           </div>
 
           {/* Footer buttons */}
-          <div className="flex justify-between items-center px-4 py-4 border-t border-gray-200 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="flex justify-between items-center px-4 py-4 border-0 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-gray-600 font-medium"
+              className="px-6 py-2.5 text-white font-medium"
             >
               Cancel
             </button>
@@ -358,7 +358,7 @@ export default function AddWellFormBottomSheet({
               type="button"
               onClick={handleSave}
               disabled={!isFormValid}
-              className="px-6 py-2.5 bg-[#5a9494] text-white rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckIcon className="w-5 h-5" />
               Save
