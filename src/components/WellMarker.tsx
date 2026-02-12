@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import { Marker } from 'react-map-gl/mapbox';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import type { WellWithReading } from '../hooks/useWells';
@@ -66,9 +66,7 @@ export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
   const allocationPercentage = 100;
 
   // Get status text based on timestamps
-  const statusText = useMemo(() => {
-    return getStatusText(well.createdAt, well.updatedAt);
-  }, [well.createdAt, well.updatedAt]);
+  const statusText = getStatusText(well.createdAt, well.updatedAt);
 
   if (!well.location) return null;
 
