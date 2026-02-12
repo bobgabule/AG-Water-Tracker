@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { MapPinIcon, CheckIcon } from '@heroicons/react/24/outline';
 import SegmentedControl from './SegmentedControl';
+import { getCoordinateValidationError } from '../lib/validation';
 
 export interface WellFormData {
   name: string;
@@ -158,11 +159,12 @@ export default function AddWellFormBottomSheet({
     onSave,
   ]);
 
+  const coordinateError = getCoordinateValidationError(latitude, longitude);
+
   const isFormValid =
     name.trim() !== '' &&
     wmisNumber.trim() !== '' &&
-    latitude >= -90 && latitude <= 90 &&
-    longitude >= -180 && longitude <= 180;
+    coordinateError === null;
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
@@ -266,6 +268,9 @@ export default function AddWellFormBottomSheet({
               </div>
               {gpsError && (
                 <p className="text-red-500 text-xs mt-1">{gpsError}</p>
+              )}
+              {coordinateError && !gpsError && (
+                <p className="text-red-500 text-xs mt-1">{coordinateError}</p>
               )}
 
               {/* Allocations disabled card */}

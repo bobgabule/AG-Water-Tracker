@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
+import { getCoordinateValidationError } from '../lib/validation';
 
 interface LocationPickerBottomSheetProps {
   open: boolean;
@@ -88,9 +89,11 @@ export default function LocationPickerBottomSheet({
     }
   }, [location, onNext]);
 
-  const isNextDisabled = !location ||
-    location.latitude < -90 || location.latitude > 90 ||
-    location.longitude < -180 || location.longitude > 180;
+  const coordinateError = location
+    ? getCoordinateValidationError(location.latitude, location.longitude)
+    : null;
+
+  const isNextDisabled = !location || coordinateError !== null;
 
   if (!open) return null;
 
@@ -158,6 +161,9 @@ export default function LocationPickerBottomSheet({
           {/* GPS Error message */}
           {gpsError && (
             <p className="text-red-500 text-xs mt-2">{gpsError}</p>
+          )}
+          {coordinateError && !gpsError && (
+            <p className="text-red-500 text-xs mt-2">{coordinateError}</p>
           )}
         </div>
 
