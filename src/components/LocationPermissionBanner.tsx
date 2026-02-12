@@ -7,7 +7,7 @@ interface LocationPermissionBannerProps {
 
 export default memo(function LocationPermissionBanner({ onDismiss }: LocationPermissionBannerProps) {
   return (
-    <div className="absolute top-20 left-4 right-4 z-10 bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-lg">
+    <div role="alert" className="absolute top-20 left-4 right-4 z-10 bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-lg">
       <div className="flex items-start gap-3">
         <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">

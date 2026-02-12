@@ -62,11 +62,8 @@ export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
     onClick?.(well.id);
   }, [onClick, well.id]);
 
-  // Calculate allocation percentage (100% for all wells for now)
-  const allocationPercentage = useMemo(() => {
-    // Future: calculate from used / allocated
-    return 100;
-  }, []);
+  // Future: calculate from used / allocated
+  const allocationPercentage = 100;
 
   // Get status text based on timestamps
   const statusText = useMemo(() => {

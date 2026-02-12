@@ -88,6 +88,10 @@ export default function MapView({
     sessionStorage.getItem(BANNER_DISMISSED_KEY) === 'true'
   );
 
+  // Track when the Mapbox GL map is fully loaded and ready for jumpTo/flyTo
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const handleMapLoad = useCallback(() => setMapLoaded(true), []);
+
   // Track map tile loading status for offline handling
   const { isOnline, hasTileError, setTileError } = useMapTileStatus();
 
@@ -133,9 +137,9 @@ export default function MapView({
   // Track if we've already flown to user location (to avoid flying on every re-render)
   const hasFlyToUserLocation = useRef(false);
 
-  // Fly to user location when it becomes available after the map has rendered
+  // Fly to user location when it becomes available after the map is loaded
   useEffect(() => {
-    if (userLocation && mapRef.current && !hasFlyToUserLocation.current) {
+    if (userLocation && mapLoaded && mapRef.current && !hasFlyToUserLocation.current) {
       hasFlyToUserLocation.current = true;
       mapRef.current.flyTo({
         center: [userLocation.lng, userLocation.lat],
@@ -143,13 +147,14 @@ export default function MapView({
         duration: 1500,
       });
     }
-  }, [userLocation]);
+  }, [userLocation, mapLoaded]);
 
   // Jump to farm state center if it arrives after Map already mounted with fallback
   const hasJumpedToFarmState = useRef(false);
   useEffect(() => {
     if (
       farmState &&
+      mapLoaded &&
       mapRef.current &&
       !hasJumpedToFarmState.current &&
       !userLocation &&
@@ -164,7 +169,7 @@ export default function MapView({
         });
       }
     }
-  }, [farmState, wells, userLocation]);
+  }, [farmState, wells, userLocation, mapLoaded]);
 
   // Compute initial view from wells/farm state — user location handled via flyTo animation
   const initialViewState = useMemo(
@@ -223,6 +228,7 @@ export default function MapView({
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+        onLoad={handleMapLoad}
         onError={handleMapError}
         onClick={handleMapClick}
       >
