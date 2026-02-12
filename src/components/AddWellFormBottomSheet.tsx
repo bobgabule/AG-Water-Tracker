@@ -80,6 +80,10 @@ export default function AddWellFormBottomSheet({
   }, [open, initialLocation.latitude, initialLocation.longitude]);
 
   const handleGetLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGpsError('Geolocation is not supported by this browser.');
+      return;
+    }
     setGpsLoading(true);
     setGpsError(null);
     navigator.geolocation.getCurrentPosition(
@@ -154,7 +158,11 @@ export default function AddWellFormBottomSheet({
     onSave,
   ]);
 
-  const isFormValid = name.trim() !== '' && meterSerialNumber.trim() !== '' && wmisNumber.trim() !== '';
+  const isFormValid =
+    name.trim() !== '' &&
+    wmisNumber.trim() !== '' &&
+    latitude >= -90 && latitude <= 90 &&
+    longitude >= -180 && longitude <= 180;
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
@@ -197,7 +205,7 @@ export default function AddWellFormBottomSheet({
               {/* Meter Serial Number and WMIS Number */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-white mb-1 block">Meter Serial Number*</label>
+                  <label className="text-xs text-white mb-1 block">Meter Serial Number</label>
                   <input
                     type="text"
                     value={meterSerialNumber}

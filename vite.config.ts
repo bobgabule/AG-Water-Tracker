@@ -51,7 +51,7 @@ export default defineConfig({
             options: {
               cacheName: 'mapbox-api-v1',
               expiration: {
-                maxEntries: 800,
+                maxEntries: 2000,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
               cacheableResponse: {
@@ -66,7 +66,7 @@ export default defineConfig({
             options: {
               cacheName: 'mapbox-tiles-v1',
               expiration: {
-                maxEntries: 1000,
+                maxEntries: 3000,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
               cacheableResponse: {

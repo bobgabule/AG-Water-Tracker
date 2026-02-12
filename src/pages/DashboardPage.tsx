@@ -34,9 +34,13 @@ export default function DashboardPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    return () => { clearTimeout(errorTimeoutRef.current); };
+    return () => {
+      isMountedRef.current = false;
+      clearTimeout(errorTimeoutRef.current);
+    };
   }, []);
 
   // Bottom sheet flow state
@@ -118,16 +122,20 @@ export default function DashboardPage() {
         ]
       );
 
+      if (!isMountedRef.current) return;
       setSaveError(null);
       setCurrentStep('closed');
       setPickedLocation(null);
     } catch (error) {
       debugError('Dashboard', 'Failed to save well:', error);
+      if (!isMountedRef.current) return;
       clearTimeout(errorTimeoutRef.current);
       setSaveError('Failed to save well. Please try again.');
       errorTimeoutRef.current = setTimeout(() => setSaveError(null), 5000);
     } finally {
-      setIsSaving(false);
+      if (isMountedRef.current) {
+        setIsSaving(false);
+      }
     }
   }, [db, isSaving, farmId, role, user]);
 

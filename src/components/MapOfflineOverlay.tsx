@@ -43,7 +43,7 @@ export default memo(function MapOfflineOverlay({
                 <button
                   onClick={onRetry}
                   className="mt-3 flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 transition-colors"
-                  aria-label="Retry loading map tiles"
+
                 >
                   <ArrowPathIcon className="w-4 h-4" aria-hidden="true" />
                   Try again
