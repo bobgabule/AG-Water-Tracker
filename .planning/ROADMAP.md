@@ -202,7 +202,10 @@ Plans:
   7. WellMarker uses plain constant instead of useMemo for static value
   8. LocationPermissionBanner is announced by screen readers via ARIA role
   9. MapOfflineOverlay retry button does not have redundant aria-label
-**Plans**: Not yet planned
+**Plans**: 1 plan
+
+Plans:
+- [ ] 11-01-PLAN.md -- US-bounds coordinate validation (shared utility + both forms) and WellMarker useMemo removal
 
 ## Progress
 
