@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-12)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v1.1 Milestone — Dashboard & Map improvements (Phase 11 next)
+**Current focus:** v1.1 Milestone — Dashboard & Map improvements (complete)
 
 ## Current Position
 
 Phase: 11 of 11 (Dashboard Quality Fixes)
-Plan: 0 of ? in phase 11 -- NOT YET PLANNED
-Status: Phase needs planning
-Last activity: 2026-02-12 -- Phase 10 completed
+Plan: 1 of 1 in phase 11 -- COMPLETE
+Status: Phase 11 complete -- all v1.1 phases done
+Last activity: 2026-02-12 -- Phase 11 completed
 
-Progress: [█████████░] 91% (v1.0 complete, v1.1 Phases 9-10 done)
+Progress: [██████████] 100% (v1.0 complete, v1.1 Phases 9-11 done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27 (25 v1.0 + 2 v1.1)
+- Total plans completed: 28 (25 v1.0 + 3 v1.1)
 - Average duration: 5min
-- Total execution time: ~1.9 hours
+- Total execution time: ~2.0 hours
 
 **By Phase:**
 
@@ -37,9 +37,10 @@ Progress: [█████████░] 91% (v1.0 complete, v1.1 Phases 9-10 
 | 08-subscription-gating | 3 | 9min | 3min |
 | 09-map-default-view | 1 | ~5min | 5min |
 | 10-location-permission-flow | 1 | ~5min | 5min |
+| 11-dashboard-quality-fixes | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 10-01 (5min), 09-01 (5min), 08-03 (4min), 08-02 (3min), 08-01 (2min)
+- Last 5 plans: 11-01 (2min), 10-01 (5min), 09-01 (5min), 08-03 (4min), 08-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -57,6 +58,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [v1.1]: meterSerialNumber is optional in AddWellFormBottomSheet (only name + WMIS required)
 - [v1.1]: Increase tile cache maxEntries (800→2000 API, 1000→3000 tiles) for large farm areas
 - [v1.1]: Phase 11 (quality fixes) can run in parallel with Phase 10 since they touch different files
+- [v1.1]: US bounds defined as lat 18-72, lng -180 to -66 (covers all US states, territories, and Alaska)
 
 **v1.0 decisions (archived):**
 - See v1.0-MILESTONE-AUDIT.md for full v1.0 decision history
@@ -74,5 +76,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Phase 10 complete, Phase 11 needs planning
+Stopped at: Completed 11-01-PLAN.md -- Phase 11 complete, v1.1 milestone complete
 Resume file: None
