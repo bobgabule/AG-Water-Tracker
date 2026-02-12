@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 9: Map Default View** - Smart farm-state center, remove long-press, keep wells center and GPS fly-to
 - [x] **Phase 10: Location Permission Flow** - Soft-ask pattern with FAB button, custom modal, remove auto-request on load
-- [ ] **Phase 11: Dashboard Quality Fixes** - Geolocation guards, validation consistency, tile cache, accessibility, form fixes
+- [x] **Phase 11: Dashboard Quality Fixes** - Geolocation guards, validation consistency, tile cache, accessibility, form fixes
 
 ## Phase Details
 
@@ -205,7 +205,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 11-01-PLAN.md -- US-bounds coordinate validation (shared utility + both forms) and WellMarker useMemo removal
+- [x] 11-01-PLAN.md -- US-bounds coordinate validation (shared utility + both forms) and WellMarker useMemo removal
 
 ## Progress
 
@@ -227,4 +227,4 @@ Note: Phases 10 and 11 both depend on Phase 9. Phase 11 can run in parallel with
 | 8. Subscription Gating | 3/3 | Complete | 2026-02-11 |
 | 9. Map Default View | 1/1 | Complete | 2026-02-12 |
 | 10. Location Permission Flow | 1/1 | Complete | 2026-02-12 |
-| 11. Dashboard Quality Fixes | 0/? | Not Started | — |
+| 11. Dashboard Quality Fixes | 1/1 | Complete | 2026-02-12 |
