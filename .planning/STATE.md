@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-12)
+See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v1.1 Milestone — Dashboard & Map improvements (complete)
+**Current focus:** v2.0 Milestone — Meter Readings & Allocations
 
 ## Current Position
 
-Phase: 11 of 11 (Dashboard Quality Fixes)
-Plan: 1 of 1 in phase 11 -- COMPLETE
-Status: Phase 11 complete -- all v1.1 phases done
-Last activity: 2026-02-12 -- Phase 11 completed
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-19 — Milestone v2.0 started
 
-Progress: [██████████] 100% (v1.0 complete, v1.1 Phases 9-11 done)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: [██████████] 100% (v1.0 complete, v1.1 Phases 9-11
 - Average duration: 5min
 - Total execution time: ~2.0 hours
 
-**By Phase:**
+**By Phase (previous milestones):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -39,10 +39,6 @@ Progress: [██████████] 100% (v1.0 complete, v1.1 Phases 9-11
 | 10-location-permission-flow | 1 | ~5min | 5min |
 | 11-dashboard-quality-fixes | 1 | 2min | 2min |
 
-**Recent Trend:**
-- Last 5 plans: 11-01 (2min), 10-01 (5min), 09-01 (5min), 08-03 (4min), 08-02 (3min)
-- Trend: stable
-
 *Updated after each plan completion*
 
 ## Accumulated Context
@@ -51,17 +47,20 @@ Progress: [██████████] 100% (v1.0 complete, v1.1 Phases 9-11
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-**v1.1 decisions:**
-- [v1.1]: Smart map default center using static US state → coordinates lookup (not Mapbox geocoding)
-- [v1.1]: Soft-ask location permission pattern — FAB + custom modal before browser native dialog
-- [v1.1]: Remove long-press → add well form behavior entirely (keep New Well button flow)
-- [v1.1]: meterSerialNumber is optional in AddWellFormBottomSheet (only name + WMIS required)
-- [v1.1]: Increase tile cache maxEntries (800→2000 API, 1000→3000 tiles) for large farm areas
-- [v1.1]: Phase 11 (quality fixes) can run in parallel with Phase 10 since they touch different files
-- [v1.1]: US bounds defined as lat 18-72, lng -180 to -66 (covers all US states, territories, and Alaska)
+**v2.0 decisions:**
+- [v2.0]: Readings are raw cumulative meter values (not usage amounts)
+- [v2.0]: Period-based allocations with flexible start/end dates, multiple per well
+- [v2.0]: GPS proximity = display + flag, does NOT block recording
+- [v2.0]: Meter problems directly update well status fields (pump_state, battery_state, meter_status)
+- [v2.0]: Usage auto-calculated from readings within allocation period + manually overridable
+- [v2.0]: Well edit form is separate full-page form (not reuse of create bottom sheet)
+- [v2.0]: Similar reading warning (within 5 units) = warning, not blocker
+- [v2.0]: Anyone with well access can set allocations (not restricted to grower/admin)
+- [v2.0]: Reading edit/delete restricted to grower/admin
 
-**v1.0 decisions (archived):**
-- See v1.0-MILESTONE-AUDIT.md for full v1.0 decision history
+**Previous milestone decisions (archived):**
+- See v1.0-MILESTONE-AUDIT.md for v1.0 decisions
+- v1.1 decisions captured in PROJECT.md Key Decisions table
 
 ### Pending Todos
 
@@ -71,10 +70,12 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Blockers/Concerns
 
-- None for v1.1 — all work is client-side code changes, no migrations or backend changes needed
+- v2.0 requires new database tables (readings, allocations) and Supabase migrations
+- PowerSync schema and sync rules need updates for new tables
+- Readings table was previously dropped in migration 013 — will be recreated with finalized schema
 
 ## Session Continuity
 
-Last session: 2026-02-12
-Stopped at: Completed 11-01-PLAN.md -- Phase 11 complete, v1.1 milestone complete
+Last session: 2026-02-19
+Stopped at: Milestone v2.0 initialized — defining requirements
 Resume file: None
