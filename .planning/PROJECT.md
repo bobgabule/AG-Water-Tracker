@@ -54,27 +54,37 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ### Active
 
-- [ ] Well detail page accessible from map marker tap and well list item
-- [ ] Well detail page shows well info (name, serial number, WMIS #, last updated)
-- [ ] Usage gauge showing Allocated / Used / Remaining for current allocation period
-- [ ] Status indicators (Pump, Battery, Meter Status) with check/X icons
-- [ ] Readings history table (Date, Value in well units, User name, Time)
-- [ ] Out-of-range readings marked with yellow indicator in readings list
-- [ ] "Missing Allocation" message when well has no allocation periods
-- [ ] Record new meter reading (raw cumulative value) with unit/multiplier display
-- [ ] GPS location captured automatically with each reading submission
-- [ ] "In Range / Out of Range" indicator on well detail page based on GPS proximity
-- [ ] Out-of-range status recorded with each reading
-- [ ] Similar reading warning (within 5 units of last reading) with Continue option
-- [ ] Meter problem reporting (Not Working, Battery Dead, Pump Off, Dead Pump) updates well status
-- [ ] Allocation periods CRUD (start date, end date, allocated amount in AF)
-- [ ] Multiple allocation periods per well, displayed in table
-- [ ] Usage auto-calculated from readings within allocation period (converted to AF)
-- [ ] Usage manually overridable by any user with well access
-- [ ] Well edit form (name, serial, WMIS, coordinates, units, multiplier, status)
-- [ ] Well edit form shows allocation count with link to allocation management
-- [ ] Grower/admin can edit an existing reading value
-- [ ] Grower/admin can delete a reading
+- [ ] WELL-01: Full-page slide-up sheet from well marker tap (map stays loaded)
+- [ ] WELL-02: Farm name, well name, serial, WMIS, Last Updated
+- [ ] WELL-03: Visual usage gauge (Allocated / Used / Remaining)
+- [ ] WELL-04: Status indicators (Pump, Battery, Meter Status)
+- [ ] WELL-05: Scrollable readings history (Date, Value, User, Time)
+- [ ] WELL-06: Out-of-range yellow indicators on readings
+- [ ] WELL-07: "Missing Allocation" empty state
+- [ ] WELL-08: Back button dismisses sheet
+- [ ] WELL-09: Edit button to well edit form
+- [ ] WELL-10: WellMarker shows real allocation % (not hardcoded)
+- [ ] WELL-11: Well list page shows latest reading date
+- [ ] READ-01: Record reading via "+ New Reading" button
+- [ ] READ-02: Shows unit and multiplier (e.g., "GAL x 10.0")
+- [ ] READ-03: GPS auto-capture on submission
+- [ ] READ-04: Similar reading warning (within 5 units)
+- [ ] READ-05: Grower/admin can edit readings
+- [ ] READ-06: Grower/admin can delete readings
+- [ ] READ-07: "No readings" empty state message
+- [ ] PROB-01: Meter problem checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump)
+- [ ] PROB-02: Problem submission updates well status fields
+- [ ] PROX-01: "In Range / Out of Range" GPS indicator
+- [ ] PROX-02: Range status recorded with each reading
+- [ ] ALLOC-01: Create allocation period (start, end, allocated in AF)
+- [ ] ALLOC-02: View allocation periods table
+- [ ] ALLOC-03: Edit allocation (dates, used, allocated)
+- [ ] ALLOC-04: Delete allocation period
+- [ ] ALLOC-05: Usage auto-calculated from readings
+- [ ] ALLOC-06: Usage manually overridable
+- [ ] EDIT-01: Edit well details (name, serial, WMIS, coords, units, multiplier)
+- [ ] EDIT-02: Allocation count with link to allocation management
+- [ ] EDIT-03: Update equipment status from edit form
 
 ### Out of Scope
 
