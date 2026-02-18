@@ -75,5 +75,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: v2.0 roadmap created -- ready to plan Phase 12
-Resume file: None
+Stopped at: Phase 12 context gathered -- ready to plan
+Resume file: .planning/phases/12-data-foundation/12-CONTEXT.md
