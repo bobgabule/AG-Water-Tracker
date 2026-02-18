@@ -1,10 +1,12 @@
-# Roadmap: AG Water Tracker
+﻿# Roadmap: AG Water Tracker
 
 ## Overview
 
-**v1.0** (Complete): Role-based user management and phone-based invite flows. 8 phases, 25 plans, 28 requirements — all delivered.
+**v1.0** (Complete): Role-based user management and phone-based invite flows. 8 phases, 25 plans, 28 requirements -- all delivered.
 
-**v1.1** (Active): Dashboard and map view improvements. Smarter map default center using farm state, soft-ask location permission flow, long-press removal, and code quality fixes across all dashboard/map components. Three phases deliver UX improvements first, then quality hardening.
+**v1.1** (Complete): Dashboard and map view improvements. Smarter map default center using farm state, soft-ask location permission flow, long-press removal, and code quality fixes across all dashboard/map components. 3 phases, 3 plans, 17 requirements -- all delivered.
+
+**v2.0** (Active): Meter readings and allocation tracking. Well detail page, reading recording with GPS proximity, allocation management, well editing, and problem reporting. The core data-capture features that make the app useful for field agents. 5 phases, 31 requirements.
 
 ## Phases
 
@@ -13,6 +15,9 @@
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
+
+<details>
+<summary>v1.0 (Phases 1-8) -- Complete</summary>
 
 - [x] **Phase 1: Session Stability** - Fix loading spinner hang, blank page on reload, and add error boundaries
 - [x] **Phase 2: Offline Session Resilience** - Offline-first session trust, token refresh failure handling, and offline registration messaging
@@ -23,13 +28,29 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: User Management** - Users page, disable/enable users, profile editing, and disabled user filtering
 - [x] **Phase 8: Subscription Gating** - Seat limit display, invite blocking at capacity, and upgrade placeholder
 
-### v1.1 — Dashboard & Map
+</details>
+
+<details>
+<summary>v1.1 -- Dashboard & Map (Phases 9-11) -- Complete</summary>
 
 - [x] **Phase 9: Map Default View** - Smart farm-state center, remove long-press, keep wells center and GPS fly-to
 - [x] **Phase 10: Location Permission Flow** - Soft-ask pattern with FAB button, custom modal, remove auto-request on load
 - [x] **Phase 11: Dashboard Quality Fixes** - Geolocation guards, validation consistency, tile cache, accessibility, form fixes
 
+</details>
+
+### v2.0 -- Meter Readings & Allocations
+
+- [ ] **Phase 12: Data Foundation** - Supabase migration for readings + allocations tables, PowerSync schema, connector updates, query hooks, GPS proximity utility
+- [ ] **Phase 13: Well Detail Page** - Full-page slide-up sheet with well info header, usage gauge, status indicators, readings history, and empty states
+- [ ] **Phase 14: Record Meter Reading** - New reading form with GPS auto-capture, similar reading warning, meter problem reporting, and proximity flagging
+- [ ] **Phase 15: Well Editing & Allocation Management** - Well edit form, allocation CRUD (create/view/edit/delete), usage auto-calculation, and manual override
+- [ ] **Phase 16: Reading Management & Map Integration** - Reading edit/delete for grower/admin, real allocation percentage on map markers, and reading dates on well list
+
 ## Phase Details
+
+<details>
+<summary>v1.0 Phase Details (Complete)</summary>
 
 ### Phase 1: Session Stability
 **Goal**: App never hangs on a loading spinner or shows a blank white page after reload
@@ -159,6 +180,11 @@ Plans:
 - [x] 08-02-PLAN.md -- Seat usage display on Users page (admin and meter checker counts with Full indicator)
 - [x] 08-03-PLAN.md -- Invite form role blocking when seats full + "Contact us to upgrade" placeholder
 
+</details>
+
+<details>
+<summary>v1.1 Phase Details (Complete)</summary>
+
 ### Phase 9: Map Default View
 **Goal**: Map shows a meaningful default view based on the farm's location instead of hardcoded Kansas center
 **Depends on**: Nothing (first v1.1 phase)
@@ -167,7 +193,7 @@ Plans:
   1. User with no wells sees the map centered on their farm's US state at a zoom level showing the whole state in satellite view
   2. User with wells sees the map centered on the average of all well coordinates (existing behavior preserved)
   3. User who grants location permission sees the map fly to their GPS position with 1500ms animation (existing behavior preserved)
-  4. Long-pressing the map does nothing — no add well form appears, only normal pan/zoom behavior
+  4. Long-pressing the map does nothing -- no add well form appears, only normal pan/zoom behavior
 **Plans**: 1 plan
 
 Plans:
@@ -193,7 +219,7 @@ Plans:
 **Depends on**: Phase 9
 **Requirements**: QUAL-01 through QUAL-09
 **Success Criteria** (what must be TRUE):
-  1. Calling geolocation in any component is guarded by `navigator.geolocation` existence check — no crashes in environments without geolocation API
+  1. Calling geolocation in any component is guarded by `navigator.geolocation` existence check -- no crashes in environments without geolocation API
   2. Well save handler does not attempt state updates after DashboardPage unmounts
   3. LocationPickerBottomSheet rejects coordinates outside valid ranges (matching AddWellFormBottomSheet validation)
   4. Service worker caches up to 2000 API entries and 3000 tile entries
@@ -207,13 +233,75 @@ Plans:
 Plans:
 - [x] 11-01-PLAN.md -- US-bounds coordinate validation (shared utility + both forms) and WellMarker useMemo removal
 
+</details>
+
+### Phase 12: Data Foundation
+**Goal**: The database tables, sync infrastructure, and query hooks exist so that readings and allocations can be stored, synced, and queried throughout the app
+**Depends on**: Phase 11 (existing codebase)
+**Requirements**: None (infrastructure phase -- enables Phases 13-16)
+**Success Criteria** (what must be TRUE):
+  1. A `readings` table exists in Supabase with columns for well_id, value (numeric), recorded_by, recorded_at, gps_latitude, gps_longitude, is_in_range, and the record syncs to PowerSync local database
+  2. An `allocations` table exists in Supabase with columns for well_id, period_start, period_end, allocated_af, used_af, is_manual_override, and the record syncs to PowerSync local database
+  3. PowerSync connector correctly uploads new readings and allocations created offline, and downloads server-side changes on sync
+  4. A `useWellReadings(wellId)` hook returns the readings for a well sorted by date, and a `useWellAllocations(wellId)` hook returns the allocation periods for a well
+  5. A `getDistanceToWell(userCoords, wellCoords)` utility returns the distance in feet/meters, and an `isInRange(distance, threshold)` check determines proximity status
+**Plans**: TBD
+
+### Phase 13: Well Detail Page
+**Goal**: Users can tap a well on the map and see all its information -- header, usage gauge, status indicators, and readings history -- in a full-page slide-up sheet
+**Depends on**: Phase 12
+**Requirements**: WELL-01, WELL-02, WELL-03, WELL-04, WELL-05, WELL-06, WELL-07, WELL-08, WELL-09, READ-07, PROX-01
+**Success Criteria** (what must be TRUE):
+  1. User taps a well marker on the map and a full-page sheet slides up from the bottom showing well details, while the map remains loaded behind it
+  2. The well detail sheet displays farm name, well name, serial number, WMIS number, last updated timestamp, and equipment status indicators (Pump, Battery, Meter) with check/X icons
+  3. A visual usage gauge bar shows Allocated / Used / Remaining for the current allocation period, or a "Missing Allocation" message when no allocation exists
+  4. A scrollable readings history table shows each reading's date, value, user name, and time -- with out-of-range readings marked by a yellow indicator -- or a "No readings yet" message when empty
+  5. A back button dismisses the sheet returning to the interactive map, and an edit button navigates to the well edit form
+**Plans**: TBD
+
+### Phase 14: Record Meter Reading
+**Goal**: Field agents can record a new meter reading with GPS location capture, get warned about suspicious values, and report meter problems -- all working offline
+**Depends on**: Phase 13
+**Requirements**: READ-01, READ-02, READ-03, READ-04, PROB-01, PROB-02, PROX-02
+**Success Criteria** (what must be TRUE):
+  1. User taps "+ New Reading" on the well detail page, enters a raw cumulative meter value, and the reading is saved to the local database (syncs when online)
+  2. The new reading form displays the well's measurement unit and multiplier (e.g., "GAL x 10.0") so the agent knows what scale to read
+  3. When the user submits a reading, their GPS location is automatically captured and stored with the reading, and the reading records whether the user was in range or out of range of the well
+  4. If the entered value is within 5 units of the last reading, a warning appears asking the user to double-check -- but they can continue and save anyway
+  5. User can switch to a "Meter Problem" tab with checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump), and submitting updates the well's equipment status fields
+**Plans**: TBD
+
+### Phase 15: Well Editing & Allocation Management
+**Goal**: Users can edit well properties and manage allocation periods with auto-calculated or manually overridden usage values
+**Depends on**: Phase 13
+**Requirements**: EDIT-01, EDIT-02, EDIT-03, ALLOC-01, ALLOC-02, ALLOC-03, ALLOC-04, ALLOC-05, ALLOC-06
+**Success Criteria** (what must be TRUE):
+  1. User taps "Edit" on the well detail page and sees a full-page form pre-filled with the well's current name, serial number, WMIS, coordinates, units, multiplier, and equipment status -- and can save changes
+  2. The well edit form shows the current allocation count (e.g., "2 Allocations") with a link that navigates to the allocation management page for that well
+  3. User can create a new allocation period by specifying start date, end date, and allocated amount in acre-feet (AF)
+  4. User can view all allocation periods in a table, edit any period's dates/amounts, or delete a period -- all working offline
+  5. Each allocation's "Used" value is auto-calculated from readings within that period (converted to AF via multiplier), but the user can manually override the used value
+**Plans**: TBD
+
+### Phase 16: Reading Management & Map Integration
+**Goal**: Growers and admins can correct reading data, and the map and well list reflect real allocation and reading data instead of placeholders
+**Depends on**: Phase 14, Phase 15
+**Requirements**: READ-05, READ-06, WELL-10, WELL-11
+**Success Criteria** (what must be TRUE):
+  1. Grower or admin can tap a reading in the history list, edit its value, and save the correction -- meter_checker role cannot edit
+  2. Grower or admin can delete a reading from the history list with a confirmation prompt -- meter_checker role cannot delete
+  3. Well markers on the map display the real allocation percentage (used/allocated from the current period) instead of the hardcoded 100% placeholder
+  4. The well list page shows the date and time of the latest reading for each well, so users can see at a glance which wells need attention
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-- v1.0: Phases 1 → 8 (complete)
-- v1.1: Phases 9 → 10 → 11
+- v1.0: Phases 1 -> 8 (complete)
+- v1.1: Phases 9 -> 10 -> 11 (complete)
+- v2.0: Phases 12 -> 13 -> 14 + 15 (parallel after 13) -> 16
 
-Note: Phases 10 and 11 both depend on Phase 9. Phase 11 can run in parallel with Phase 10 since they touch different files.
+Note: Phases 14 and 15 both depend on Phase 13 and can run in parallel. Phase 16 depends on both 14 and 15.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -228,3 +316,8 @@ Note: Phases 10 and 11 both depend on Phase 9. Phase 11 can run in parallel with
 | 9. Map Default View | 1/1 | Complete | 2026-02-12 |
 | 10. Location Permission Flow | 1/1 | Complete | 2026-02-12 |
 | 11. Dashboard Quality Fixes | 1/1 | Complete | 2026-02-12 |
+| 12. Data Foundation | 0/TBD | Not started | - |
+| 13. Well Detail Page | 0/TBD | Not started | - |
+| 14. Record Meter Reading | 0/TBD | Not started | - |
+| 15. Well Editing & Allocation Management | 0/TBD | Not started | - |
+| 16. Reading Management & Map Integration | 0/TBD | Not started | - |

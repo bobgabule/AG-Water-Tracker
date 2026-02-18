@@ -16,7 +16,7 @@
 
 ### Onboarding (4/4 Complete)
 
-- [x] **ONBD-01**: Grower registration flow (OTP → profile → farm → dashboard)
+- [x] **ONBD-01**: Grower registration flow (OTP -> profile -> farm -> dashboard)
 - [x] **ONBD-02**: Invited user auto-match to farm via phone number
 - [x] **ONBD-03**: Invited user's profile auto-created from invite data
 - [x] **ONBD-04**: Unknown phone number enters grower onboarding
@@ -107,27 +107,27 @@ Requirements for meter reading, allocation tracking, and well management milesto
 ### Meter Problem
 
 - [ ] **PROB-01**: User can report a meter problem via checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump)
-- [ ] **PROB-02**: Submitting a meter problem updates the well's pump_state, battery_state, and/or meter_status fields
+- [ ] **PROB-02**: Problem submission updates well status fields
 
 ### GPS Proximity
 
-- [ ] **PROX-01**: Well detail page shows "In Range of Well" (green) or "Out of Range of Well" (red) based on current GPS distance
-- [ ] **PROX-02**: Each reading records whether the user was in range or out of range at time of submission
+- [ ] **PROX-01**: "In Range / Out of Range" GPS indicator
+- [ ] **PROX-02**: Range status recorded with each reading
 
 ### Allocations
 
-- [ ] **ALLOC-01**: User can create an allocation period with start date, end date, and allocated amount (in AF)
-- [ ] **ALLOC-02**: User can view all allocation periods for a well in a table (Start, End, Used AF, Allocated AF)
-- [ ] **ALLOC-03**: User can edit an existing allocation (dates, used amount, allocated amount)
-- [ ] **ALLOC-04**: User can delete an allocation period
-- [ ] **ALLOC-05**: Used value is auto-calculated from readings within the allocation period (converted to AF)
-- [ ] **ALLOC-06**: Used value can be manually overridden by any user with well access
+- [ ] **ALLOC-01**: Create allocation period (start, end, allocated in AF)
+- [ ] **ALLOC-02**: View allocation periods table
+- [ ] **ALLOC-03**: Edit allocation (dates, used, allocated)
+- [ ] **ALLOC-04**: Delete allocation period
+- [ ] **ALLOC-05**: Usage auto-calculated from readings
+- [ ] **ALLOC-06**: Usage manually overridable
 
 ### Well Editing
 
-- [ ] **EDIT-01**: User can edit well details (name, serial number, WMIS, coordinates, units, multiplier)
-- [ ] **EDIT-02**: Well edit form shows current allocation count with link to allocation management page
-- [ ] **EDIT-03**: User can update well equipment status (Battery, Pump, Meter Status) from edit form
+- [ ] **EDIT-01**: Edit well details (name, serial, WMIS, coords, units, multiplier)
+- [ ] **EDIT-02**: Allocation count with link to allocation management
+- [ ] **EDIT-03**: Update equipment status from edit form
 
 ## Future Requirements
 
@@ -161,7 +161,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 | Real-time invite codes | Phone-targeted invites give explicit control |
 | Multi-farm membership | Premature complexity for current scale |
 | Stripe payment | Need product validation first |
-| 30D time period filter | Deferred — show all readings for now |
+| 30D time period filter | Deferred -- show all readings for now |
 | Toggle Unit display | Deferred |
 | Monthly meter reading report | Deferred |
 | Reading photos/attachments | Deferred |
@@ -227,43 +227,43 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WELL-01 | — | Pending |
-| WELL-02 | — | Pending |
-| WELL-03 | — | Pending |
-| WELL-04 | — | Pending |
-| WELL-05 | — | Pending |
-| WELL-06 | — | Pending |
-| WELL-07 | — | Pending |
-| WELL-08 | — | Pending |
-| WELL-09 | — | Pending |
-| WELL-10 | — | Pending |
-| WELL-11 | — | Pending |
-| READ-01 | — | Pending |
-| READ-02 | — | Pending |
-| READ-03 | — | Pending |
-| READ-04 | — | Pending |
-| READ-05 | — | Pending |
-| READ-06 | — | Pending |
-| READ-07 | — | Pending |
-| PROB-01 | — | Pending |
-| PROB-02 | — | Pending |
-| PROX-01 | — | Pending |
-| PROX-02 | — | Pending |
-| ALLOC-01 | — | Pending |
-| ALLOC-02 | — | Pending |
-| ALLOC-03 | — | Pending |
-| ALLOC-04 | — | Pending |
-| ALLOC-05 | — | Pending |
-| ALLOC-06 | — | Pending |
-| EDIT-01 | — | Pending |
-| EDIT-02 | — | Pending |
-| EDIT-03 | — | Pending |
+| WELL-01 | Phase 13: Well Detail Page | Pending |
+| WELL-02 | Phase 13: Well Detail Page | Pending |
+| WELL-03 | Phase 13: Well Detail Page | Pending |
+| WELL-04 | Phase 13: Well Detail Page | Pending |
+| WELL-05 | Phase 13: Well Detail Page | Pending |
+| WELL-06 | Phase 13: Well Detail Page | Pending |
+| WELL-07 | Phase 13: Well Detail Page | Pending |
+| WELL-08 | Phase 13: Well Detail Page | Pending |
+| WELL-09 | Phase 13: Well Detail Page | Pending |
+| WELL-10 | Phase 16: Reading Management & Map Integration | Pending |
+| WELL-11 | Phase 16: Reading Management & Map Integration | Pending |
+| READ-01 | Phase 14: Record Meter Reading | Pending |
+| READ-02 | Phase 14: Record Meter Reading | Pending |
+| READ-03 | Phase 14: Record Meter Reading | Pending |
+| READ-04 | Phase 14: Record Meter Reading | Pending |
+| READ-05 | Phase 16: Reading Management & Map Integration | Pending |
+| READ-06 | Phase 16: Reading Management & Map Integration | Pending |
+| READ-07 | Phase 13: Well Detail Page | Pending |
+| PROB-01 | Phase 14: Record Meter Reading | Pending |
+| PROB-02 | Phase 14: Record Meter Reading | Pending |
+| PROX-01 | Phase 13: Well Detail Page | Pending |
+| PROX-02 | Phase 14: Record Meter Reading | Pending |
+| ALLOC-01 | Phase 15: Well Editing & Allocation Management | Pending |
+| ALLOC-02 | Phase 15: Well Editing & Allocation Management | Pending |
+| ALLOC-03 | Phase 15: Well Editing & Allocation Management | Pending |
+| ALLOC-04 | Phase 15: Well Editing & Allocation Management | Pending |
+| ALLOC-05 | Phase 15: Well Editing & Allocation Management | Pending |
+| ALLOC-06 | Phase 15: Well Editing & Allocation Management | Pending |
+| EDIT-01 | Phase 15: Well Editing & Allocation Management | Pending |
+| EDIT-02 | Phase 15: Well Editing & Allocation Management | Pending |
+| EDIT-03 | Phase 15: Well Editing & Allocation Management | Pending |
 
 **v2.0 Coverage:**
 - v2.0 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-19 after v2.0 milestone requirements*
+*Last updated: 2026-02-19 after v2.0 roadmap creation*

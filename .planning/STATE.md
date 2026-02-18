@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v2.0 Milestone — Meter Readings & Allocations
+**Current focus:** v2.0 Milestone -- Phase 12: Data Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-19 — Milestone v2.0 started
+Phase: 12 of 16 (Data Foundation)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-02-19 -- v2.0 roadmap created (Phases 12-16)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [###########░░░░░░░░░] 55% (28/~TBD plans -- v1.0+v1.1 complete, v2.0 not yet planned)
 
 ## Performance Metrics
 
@@ -57,10 +57,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [v2.0]: Similar reading warning (within 5 units) = warning, not blocker
 - [v2.0]: Anyone with well access can set allocations (not restricted to grower/admin)
 - [v2.0]: Reading edit/delete restricted to grower/admin
-
-**Previous milestone decisions (archived):**
-- See v1.0-MILESTONE-AUDIT.md for v1.0 decisions
-- v1.1 decisions captured in PROJECT.md Key Decisions table
+- [v2.0]: Meter values stored as TEXT in PowerSync (not REAL) to preserve decimal precision
+- [v2.0]: GPS proximity via @turf/distance (client-side Haversine), not server-side
 
 ### Pending Todos
 
@@ -70,12 +68,12 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Blockers/Concerns
 
-- v2.0 requires new database tables (readings, allocations) and Supabase migrations
+- v2.0 requires new database tables (readings, allocations) -- tables were DROPPED in migration 013 and never recreated
 - PowerSync schema and sync rules need updates for new tables
-- Readings table was previously dropped in migration 013 — will be recreated with finalized schema
+- Allocation schema changed from year-only to period-based -- confirm before implementing
 
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Milestone v2.0 initialized — defining requirements
+Stopped at: v2.0 roadmap created -- ready to plan Phase 12
 Resume file: None
