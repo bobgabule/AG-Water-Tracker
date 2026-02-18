@@ -3,80 +3,133 @@
 **Defined:** 2026-02-10
 **Core Value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
 
-## v1 Requirements
+## v1.0 Requirements (Complete)
 
-### Auth & Session
+### Auth & Session (6/6 Complete)
 
-- [ ] **AUTH-01**: Session recovery works reliably on app reload — no loading spinner hang
-- [ ] **AUTH-02**: Dashboard renders correctly on page refresh — no blank white page
-- [ ] **AUTH-03**: Error Boundaries catch component crashes and show recovery UI instead of blank screen
-- [ ] **AUTH-04**: App works offline for logged-in users — trust local session, refresh token when online
-- [ ] **AUTH-05**: If token refresh fails (account revoked), force re-login with clear message
-- [ ] **AUTH-06**: Registration requires internet — show clear "no connection" message if offline during OTP
+- [x] **AUTH-01**: Session recovery works reliably on app reload
+- [x] **AUTH-02**: Dashboard renders correctly on page refresh
+- [x] **AUTH-03**: Error Boundaries catch component crashes
+- [x] **AUTH-04**: App works offline for logged-in users
+- [x] **AUTH-05**: Token refresh failure forces re-login with clear message
+- [x] **AUTH-06**: Registration requires internet with clear offline message
 
-### Onboarding
+### Onboarding (4/4 Complete)
 
-- [ ] **ONBD-01**: Grower registration: phone OTP → verify → create profile (first name, last name, email) → create farm (name, address) → dashboard
-- [ ] **ONBD-02**: Invited user registration: phone OTP → verify → auto-match to farm via phone number → dashboard (no profile or farm steps)
-- [ ] **ONBD-03**: Invited user's profile auto-created from invite data (first name, last name pre-filled by farm owner)
-- [ ] **ONBD-04**: Unknown phone number (no invite, no existing account) creates new grower account and goes through full onboarding
+- [x] **ONBD-01**: Grower registration flow (OTP → profile → farm → dashboard)
+- [x] **ONBD-02**: Invited user auto-match to farm via phone number
+- [x] **ONBD-03**: Invited user's profile auto-created from invite data
+- [x] **ONBD-04**: Unknown phone number enters grower onboarding
 
-### Roles & Permissions
+### Roles & Permissions (7/7 Complete)
 
-- [ ] **ROLE-01**: Four roles stored in farm_members.role: super_admin, grower, admin, meter_checker
-- [ ] **ROLE-02**: Supabase RLS policies enforce role-based data access at the database level
-- [ ] **ROLE-03**: PowerSync sync rules filter data by farm_id so users only see their farm's data
-- [ ] **ROLE-04**: Client-side route guards and UI gating based on user role (admin-only sections hidden for meter_checker)
-- [ ] **ROLE-05**: Super admin can see and manage all farms, users, and wells across the system
-- [ ] **ROLE-06**: Grower and admin can manage users and wells within their own farm
-- [ ] **ROLE-07**: Meter checker can view wells, add meter readings, but cannot manage users or farm settings
+- [x] **ROLE-01**: Four roles in farm_members.role
+- [x] **ROLE-02**: Supabase RLS policies enforce role-based access
+- [x] **ROLE-03**: PowerSync sync rules filter by farm_id
+- [x] **ROLE-04**: Client-side route guards and UI gating by role
+- [x] **ROLE-05**: Super admin cross-farm access
+- [x] **ROLE-06**: Grower/admin manage own farm
+- [x] **ROLE-07**: Meter checker limited to wells and readings
 
-### User Management
+### User Management (8/8 Complete)
 
-- [ ] **USER-01**: Users page (/users) shows list of farm members with name and role badge
-- [ ] **USER-02**: Users page has "Show disabled users" toggle to filter disabled accounts
-- [ ] **USER-03**: Invite user form with fields: first name, last name, phone number, role (Admin / Meter Checker)
-- [ ] **USER-04**: Invite creates a farm_invites record with all user details + farm_id + role
-- [ ] **USER-05**: SMS sent to invited phone number with app URL and farm name
-- [ ] **USER-06**: Grower/admin can disable a user (soft delete — user can't log in, data preserved)
-- [ ] **USER-07**: Grower/admin can re-enable a disabled user
-- [ ] **USER-08**: User can update their own profile (first name, last name, email) in settings
+- [x] **USER-01**: Users page with role badges
+- [x] **USER-02**: Show disabled users toggle
+- [x] **USER-03**: Invite user form (name, phone, role)
+- [x] **USER-04**: farm_invites record creation
+- [x] **USER-05**: SMS delivery to invited phone
+- [x] **USER-06**: Disable user (soft delete)
+- [x] **USER-07**: Re-enable disabled user
+- [x] **USER-08**: Profile self-edit in settings
 
-### Subscription
+### Subscription (3/3 Complete)
 
-- [ ] **SUBS-01**: Subscription seat limits displayed in UI (e.g., "Basic: 1 admin + 2 meter checkers")
-- [ ] **SUBS-02**: Invite form blocked with message when seat limit reached for a role
-- [ ] **SUBS-03**: No Stripe integration — limits enforced in UI/DB only, "Contact us to upgrade" placeholder
+- [x] **SUBS-01**: Seat limits displayed in UI
+- [x] **SUBS-02**: Invite blocked at seat capacity
+- [x] **SUBS-03**: UI-only gating, no Stripe
 
-## v1.1 Requirements
+## v1.1 Requirements (Complete)
 
-### Dashboard & Map
+### Dashboard & Map (4/4 Complete)
 
-- [ ] **MAP-01**: Map centers on farm's US state (whole-state satellite view) when no wells exist, using a static state→coordinates lookup
-- [ ] **MAP-02**: Map centers on average of all well coordinates when wells exist
-- [ ] **MAP-03**: User location fly-to with 1500ms animation when GPS is granted
-- [ ] **MAP-04**: Long-press on map does NOT trigger add well form — long-press behavior removed entirely
+- [x] **MAP-01**: Map centers on farm's US state when no wells
+- [x] **MAP-02**: Map centers on well coordinates average
+- [x] **MAP-03**: GPS fly-to with 1500ms animation
+- [x] **MAP-04**: Long-press add well removed
 
-### Location Permission
+### Location Permission (4/4 Complete)
 
-- [ ] **LOC-01**: No automatic geolocation request on page load — location only requested after user action
-- [ ] **LOC-02**: "Use My Location" floating action button displayed on the map
-- [ ] **LOC-03**: Custom soft-ask modal shown before triggering the browser's native permission dialog
-- [ ] **LOC-04**: Settings guidance displayed when location permission is denied (keep existing LocationPermissionBanner pattern)
+- [x] **LOC-01**: No automatic geolocation on page load
+- [x] **LOC-02**: "Use My Location" FAB on map
+- [x] **LOC-03**: Custom soft-ask modal before browser prompt
+- [x] **LOC-04**: Settings guidance when permission denied
 
-### Code Quality
+### Code Quality (9/9 Complete)
 
-- [ ] **QUAL-01**: Geolocation API existence checked (`navigator.geolocation`) before calling in all components
-- [ ] **QUAL-02**: Well save handler in DashboardPage guards against component unmount during async operation
-- [ ] **QUAL-03**: LocationPickerBottomSheet validates coordinate ranges (-90/90 lat, -180/180 lng) matching AddWellFormBottomSheet
-- [ ] **QUAL-04**: Service worker tile cache maxEntries increased for large farm areas (800→2000 API, 1000→3000 tiles)
-- [ ] **QUAL-05**: AddWellFormBottomSheet meterSerialNumber field is optional (not required for form validation)
-- [ ] **QUAL-06**: AddWellFormBottomSheet isFormValid includes coordinate range validation
-- [ ] **QUAL-07**: WellMarker removes unnecessary useMemo wrapping a constant value
-- [ ] **QUAL-08**: LocationPermissionBanner has proper ARIA role attribute for screen reader announcements
-- [ ] **QUAL-09**: MapOfflineOverlay removes redundant aria-label that duplicates visible button text
+- [x] **QUAL-01**: Geolocation API existence checked
+- [x] **QUAL-02**: Well save handler unmount guard
+- [x] **QUAL-03**: LocationPickerBottomSheet coordinate validation
+- [x] **QUAL-04**: Tile cache maxEntries increased
+- [x] **QUAL-05**: meterSerialNumber optional
+- [x] **QUAL-06**: AddWellFormBottomSheet coordinate range validation
+- [x] **QUAL-07**: WellMarker useMemo removal
+- [x] **QUAL-08**: LocationPermissionBanner ARIA role
+- [x] **QUAL-09**: MapOfflineOverlay aria-label cleanup
 
-## v2 Requirements
+## v2.0 Requirements
+
+Requirements for meter reading, allocation tracking, and well management milestone.
+
+### Well Detail
+
+- [ ] **WELL-01**: User can tap a well marker on the map to open a full-page slide-up sheet (map stays loaded behind)
+- [ ] **WELL-02**: Well detail sheet shows farm name, well name, serial number, WMIS #, and "Last Updated" timestamp
+- [ ] **WELL-03**: Well detail sheet shows a visual usage gauge bar with Allocated / Used / Remaining for current allocation
+- [ ] **WELL-04**: Well detail sheet shows status indicators (Pump, Battery, Meter Status) with check/X icons
+- [ ] **WELL-05**: Well detail sheet shows scrollable readings history (Date, Value, User, Time)
+- [ ] **WELL-06**: Out-of-range readings marked with yellow indicator in readings list
+- [ ] **WELL-07**: "Missing Allocation" message when well has no allocation periods
+- [ ] **WELL-08**: Back button dismisses the sheet, returning to interactive map
+- [ ] **WELL-09**: Edit button navigates to well edit form
+- [ ] **WELL-10**: WellMarker on map shows real allocation percentage (not hardcoded 100%)
+- [ ] **WELL-11**: Well list page shows latest reading date/time for each well
+
+### Meter Readings
+
+- [ ] **READ-01**: User can record a new meter reading via "+ New Reading" button (raw cumulative value)
+- [ ] **READ-02**: New reading form displays unit and multiplier (e.g., "GAL x 10.0")
+- [ ] **READ-03**: Reading captures GPS location automatically on submission
+- [ ] **READ-04**: Similar reading warning (within 5 units of last reading) with Continue option
+- [ ] **READ-05**: Grower/admin can edit a reading value
+- [ ] **READ-06**: Grower/admin can delete a reading
+- [ ] **READ-07**: "No readings" empty state message when well has no readings
+
+### Meter Problem
+
+- [ ] **PROB-01**: User can report a meter problem via checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump)
+- [ ] **PROB-02**: Submitting a meter problem updates the well's pump_state, battery_state, and/or meter_status fields
+
+### GPS Proximity
+
+- [ ] **PROX-01**: Well detail page shows "In Range of Well" (green) or "Out of Range of Well" (red) based on current GPS distance
+- [ ] **PROX-02**: Each reading records whether the user was in range or out of range at time of submission
+
+### Allocations
+
+- [ ] **ALLOC-01**: User can create an allocation period with start date, end date, and allocated amount (in AF)
+- [ ] **ALLOC-02**: User can view all allocation periods for a well in a table (Start, End, Used AF, Allocated AF)
+- [ ] **ALLOC-03**: User can edit an existing allocation (dates, used amount, allocated amount)
+- [ ] **ALLOC-04**: User can delete an allocation period
+- [ ] **ALLOC-05**: Used value is auto-calculated from readings within the allocation period (converted to AF)
+- [ ] **ALLOC-06**: Used value can be manually overridden by any user with well access
+
+### Well Editing
+
+- [ ] **EDIT-01**: User can edit well details (name, serial number, WMIS, coordinates, units, multiplier)
+- [ ] **EDIT-02**: Well edit form shows current allocation count with link to allocation management page
+- [ ] **EDIT-03**: User can update well equipment status (Battery, Pump, Meter Status) from edit form
+
+## Future Requirements
 
 ### User Management Enhancements
 
@@ -101,79 +154,116 @@
 
 | Feature | Reason |
 |---------|--------|
-| Granular per-feature permissions | 4 simple roles sufficient. AgriWebb has 12+ roles — creates admin burden. Farmable's 4-role model validates our approach |
-| Self-service role change | Security risk. Farm owners control access, not field workers |
-| Email-based invites | Target users are field workers who check email infrequently. Phone SMS is the right channel |
-| Password-based auth | Maintaining two auth methods doubles complexity. Phone OTP only |
-| Real-time invite codes | Codes can be shared uncontrollably, bypasses admin intent. Phone-targeted invites give explicit control |
-| Multi-farm membership (v1) | Adds complexity to every query, sync rule, UI component. Premature for MVP |
-| Stripe payment (v1) | Need product validation first. UI-only seat limits sufficient |
+| Granular per-feature permissions | 4 simple roles sufficient |
+| Self-service role change | Security risk. Farm owners control access |
+| Email-based invites | Field workers check email infrequently. Phone SMS is correct channel |
+| Password-based auth | Phone OTP only, no dual auth methods |
+| Real-time invite codes | Phone-targeted invites give explicit control |
+| Multi-farm membership | Premature complexity for current scale |
+| Stripe payment | Need product validation first |
+| 30D time period filter | Deferred — show all readings for now |
+| Toggle Unit display | Deferred |
+| Monthly meter reading report | Deferred |
+| Reading photos/attachments | Deferred |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1: Session Stability | Pending |
-| AUTH-02 | Phase 1: Session Stability | Pending |
-| AUTH-03 | Phase 1: Session Stability | Pending |
-| AUTH-04 | Phase 2: Offline Session Resilience | Pending |
-| AUTH-05 | Phase 2: Offline Session Resilience | Pending |
-| AUTH-06 | Phase 2: Offline Session Resilience | Pending |
-| ONBD-01 | Phase 5: Grower Onboarding | Pending |
-| ONBD-02 | Phase 6: Invite System | Pending |
-| ONBD-03 | Phase 6: Invite System | Pending |
-| ONBD-04 | Phase 5: Grower Onboarding | Pending |
-| ROLE-01 | Phase 3: Role Foundation | Pending |
-| ROLE-02 | Phase 3: Role Foundation | Pending |
-| ROLE-03 | Phase 3: Role Foundation | Pending |
-| ROLE-04 | Phase 4: Permission Enforcement | Pending |
-| ROLE-05 | Phase 4: Permission Enforcement | Pending |
-| ROLE-06 | Phase 4: Permission Enforcement | Pending |
-| ROLE-07 | Phase 4: Permission Enforcement | Pending |
-| USER-01 | Phase 7: User Management | Pending |
-| USER-02 | Phase 7: User Management | Pending |
-| USER-03 | Phase 6: Invite System | Pending |
-| USER-04 | Phase 6: Invite System | Pending |
-| USER-05 | Phase 6: Invite System | Pending |
-| USER-06 | Phase 7: User Management | Pending |
-| USER-07 | Phase 7: User Management | Pending |
-| USER-08 | Phase 7: User Management | Pending |
-| SUBS-01 | Phase 8: Subscription Gating | Pending |
-| SUBS-02 | Phase 8: Subscription Gating | Pending |
-| SUBS-03 | Phase 8: Subscription Gating | Pending |
-
-**v1 Coverage:**
-- v1 requirements: 28 total
-- Mapped to phases: 28
-- Unmapped: 0
-
-### v1.1 Traceability
+### v1.0 Traceability (Complete)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | Phase 9: Map Default View | Pending |
-| MAP-02 | Phase 9: Map Default View | Pending |
-| MAP-03 | Phase 9: Map Default View | Pending |
-| MAP-04 | Phase 9: Map Default View | Pending |
-| LOC-01 | Phase 10: Location Permission Flow | Pending |
-| LOC-02 | Phase 10: Location Permission Flow | Pending |
-| LOC-03 | Phase 10: Location Permission Flow | Pending |
-| LOC-04 | Phase 10: Location Permission Flow | Pending |
-| QUAL-01 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-02 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-03 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-04 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-05 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-06 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-07 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-08 | Phase 11: Dashboard Quality Fixes | Pending |
-| QUAL-09 | Phase 11: Dashboard Quality Fixes | Pending |
+| AUTH-01 | Phase 1: Session Stability | Complete |
+| AUTH-02 | Phase 1: Session Stability | Complete |
+| AUTH-03 | Phase 1: Session Stability | Complete |
+| AUTH-04 | Phase 2: Offline Session Resilience | Complete |
+| AUTH-05 | Phase 2: Offline Session Resilience | Complete |
+| AUTH-06 | Phase 2: Offline Session Resilience | Complete |
+| ONBD-01 | Phase 5: Grower Onboarding | Complete |
+| ONBD-02 | Phase 6: Invite System | Complete |
+| ONBD-03 | Phase 6: Invite System | Complete |
+| ONBD-04 | Phase 5: Grower Onboarding | Complete |
+| ROLE-01 | Phase 3: Role Foundation | Complete |
+| ROLE-02 | Phase 3: Role Foundation | Complete |
+| ROLE-03 | Phase 3: Role Foundation | Complete |
+| ROLE-04 | Phase 4: Permission Enforcement | Complete |
+| ROLE-05 | Phase 4: Permission Enforcement | Complete |
+| ROLE-06 | Phase 4: Permission Enforcement | Complete |
+| ROLE-07 | Phase 4: Permission Enforcement | Complete |
+| USER-01 | Phase 7: User Management | Complete |
+| USER-02 | Phase 7: User Management | Complete |
+| USER-03 | Phase 6: Invite System | Complete |
+| USER-04 | Phase 6: Invite System | Complete |
+| USER-05 | Phase 6: Invite System | Complete |
+| USER-06 | Phase 7: User Management | Complete |
+| USER-07 | Phase 7: User Management | Complete |
+| USER-08 | Phase 7: User Management | Complete |
+| SUBS-01 | Phase 8: Subscription Gating | Complete |
+| SUBS-02 | Phase 8: Subscription Gating | Complete |
+| SUBS-03 | Phase 8: Subscription Gating | Complete |
 
-**v1.1 Coverage:**
-- v1.1 requirements: 17 total
-- Mapped to phases: 17
-- Unmapped: 0
+### v1.1 Traceability (Complete)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MAP-01 | Phase 9: Map Default View | Complete |
+| MAP-02 | Phase 9: Map Default View | Complete |
+| MAP-03 | Phase 9: Map Default View | Complete |
+| MAP-04 | Phase 9: Map Default View | Complete |
+| LOC-01 | Phase 10: Location Permission Flow | Complete |
+| LOC-02 | Phase 10: Location Permission Flow | Complete |
+| LOC-03 | Phase 10: Location Permission Flow | Complete |
+| LOC-04 | Phase 10: Location Permission Flow | Complete |
+| QUAL-01 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-02 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-03 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-04 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-05 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-06 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-07 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-08 | Phase 11: Dashboard Quality Fixes | Complete |
+| QUAL-09 | Phase 11: Dashboard Quality Fixes | Complete |
+
+### v2.0 Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| WELL-01 | — | Pending |
+| WELL-02 | — | Pending |
+| WELL-03 | — | Pending |
+| WELL-04 | — | Pending |
+| WELL-05 | — | Pending |
+| WELL-06 | — | Pending |
+| WELL-07 | — | Pending |
+| WELL-08 | — | Pending |
+| WELL-09 | — | Pending |
+| WELL-10 | — | Pending |
+| WELL-11 | — | Pending |
+| READ-01 | — | Pending |
+| READ-02 | — | Pending |
+| READ-03 | — | Pending |
+| READ-04 | — | Pending |
+| READ-05 | — | Pending |
+| READ-06 | — | Pending |
+| READ-07 | — | Pending |
+| PROB-01 | — | Pending |
+| PROB-02 | — | Pending |
+| PROX-01 | — | Pending |
+| PROX-02 | — | Pending |
+| ALLOC-01 | — | Pending |
+| ALLOC-02 | — | Pending |
+| ALLOC-03 | — | Pending |
+| ALLOC-04 | — | Pending |
+| ALLOC-05 | — | Pending |
+| ALLOC-06 | — | Pending |
+| EDIT-01 | — | Pending |
+| EDIT-02 | — | Pending |
+| EDIT-03 | — | Pending |
+
+**v2.0 Coverage:**
+- v2.0 requirements: 31 total
+- Mapped to phases: 0
+- Unmapped: 31 ⚠️
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-11 after v1.1 milestone creation*
+*Last updated: 2026-02-19 after v2.0 milestone requirements*
