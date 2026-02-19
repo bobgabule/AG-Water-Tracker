@@ -106,8 +106,8 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 ### Meter Problem
 
-- [ ] **PROB-01**: User can report a meter problem via checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump)
-- [ ] **PROB-02**: Problem submission updates well status fields
+- [x] **PROB-01**: User can report a meter problem via checkboxes (Not Working, Battery Dead, Pump Off, Dead Pump)
+- [x] **PROB-02**: Problem submission updates well status fields
 
 ### GPS Proximity
 
@@ -245,8 +245,8 @@ Requirements for meter reading, allocation tracking, and well management milesto
 | READ-05 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-06 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-07 | Phase 13: Well Detail Page | Complete |
-| PROB-01 | Phase 14: Record Meter Reading | Pending |
-| PROB-02 | Phase 14: Record Meter Reading | Pending |
+| PROB-01 | Phase 14: Record Meter Reading | Complete |
+| PROB-02 | Phase 14: Record Meter Reading | Complete |
 | PROX-01 | Phase 13: Well Detail Page | Complete |
 | PROX-02 | Phase 14: Record Meter Reading | Complete |
 | ALLOC-01 | Phase 15: Well Editing & Allocation Management | Complete |
