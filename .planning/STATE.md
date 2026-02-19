@@ -102,5 +102,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 14-02-PLAN.md (Phase 14 complete)
-Resume file: .planning/phases/14-record-meter-reading/14-02-SUMMARY.md
+Stopped at: Phase 15 context gathered
+Resume file: .planning/phases/15-well-editing-allocation-management/15-CONTEXT.md
