@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v2.0 Milestone -- Phase 14: Record Meter Reading
+**Current focus:** v2.0 Milestone -- Phase 14 complete, ready for Phase 15: Well Editing & Allocation Management
 
 ## Current Position
 
-Phase: 14 of 16 (Record Meter Reading) -- In progress
-Plan: 1 of 2
-Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-02-19 -- Phase 14 Plan 01 executed
+Phase: 14 of 16 (Record Meter Reading) -- Complete
+Plan: 2 of 2
+Status: Phase 14 complete, ready for Phase 15
+Last activity: 2026-02-19 -- Phase 14 Plan 02 executed
 
-Progress: [###############░░░░░] 69% (33/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [################░░░░] 71% (34/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 33 (25 v1.0 + 3 v1.1 + 5 v2.0)
+- Total plans completed: 34 (25 v1.0 + 3 v1.1 + 6 v2.0)
 - Average duration: 5min
-- Total execution time: ~2.1 hours
+- Total execution time: ~2.2 hours
 
 **By Phase (previous milestones):**
 
@@ -48,10 +48,11 @@ Progress: [###############░░░░░] 69% (33/~TBD plans -- v1.0+v1.1 compl
 *Updated after each plan completion*
 | Phase 13 P01 | 3min | 2 tasks | 7 files |
 | Phase 13 P02 | 2min | 2 tasks | 4 files |
-| 14-record-meter-reading | 1/2 | 2min | 2min |
+| 14-record-meter-reading | 2/2 | 5min | 3min |
 
 *Updated after each plan completion*
 | Phase 14 P01 | 2min | 2 tasks | 4 files |
+| Phase 14 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 14]: Toast auto-dismiss after 3s with tap-to-dismiss fallback
 - [Phase 14]: State machine views (form/similar-warning/range-warning/submitting) for reading submission flow
 - [Phase 14]: GPS captured fresh on each submit via navigator.geolocation (not cached) for accuracy
+- [Phase 14]: Dead Pump overwrites Pump Off when both checked (severity precedence in checkbox mapping)
+- [Phase 14]: NewReadingSheet conditionally rendered (mount/unmount) rather than always-mounted with open prop
 
 ### Pending Todos
 
@@ -99,5 +102,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 14-01-PLAN.md
-Resume file: .planning/phases/14-record-meter-reading/14-01-SUMMARY.md
+Stopped at: Completed 14-02-PLAN.md (Phase 14 complete)
+Resume file: .planning/phases/14-record-meter-reading/14-02-SUMMARY.md
