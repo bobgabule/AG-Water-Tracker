@@ -23,6 +23,20 @@ interface NewReadingSheetProps {
 type ActiveTab = 'reading' | 'problem';
 type ReadingView = 'form' | 'similar-warning' | 'range-warning' | 'submitting';
 
+interface MeterProblems {
+  notWorking: boolean;
+  batteryDead: boolean;
+  pumpOff: boolean;
+  deadPump: boolean;
+}
+
+const INITIAL_PROBLEMS: MeterProblems = {
+  notWorking: false,
+  batteryDead: false,
+  pumpOff: false,
+  deadPump: false,
+};
+
 interface GpsResult {
   lat: number;
   lng: number;
@@ -74,6 +88,8 @@ export default function NewReadingSheet({
   const [readingValue, setReadingValue] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [gpsResult, setGpsResult] = useState<GpsResult | null>(null);
+  const [problems, setProblems] = useState<MeterProblems>(INITIAL_PROBLEMS);
+  const [problemsSubmitting, setProblemsSubmitting] = useState(false);
 
   // Real-time proximity indicator from cached location
   const proximityInfo = useMemo(() => {
@@ -91,6 +107,8 @@ export default function NewReadingSheet({
     setReadingValue('');
     setValidationError(null);
     setGpsResult(null);
+    setProblems(INITIAL_PROBLEMS);
+    setProblemsSubmitting(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -216,6 +234,38 @@ export default function NewReadingSheet({
     },
     [validationError],
   );
+
+  const handleProblemToggle = useCallback((key: keyof MeterProblems) => {
+    setProblems((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const hasProblemsSelected = problems.notWorking || problems.batteryDead || problems.pumpOff || problems.deadPump;
+
+  const handleProblemSubmit = useCallback(async () => {
+    setProblemsSubmitting(true);
+    try {
+      const updates: Record<string, string> = {};
+      if (problems.notWorking) updates.meter_status = 'Dead';
+      if (problems.batteryDead) updates.battery_state = 'Dead';
+      if (problems.pumpOff) updates.pump_state = 'Critical';
+      if (problems.deadPump) updates.pump_state = 'Dead'; // overwrites pumpOff
+
+      const setClauses = Object.keys(updates).map((k) => `${k} = ?`).join(', ');
+      const values = [...Object.values(updates), new Date().toISOString(), well.id];
+
+      await db.execute(
+        `UPDATE wells SET ${setClauses}, updated_at = ? WHERE id = ?`,
+        values,
+      );
+
+      useToastStore.getState().show('Problem reported');
+      resetForm();
+      onClose();
+    } catch {
+      useToastStore.getState().show('Failed to report problem', 'error');
+      setProblemsSubmitting(false);
+    }
+  }, [db, problems, well.id, resetForm, onClose]);
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-[60]">
@@ -380,16 +430,56 @@ export default function NewReadingSheet({
                 )}
               </>
             ) : (
-              /* Meter Problem tab placeholder */
-              <div className="flex items-center justify-center py-12">
-                <p className="text-white/50 text-sm">
-                  Meter Problem reporting will be available soon
-                </p>
-              </div>
+              /* Meter Problem tab */
+              problemsSubmitting ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-3">
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <p className="text-white/70 text-sm">Submitting...</p>
+                </div>
+              ) : (
+                <div className="space-y-3 p-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={problems.notWorking}
+                      onChange={() => handleProblemToggle('notWorking')}
+                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                    />
+                    <span className="text-white text-base">Not Working</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={problems.batteryDead}
+                      onChange={() => handleProblemToggle('batteryDead')}
+                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                    />
+                    <span className="text-white text-base">Battery Dead</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={problems.pumpOff}
+                      onChange={() => handleProblemToggle('pumpOff')}
+                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                    />
+                    <span className="text-white text-base">Pump Off</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={problems.deadPump}
+                      onChange={() => handleProblemToggle('deadPump')}
+                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                    />
+                    <span className="text-white text-base">Dead Pump</span>
+                  </label>
+                </div>
+              )
             )}
           </div>
 
-          {/* Footer - only show in form view on reading tab */}
+          {/* Footer - Reading tab form view */}
           {activeTab === 'reading' && view === 'form' && (
             <div className="flex justify-between items-center px-4 py-4 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
@@ -406,6 +496,28 @@ export default function NewReadingSheet({
               >
                 <CheckIcon className="w-5 h-5" />
                 Save
+              </button>
+            </div>
+          )}
+
+          {/* Footer - Meter Problem tab */}
+          {activeTab === 'problem' && !problemsSubmitting && (
+            <div className="flex justify-between items-center px-4 py-4 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-white font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleProblemSubmit}
+                disabled={!hasProblemsSelected}
+                className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
+              >
+                <CheckIcon className="w-5 h-5" />
+                Submit
               </button>
             </div>
           )}
