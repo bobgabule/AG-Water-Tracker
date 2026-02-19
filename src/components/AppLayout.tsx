@@ -8,6 +8,7 @@ import { ErrorFallback } from './ErrorFallback';
 import { PowerSyncProvider } from '../lib/PowerSyncContext';
 import { useAuth } from '../lib/AuthProvider';
 import { useRoleChangeDetector } from '../hooks/useRoleChangeDetector';
+import Toast from './Toast';
 
 /**
  * Inner component rendered inside PowerSyncProvider.
@@ -69,6 +70,7 @@ function AppLayoutContent() {
           <Outlet />
         </ErrorBoundary>
       </main>
+      <Toast />
     </div>
   );
 }
