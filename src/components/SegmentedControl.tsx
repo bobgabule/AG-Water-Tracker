@@ -15,20 +15,20 @@ export default memo(function SegmentedControl({
 }: SegmentedControlProps) {
   return (
     <div role="group" aria-label={label}>
-      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
-      <div className="flex gap-1">
-        {options.map((option) => (
+      <label className="text-xs text-white mb-1 block">{label}</label>
+      <div className="flex rounded-lg overflow-hidden border border-[#89a267]">
+        {options.map((option, index) => (
           <button
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
             aria-pressed={value === option.value}
             className={`
-              flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-              ${
-                value === option.value
-                  ? 'bg-gray-200 text-gray-900'
-                  : 'bg-transparent border border-gray-200 text-gray-600 hover:bg-gray-50'
+              flex-1 px-3 py-2 text-sm font-medium transition-colors
+              ${index < options.length - 1 ? 'border-r border-[#5f7248]' : ''}
+              ${value === option.value
+                ? 'bg-[#89a267] text-gray-900 font-semibold'
+                : 'bg-gray-50 text-gray-500 hover:bg-[#89a267]'
               }
             `}
           >

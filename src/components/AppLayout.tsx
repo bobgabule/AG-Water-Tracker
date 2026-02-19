@@ -29,7 +29,9 @@ function AppLayoutContent() {
 
   // Detect when current user's farm membership is deleted (user removed).
   // User passed RequireOnboarded to reach here, so hasFarmMembership is true.
+  // Debounced to avoid false positives from transient PowerSync sync states.
   const hadMembershipRef = useRef(false);
+  const removalTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data: membershipRows } = useQuery<{ cnt: number }>(
     user?.id && onboardingStatus?.hasFarmMembership
@@ -44,12 +46,24 @@ function AppLayoutContent() {
 
     if (count > 0) {
       hadMembershipRef.current = true;
-    } else if (hadMembershipRef.current) {
-      // Transition: had membership -> no membership = user was removed
-      hadMembershipRef.current = false;
-      alert('Your account has been removed from the farm. Please contact your farm administrator.');
-      signOut();
+      // Clear any pending removal timer — membership is confirmed
+      if (removalTimerRef.current) {
+        clearTimeout(removalTimerRef.current);
+        removalTimerRef.current = undefined;
+      }
+    } else if (hadMembershipRef.current && !removalTimerRef.current) {
+      // Debounce: wait 3s to confirm removal isn't a transient sync state
+      removalTimerRef.current = setTimeout(async () => {
+        hadMembershipRef.current = false;
+        removalTimerRef.current = undefined;
+        alert('Your account has been removed from the farm. Please contact your farm administrator.');
+        await signOut();
+      }, 3000);
     }
+
+    return () => {
+      if (removalTimerRef.current) clearTimeout(removalTimerRef.current);
+    };
   }, [membershipRows, signOut]);
 
   // Farm name comes directly from auth state - no need for PowerSync query

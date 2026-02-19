@@ -1,31 +1,5 @@
 import React from 'react';
-import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  QuestionMarkCircleIcon,
-} from '@heroicons/react/24/solid';
-
-interface StatusConfig {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  label: string;
-}
-
-function getStatusConfig(state: string): StatusConfig {
-  switch (state) {
-    case 'Ok':
-      return { icon: CheckCircleIcon, color: 'text-green-400', label: 'OK' };
-    case 'Low':
-      return { icon: ExclamationTriangleIcon, color: 'text-yellow-400', label: 'Low' };
-    case 'Critical':
-      return { icon: XCircleIcon, color: 'text-red-400', label: 'Critical' };
-    case 'Dead':
-      return { icon: XCircleIcon, color: 'text-red-600', label: 'Dead' };
-    default:
-      return { icon: QuestionMarkCircleIcon, color: 'text-gray-400', label: 'Unknown' };
-  }
-}
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 interface WellStatusIndicatorsProps {
   pumpState: string;
@@ -33,35 +7,39 @@ interface WellStatusIndicatorsProps {
   meterStatus: string;
 }
 
+function isHealthy(state: string): boolean {
+  return state === 'Ok';
+}
+
 const WellStatusIndicators = React.memo(function WellStatusIndicators({
   pumpState,
   batteryState,
   meterStatus,
 }: WellStatusIndicatorsProps) {
-  const pump = getStatusConfig(pumpState);
-  const battery = getStatusConfig(batteryState);
-  const meter = getStatusConfig(meterStatus);
+  const items = [
+    { label: 'Pump', healthy: isHealthy(pumpState) },
+    { label: 'Battery', healthy: isHealthy(batteryState) },
+    { label: 'Meter Status', healthy: isHealthy(meterStatus) },
+  ];
 
   return (
-    <div className="flex gap-3 flex-wrap">
-      {[
-        { label: 'Pump', config: pump },
-        { label: 'Battery', config: battery },
-        { label: 'Meter', config: meter },
-      ].map(({ label, config }) => {
-        const Icon = config.icon;
-        return (
-          <div
-            key={label}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10"
-          >
-            <Icon className={`w-4 h-4 ${config.color}`} />
-            <span className="text-xs text-white/80">
-              {label}: {config.label}
-            </span>
-          </div>
-        );
-      })}
+    <div className="bg-[#3a4a2a] px-5 pb-5">
+      <div className="flex flex-col gap-2">
+        {items.map(({ label, healthy }) => {
+          const Icon = healthy ? CheckCircleIcon : XCircleIcon;
+          const color = healthy ? 'text-green-400' : 'text-red-400';
+          return (
+            <div
+              key={label}
+              className="flex items-center gap-1.5"
+              aria-label={`${label}: ${healthy ? 'OK' : 'Issue'}`}
+            >
+              <Icon className={`w-5 h-5 ${color}`} aria-hidden="true" />
+              <span className="text-white text-sm">{label}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 });

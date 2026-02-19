@@ -1,14 +1,13 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useBlocker } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import {
   ArrowLeftIcon,
   CheckIcon,
   TrashIcon,
   MapPinIcon,
-  ChevronRightIcon,
+  PencilSquareIcon,
 } from '@heroicons/react/24/outline';
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import SegmentedControl from '../components/SegmentedControl';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations } from '../hooks/useWellAllocations';
@@ -55,9 +54,6 @@ export default function WellEditPage() {
 
   // Track whether initialization has occurred to prevent re-initialization
   const initializedRef = useRef<boolean>(false);
-  // Track navigation to allocations to bypass blocker
-  const navigatingToAllocationsRef = useRef<boolean>(false);
-
   // Form state
   const [name, setName] = useState('');
   const [meterSerialNumber, setMeterSerialNumber] = useState('');
@@ -157,9 +153,6 @@ export default function WellEditPage() {
     meterStatus,
   ]);
 
-  // useBlocker for in-app navigation
-  const blocker = useBlocker(isDirty && !navigatingToAllocationsRef.current);
-
   // beforeunload for browser refresh/tab close
   useEffect(() => {
     if (!isDirty) return;
@@ -223,7 +216,6 @@ export default function WellEditPage() {
 
   // Navigate to allocations: save draft and navigate
   const handleAllocationsNav = useCallback(() => {
-    navigatingToAllocationsRef.current = true;
     useWellEditDraftStore.getState().setDraft({
       wellId: id!,
       name,
@@ -505,7 +497,9 @@ export default function WellEditPage() {
                 {allocations.length} {allocations.length === 1 ? 'Period' : 'Periods'}
               </p>
             </div>
-            <ChevronRightIcon className="w-5 h-5 text-white/70" />
+            <div className="p-1.5 bg-white/15 rounded-md">
+              <PencilSquareIcon className="w-4 h-4 text-white/80" />
+            </div>
           </button>
 
           {/* Units */}
@@ -616,45 +610,6 @@ export default function WellEditPage() {
           Delete Well
         </button>
       </div>
-
-      {/* Discard changes dialog */}
-      {blocker.state === 'blocked' && (
-        <Dialog open={true} onClose={() => blocker.reset()} className="relative z-50">
-          <DialogBackdrop
-            transition
-            className="fixed inset-0 bg-black/50 transition-opacity duration-300 ease-out data-[closed]:opacity-0"
-          />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <DialogPanel
-              transition
-              className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
-            >
-              <div className="flex flex-col items-center text-center">
-                <DialogTitle className="text-lg font-semibold text-white mb-2">
-                  Discard changes?
-                </DialogTitle>
-                <p className="text-gray-400 text-sm mb-6">
-                  You have unsaved changes. Are you sure you want to leave?
-                </p>
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => blocker.reset()}
-                    className="flex-1 py-2.5 rounded-lg font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors"
-                  >
-                    Keep Editing
-                  </button>
-                  <button
-                    onClick={() => blocker.proceed()}
-                    className="flex-1 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
-                  >
-                    Discard
-                  </button>
-                </div>
-              </div>
-            </DialogPanel>
-          </div>
-        </Dialog>
-      )}
 
       {/* Delete confirmation dialog */}
       <ConfirmDeleteWellDialog

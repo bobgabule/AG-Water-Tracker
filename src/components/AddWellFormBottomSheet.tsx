@@ -24,6 +24,7 @@ interface AddWellFormBottomSheetProps {
   onSave: (wellData: WellFormData) => void;
   initialLocation: { latitude: number; longitude: number };
   farmName: string | null;
+  isSaving?: boolean;
 }
 
 const unitOptions = [
@@ -48,6 +49,7 @@ export default function AddWellFormBottomSheet({
   onSave,
   initialLocation,
   farmName,
+  isSaving = false,
 }: AddWellFormBottomSheetProps) {
   const [name, setName] = useState('');
   const [meterSerialNumber, setMeterSerialNumber] = useState('');
@@ -167,7 +169,7 @@ export default function AddWellFormBottomSheet({
     coordinateError === null;
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
+    <Dialog open={open} onClose={isSaving ? () => {} : onClose} className="relative z-50">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/40 transition-opacity duration-300 ease-out data-[closed]:opacity-0"
@@ -255,7 +257,7 @@ export default function AddWellFormBottomSheet({
                 <button
                   type="button"
                   onClick={handleGetLocation}
-                  disabled={gpsLoading}
+                  disabled={gpsLoading || isSaving}
                   className="p-2.5 bg-white rounded-lg text-[#6190d1] hover:bg-[#6190d1] transition-colors disabled:opacity-50"
                   aria-label="Get current location"
                 >
@@ -363,18 +365,28 @@ export default function AddWellFormBottomSheet({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-white font-medium"
+              disabled={isSaving}
+              className="px-6 py-2.5 text-white font-medium disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSaving}
               className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CheckIcon className="w-5 h-5" />
-              Save
+              {isSaving ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-[#506741]/30 border-t-[#506741] rounded-full animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="w-5 h-5" />
+                  Save
+                </>
+              )}
             </button>
           </div>
         </DialogPanel>

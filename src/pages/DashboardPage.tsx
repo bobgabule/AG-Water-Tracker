@@ -9,6 +9,7 @@ import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 import { debugError } from '../lib/debugLog';
 import { useFarmState } from '../hooks/useFarmState';
+import { useToastStore } from '../stores/toastStore';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
@@ -33,14 +34,12 @@ export default function DashboardPage() {
   // Save state
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const isMountedRef = useRef(true);
+  const isSavingRef = useRef(false);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const showToast = useToastStore((s) => s.show);
 
   useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      clearTimeout(errorTimeoutRef.current);
-    };
+    return () => clearTimeout(errorTimeoutRef.current);
   }, []);
 
   // Bottom sheet flow state
@@ -82,13 +81,14 @@ export default function DashboardPage() {
       debugError('Dashboard', 'Attempted well creation without permission');
       return;
     }
-    if (isSaving) return;
+    if (isSavingRef.current) return;
 
     if (!farmId || !user) {
       debugError('Dashboard', 'Cannot save well: missing farmId or user');
       return;
     }
 
+    isSavingRef.current = true;
     setIsSaving(true);
     const wellId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -122,22 +122,20 @@ export default function DashboardPage() {
         ]
       );
 
-      if (!isMountedRef.current) return;
       setSaveError(null);
       setCurrentStep('closed');
       setPickedLocation(null);
+      showToast(`"${wellData.name}" added successfully`);
     } catch (error) {
       debugError('Dashboard', 'Failed to save well:', error);
-      if (!isMountedRef.current) return;
       clearTimeout(errorTimeoutRef.current);
       setSaveError('Failed to save well. Please try again.');
       errorTimeoutRef.current = setTimeout(() => setSaveError(null), 5000);
     } finally {
-      if (isMountedRef.current) {
-        setIsSaving(false);
-      }
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
-  }, [db, isSaving, farmId, role, user]);
+  }, [db, farmId, role, user, showToast]);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden">
@@ -227,6 +225,7 @@ export default function DashboardPage() {
           onSave={handleSaveWell}
           initialLocation={pickedLocation}
           farmName={farmName}
+          isSaving={isSaving}
         />
       )}
     </div>
