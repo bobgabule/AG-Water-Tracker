@@ -245,7 +245,11 @@ Plans:
   3. PowerSync connector correctly uploads new readings and allocations created offline, and downloads server-side changes on sync
   4. A `useWellReadings(wellId)` hook returns the readings for a well sorted by date, and a `useWellAllocations(wellId)` hook returns the allocation periods for a well
   5. A `getDistanceToWell(userCoords, wellCoords)` utility returns the distance in feet/meters, and an `isInRange(distance, threshold)` check determines proximity status
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md -- Supabase migration (readings + allocations tables with RLS) + PowerSync schema, connector, and sync rules
+- [ ] 12-02-PLAN.md -- Query hooks (useWellReadings, useWellAllocations) + GPS proximity utility
 
 ### Phase 13: Well Detail Page
 **Goal**: Users can tap a well on the map and see all its information -- header, usage gauge, status indicators, and readings history -- in a full-page slide-up sheet
