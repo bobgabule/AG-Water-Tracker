@@ -86,6 +86,7 @@ const allocations = new TableV2({
   allocated_af: column.text, // TEXT preserves decimal precision
   used_af: column.text, // TEXT preserves decimal precision
   is_manual_override: column.integer, // 0/1 boolean
+  starting_reading: column.text, // TEXT preserves decimal precision (baseline for usage calc)
   notes: column.text,
   created_at: column.text,
   updated_at: column.text,
