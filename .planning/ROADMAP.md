@@ -261,7 +261,12 @@ Plans:
   3. A visual usage gauge bar shows Allocated / Used / Remaining for the current allocation period, or a "Missing Allocation" message when no allocation exists
   4. A scrollable readings history table shows each reading's date, value, user name, and time -- with out-of-range readings marked by a yellow indicator -- or a "No readings yet" message when empty
   5. A back button dismisses the sheet returning to the interactive map, and an edit button navigates to the well edit form
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md -- Well detail sheet foundation: route, Dialog container, swipe gestures, header with metadata and status indicators
+- [ ] 13-02-PLAN.md -- Content sections: usage gauge, readings list with user names, GPS proximity indicator, empty states
+- [ ] 13-03-PLAN.md -- Visual verification checkpoint for complete well detail flow
 
 ### Phase 14: Record Meter Reading
 **Goal**: Field agents can record a new meter reading with GPS location capture, get warned about suspicious values, and report meter problems -- all working offline
