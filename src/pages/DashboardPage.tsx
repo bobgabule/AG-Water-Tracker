@@ -150,6 +150,7 @@ export default function DashboardPage() {
           key={mapKey}
           wells={wells}
           farmState={farmState}
+          farmId={farmId}
           onWellClick={handleWellClick}
           onMapClick={handleMapClick}
           pickedLocation={pickedLocation}

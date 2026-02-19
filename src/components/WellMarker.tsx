@@ -5,6 +5,7 @@ import type { WellWithReading } from '../hooks/useWells';
 
 interface WellMarkerProps {
   well: WellWithReading;
+  allocationPercentage?: number;
   onClick?: (wellId: string) => void;
 }
 
@@ -57,13 +58,12 @@ function getStatusText(createdAt: string, updatedAt: string): string {
   return `Updated ${weeks} week${weeks > 1 ? 's' : ''} ago`;
 }
 
-export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
+export default memo(function WellMarker({ well, allocationPercentage, onClick }: WellMarkerProps) {
   const handleClick = useCallback(() => {
     onClick?.(well.id);
   }, [onClick, well.id]);
 
-  // Future: calculate from used / allocated
-  const allocationPercentage = 100;
+  const fillPercent = allocationPercentage ?? 0;
 
   // Get status text based on timestamps
   const statusText = getStatusText(well.createdAt, well.updatedAt);
@@ -96,7 +96,7 @@ export default memo(function WellMarker({ well, onClick }: WellMarkerProps) {
           <div className="w-2.5 h-10 bg-gray-700 rounded-full overflow-hidden flex flex-col justify-end border border-white/50">
             <div
               className="w-full bg-blue-500 rounded-b-full transition-all duration-300"
-              style={{ height: `${allocationPercentage}%` }}
+              style={{ height: `${fillPercent}%` }}
             />
           </div>
 
