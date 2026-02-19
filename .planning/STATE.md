@@ -104,6 +104,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 15]: Inline CRUD form pattern: selectedId null = create mode, non-null = edit mode
 - [Phase 16]: EditReadingSheet rendered as centered card dialog (z-[60]) above WellDetailSheet (z-50)
 - [Phase 16]: Conditional row element pattern: button when onReadingClick provided, div when not (backwards compatible)
+- [Phase 16]: Allocation percentage defaults to 0% when no allocation exists (empty gauge on map)
+- [Phase 16]: Latest reading date replaces well.updatedAt for well list display
 
 ### Pending Todos
 
@@ -121,5 +123,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 16-01-PLAN.md
-Resume file: .planning/phases/16-reading-management-map-integration/16-01-SUMMARY.md
+Stopped at: Completed 16-02-PLAN.md
+Resume file: .planning/phases/16-reading-management-map-integration/16-02-SUMMARY.md
