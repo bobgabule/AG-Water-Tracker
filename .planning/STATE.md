@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 
 ## Current Position
 
-Phase: 12 of 16 (Data Foundation)
-Plan: 2 of 2
-Status: Executing
-Last activity: 2026-02-19 -- Completed 12-01 (data foundation tables and sync)
+Phase: 12 of 16 (Data Foundation) -- COMPLETE
+Plan: 2 of 2 (all plans complete)
+Status: Phase Complete
+Last activity: 2026-02-19 -- Completed 12-02 (query hooks and GPS proximity)
 
-Progress: [############░░░░░░░░] 60% (29/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [############░░░░░░░░] 62% (30/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29 (25 v1.0 + 3 v1.1 + 1 v2.0)
+- Total plans completed: 30 (25 v1.0 + 3 v1.1 + 2 v2.0)
 - Average duration: 5min
 - Total execution time: ~2.1 hours
 
@@ -38,10 +38,11 @@ Progress: [############░░░░░░░░] 60% (29/~TBD plans -- v1.0+v1.1
 | 09-map-default-view | 1 | ~5min | 5min |
 | 10-location-permission-flow | 1 | ~5min | 5min |
 | 11-dashboard-quality-fixes | 1 | 2min | 2min |
-| 12-data-foundation | 1/2 | 3min | 3min |
+| 12-data-foundation | 2/2 | 6min | 3min |
 
 *Updated after each plan completion*
 | Phase 12 P01 | 3min | 2 tasks | 4 files |
+| Phase 12 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [v2.0]: Meter values stored as TEXT in PowerSync (not REAL) to preserve decimal precision
 - [v2.0]: GPS proximity via @turf/distance (client-side Haversine), not server-side
 - [Phase 12]: Denormalized farm_id on readings/allocations with BEFORE INSERT triggers for direct PowerSync sync rule filtering
+- [Phase 12]: GPS proximity split into getDistanceToWell + isInRange for UI flexibility (display distance even when out of range)
+- [Phase 12]: PowerSync text columns mapped with ?? '' for NOT NULL fields (type-level null vs database-level NOT NULL)
 
 ### Pending Todos
 
@@ -79,5 +82,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 12-01-PLAN.md
-Resume file: .planning/phases/12-data-foundation/12-01-SUMMARY.md
+Stopped at: Completed 12-02-PLAN.md (Phase 12 complete)
+Resume file: .planning/phases/12-data-foundation/12-02-SUMMARY.md

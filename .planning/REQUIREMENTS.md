@@ -84,22 +84,22 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 - [ ] **WELL-01**: User can tap a well marker on the map to open a full-page slide-up sheet (map stays loaded behind)
 - [ ] **WELL-02**: Well detail sheet shows farm name, well name, serial number, WMIS #, and "Last Updated" timestamp
-- [ ] **WELL-03**: Well detail sheet shows a visual usage gauge bar with Allocated / Used / Remaining for current allocation
+- [x] **WELL-03**: Well detail sheet shows a visual usage gauge bar with Allocated / Used / Remaining for current allocation
 - [ ] **WELL-04**: Well detail sheet shows status indicators (Pump, Battery, Meter Status) with check/X icons
 - [x] **WELL-05**: Well detail sheet shows scrollable readings history (Date, Value, User, Time)
 - [x] **WELL-06**: Out-of-range readings marked with yellow indicator in readings list
 - [x] **WELL-07**: "Missing Allocation" message when well has no allocation periods
 - [ ] **WELL-08**: Back button dismisses the sheet, returning to interactive map
 - [ ] **WELL-09**: Edit button navigates to well edit form
-- [ ] **WELL-10**: WellMarker on map shows real allocation percentage (not hardcoded 100%)
-- [ ] **WELL-11**: Well list page shows latest reading date/time for each well
+- [x] **WELL-10**: WellMarker on map shows real allocation percentage (not hardcoded 100%)
+- [x] **WELL-11**: Well list page shows latest reading date/time for each well
 
 ### Meter Readings
 
 - [x] **READ-01**: User can record a new meter reading via "+ New Reading" button (raw cumulative value)
 - [ ] **READ-02**: New reading form displays unit and multiplier (e.g., "GAL x 10.0")
 - [x] **READ-03**: Reading captures GPS location automatically on submission
-- [ ] **READ-04**: Similar reading warning (within 5 units of last reading) with Continue option
+- [x] **READ-04**: Similar reading warning (within 5 units of last reading) with Continue option
 - [x] **READ-05**: Grower/admin can edit a reading value
 - [x] **READ-06**: Grower/admin can delete a reading
 - [x] **READ-07**: "No readings" empty state message when well has no readings
@@ -111,7 +111,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 ### GPS Proximity
 
-- [ ] **PROX-01**: "In Range / Out of Range" GPS indicator
+- [x] **PROX-01**: "In Range / Out of Range" GPS indicator
 - [x] **PROX-02**: Range status recorded with each reading
 
 ### Allocations
@@ -229,25 +229,25 @@ Requirements for meter reading, allocation tracking, and well management milesto
 |-------------|-------|--------|
 | WELL-01 | Phase 13: Well Detail Page | Pending |
 | WELL-02 | Phase 13: Well Detail Page | Pending |
-| WELL-03 | Phase 13: Well Detail Page | Pending |
+| WELL-03 | Phase 13: Well Detail Page | Complete |
 | WELL-04 | Phase 13: Well Detail Page | Pending |
 | WELL-05 | Phase 13: Well Detail Page | Complete |
 | WELL-06 | Phase 13: Well Detail Page | Complete |
 | WELL-07 | Phase 13: Well Detail Page | Complete |
 | WELL-08 | Phase 13: Well Detail Page | Pending |
 | WELL-09 | Phase 13: Well Detail Page | Pending |
-| WELL-10 | Phase 16: Reading Management & Map Integration | Pending |
-| WELL-11 | Phase 16: Reading Management & Map Integration | Pending |
+| WELL-10 | Phase 16: Reading Management & Map Integration | Complete |
+| WELL-11 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-01 | Phase 14: Record Meter Reading | Complete |
 | READ-02 | Phase 14: Record Meter Reading | Pending |
 | READ-03 | Phase 14: Record Meter Reading | Complete |
-| READ-04 | Phase 14: Record Meter Reading | Pending |
+| READ-04 | Phase 14: Record Meter Reading | Complete |
 | READ-05 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-06 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-07 | Phase 13: Well Detail Page | Complete |
 | PROB-01 | Phase 14: Record Meter Reading | Pending |
 | PROB-02 | Phase 14: Record Meter Reading | Pending |
-| PROX-01 | Phase 13: Well Detail Page | Pending |
+| PROX-01 | Phase 13: Well Detail Page | Complete |
 | PROX-02 | Phase 14: Record Meter Reading | Complete |
 | ALLOC-01 | Phase 15: Well Editing & Allocation Management | Complete |
 | ALLOC-02 | Phase 15: Well Editing & Allocation Management | Complete |
