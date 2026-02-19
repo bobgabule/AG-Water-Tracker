@@ -16,6 +16,7 @@ import CreateFarmPage from './pages/onboarding/CreateFarmPage';
 import AppLayout from './components/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import WellDetailPage from './pages/WellDetailPage';
+import WellEditPage from './pages/WellEditPage';
 import WellListPage from './pages/WellListPage';
 import ReportsPage from './pages/ReportsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/language" element={<LanguagePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/wells/:id" element={<WellDetailPage />} />
+            <Route path="/wells/:id/edit" element={<WellEditPage />} />
           </Route>
         </Route>
       </Route>
