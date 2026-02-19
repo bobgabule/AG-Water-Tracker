@@ -114,9 +114,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Track user-initiated sign-out to distinguish from forced sign-out (revoked account)
   const userInitiatedSignOut = useRef(false);
 
+  // Track auth recovery attempts so refreshSession() doesn't trigger a SIGNED_OUT cascade
+  const isRecoveringAuthRef = useRef(false);
+
   // ---------------------------------------------------------------------------
   // Onboarding Status
   // ---------------------------------------------------------------------------
+
+  /**
+   * Attempt to recover from an auth RPC error by refreshing the token and
+   * retrying the onboarding RPC. Returns the status on success, or null if
+   * recovery failed (caller should then expire the session).
+   */
+  const attemptAuthRecovery = useCallback(async (): Promise<OnboardingStatus | null> => {
+    try {
+      isRecoveringAuthRef.current = true;
+      const { data: { session: refreshed }, error: refreshError } =
+        await supabase.auth.refreshSession();
+
+      if (refreshed && !refreshError) {
+        debugLog('Auth', 'Token refresh succeeded, retrying onboarding RPC');
+        const { data: retryData, error: retryError } =
+          await supabase.rpc('get_onboarding_status');
+
+        if (!retryError && retryData) {
+          const status: OnboardingStatus = {
+            hasProfile: retryData.has_profile ?? false,
+            hasFarmMembership: retryData.has_farm_membership ?? false,
+            farmId: retryData.farm_id ?? null,
+            farmName: retryData.farm_name ?? null,
+          };
+          try { localStorage.setItem(ONBOARDING_CACHE_KEY, JSON.stringify(status)); } catch { /* non-critical */ }
+          return status;
+        }
+        debugLog('Auth', 'Retry RPC failed after refresh');
+      }
+    } catch {
+      // Refresh threw — session is truly dead
+    } finally {
+      isRecoveringAuthRef.current = false;
+    }
+    return null;
+  }, []);
+
+  /** Expire the session and clear all local auth state. */
+  const expireSession = useCallback(() => {
+    debugLog('Auth', 'Token refresh failed, triggering session expiry');
+    setSessionExpired(true);
+    setSession(null);
+    setUser(null);
+    setOnboardingStatus(null);
+    try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+  }, []);
 
   const fetchOnboardingStatus =
     useCallback(async (): Promise<OnboardingStatus | null> => {
@@ -126,15 +175,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (error) {
           debugError('Auth', 'Failed to fetch onboarding status:', error);
 
-          // Auth errors mean the session itself is invalid -- don't mask with cache
+          // Auth errors — try refreshing the token before expiring the session
           if (isAuthRpcError(error)) {
-            debugLog('Auth', 'RPC failed due to invalid session, triggering session expiry');
-            setSessionExpired(true);
-            setSession(null);
-            setUser(null);
-            setOnboardingStatus(null);
-            // Clear the stale onboarding cache too
-            try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+            debugLog('Auth', 'RPC auth error, attempting token refresh before expiring session');
+            const recovered = await attemptAuthRecovery();
+            if (recovered) return recovered;
+            expireSession();
             return null;
           }
 
@@ -171,14 +217,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (err) {
         debugError('Auth', 'Error fetching onboarding status:', err);
 
-        // Check if the thrown error is auth-related
+        // Auth errors — try refreshing the token before expiring the session
         if (isAuthRpcError(err)) {
-          debugLog('Auth', 'RPC threw auth error, triggering session expiry');
-          setSessionExpired(true);
-          setSession(null);
-          setUser(null);
-          setOnboardingStatus(null);
-          try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+          debugLog('Auth', 'RPC threw auth error, attempting token refresh');
+          const recovered = await attemptAuthRecovery();
+          if (recovered) return recovered;
+          expireSession();
           return null;
         }
 
@@ -194,7 +238,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         return null;
       }
-    }, []);
+    }, [attemptAuthRecovery, expireSession]);
 
   const refreshOnboardingStatus =
     useCallback(async (): Promise<OnboardingStatus | null> => {
@@ -280,10 +324,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         case 'SIGNED_OUT': {
-          // Detect forced sign-out (revoked account, expired refresh token)
-          if (!userInitiatedSignOut.current) {
-            setSessionExpired(true);
-          }
+          // Skip if we're in the middle of a token recovery attempt —
+          // refreshSession() can briefly fire SIGNED_OUT before the new session lands
+          if (userInitiatedSignOut.current || isRecoveringAuthRef.current) break;
+
+          // Forced sign-out (revoked account, expired refresh token)
+          setSessionExpired(true);
           setSession(null);
           setUser(null);
           setOnboardingStatus(null);

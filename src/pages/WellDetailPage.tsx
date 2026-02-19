@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
 import WellDetailSheet from '../components/WellDetailSheet';
@@ -15,13 +15,15 @@ export default function WellDetailPage() {
 
   const [readingSheetOpen, setReadingSheetOpen] = useState(false);
 
-  const currentWell = wells.find((w) => w.id === id) ?? null;
+  const currentWell = useMemo(
+    () => wells.find((w) => w.id === id) ?? null,
+    [wells, id],
+  );
 
   const handleClose = useCallback(() => navigate('/'), [navigate]);
-  const handleEdit = useCallback(() => navigate(`/wells/${id}/edit`), [navigate, id]);
-  const handleWellChange = useCallback(
-    (wellId: string) => navigate(`/wells/${wellId}`, { replace: true }),
-    [navigate],
+  const handleEdit = useCallback(
+    () => id && navigate(`/wells/${id}/edit`),
+    [navigate, id],
   );
   const handleNewReading = useCallback(() => setReadingSheetOpen(true), []);
   const handleReadingClose = useCallback(() => setReadingSheetOpen(false), []);
@@ -29,15 +31,13 @@ export default function WellDetailPage() {
   return (
     <>
       <WellDetailSheet
-        wellId={id!}
-        wells={wells}
+        well={currentWell}
         farmName={farmName}
         onClose={handleClose}
         onEdit={handleEdit}
-        onWellChange={handleWellChange}
         onNewReading={handleNewReading}
       />
-      {readingSheetOpen && currentWell && user && (
+      {readingSheetOpen && currentWell && user && farmId && (
         <NewReadingSheet
           open={readingSheetOpen}
           onClose={handleReadingClose}

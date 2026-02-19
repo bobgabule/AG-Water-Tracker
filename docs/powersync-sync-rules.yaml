@@ -110,7 +110,7 @@ bucket_definitions:
   farm_allocations:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT id, well_id, farm_id, period_start, period_end, allocated_af, used_af, is_manual_override, notes, created_at, updated_at FROM allocations WHERE farm_id = bucket.farm_id
+      - SELECT id, well_id, farm_id, period_start, period_end, allocated_af, used_af, is_manual_override, starting_reading, notes, created_at, updated_at FROM allocations WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # User Profile (Own)

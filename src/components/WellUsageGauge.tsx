@@ -1,51 +1,122 @@
 import React from 'react';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import type { WellWithReading } from '../hooks/useWells';
 
 interface WellUsageGaugeProps {
-  allocatedAf: string;
-  usedAf: string;
+  well: WellWithReading;
+  allocatedAf: string | null;
+  usedAf: string | null;
+}
+
+/** Map well unit codes to display labels */
+function getUnitLabel(units: string): string {
+  switch (units) {
+    case 'GAL':
+      return 'Gallons';
+    case 'CF':
+      return 'Cubic Feet';
+    case 'AF':
+    default:
+      return 'AF';
+  }
+}
+
+function isHealthy(state: string): boolean {
+  return state === 'Ok';
 }
 
 const WellUsageGauge = React.memo(function WellUsageGauge({
+  well,
   allocatedAf,
   usedAf,
 }: WellUsageGaugeProps) {
-  const allocated = parseFloat(allocatedAf) || 0;
-  const used = parseFloat(usedAf) || 0;
+  const allocated = parseFloat(allocatedAf ?? '') || 0;
+  const used = parseFloat(usedAf ?? '') || 0;
   const remaining = Math.max(0, allocated - used);
-  const usedPercent =
-    allocated > 0 ? Math.min((used / allocated) * 100, 100) : 0;
+  const remainingPercent =
+    allocated > 0 ? Math.min((remaining / allocated) * 100, 100) : 0;
+  const unitLabel = getUnitLabel(well.units);
 
-  const fillColor =
-    usedPercent > 90
-      ? 'bg-red-500'
-      : usedPercent > 75
-        ? 'bg-yellow-500'
-        : 'bg-green-500';
+  const statusItems = [
+    { label: 'Pump', healthy: isHealthy(well.pumpState) },
+    { label: 'Battery', healthy: isHealthy(well.batteryState) },
+    { label: 'Meter Status', healthy: isHealthy(well.meterStatus) },
+  ];
 
   return (
-    <div>
-      <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wide mb-3">
-        Water Usage
-      </h3>
-      <div className="flex justify-between text-sm mb-1.5">
-        <span className="text-white/70">
-          Used: <span className="text-white font-medium">{used.toFixed(2)} AF</span>
-        </span>
-        <span className="text-white/70">
-          Remaining: <span className="text-white font-medium">{remaining.toFixed(2)} AF</span>
-        </span>
-      </div>
-      <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full ${fillColor} transition-all duration-300`}
-          style={{ width: `${usedPercent}%` }}
-        />
-      </div>
-      <div className="flex justify-between text-xs mt-1.5">
-        <span className="text-white/50">
-          Allocated: {allocated.toFixed(2)} AF
-        </span>
-        <span className="text-white/50">{usedPercent.toFixed(1)}%</span>
+    <div className="bg-[#3a4a2a] px-5 py-5">
+      <div className="flex items-start gap-4">
+        {/* Left column: Serial Number + WMIS */}
+        <div className="flex-1 space-y-4">
+          <div>
+            <p className="text-white/50 text-xs font-medium">Serial Number</p>
+            <p className="text-white text-sm font-semibold">
+              {well.meterSerialNumber || '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-white/50 text-xs font-medium">WMIS #</p>
+            <p className="text-white text-sm font-semibold">
+              {well.wmisNumber || '—'}
+            </p>
+          </div>
+        </div>
+
+        {/* Center: Vertical pill gauge */}
+        <div className="flex-shrink-0 w-14 h-36 rounded-full bg-[#2a3520] overflow-hidden relative border border-white/10">
+          {/* Fill from bottom */}
+          <div
+            className="absolute bottom-0 left-0 right-0 bg-green-500 transition-all duration-500"
+            style={{ height: `${remainingPercent}%` }}
+          />
+          {/* Rounded cap at top of fill */}
+          {remainingPercent > 8 && remainingPercent < 100 && (
+            <div
+              className="absolute left-0 right-0 h-4 bg-green-500 rounded-t-full"
+              style={{ bottom: `calc(${remainingPercent}% - 0.5rem)` }}
+            />
+          )}
+        </div>
+
+        {/* Right column: Usage stats + Status indicators */}
+        <div className="flex-1">
+          <h3 className="text-white font-bold text-base uppercase tracking-wide">
+            Usage
+          </h3>
+          <div className="space-y-1 mt-1">
+            <p className="text-white/80 text-sm">
+              <span className="text-white font-semibold">
+                {Math.round(allocated)}
+              </span>{' '}
+              Allocated
+            </p>
+            <p className="text-white/80 text-sm">
+              <span className="text-white font-semibold">
+                {Math.round(used)}
+              </span>{' '}
+              Used
+            </p>
+            <div className="inline-block bg-green-600/80 rounded px-2 py-0.5 mt-1">
+              <span className="text-white text-sm font-semibold">
+                {Math.round(remaining)} {unitLabel} Left
+              </span>
+            </div>
+          </div>
+
+          {/* Status indicators — vertically stacked below usage stats */}
+          <div className="mt-3 space-y-1.5">
+            {statusItems.map(({ label, healthy }) => {
+              const Icon = healthy ? CheckCircleIcon : XCircleIcon;
+              const color = healthy ? 'text-green-400' : 'text-red-400';
+              return (
+                <div key={label} className="flex items-center gap-1.5">
+                  <Icon className={`w-5 h-5 ${color}`} aria-hidden="true" />
+                  <span className="text-white text-sm">{label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
