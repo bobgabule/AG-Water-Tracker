@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { useSwipeable } from 'react-swipeable';
 import { MapPinIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
@@ -6,6 +7,7 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 import WellDetailHeader from './WellDetailHeader';
 import WellUsageGauge from './WellUsageGauge';
 import WellReadingsList from './WellReadingsList';
+import EditReadingSheet from './EditReadingSheet';
 import { useWellProximityOrder } from '../hooks/useWellProximityOrder';
 import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
@@ -66,6 +68,19 @@ export default function WellDetailSheet({
     return { distance: dist, inRange: isInRange(dist) };
   }, [userLocation, currentWell?.location]);
 
+  const [selectedReading, setSelectedReading] = useState<ReadingWithName | null>(null);
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
+
+  const handleReadingClick = useCallback((reading: ReadingWithName) => {
+    setSelectedReading(reading);
+    setEditSheetOpen(true);
+  }, []);
+
+  const handleEditClose = useCallback(() => {
+    setEditSheetOpen(false);
+    setSelectedReading(null);
+  }, []);
+
   const [transitioning, setTransitioning] = useState(false);
 
   const navigateToWell = useCallback(
@@ -96,6 +111,7 @@ export default function WellDetailSheet({
   });
 
   return (
+    <>
     <Dialog open={true} onClose={() => {}} static className="relative z-50">
       <DialogBackdrop className="fixed inset-0 bg-black/40" />
       <div className="fixed inset-0 flex flex-col">
@@ -171,7 +187,7 @@ export default function WellDetailSheet({
                 )}
 
                 {/* Readings History */}
-                <WellReadingsList readings={readings} />
+                <WellReadingsList readings={readings} onReadingClick={handleReadingClick} />
               </div>
             )}
           </div>
@@ -189,5 +205,16 @@ export default function WellDetailSheet({
         </DialogPanel>
       </div>
     </Dialog>
+
+    {editSheetOpen && selectedReading && currentWell && (
+      <EditReadingSheet
+        open={editSheetOpen}
+        onClose={handleEditClose}
+        reading={selectedReading}
+        wellUnits={currentWell.units}
+        wellMultiplier={currentWell.multiplier}
+      />
+    )}
+    </>
   );
 }
