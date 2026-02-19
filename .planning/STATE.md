@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 
 ## Current Position
 
-Phase: 12 of 16 (Data Foundation) -- COMPLETE
-Plan: 2 of 2 (all plans complete)
-Status: Phase Complete
-Last activity: 2026-02-19 -- Completed 12-02 (query hooks and GPS proximity)
+Phase: 13 of 16 (Well Detail Page) -- Context gathered
+Plan: 0 of TBD
+Status: Context gathered, ready for planning
+Last activity: 2026-02-19 -- Phase 13 context gathered
 
 Progress: [############░░░░░░░░] 62% (30/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
@@ -82,5 +82,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 12-02-PLAN.md (Phase 12 complete)
-Resume file: .planning/phases/12-data-foundation/12-02-SUMMARY.md
+Stopped at: Phase 13 context gathered
+Resume file: .planning/phases/13-well-detail-page/13-CONTEXT.md
