@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 12 of 16 (Data Foundation)
-Plan: --
-Status: Ready to plan
-Last activity: 2026-02-19 -- v2.0 roadmap created (Phases 12-16)
+Plan: 2 of 2
+Status: Executing
+Last activity: 2026-02-19 -- Completed 12-01 (data foundation tables and sync)
 
-Progress: [###########░░░░░░░░░] 55% (28/~TBD plans -- v1.0+v1.1 complete, v2.0 not yet planned)
+Progress: [############░░░░░░░░] 60% (29/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28 (25 v1.0 + 3 v1.1)
+- Total plans completed: 29 (25 v1.0 + 3 v1.1 + 1 v2.0)
 - Average duration: 5min
-- Total execution time: ~2.0 hours
+- Total execution time: ~2.1 hours
 
 **By Phase (previous milestones):**
 
@@ -38,8 +38,10 @@ Progress: [###########░░░░░░░░░] 55% (28/~TBD plans -- v1.0+v1
 | 09-map-default-view | 1 | ~5min | 5min |
 | 10-location-permission-flow | 1 | ~5min | 5min |
 | 11-dashboard-quality-fixes | 1 | 2min | 2min |
+| 12-data-foundation | 1/2 | 3min | 3min |
 
 *Updated after each plan completion*
+| Phase 12 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -59,6 +61,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [v2.0]: Reading edit/delete restricted to grower/admin
 - [v2.0]: Meter values stored as TEXT in PowerSync (not REAL) to preserve decimal precision
 - [v2.0]: GPS proximity via @turf/distance (client-side Haversine), not server-side
+- [Phase 12]: Denormalized farm_id on readings/allocations with BEFORE INSERT triggers for direct PowerSync sync rule filtering
 
 ### Pending Todos
 
@@ -68,12 +71,13 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Blockers/Concerns
 
-- v2.0 requires new database tables (readings, allocations) -- tables were DROPPED in migration 013 and never recreated
-- PowerSync schema and sync rules need updates for new tables
-- Allocation schema changed from year-only to period-based -- confirm before implementing
+- ~~v2.0 requires new database tables (readings, allocations) -- tables were DROPPED in migration 013 and never recreated~~ RESOLVED in 12-01 (migration 031)
+- ~~PowerSync schema and sync rules need updates for new tables~~ RESOLVED in 12-01
+- ~~Allocation schema changed from year-only to period-based -- confirm before implementing~~ RESOLVED in 12-01 (period_start/period_end with CHECK constraint)
+- PowerSync Dashboard sync rules need updating with farm_readings and farm_allocations buckets (manual step)
 
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Phase 12 context gathered -- ready to plan
-Resume file: .planning/phases/12-data-foundation/12-CONTEXT.md
+Stopped at: Completed 12-01-PLAN.md
+Resume file: .planning/phases/12-data-foundation/12-01-SUMMARY.md
