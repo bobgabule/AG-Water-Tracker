@@ -1,10 +1,10 @@
 import distance from '@turf/distance';
 
 /**
- * 500 feet (~152.4 meters). Global threshold for all wells.
+ * 150 feet (~45.7 meters). Global threshold for all wells.
  * User decision: not configurable per-well.
  */
-export const PROXIMITY_THRESHOLD_FEET = 500;
+export const PROXIMITY_THRESHOLD_FEET = 150;
 
 export interface Coords {
   lat: number;
