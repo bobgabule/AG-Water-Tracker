@@ -11,6 +11,7 @@ export interface Allocation {
   allocatedAf: string;
   usedAf: string;
   isManualOverride: boolean;
+  startingReading: string;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -19,7 +20,7 @@ export interface Allocation {
 export function useWellAllocations(wellId: string | null) {
   const query = wellId
     ? `SELECT id, well_id, farm_id, period_start, period_end, allocated_af,
-       used_af, is_manual_override, notes, created_at, updated_at
+       used_af, is_manual_override, starting_reading, notes, created_at, updated_at
        FROM allocations WHERE well_id = ? ORDER BY period_start DESC`
     : 'SELECT NULL WHERE 0';
 
@@ -39,6 +40,7 @@ export function useWellAllocations(wellId: string | null) {
         allocatedAf: row.allocated_af ?? '',
         usedAf: row.used_af ?? '',
         isManualOverride: row.is_manual_override === 1,
+        startingReading: row.starting_reading ?? '',
         notes: row.notes,
         createdAt: row.created_at ?? '',
         updatedAt: row.updated_at ?? '',

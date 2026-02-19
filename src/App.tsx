@@ -17,6 +17,7 @@ import AppLayout from './components/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import WellDetailPage from './pages/WellDetailPage';
 import WellEditPage from './pages/WellEditPage';
+import WellAllocationsPage from './pages/WellAllocationsPage';
 import WellListPage from './pages/WellListPage';
 import ReportsPage from './pages/ReportsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/wells/:id" element={<WellDetailPage />} />
             <Route path="/wells/:id/edit" element={<WellEditPage />} />
+            <Route path="/wells/:id/allocations" element={<WellAllocationsPage />} />
           </Route>
         </Route>
       </Route>
