@@ -337,5 +337,5 @@ Note: Phases 14 and 15 both depend on Phase 13 and can run in parallel. Phase 16
 | 12. Data Foundation | 2/2 | Complete    | 2026-02-19 |
 | 13. Well Detail Page | 3/3 | Complete    | 2026-02-19 |
 | 14. Record Meter Reading | 2/2 | Complete   | 2026-02-19 |
-| 15. Well Editing & Allocation Management | 3/3 | Complete   | 2026-02-19 |
+| 15. Well Editing & Allocation Management | 3/3 | Complete    | 2026-02-19 |
 | 16. Reading Management & Map Integration | 0/TBD | Not started | - |
