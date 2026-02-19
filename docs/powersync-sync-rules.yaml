@@ -89,6 +89,30 @@ bucket_definitions:
       - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, send_monthly_report, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
+  # Readings (via denormalized farm_id)
+  # ---------------------------------------------------------------------------
+  # Syncs readings for farms where the user has a membership.
+  # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
+  # Same pattern as farm_wells.
+  # ---------------------------------------------------------------------------
+  farm_readings:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, well_id, farm_id, value, recorded_by, recorded_at, gps_latitude, gps_longitude, is_in_range, notes, created_at, updated_at FROM readings WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Allocations (via denormalized farm_id)
+  # ---------------------------------------------------------------------------
+  # Syncs allocations for farms where the user has a membership.
+  # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
+  # Same pattern as farm_wells and farm_readings.
+  # ---------------------------------------------------------------------------
+  farm_allocations:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, well_id, farm_id, period_start, period_end, allocated_af, used_af, is_manual_override, notes, created_at, updated_at FROM allocations WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
   # User Profile (Own)
   # ---------------------------------------------------------------------------
   # Syncs the user's own profile. This ensures users always have their
@@ -113,6 +137,8 @@ bucket_definitions:
 #
 # 3. Denormalized Columns:
 #    - farm_members.full_name: Copied from users.display_name via trigger
+#    - readings.farm_id: Auto-populated from wells.farm_id via BEFORE INSERT trigger
+#    - allocations.farm_id: Auto-populated from wells.farm_id via BEFORE INSERT trigger
 #
 # 4. Data Query Requirements:
 #    - Must SELECT from a single table (no joins)
