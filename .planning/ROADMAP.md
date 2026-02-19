@@ -294,7 +294,12 @@ Plans:
   3. User can create a new allocation period by specifying start date, end date, and allocated amount in acre-feet (AF)
   4. User can view all allocation periods in a table, edit any period's dates/amounts, or delete a period -- all working offline
   5. Each allocation's "Used" value is auto-calculated from readings within that period (converted to AF via multiplier), but the user can manually override the used value
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md -- Foundation: schema migration (starting_reading + wells RLS), usage calculation utility, validation, draft store
+- [ ] 15-02-PLAN.md -- Well edit form: full-page WellEditPage with pre-fill, save, delete cascade, unsaved changes protection
+- [ ] 15-03-PLAN.md -- Allocation management: WellAllocationsPage with inline CRUD, MonthYearPicker, usage auto-calc, manual override
 
 ### Phase 16: Reading Management & Map Integration
 **Goal**: Growers and admins can correct reading data, and the map and well list reflect real allocation and reading data instead of placeholders
