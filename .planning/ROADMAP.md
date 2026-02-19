@@ -326,7 +326,7 @@ Note: Phases 14 and 15 both depend on Phase 13 and can run in parallel. Phase 16
 | 10. Location Permission Flow | 1/1 | Complete | 2026-02-12 |
 | 11. Dashboard Quality Fixes | 1/1 | Complete | 2026-02-12 |
 | 12. Data Foundation | 2/2 | Complete    | 2026-02-19 |
-| 13. Well Detail Page | 3/3 | Complete   | 2026-02-19 |
+| 13. Well Detail Page | 3/3 | Complete    | 2026-02-19 |
 | 14. Record Meter Reading | 0/TBD | Not started | - |
 | 15. Well Editing & Allocation Management | 0/TBD | Not started | - |
 | 16. Reading Management & Map Integration | 0/TBD | Not started | - |
