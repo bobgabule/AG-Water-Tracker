@@ -44,7 +44,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 12: Data Foundation** - Supabase migration for readings + allocations tables, PowerSync schema, connector updates, query hooks, GPS proximity utility (completed 2026-02-19)
 - [x] **Phase 13: Well Detail Page** - Full-page slide-up sheet with well info header, usage gauge, status indicators, readings history, and empty states (completed 2026-02-19)
 - [x] **Phase 14: Record Meter Reading** - New reading form with GPS auto-capture, similar reading warning, meter problem reporting, and proximity flagging (2 plans) (completed 2026-02-19)
-- [ ] **Phase 15: Well Editing & Allocation Management** - Well edit form, allocation CRUD (create/view/edit/delete), usage auto-calculation, and manual override
+- [x] **Phase 15: Well Editing & Allocation Management** - Well edit form, allocation CRUD (create/view/edit/delete), usage auto-calculation, and manual override (completed 2026-02-19)
 - [ ] **Phase 16: Reading Management & Map Integration** - Reading edit/delete for grower/admin, real allocation percentage on map markers, and reading dates on well list
 
 ## Phase Details
@@ -337,5 +337,5 @@ Note: Phases 14 and 15 both depend on Phase 13 and can run in parallel. Phase 16
 | 12. Data Foundation | 2/2 | Complete    | 2026-02-19 |
 | 13. Well Detail Page | 3/3 | Complete    | 2026-02-19 |
 | 14. Record Meter Reading | 2/2 | Complete   | 2026-02-19 |
-| 15. Well Editing & Allocation Management | 2/3 | In Progress|  |
+| 15. Well Editing & Allocation Management | 3/3 | Complete   | 2026-02-19 |
 | 16. Reading Management & Map Integration | 0/TBD | Not started | - |
