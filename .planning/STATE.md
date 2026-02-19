@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 13 of 16 (Well Detail Page) -- In progress
-Plan: 1 of 3
-Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-02-19 -- Phase 13 Plan 01 executed
+Plan: 2 of 3
+Status: Plan 02 complete, ready for Plan 03
+Last activity: 2026-02-19 -- Phase 13 Plan 02 executed
 
-Progress: [#############░░░░░░░] 64% (31/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [##############░░░░░░] 66% (32/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31 (25 v1.0 + 3 v1.1 + 3 v2.0)
+- Total plans completed: 32 (25 v1.0 + 3 v1.1 + 4 v2.0)
 - Average duration: 5min
 - Total execution time: ~2.1 hours
 
@@ -43,10 +43,11 @@ Progress: [#############░░░░░░░] 64% (31/~TBD plans -- v1.0+v1.1 c
 *Updated after each plan completion*
 | Phase 12 P01 | 3min | 2 tasks | 4 files |
 | Phase 12 P02 | 3min | 2 tasks | 3 files |
-| 13-well-detail-page | 1/3 | 3min | 3min |
+| 13-well-detail-page | 2/3 | 5min | 3min |
 
 *Updated after each plan completion*
 | Phase 13 P01 | 3min | 2 tasks | 7 files |
+| Phase 13 P02 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 13]: Sheet uses Headless UI Dialog with static prop -- backdrop tap does NOT dismiss (user decision)
 - [Phase 13]: Proximity ordering via @turf/distance: current well at index 0, rest sorted nearest-to-farthest
 - [Phase 13]: react-swipeable for gesture handling (swipe-down dismiss, swipe-left/right well cycling)
+- [Phase 13]: GPS proximity autoRequest: false -- does not prompt for location, only displays if previously granted
+- [Phase 13]: Current allocation found by date range match with fallback to most recent
 
 ### Pending Todos
 
@@ -89,5 +92,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 13-01-PLAN.md
-Resume file: .planning/phases/13-well-detail-page/13-01-SUMMARY.md
+Stopped at: Completed 13-02-PLAN.md
+Resume file: .planning/phases/13-well-detail-page/13-02-SUMMARY.md
