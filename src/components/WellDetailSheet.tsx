@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { useSwipeable } from 'react-swipeable';
 import { MapPinIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/solid';
 import WellDetailHeader from './WellDetailHeader';
 import WellUsageGauge from './WellUsageGauge';
 import WellReadingsList from './WellReadingsList';
@@ -19,6 +20,7 @@ interface WellDetailSheetProps {
   onClose: () => void;
   onEdit: () => void;
   onWellChange: (wellId: string) => void;
+  onNewReading: () => void;
 }
 
 export default function WellDetailSheet({
@@ -28,6 +30,7 @@ export default function WellDetailSheet({
   onClose,
   onEdit,
   onWellChange,
+  onNewReading,
 }: WellDetailSheetProps) {
   const orderedWells = useWellProximityOrder(wellId, wells);
   const currentIndex = useMemo(
@@ -171,6 +174,17 @@ export default function WellDetailSheet({
                 <WellReadingsList readings={readings} />
               </div>
             )}
+          </div>
+          {/* Fixed footer button */}
+          <div className="flex-shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={onNewReading}
+              className="w-full bg-[#bdefda] text-[#506741] rounded-lg font-bold text-base py-3 flex items-center justify-center gap-2"
+            >
+              <PlusIcon className="w-5 h-5" />
+              + New Reading
+            </button>
           </div>
         </DialogPanel>
       </div>
