@@ -4,10 +4,12 @@ import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 
 interface WellReadingsListProps {
   readings: ReadingWithName[];
+  onReadingClick?: (reading: ReadingWithName) => void;
 }
 
 const WellReadingsList = React.memo(function WellReadingsList({
   readings,
+  onReadingClick,
 }: WellReadingsListProps) {
   return (
     <div>
@@ -34,11 +36,21 @@ const WellReadingsList = React.memo(function WellReadingsList({
               minute: '2-digit',
             });
 
+            const Row = onReadingClick ? 'button' : 'div';
+            const rowProps = onReadingClick
+              ? {
+                  type: 'button' as const,
+                  onClick: () => onReadingClick(reading),
+                  className:
+                    'flex items-center py-3 first:pt-0 last:pb-0 w-full text-left cursor-pointer hover:bg-white/5 active:bg-white/10 rounded-lg -mx-1 px-1 transition-colors',
+                }
+              : {
+                  className:
+                    'flex items-center py-3 first:pt-0 last:pb-0',
+                };
+
             return (
-              <div
-                key={reading.id}
-                className="flex items-center py-3 first:pt-0 last:pb-0"
-              >
+              <Row key={reading.id} {...rowProps}>
                 {/* Date & Time */}
                 <div className="flex-shrink-0 w-24">
                   <p className="text-sm font-medium text-white">{dateStr}</p>
@@ -64,7 +76,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
                     />
                   )}
                 </div>
-              </div>
+              </Row>
             );
           })}
         </div>
