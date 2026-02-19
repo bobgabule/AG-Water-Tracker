@@ -97,7 +97,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 ### Meter Readings
 
 - [x] **READ-01**: User can record a new meter reading via "+ New Reading" button (raw cumulative value)
-- [ ] **READ-02**: New reading form displays unit and multiplier (e.g., "GAL x 10.0")
+- [x] **READ-02**: New reading form displays unit and multiplier (e.g., "GAL x 10.0")
 - [x] **READ-03**: Reading captures GPS location automatically on submission
 - [x] **READ-04**: Similar reading warning (within 5 units of last reading) with Continue option
 - [x] **READ-05**: Grower/admin can edit a reading value
@@ -239,7 +239,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 | WELL-10 | Phase 16: Reading Management & Map Integration | Complete |
 | WELL-11 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-01 | Phase 14: Record Meter Reading | Complete |
-| READ-02 | Phase 14: Record Meter Reading | Pending |
+| READ-02 | Phase 14: Record Meter Reading | Complete |
 | READ-03 | Phase 14: Record Meter Reading | Complete |
 | READ-04 | Phase 14: Record Meter Reading | Complete |
 | READ-05 | Phase 16: Reading Management & Map Integration | Complete |
