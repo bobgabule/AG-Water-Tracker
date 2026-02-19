@@ -12,6 +12,7 @@ import LocationPermissionBanner from './LocationPermissionBanner';
 import LocationSoftAskModal from './LocationSoftAskModal';
 import MapOfflineOverlay from './MapOfflineOverlay';
 import type { WellWithReading } from '../hooks/useWells';
+import { useCurrentAllocations } from '../hooks/useCurrentAllocations';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useMapTileStatus } from '../hooks/useMapTileStatus';
@@ -20,6 +21,7 @@ import { useMapTileStatus } from '../hooks/useMapTileStatus';
 interface MapViewProps {
   wells: WellWithReading[];
   farmState?: string | null;
+  farmId?: string | null;
   onWellClick?: (wellId: string) => void;
   onMapClick?: (lngLat: { lng: number; lat: number }) => void;
   pickedLocation?: { latitude: number; longitude: number } | null;
@@ -67,12 +69,14 @@ const BANNER_DISMISSED_KEY = 'location-banner-dismissed';
 export default function MapView({
   wells,
   farmState,
+  farmId,
   onWellClick,
   onMapClick,
   pickedLocation,
   isPickingLocation,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
+  const { allocationsByWellId } = useCurrentAllocations(farmId ?? null);
 
   // Fetch user's geolocation — no auto-request, triggered by FAB or permission state
   const { location: userLocation, requestLocation } = useGeolocation({
@@ -235,7 +239,12 @@ export default function MapView({
         {wells
           .filter((w) => w.location)
           .map((well) => (
-            <WellMarker key={well.id} well={well} onClick={onWellClick} />
+            <WellMarker
+              key={well.id}
+              well={well}
+              allocationPercentage={allocationsByWellId.get(well.id)?.usagePercent}
+              onClick={onWellClick}
+            />
           ))}
         {/* Location picker marker */}
         {pickedLocation && (
