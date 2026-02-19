@@ -82,15 +82,15 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 ### Well Detail
 
-- [ ] **WELL-01**: User can tap a well marker on the map to open a full-page slide-up sheet (map stays loaded behind)
-- [ ] **WELL-02**: Well detail sheet shows farm name, well name, serial number, WMIS #, and "Last Updated" timestamp
+- [x] **WELL-01**: User can tap a well marker on the map to open a full-page slide-up sheet (map stays loaded behind)
+- [x] **WELL-02**: Well detail sheet shows farm name, well name, serial number, WMIS #, and "Last Updated" timestamp
 - [x] **WELL-03**: Well detail sheet shows a visual usage gauge bar with Allocated / Used / Remaining for current allocation
-- [ ] **WELL-04**: Well detail sheet shows status indicators (Pump, Battery, Meter Status) with check/X icons
+- [x] **WELL-04**: Well detail sheet shows status indicators (Pump, Battery, Meter Status) with check/X icons
 - [x] **WELL-05**: Well detail sheet shows scrollable readings history (Date, Value, User, Time)
 - [x] **WELL-06**: Out-of-range readings marked with yellow indicator in readings list
 - [x] **WELL-07**: "Missing Allocation" message when well has no allocation periods
-- [ ] **WELL-08**: Back button dismisses the sheet, returning to interactive map
-- [ ] **WELL-09**: Edit button navigates to well edit form
+- [x] **WELL-08**: Back button dismisses the sheet, returning to interactive map
+- [x] **WELL-09**: Edit button navigates to well edit form
 - [x] **WELL-10**: WellMarker on map shows real allocation percentage (not hardcoded 100%)
 - [x] **WELL-11**: Well list page shows latest reading date/time for each well
 
@@ -227,15 +227,15 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WELL-01 | Phase 13: Well Detail Page | Pending |
-| WELL-02 | Phase 13: Well Detail Page | Pending |
+| WELL-01 | Phase 13: Well Detail Page | Complete |
+| WELL-02 | Phase 13: Well Detail Page | Complete |
 | WELL-03 | Phase 13: Well Detail Page | Complete |
-| WELL-04 | Phase 13: Well Detail Page | Pending |
+| WELL-04 | Phase 13: Well Detail Page | Complete |
 | WELL-05 | Phase 13: Well Detail Page | Complete |
 | WELL-06 | Phase 13: Well Detail Page | Complete |
 | WELL-07 | Phase 13: Well Detail Page | Complete |
-| WELL-08 | Phase 13: Well Detail Page | Pending |
-| WELL-09 | Phase 13: Well Detail Page | Pending |
+| WELL-08 | Phase 13: Well Detail Page | Complete |
+| WELL-09 | Phase 13: Well Detail Page | Complete |
 | WELL-10 | Phase 16: Reading Management & Map Integration | Complete |
 | WELL-11 | Phase 16: Reading Management & Map Integration | Complete |
 | READ-01 | Phase 14: Record Meter Reading | Complete |
