@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v2.0 Milestone -- Phase 15 in progress: Well Editing & Allocation Management
+**Current focus:** v2.0 Milestone -- Phase 16 complete: Reading Management & Map Integration
 
 ## Current Position
 
-Phase: 15 of 16 (Well Editing & Allocation Management)
-Plan: 3 of 3 complete
-Status: Phase 15 complete, all plans executed
-Last activity: 2026-02-19 -- Phase 15 Plan 03 executed
+Phase: 16 of 16 (Reading Management & Map Integration)
+Plan: 2 of 2 complete
+Status: Phase 16 complete, all plans executed
+Last activity: 2026-02-19 -- Phase 16 Plan 02 executed
 
-Progress: [##################░░] 77% (37/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [###################░] 80% (39/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 37 (25 v1.0 + 3 v1.1 + 9 v2.0)
+- Total plans completed: 39 (25 v1.0 + 3 v1.1 + 11 v2.0)
 - Average duration: 5min
 - Total execution time: ~2.2 hours
 
@@ -59,6 +59,11 @@ Progress: [##################░░] 77% (37/~TBD plans -- v1.0+v1.1 complete, v
 | Phase 15 P01 | 2min | 2 tasks | 5 files |
 | Phase 15 P02 | 3min | 2 tasks | 3 files |
 | Phase 15 P03 | 3min | 2 tasks | 5 files |
+| 16-reading-management-map-integration | 2/2 | 6min | 3min |
+
+*Updated after each plan completion*
+| Phase 16 P01 | 3min | 2 tasks | 4 files |
+| Phase 16 P02 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -97,6 +102,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 15]: Allocation nav saves draft to Zustand store with ref flag to bypass useBlocker
 - [Phase 15]: react-mobile-picker for iOS-style month/year scroll wheel in allocation date selection
 - [Phase 15]: Inline CRUD form pattern: selectedId null = create mode, non-null = edit mode
+- [Phase 16]: EditReadingSheet rendered as centered card dialog (z-[60]) above WellDetailSheet (z-50)
+- [Phase 16]: Conditional row element pattern: button when onReadingClick provided, div when not (backwards compatible)
 
 ### Pending Todos
 
@@ -114,5 +121,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 15-03-PLAN.md
-Resume file: .planning/phases/15-well-editing-allocation-management/15-03-SUMMARY.md
+Stopped at: Completed 16-01-PLAN.md
+Resume file: .planning/phases/16-reading-management-map-integration/16-01-SUMMARY.md
