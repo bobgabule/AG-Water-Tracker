@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { PlusIcon } from '@heroicons/react/24/solid';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 import WellDetailHeader from './WellDetailHeader';
 import WellUsageGauge from './WellUsageGauge';
@@ -83,40 +82,12 @@ export default function WellDetailSheet({
 
           {well && (
             <>
-              {/* Usage gauge + serial/WMIS — or no-allocation message */}
-              {currentAllocation ? (
-                <WellUsageGauge
-                  well={well}
-                  allocatedAf={currentAllocation.allocatedAf}
-                  usedAf={currentAllocation.usedAf}
-                />
-              ) : (
-                <div className="bg-[#3a4a2a] px-5 py-5">
-                  <div className="flex items-center gap-2">
-                    <InformationCircleIcon className="w-5 h-5 text-white/40" />
-                    <span className="text-sm text-white/50">
-                      No allocation set for this well
-                    </span>
-                  </div>
-                  {/* Status indicators for no-allocation case */}
-                  <div className="mt-3 space-y-1.5">
-                    {([
-                      { label: 'Pump', state: well.pumpState },
-                      { label: 'Battery', state: well.batteryState },
-                      { label: 'Meter Status', state: well.meterStatus },
-                    ] as const).map(({ label, state }) => {
-                      const healthy = state === 'Ok';
-                      const Icon = healthy ? CheckCircleIcon : XCircleIcon;
-                      return (
-                        <div key={label} className="flex items-center gap-1.5">
-                          <Icon className={`w-5 h-5 ${healthy ? 'text-green-400' : 'text-red-400'}`} aria-hidden="true" />
-                          <span className="text-white text-sm">{label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {/* Usage gauge + serial/WMIS */}
+              <WellUsageGauge
+                well={well}
+                allocatedAf={currentAllocation?.allocatedAf ?? '0'}
+                usedAf={currentAllocation?.usedAf ?? '0'}
+              />
 
               {/* Readings table on white background */}
               <WellReadingsList
