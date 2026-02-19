@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { MapIcon, PlusIcon, PlayIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
+import { useLatestReadings } from '../hooks/useLatestReadings';
+import { useAuth } from '../lib/AuthProvider';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 
@@ -20,13 +22,16 @@ interface WellDisplayData {
   statusWidth: string;
 }
 
-function computeWellDisplayData(well: WellWithReading): WellDisplayData {
-  const { updatedAt, status } = well;
+function computeWellDisplayData(
+  well: WellWithReading,
+  latestReadingDate: string | null,
+): WellDisplayData {
+  const { status } = well;
 
-  // Parse date and compute diff
+  // Parse date and compute diff using actual reading date
   let diffDays: number | null = null;
-  if (updatedAt) {
-    const date = new Date(updatedAt);
+  if (latestReadingDate) {
+    const date = new Date(latestReadingDate);
     if (!isNaN(date.getTime())) {
       const now = new Date();
       diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -74,6 +79,9 @@ function computeWellDisplayData(well: WellWithReading): WellDisplayData {
 export default function WellListPage() {
   const { wells, loading } = useWells();
   const navigate = useNavigate();
+  const { onboardingStatus } = useAuth();
+  const farmId = onboardingStatus?.farmId ?? null;
+  const { latestByWellId } = useLatestReadings(farmId);
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,8 +97,10 @@ export default function WellListPage() {
   const handleWellMap = useCallback(() => navigate('/'), [navigate]);
 
   const wellsWithDisplayData = useMemo(
-    () => wells.map(computeWellDisplayData),
-    [wells],
+    () => wells.map((well) =>
+      computeWellDisplayData(well, latestByWellId.get(well.id) ?? null)
+    ),
+    [wells, latestByWellId],
   );
 
   const filteredWells = useMemo(() => {
