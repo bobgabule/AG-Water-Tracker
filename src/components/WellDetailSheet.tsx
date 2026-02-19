@@ -1,8 +1,15 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { useSwipeable } from 'react-swipeable';
+import { MapPinIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import WellDetailHeader from './WellDetailHeader';
+import WellUsageGauge from './WellUsageGauge';
+import WellReadingsList from './WellReadingsList';
 import { useWellProximityOrder } from '../hooks/useWellProximityOrder';
+import { useWellAllocations } from '../hooks/useWellAllocations';
+import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
+import { useGeolocation } from '../hooks/useGeolocation';
+import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellDetailSheetProps {
@@ -28,6 +35,33 @@ export default function WellDetailSheet({
     [orderedWells, wellId],
   );
   const currentWell = orderedWells[currentIndex] ?? null;
+
+  const { allocations } = useWellAllocations(currentWell?.id ?? null);
+  const { readings } = useWellReadingsWithNames(currentWell?.id ?? null);
+  const { location: userLocation } = useGeolocation({ autoRequest: false });
+
+  // Find current allocation (most recent period that encompasses today, or fallback to most recent)
+  const currentAllocation = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return (
+      allocations.find((a) => a.periodStart <= today && a.periodEnd >= today) ??
+      allocations[0] ??
+      null
+    );
+  }, [allocations]);
+
+  // GPS proximity
+  const proximityInfo = useMemo(() => {
+    if (!userLocation || !currentWell?.location) return null;
+    const dist = getDistanceToWell(
+      { lat: userLocation.lat, lng: userLocation.lng },
+      {
+        latitude: currentWell.location.latitude,
+        longitude: currentWell.location.longitude,
+      },
+    );
+    return { distance: dist, inRange: isInRange(dist) };
+  }, [userLocation, currentWell?.location]);
 
   const [transitioning, setTransitioning] = useState(false);
 
@@ -86,9 +120,55 @@ export default function WellDetailSheet({
             }`}
           >
             {currentWell && (
-              <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                {/* Content sections will be added in Plan 02 */}
-                <p className="text-white/50 text-sm">Well detail content loading...</p>
+              <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-6">
+                {/* GPS Proximity indicator */}
+                {proximityInfo && (
+                  <div
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                      proximityInfo.inRange
+                        ? 'bg-green-500/20'
+                        : 'bg-yellow-500/20'
+                    }`}
+                  >
+                    <MapPinIcon
+                      className={`w-5 h-5 ${
+                        proximityInfo.inRange
+                          ? 'text-green-400'
+                          : 'text-yellow-400'
+                      }`}
+                    />
+                    <span
+                      className={`text-sm font-medium ${
+                        proximityInfo.inRange
+                          ? 'text-green-300'
+                          : 'text-yellow-300'
+                      }`}
+                    >
+                      {proximityInfo.inRange ? 'In Range' : 'Out of Range'}
+                      <span className="text-white/50 font-normal ml-1.5">
+                        ({Math.round(proximityInfo.distance)} ft)
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                {/* Usage Gauge or Missing Allocation */}
+                {currentAllocation ? (
+                  <WellUsageGauge
+                    allocatedAf={currentAllocation.allocatedAf}
+                    usedAf={currentAllocation.usedAf}
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-3 rounded-lg bg-white/5">
+                    <InformationCircleIcon className="w-5 h-5 text-white/40" />
+                    <span className="text-sm text-white/50">
+                      No allocation set for this well
+                    </span>
+                  </div>
+                )}
+
+                {/* Readings History */}
+                <WellReadingsList readings={readings} />
               </div>
             )}
           </div>
