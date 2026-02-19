@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 15 of 16 (Well Editing & Allocation Management)
-Plan: 1 of 3 complete
-Status: Phase 15 Plan 01 complete, ready for Plan 02
-Last activity: 2026-02-19 -- Phase 15 Plan 01 executed
+Plan: 2 of 3 complete
+Status: Phase 15 Plan 02 complete, ready for Plan 03
+Last activity: 2026-02-19 -- Phase 15 Plan 02 executed
 
-Progress: [#################░░░] 73% (35/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [##################░░] 75% (36/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 35 (25 v1.0 + 3 v1.1 + 7 v2.0)
+- Total plans completed: 36 (25 v1.0 + 3 v1.1 + 8 v2.0)
 - Average duration: 5min
 - Total execution time: ~2.2 hours
 
@@ -53,10 +53,11 @@ Progress: [#################░░░] 73% (35/~TBD plans -- v1.0+v1.1 complete,
 *Updated after each plan completion*
 | Phase 14 P01 | 2min | 2 tasks | 4 files |
 | Phase 14 P02 | 3min | 2 tasks | 3 files |
-| 15-well-editing-allocation-management | 1/3 | 2min | 2min |
+| 15-well-editing-allocation-management | 2/3 | 5min | 3min |
 
 *Updated after each plan completion*
 | Phase 15 P01 | 2min | 2 tasks | 5 files |
+| Phase 15 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 14]: NewReadingSheet conditionally rendered (mount/unmount) rather than always-mounted with open prop
 - [Phase 15]: starting_reading stored as column.text in PowerSync (matches TEXT pattern for decimal precision)
 - [Phase 15]: Wells UPDATE/DELETE RLS relaxed to all farm members (matching INSERT and allocations pattern)
+- [Phase 15]: Cascade delete via writeTransaction (readings -> allocations -> well) since PowerSync local SQLite does not enforce FK cascades
+- [Phase 15]: Allocation nav saves draft to Zustand store with ref flag to bypass useBlocker
 
 ### Pending Todos
 
@@ -108,5 +111,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-well-editing-allocation-management/15-01-SUMMARY.md
+Stopped at: Completed 15-02-PLAN.md
+Resume file: .planning/phases/15-well-editing-allocation-management/15-02-SUMMARY.md
