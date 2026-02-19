@@ -64,12 +64,41 @@ const wells = new TableV2({
   updated_at: column.text,
 });
 
+const readings = new TableV2({
+  well_id: column.text,
+  farm_id: column.text, // denormalized for sync rules filtering
+  value: column.text, // TEXT preserves decimal precision (v2.0 decision)
+  recorded_by: column.text,
+  recorded_at: column.text,
+  gps_latitude: column.real,
+  gps_longitude: column.real,
+  is_in_range: column.integer, // 0/1 boolean (PowerSync has no BOOLEAN)
+  notes: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+const allocations = new TableV2({
+  well_id: column.text,
+  farm_id: column.text, // denormalized for sync rules filtering
+  period_start: column.text,
+  period_end: column.text,
+  allocated_af: column.text, // TEXT preserves decimal precision
+  used_af: column.text, // TEXT preserves decimal precision
+  is_manual_override: column.integer, // 0/1 boolean
+  notes: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 export const AppSchema = new Schema({
   farms,
   users,
   farm_members,
   farm_invites,
   wells,
+  readings,
+  allocations,
 });
 
 export type Database = (typeof AppSchema)['types'];
@@ -78,3 +107,5 @@ export type User = Database['users'];
 export type FarmMember = Database['farm_members'];
 export type FarmInvite = Database['farm_invites'];
 export type Well = Database['wells'];
+export type ReadingRow = Database['readings'];
+export type AllocationRow = Database['allocations'];
