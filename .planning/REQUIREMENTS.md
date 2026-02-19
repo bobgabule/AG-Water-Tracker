@@ -125,7 +125,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 
 ### Well Editing
 
-- [ ] **EDIT-01**: Edit well details (name, serial, WMIS, coords, units, multiplier)
+- [x] **EDIT-01**: Edit well details (name, serial, WMIS, coords, units, multiplier)
 - [ ] **EDIT-02**: Allocation count with link to allocation management
 - [ ] **EDIT-03**: Update equipment status from edit form
 
@@ -255,7 +255,7 @@ Requirements for meter reading, allocation tracking, and well management milesto
 | ALLOC-04 | Phase 15: Well Editing & Allocation Management | Complete |
 | ALLOC-05 | Phase 15: Well Editing & Allocation Management | Complete |
 | ALLOC-06 | Phase 15: Well Editing & Allocation Management | Complete |
-| EDIT-01 | Phase 15: Well Editing & Allocation Management | Pending |
+| EDIT-01 | Phase 15: Well Editing & Allocation Management | Complete |
 | EDIT-02 | Phase 15: Well Editing & Allocation Management | Pending |
 | EDIT-03 | Phase 15: Well Editing & Allocation Management | Pending |
 

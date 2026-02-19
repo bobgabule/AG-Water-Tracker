@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v2.0 Milestone -- Phase 14 complete, ready for Phase 15: Well Editing & Allocation Management
+**Current focus:** v2.0 Milestone -- Phase 15 in progress: Well Editing & Allocation Management
 
 ## Current Position
 
-Phase: 14 of 16 (Record Meter Reading) -- Complete
-Plan: 2 of 2
-Status: Phase 14 complete, ready for Phase 15
-Last activity: 2026-02-19 -- Phase 14 Plan 02 executed
+Phase: 15 of 16 (Well Editing & Allocation Management)
+Plan: 1 of 3 complete
+Status: Phase 15 Plan 01 complete, ready for Plan 02
+Last activity: 2026-02-19 -- Phase 15 Plan 01 executed
 
-Progress: [################░░░░] 71% (34/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [#################░░░] 73% (35/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34 (25 v1.0 + 3 v1.1 + 6 v2.0)
+- Total plans completed: 35 (25 v1.0 + 3 v1.1 + 7 v2.0)
 - Average duration: 5min
 - Total execution time: ~2.2 hours
 
@@ -53,6 +53,10 @@ Progress: [################░░░░] 71% (34/~TBD plans -- v1.0+v1.1 complet
 *Updated after each plan completion*
 | Phase 14 P01 | 2min | 2 tasks | 4 files |
 | Phase 14 P02 | 3min | 2 tasks | 3 files |
+| 15-well-editing-allocation-management | 1/3 | 2min | 2min |
+
+*Updated after each plan completion*
+| Phase 15 P01 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -85,6 +89,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 14]: GPS captured fresh on each submit via navigator.geolocation (not cached) for accuracy
 - [Phase 14]: Dead Pump overwrites Pump Off when both checked (severity precedence in checkbox mapping)
 - [Phase 14]: NewReadingSheet conditionally rendered (mount/unmount) rather than always-mounted with open prop
+- [Phase 15]: starting_reading stored as column.text in PowerSync (matches TEXT pattern for decimal precision)
+- [Phase 15]: Wells UPDATE/DELETE RLS relaxed to all farm members (matching INSERT and allocations pattern)
 
 ### Pending Todos
 
@@ -102,5 +108,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-well-editing-allocation-management/15-CONTEXT.md
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-well-editing-allocation-management/15-01-SUMMARY.md
