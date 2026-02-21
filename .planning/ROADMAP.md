@@ -176,7 +176,9 @@
   2. An `app_settings` table exists with key-value config rows including subscription website URL
   3. Every farm has a `subscription_tier` column defaulting to 'basic' that links to the tiers table
   4. Tier limits can be changed via direct DB update without redeploying the app
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 17-01-PLAN.md -- Create subscription tier tables, app settings, and farm-tier linkage migration
 
 ### Phase 18: Tier Sync & Hooks
 **Goal**: Subscription tier data is available offline in the app and accessed through reactive hooks instead of hardcoded constants
@@ -264,7 +266,7 @@
 | 14. Record Meter Reading | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 15. Well Editing & Allocation Management | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
-| 17. Subscription Database Foundation | v3.0 | 0/TBD | Not started | - |
+| 17. Subscription Database Foundation | v3.0 | 0/1 | Not started | - |
 | 18. Tier Sync & Hooks | v3.0 | 0/TBD | Not started | - |
 | 19. Permission Enforcement | v3.0 | 0/TBD | Not started | - |
 | 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
