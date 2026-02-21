@@ -52,5 +52,6 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: v3.0 roadmap created with 6 phases (17-22)
-Next action: Plan Phase 17 (Subscription Database Foundation)
+Stopped at: Phase 17 context gathered
+Resume file: .planning/phases/17-subscription-database-foundation/17-CONTEXT.md
+Next action: /gsd:plan-phase 17
