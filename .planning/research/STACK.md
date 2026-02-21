@@ -1,426 +1,449 @@
 # Technology Stack
 
-**Project:** AG Water Tracker -- Meter Readings, Allocations, GPS Proximity & Well Management
-**Researched:** 2026-02-19
+**Project:** AG Water Tracker v3.0 -- Subscriptions & Permissions
+**Researched:** 2026-02-22
 **Overall confidence:** HIGH
 
-## Context: Existing Stack (Do Not Change)
+## TL;DR: No New Libraries Required
+
+This milestone is a **code-and-schema** change, not a stack change. The existing stack (PowerSync, Supabase, React, Zustand) already provides everything needed for subscription tier management, role permission enforcement, and login-only auth simplification. Zero npm installs.
+
+---
+
+## Existing Stack (Unchanged)
 
 These technologies are already in production and are NOT part of this research. Listed for compatibility reference only.
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| React | ^19.2.0 | UI framework |
-| Vite | ^6.4.1 | Build tool |
-| TypeScript | ~5.9.3 | Type safety |
-| Tailwind CSS | ^4.1.18 | Styling (CSS-first config) |
-| @powersync/web | ^1.32.0 | Offline-first SQLite sync |
-| @powersync/react | ^1.8.2 | React bindings for PowerSync |
-| @supabase/supabase-js | ^2.93.3 | Supabase client |
-| Mapbox GL JS | ^3.18.1 | Maps |
-| react-map-gl | ^8.1.0 | React Mapbox wrapper |
-| @turf/circle | ^7.3.3 | Circle polygon generation for map |
-| Headless UI | ^2.2.9 | Accessible UI primitives |
-| Heroicons | ^2.2.0 | Icons |
-| React Router | ^7.13.0 | Routing |
-| vite-plugin-pwa | ^1.2.0 | PWA support |
-| Zustand | ^5.0.11 | UI state |
-| react-error-boundary | ^6.1.0 | Error boundaries |
+| Technology | Installed Version | Purpose |
+|------------|-------------------|---------|
+| React | 19.2.0 | UI framework |
+| TypeScript | 5.9.3 | Type safety |
+| Vite | 6.4.1 | Build tool |
+| Tailwind CSS | 4.1.18 | Styling (CSS-first config) |
+| `@powersync/web` | 1.32.0 | Offline-first SQLite sync |
+| `@powersync/react` | 1.8.2 | React bindings for PowerSync |
+| `@supabase/supabase-js` | 2.93.3 | Supabase client (auth + RPC + CRUD) |
+| Mapbox GL JS | 3.18.1 | Maps |
+| react-map-gl | 8.1.0 | React Mapbox wrapper |
+| Headless UI | 2.2.9 | Accessible UI primitives |
+| Heroicons | 2.2.0 | Icons |
+| React Router | 7.13.0 | Routing + route guards |
+| vite-plugin-pwa | 1.2.0 | PWA support |
+| Zustand | 5.0.11 | UI state |
+| react-error-boundary | 6.1.0 | Error boundaries |
 
 ---
 
-## Recommended Stack (New Additions for This Milestone)
+## Recommended Stack: Zero New Dependencies
 
-### 1. GPS Distance Calculation: @turf/distance
+### Why No New Packages
 
-**Confidence:** HIGH -- same ecosystem as existing @turf/circle dependency.
+Every feature in v3.0 maps to an existing capability:
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| @turf/distance | ^7.3.3 | Haversine distance between user GPS and well coordinates | Uses the same Turf.js v7 ecosystem already in the project (@turf/circle is v7.3.3). Calculates great-circle distance using the Haversine formula. Returns distance in configurable units (meters, kilometers, miles). Tree-shakeable -- only adds ~3KB. |
+| v3.0 Feature | Implementation Approach | Existing Capability |
+|--------------|------------------------|---------------------|
+| Subscription tiers DB table | Supabase migration + PowerSync global bucket | `@powersync/web` TableV2, `@supabase/supabase-js` |
+| App settings DB table | Supabase migration + PowerSync global bucket | Same as above |
+| Farm-to-tier linking | Add column to `farms` table, join in queries | `@powersync/react` `useQuery` |
+| Tier-based seat limits | Replace hardcoded `PLAN_LIMITS` with PowerSync query | `useSeatUsage` hook pattern (existing) |
+| Tier-based well limits | New hook querying well count vs tier limit | `useQuery` + `useMemo` pattern (existing) |
+| Role permission gating | Extend existing permission matrix with new actions | `src/lib/permissions.ts` (106 lines, type-safe) |
+| Route-level permission guards | Use existing `RequireRole` component | `src/components/RequireRole.tsx` (existing) |
+| Component-level permission checks | Use existing `hasPermission()` function | `src/lib/permissions.ts` (existing) |
+| Login-only auth flow | Remove onboarding pages, simplify route guards | `react-router` + `AuthProvider` (existing) |
+| "No subscription" redirect page | New static React component | React (existing) |
+| Subscription page with tier info | Extend existing `SubscriptionPage.tsx` | `@powersync/react` `useQuery` (existing) |
 
-**Why @turf/distance over alternatives:**
-
-| Option | Verdict | Reason |
-|--------|---------|--------|
-| @turf/distance | USE THIS | Same ecosystem as @turf/circle (already installed). Consistent API (GeoJSON points, configurable units). Well-maintained (7.3.3, same release as @turf/circle). Haversine formula is accurate to ~0.3% for Earth-surface distances. |
-| Custom Haversine function (~15 lines) | Viable but unnecessary | The formula is simple, but @turf/distance handles edge cases, unit conversion, and GeoJSON interop that would need to be reimplemented. Since @turf/helpers is already a transitive dependency, the marginal bundle cost is near zero. |
-| haversine-distance npm | Skip | Adds a separate dependency tree for something @turf already provides. Would be the only non-Turf geo package in the project. |
-
-**Usage pattern for GPS proximity verification:**
-
-```typescript
-import { distance, point } from '@turf/turf';
-// Or tree-shaken:
-import distance from '@turf/distance';
-import { point } from '@turf/helpers';
-
-const PROXIMITY_THRESHOLD_KM = 0.1; // 100 meters
-
-function isWithinRange(
-  userLat: number, userLng: number,
-  wellLat: number, wellLng: number,
-  thresholdKm = PROXIMITY_THRESHOLD_KM
-): { inRange: boolean; distanceMeters: number } {
-  const userPoint = point([userLng, userLat]);
-  const wellPoint = point([wellLng, wellLat]);
-  const dist = distance(userPoint, wellPoint, { units: 'kilometers' });
-  return {
-    inRange: dist <= thresholdKm,
-    distanceMeters: Math.round(dist * 1000),
-  };
-}
-```
-
-**Note:** @turf/helpers is already a transitive dependency of @turf/circle. The `point()` helper is available without additional install.
+**Confidence: HIGH** -- Every integration point verified against the actual codebase.
 
 ---
 
-### 2. Date/Time Input: Native HTML5 `<input type="date">` and `<input type="datetime-local">`
+## Feature-by-Feature Implementation Strategy
 
-**Confidence:** HIGH -- no library needed.
+### 1. Subscription Tiers: DB Config Tables Synced via PowerSync
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Native `<input type="date">` | HTML5 (all modern browsers) | Date selection for reading date, allocation periods | Zero bundle cost. Mobile browsers (iOS Safari, Chrome, Firefox) all provide native date picker widgets with OS-native UX. This is a field-worker app primarily used on mobile -- native pickers are the best UX. |
-| Native `<input type="datetime-local">` | HTML5 | Date+time for meter reading timestamps | Same rationale. Provides time selection on mobile without a library. |
+**Current state:** Hardcoded `PLAN_LIMITS` constant in `src/lib/subscription.ts` defines a single "Basic" plan with fixed seat counts (`admin: 1`, `meter_checker: 3`). No well limits. No tier selection per farm.
 
-**Why NOT a date picker library:**
+**Target state:** Database-driven tiers synced to all clients via PowerSync global buckets. Each farm links to a tier. Limits are read from the synced local SQLite.
 
-| Option | Verdict | Reason |
-|--------|---------|--------|
-| Native HTML5 inputs | USE THIS | Zero bundle cost. Mobile-native UX (iOS/Android pickers). Field workers use phones, not desktops. No library to maintain. |
-| react-datepicker | Skip | 44KB gzipped. Adds CSS dependency. Mobile UX is worse than native OS picker. Overkill for "pick a date" in a mobile-first PWA. |
-| react-day-picker | Skip | Better than react-datepicker but still unnecessary overhead for this use case. Would only consider if custom calendar UI were needed (e.g., color-coding dates with readings). |
+#### Supabase Migrations (SQL)
 
-**Implementation pattern:**
-
-```tsx
-<input
-  type="date"
-  value={readingDate}  // "YYYY-MM-DD" format
-  max={new Date().toISOString().split('T')[0]}  // no future dates
-  onChange={(e) => setReadingDate(e.target.value)}
-  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
-/>
-```
-
-**Caveat:** On older desktop Firefox (pre-93), `<input type="date">` renders as a plain text field without a calendar picker. This is acceptable because this app targets mobile field workers. Desktop is secondary.
-
----
-
-### 3. Numeric Precision Strategy: PowerSync column.text for Meter Values
-
-**Confidence:** HIGH -- based on SQLite documentation and existing project patterns.
-
-| Concern | Decision | Rationale |
-|---------|----------|-----------|
-| Meter reading values (e.g., 12345678.90) | Store as `column.text` in PowerSync schema | SQLite REAL is IEEE 754 double (64-bit float) which introduces rounding for decimals. Meter values like `12345.67` can silently become `12345.670000000001`. Storing as TEXT preserves exact decimal representation. Parse to number only for calculations. |
-| Allocation amounts (e.g., 150.50 AF) | Store as `column.text` in PowerSync schema | Same rationale. Allocation amounts are financial-grade precision. PostgreSQL uses `numeric(10,2)` which is exact decimal -- TEXT preserves this across the sync boundary. |
-| GPS coordinates (lat/lng) | Keep as `column.real` in PowerSync schema | Already using `column.real` for well lat/lng. GPS coordinates from the Geolocation API are already floating-point. Rounding at the 8th decimal place (sub-millimeter) is irrelevant for 100m proximity checks. |
-| Calculated usage values | Compute client-side, do not store | Usage = (current_reading - previous_reading) * multiplier. Calculated on display, not persisted. Avoids sync conflicts and stale derived data. |
-
-**Critical: The PostgreSQL-to-SQLite precision boundary.**
-
-PostgreSQL `numeric(15,2)` stores exact decimals. When PowerSync syncs this to SQLite:
-- If the PowerSync schema column is `column.real`: SQLite stores it as a float, potentially losing precision.
-- If the PowerSync schema column is `column.text`: SQLite stores the exact decimal string. Parse to `Number()` or `parseFloat()` only when calculating.
-
-The existing `wells` table already uses `column.text` for `multiplier` (which includes values like `'0.01'`). This milestone should follow the same pattern for meter values and allocation amounts.
-
-**Meter value calculation formula:**
-
-```typescript
-// Usage between two readings:
-// actual_usage = (current_raw - previous_raw) * multiplier_factor
-
-// Where multiplier_factor depends on well.multiplier:
-const MULTIPLIER_MAP: Record<string, number> = {
-  '0.01': 0.01,
-  '1': 1,
-  '10': 10,
-  '1000': 1000,
-  'MG': 1_000_000, // Million Gallons -- raw reading is in MG units
-};
-```
-
----
-
-### 4. Unit Conversion Constants
-
-**Confidence:** HIGH -- well-established water measurement standards.
-
-No library needed. These are fixed conversion factors from authoritative water management sources (Oklahoma State University Extension, California Water Boards, Colorado River District).
-
-| Conversion | Factor | Precision Notes |
-|------------|--------|-----------------|
-| 1 Acre-Foot (AF) to Gallons (GAL) | 325,851 gallons | Exact per US survey standards. Some sources round to 325,829 or 326,000 -- use 325,851 for consistency with USGS. |
-| 1 Acre-Foot (AF) to Cubic Feet (CF) | 43,560 cubic feet | Exact (1 acre = 43,560 sq ft, 1 AF = 1 ft depth). |
-| 1 Cubic Foot (CF) to Gallons (GAL) | 7.48052 gallons | Standard precision. 325,851 / 43,560 = 7.48052. |
-
-**Implementation: Pure TypeScript utility module, no external library.**
-
-```typescript
-// src/lib/unitConversions.ts
-const AF_TO_GAL = 325_851;
-const AF_TO_CF = 43_560;
-const CF_TO_GAL = 7.48052;
-
-type WaterUnit = 'AF' | 'GAL' | 'CF';
-
-export function convertUnits(
-  value: number,
-  from: WaterUnit,
-  to: WaterUnit
-): number {
-  if (from === to) return value;
-  // Convert to AF first, then to target
-  const inAF = from === 'AF' ? value
-    : from === 'GAL' ? value / AF_TO_GAL
-    : value / AF_TO_CF; // CF
-  return to === 'AF' ? inAF
-    : to === 'GAL' ? inAF * AF_TO_GAL
-    : inAF * AF_TO_CF; // CF
-}
-```
-
----
-
-### 5. PowerSync Schema Additions: readings and allocations tables
-
-**Confidence:** HIGH -- follows existing patterns in `powersync-schema.ts`.
-
-No new npm packages needed. The PowerSync schema must be extended with two new `TableV2` definitions.
-
-| Table | PowerSync Columns | Type Notes |
-|-------|-------------------|------------|
-| `readings` | `well_id: text`, `meter_value: text`, `reading_date: text`, `gps_latitude: real`, `gps_longitude: real`, `gps_accuracy: real`, `gps_verified: integer`, `notes: text`, `problem_type: text`, `problem_notes: text`, `created_by: text`, `created_at: text`, `updated_at: text` | `meter_value` as TEXT to preserve decimal precision. `gps_verified` as INTEGER (0/1) following existing boolean pattern. `gps_latitude`/`gps_longitude` as REAL (same as wells). |
-| `allocations` | `well_id: text`, `period_start: text`, `period_end: text`, `allocated_amount: text`, `allocated_units: text`, `notes: text`, `created_at: text`, `updated_at: text` | `allocated_amount` as TEXT to preserve decimal precision. Period-based (start/end dates) instead of year-only for flexibility. |
-
-**Key pattern from existing codebase:** PowerSync does not support BOOLEAN type. Use INTEGER (0/1) and convert in the connector's `normalizeForSupabase()` method. The existing connector already does this for `wells.send_monthly_report`.
-
-**Connector update needed:** Add `'readings'` and `'allocations'` to `ALLOWED_TABLES` in `powersync-connector.ts`. Add boolean normalization for `readings.gps_verified`.
-
----
-
-### 6. Geolocation API: watchPosition for GPS Proximity
-
-**Confidence:** HIGH -- Web standard API, already used in the project.
-
-No new library needed. The existing `useGeolocation` hook uses `getCurrentPosition()`. For the meter reading flow, we need a new hook variant that uses `watchPosition()` for continuous GPS tracking while the reading form is open.
-
-| Approach | Use Case | Why |
-|----------|----------|-----|
-| `getCurrentPosition()` (existing hook) | One-shot location for well creation | Already implemented in `useGeolocation.ts`. Good for "get my location" button. |
-| `watchPosition()` (new hook) | Continuous GPS during meter reading | Field worker approaches well, opens reading form. GPS updates continuously so proximity status reflects real-time position. Auto-stops when form closes (cleanup in useEffect). |
-
-**Battery/performance concern:** `watchPosition` drains battery if left running. Mitigation: only activate when the reading form is open, and clear the watch on form close/unmount. The existing hook pattern with `requestIdRef` for StrictMode handling is the right foundation.
-
-**Accuracy field:** The Geolocation API returns `coords.accuracy` (meters). Store this alongside the reading's GPS coordinates for auditability. A reading with 500m accuracy is less trustworthy than one with 5m accuracy.
-
----
-
-### 7. Well Editing: No New Libraries
-
-**Confidence:** HIGH -- reuses existing form patterns.
-
-The existing `AddWellFormBottomSheet` uses Headless UI `Dialog` with controlled state and `SegmentedControl` for units/multiplier. Well editing reuses the same components with pre-populated values.
-
-**Pattern:** Extract the shared form fields into a `WellFormFields` component. `AddWellFormBottomSheet` and `EditWellFormBottomSheet` (or a unified `WellFormBottomSheet` with `mode: 'create' | 'edit'`) both compose this.
-
-No new UI libraries needed. All form patterns (text inputs, select dropdowns, segmented controls, GPS button) are already implemented.
-
----
-
-### 8. Meter Problem Reporting: No New Libraries
-
-**Confidence:** HIGH -- uses existing UI patterns.
-
-Problem reporting is a set of structured fields (problem type enum, notes text area, optional photo reference) within the reading form. Uses existing Headless UI components and Tailwind styling.
-
-| Field | Type | Values |
-|-------|------|--------|
-| `problem_type` | Enum (select) | `none`, `broken_meter`, `damaged_seal`, `no_access`, `frozen`, `vandalism`, `other` |
-| `problem_notes` | Text (textarea) | Free-text description |
-
-No image upload in initial implementation. Photo support would require Supabase Storage integration (a future milestone concern).
-
----
-
-## Recommended Stack Summary
-
-### New Dependencies (npm install)
-
-```bash
-# GPS distance calculation (same ecosystem as existing @turf/circle)
-npm install @turf/distance
-```
-
-**That is the ONLY new npm package.** Everything else uses existing dependencies, native browser APIs, or custom utility code.
-
-### No New Dependencies Needed For
-
-| Feature | Why No Library |
-|---------|----------------|
-| Date/time picking | Native HTML5 `<input type="date">` and `<input type="datetime-local">` -- mobile-native UX, zero bundle cost |
-| Unit conversion (AF/GAL/CF) | ~20 lines of TypeScript with well-established conversion constants |
-| Numeric precision | Store as `column.text` in PowerSync, parse on calculation. No `decimal.js` or `bignumber.js` needed -- meter values have max 2 decimal places and calculations are simple subtraction/multiplication |
-| GPS proximity check | @turf/distance (listed above) + existing Geolocation API hook pattern |
-| Well editing form | Existing Headless UI Dialog + form patterns |
-| Meter problem reporting | Existing select/textarea patterns |
-| Reading history list | Existing PowerSync `useQuery` + `useMemo` patterns |
-| Allocation CRUD | Existing PowerSync write + form patterns |
-
----
-
-## Database Changes (Supabase Migrations)
-
-No new npm packages, but new PostgreSQL migrations are needed.
-
-### New Table: `readings`
-
+**New table: `subscription_tiers`**
 ```sql
-CREATE TABLE readings (
+CREATE TABLE subscription_tiers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    well_id UUID NOT NULL REFERENCES wells(id) ON DELETE CASCADE,
-    meter_value NUMERIC(15,2) NOT NULL,
-    reading_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    gps_latitude NUMERIC(10,8),
-    gps_longitude NUMERIC(11,8),
-    gps_accuracy NUMERIC(8,2),           -- NEW: accuracy in meters from Geolocation API
-    gps_verified BOOLEAN DEFAULT FALSE,
-    notes TEXT,
-    problem_type TEXT DEFAULT 'none',     -- NEW: meter problem enum
-    problem_notes TEXT,                   -- NEW: problem description
-    created_by UUID REFERENCES auth.users(id),
+    name TEXT NOT NULL UNIQUE,          -- 'Basic', 'Pro'
+    max_wells INTEGER NOT NULL,         -- 5, 10
+    max_admins INTEGER NOT NULL,        -- 1, 2
+    max_meter_checkers INTEGER NOT NULL, -- 3, 5
+    max_growers INTEGER NOT NULL DEFAULT 1, -- Always 1 grower per farm
+    description TEXT,                   -- Plan description for UI
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Seed tiers
+INSERT INTO subscription_tiers (name, max_wells, max_admins, max_meter_checkers, description) VALUES
+  ('Basic', 5, 1, 3, 'Up to 5 wells, 1 admin, 3 meter checkers'),
+  ('Pro', 10, 2, 5, 'Up to 10 wells, 2 admins, 5 meter checkers');
 ```
 
-### New Table: `allocations`
-
+**New table: `app_settings`**
 ```sql
-CREATE TABLE allocations (
+CREATE TABLE app_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    well_id UUID NOT NULL REFERENCES wells(id) ON DELETE CASCADE,
-    period_start DATE NOT NULL,           -- CHANGED: date instead of year integer
-    period_end DATE NOT NULL,             -- CHANGED: end date for flexibility
-    allocated_amount NUMERIC(10,2) NOT NULL CHECK (allocated_amount > 0),
-    allocated_units TEXT NOT NULL DEFAULT 'AF' CHECK (allocated_units IN ('AF', 'GAL', 'CF')),
-    notes TEXT,
+    key TEXT NOT NULL UNIQUE,           -- 'subscription_website_url', etc.
+    value TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(well_id, period_start, period_end)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Seed initial settings
+INSERT INTO app_settings (key, value) VALUES
+  ('subscription_website_url', 'https://example.com/pricing');
 ```
 
-**Key change from original API.md spec:** Allocations use `period_start`/`period_end` dates instead of just `year` integer. This supports:
-- Annual allocations (Jan 1 - Dec 31)
-- Irrigation season allocations (Apr 1 - Oct 31)
-- Custom periods as required by water districts
+**Alter existing `farms` table:**
+```sql
+ALTER TABLE farms ADD COLUMN subscription_tier_id UUID
+  REFERENCES subscription_tiers(id) DEFAULT (
+    SELECT id FROM subscription_tiers WHERE name = 'Basic' LIMIT 1
+  );
+```
 
----
+**RLS policies (SELECT-only for config tables):**
+```sql
+-- Authenticated users can read tiers (synced to all clients)
+ALTER TABLE subscription_tiers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users can read subscription tiers"
+  ON subscription_tiers FOR SELECT TO authenticated USING (true);
 
-## Connector Updates Required
+-- Authenticated users can read app settings
+ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users can read app settings"
+  ON app_settings FOR SELECT TO authenticated USING (true);
 
-The existing `SupabaseConnector` in `powersync-connector.ts` needs:
+-- No INSERT/UPDATE/DELETE policies = only service_role can modify
+```
 
-1. Add `'readings'` and `'allocations'` to `ALLOWED_TABLES`
-2. Add boolean normalization for `readings.gps_verified` in `normalizeForSupabase()`
-3. No other connector changes needed -- the existing PUT/PATCH/DELETE flow handles all table operations generically
+#### PowerSync Dashboard (Sync Rules)
 
----
-
-## Sync Rules Updates Required (PowerSync Dashboard)
-
-New sync rule data queries for the `user_farm_data` bucket:
+**Two new global buckets** (no parameter query = syncs to ALL clients):
 
 ```yaml
-# Sync all readings for farm wells
-- SELECT r.* FROM readings r
-  WHERE r.well_id IN (
-    SELECT id FROM wells WHERE farm_id IN (
-      SELECT farm_id FROM users WHERE id = bucket.user_id
-    )
-  )
+bucket_definitions:
+  global_subscription_tiers:
+    data:
+      - SELECT id, name, max_wells, max_admins, max_meter_checkers,
+               max_growers, description, is_active, created_at, updated_at
+        FROM subscription_tiers
+        WHERE is_active = true
 
-# Sync all allocations for farm wells
-- SELECT a.* FROM allocations a
-  WHERE a.well_id IN (
-    SELECT id FROM wells WHERE farm_id IN (
-      SELECT farm_id FROM users WHERE id = bucket.user_id
-    )
-  )
+  global_app_settings:
+    data:
+      - SELECT id, key, value, created_at, updated_at
+        FROM app_settings
 ```
+
+**Update existing farm bucket** to include `subscription_tier_id` in the SELECT column list.
+
+**Confidence: HIGH** -- PowerSync docs explicitly state: "If no Parameter Query is specified in the bucket definition, the bucket is automatically a global bucket. These buckets will be synced to all clients/users."
+
+#### PowerSync Client Schema (`powersync-schema.ts`)
+
+```typescript
+const subscription_tiers = new TableV2({
+  name: column.text,
+  max_wells: column.integer,
+  max_admins: column.integer,
+  max_meter_checkers: column.integer,
+  max_growers: column.integer,
+  description: column.text,
+  is_active: column.integer,    // 0/1 (PowerSync no BOOLEAN)
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+const app_settings = new TableV2({
+  key: column.text,
+  value: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+```
+
+Add `subscription_tier_id: column.text` to the existing `farms` TableV2 definition.
+
+Register both in the Schema:
+```typescript
+export const AppSchema = new Schema({
+  farms,
+  users,
+  farm_members,
+  farm_invites,
+  wells,
+  readings,
+  allocations,
+  subscription_tiers,  // NEW
+  app_settings,        // NEW
+});
+```
+
+#### Connector: Read-Only by Omission
+
+The existing `ALLOWED_TABLES` set in `powersync-connector.ts` controls which tables get uploaded:
+
+```typescript
+const ALLOWED_TABLES = new Set([
+  'farms', 'users', 'farm_members', 'farm_invites',
+  'wells', 'readings', 'allocations'
+]);
+// subscription_tiers and app_settings are NOT listed
+// = any accidental local writes are silently dropped during upload
+```
+
+Do NOT add `subscription_tiers` or `app_settings` to this set. This is the established pattern for read-only tables in this codebase -- no SDK flags or special configuration needed.
+
+**Confidence: HIGH** -- Verified by reading `powersync-connector.ts` line 9. The `applyOperation` method skips tables not in `ALLOWED_TABLES` (line 116-118).
+
+#### React Hooks
+
+Replace `src/lib/subscription.ts` (hardcoded) with a query-based approach:
+
+```typescript
+// New: src/hooks/useSubscriptionTier.ts
+// Queries subscription_tiers via farms.subscription_tier_id
+// Returns the tier limits for the current farm
+// Falls back to Basic-tier defaults if query returns no rows (offline cold start edge case)
+```
+
+Update `useSeatUsage.ts` to read limits from `useSubscriptionTier()` instead of `PLAN_LIMITS`.
+
+Add new `useWellLimitUsage()` hook for well count enforcement.
 
 ---
 
-## Alternatives Considered
+### 2. Role Permission Enforcement in React UI
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| GPS distance | @turf/distance | Custom Haversine function | @turf is already in the project. Consistent API, tested edge cases, unit conversion included. Marginal bundle cost. |
-| GPS distance | @turf/distance | geolib npm package | Different ecosystem. @turf is already a dependency. geolib would add a parallel geo library. |
-| Date picker | Native HTML5 input | react-datepicker | 44KB gzipped overhead for a mobile-first app where native pickers are better UX. |
-| Date picker | Native HTML5 input | react-day-picker | Unnecessary for "pick a date" flows. Would consider only if calendar visualization were needed. |
-| Decimal precision | TEXT storage + parseFloat | decimal.js or bignumber.js | Meter values have max 2 decimal places. Calculations are simple (subtraction, multiplication). Arbitrary-precision libraries add 15-30KB for a problem that does not exist in this domain. |
-| Allocation model | Period-based (start/end) | Year-only (integer) | Water districts often use irrigation seasons, not calendar years. Period-based is more flexible with minimal added complexity. |
-| Form state | React useState (existing pattern) | React Hook Form or Formik | Existing forms use plain useState. Forms are simple (5-10 fields). A form library adds complexity without benefit at this scale. |
+**Current state:** `src/lib/permissions.ts` defines 9 actions: `manage_farm`, `manage_users`, `manage_wells`, `create_well`, `record_reading`, `view_wells`, `view_members`, `manage_invites`, `cross_farm_access`. The `RequireRole` route guard and `hasPermission()` function are used throughout the app.
+
+**What needs to change:** The existing `manage_wells` action is too coarse. The requirements call for:
+- Well edit/delete: gated to grower and admin only (meter_checker excluded)
+- Allocation management: gated to grower and admin only
+- Well detail edit button: hidden for meter_checkers
+
+**Implementation approach -- extend the existing matrix:**
+
+Add new fine-grained actions:
+```typescript
+export const ACTIONS = [
+  'manage_farm',
+  'manage_users',
+  'manage_wells',
+  'create_well',
+  'edit_well',            // NEW
+  'delete_well',          // NEW
+  'manage_allocations',   // NEW
+  'record_reading',
+  'view_wells',
+  'view_members',
+  'manage_invites',
+  'cross_farm_access',
+] as const;
+```
+
+Update the permission matrix:
+```typescript
+export const PERMISSION_MATRIX: Record<Role, Set<Action>> = {
+  super_admin: ALL_ACTIONS,
+  grower: ALL_EXCEPT_CROSS_FARM,
+  admin: new Set<Action>([
+    'manage_users',
+    'manage_wells',
+    'create_well',
+    'edit_well',            // NEW
+    'delete_well',          // NEW
+    'manage_allocations',   // NEW
+    'record_reading',
+    'view_wells',
+    'view_members',
+    'manage_invites',
+  ]),
+  meter_checker: new Set<Action>([
+    'record_reading',
+    'view_wells',
+    'view_members',
+    // NO edit_well, delete_well, manage_allocations
+  ]),
+};
+```
+
+**UI gating patterns (all existing, no new components):**
+
+Route-level gating:
+```tsx
+<Route element={<RequireRole action="edit_well" />}>
+  <Route path="/wells/:id/edit" element={<WellEditPage />} />
+</Route>
+<Route element={<RequireRole action="manage_allocations" />}>
+  <Route path="/wells/:id/allocations" element={<WellAllocationsPage />} />
+</Route>
+```
+
+Component-level gating (hide edit button for meter_checkers):
+```tsx
+{hasPermission(role, 'edit_well') && (
+  <button onClick={onEdit}>Edit Well</button>
+)}
+```
+
+**No new libraries.** The existing system is 106 lines, fully typed, and designed for exactly this kind of extension.
+
+**Confidence: HIGH** -- The pattern is proven across v1.0 and v2.0 with 9 actions already working.
+
+---
+
+### 3. Login-Only Auth Flow (Remove Registration)
+
+**Current state:**
+- `resolveNextRoute()` has 3 states: no profile -> `/onboarding/profile`, no farm -> `/onboarding/farm/create`, complete -> dashboard
+- `RequireOnboarded` checks `hasProfile` and `hasFarmMembership`
+- `RequireNotOnboarded` prevents already-onboarded users from hitting onboarding routes
+- `ProfilePage.tsx` and `CreateFarmPage.tsx` handle self-service registration
+
+**Target state:**
+- Login-only: Phone OTP -> farm check -> dashboard or "no subscription" page
+- No in-app registration. Users are pre-created via invite system (already built in v1.0)
+- Farm creation handled externally (admin tooling or future landing page)
+
+**Files to remove entirely:**
+- `src/pages/onboarding/ProfilePage.tsx`
+- `src/pages/onboarding/CreateFarmPage.tsx`
+- `src/components/RequireNotOnboarded.tsx` (or equivalent guard)
+
+**Files to simplify:**
+
+`src/lib/resolveNextRoute.ts` -- Two states only:
+```typescript
+export function resolveNextRoute(status: OnboardingStatus | null): string {
+  if (!status) return '/auth/phone';
+  if (!status.hasFarmMembership) return '/no-subscription';
+  return '/app/dashboard';
+}
+```
+
+`src/components/RequireOnboarded.tsx` -- Remove profile check branch:
+- Remove the `if (!onboardingStatus.hasProfile)` redirect to `/onboarding/profile`
+- Change the `if (!onboardingStatus.hasFarmMembership)` redirect from `/onboarding/farm/create` to `/no-subscription`
+
+`src/App.tsx` -- Remove onboarding routes:
+```tsx
+// REMOVE:
+// <Route element={<RequireNotOnboarded />}>
+//   <Route path="/onboarding/profile" element={<ProfilePage />} />
+//   <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
+// </Route>
+
+// ADD:
+<Route path="/no-subscription" element={<NoSubscriptionPage />} />
+```
+
+**New file: `src/pages/NoSubscriptionPage.tsx`**
+- Static page explaining user does not have an active subscription
+- Shows "Contact your farm administrator" or links to subscription website URL from `app_settings`
+- Route: `/no-subscription` (outside `AppLayout`, does not need PowerSync)
+- Pattern: Simple React component with Tailwind styling, matching existing page style
+
+**AuthProvider changes:** Minimal. The `OnboardingStatus` interface keeps `hasProfile` for backward compatibility with the Supabase RPC `get_onboarding_status`, but the client simply stops checking it for routing decisions.
+
+**No new libraries needed.** This is purely code removal and simplification.
+
+**Confidence: HIGH** -- Straightforward refactoring of existing patterns. No new capabilities required.
 
 ---
 
 ## What NOT to Add
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| decimal.js / bignumber.js | Meter values are NUMERIC(15,2) -- at most 2 decimal places. Simple JS number arithmetic with `toFixed(2)` is sufficient. These libraries are for arbitrary-precision math (financial, cryptographic). | Store as TEXT in PowerSync, parse with `parseFloat()`, round with `toFixed(2)` for display. |
-| react-datepicker / date-fns | This is a mobile-first PWA. Native date inputs provide OS-native picker UX. Adding a date library means shipping CSS + JS that provides worse mobile UX than the browser default. | Native `<input type="date">` and `<input type="datetime-local">`. |
-| Chart.js / recharts / d3 | Not needed for this milestone. Reading history is a list, not a chart. Allocation gauge is a custom SVG component, not a charting library use case. | Custom SVG gauge component (existing pattern in codebase design). |
-| Leaflet / alternative map library | Already using Mapbox GL JS via react-map-gl. No reason to add a second map library for proximity visualization. | Use existing Mapbox + @turf/circle for proximity circles on map. |
-| PostGIS geography type for wells | Migration 017 deliberately moved away from PostGIS to simple lat/lng NUMERIC columns. The distance calculation happens client-side via @turf/distance, not via PostGIS ST_DWithin. | Client-side Haversine via @turf/distance. PostGIS would only matter for server-side spatial queries, which this offline-first architecture does not use. |
-| Image upload library (for problem photos) | Problem reporting in this milestone is text-only (type enum + notes). Photo attachment is a future feature that requires Supabase Storage setup. Do not add complexity prematurely. | Text-based problem reporting. Flag photo support as a future enhancement. |
-| @stripe/stripe-js | Billing is a separate milestone (already researched in prior STACK.md). Do not mix billing concerns into the readings/allocations feature set. | Defer to billing milestone. |
+| Library/Tool | Why Not | What to Do Instead |
+|--------------|---------|-------------------|
+| `@stripe/stripe-js` | Explicitly out of scope per PROJECT.md: "No Stripe yet" | Enforce limits in UI/DB only. "Manage Plan" button links to external URL from `app_settings` |
+| TanStack Query / React Query | PowerSync `useQuery` already provides reactive, offline-capable data queries. Adding another query layer creates confusion and duplicate caches | Use `useQuery` from `@powersync/react` for all synced data |
+| Zustand store for subscription data | Subscription tier data lives in PowerSync (synced SQLite). Creating a Zustand store duplicates state and creates sync issues | Query PowerSync directly via hooks |
+| CASL / `@casl/react` / any RBAC library | The existing `permissions.ts` is 106 lines, type-safe, and perfectly fitted to 4 roles with ~12 actions. A library adds abstraction layers for zero benefit | Extend the existing permission matrix (add 3 new actions) |
+| Feature flag library (LaunchDarkly, Flagsmith, etc.) | Subscription tiers in DB already serve as feature flags per farm. No need for a separate system | Tier-based gating via PowerSync queries |
+| Form validation library (Zod, Yup, Valibot) | No new complex forms in this milestone. The subscription page is read-only display. The "no subscription" page is static | Keep existing validation patterns |
+| Additional auth library | Supabase Auth handles everything needed. Phone OTP flow is working. Login-only simplifies, not adds | Keep `@supabase/supabase-js` auth |
+| Admin panel library (react-admin, Retool SDK) | Tier management is done via Supabase Dashboard or SQL migrations, not in-app. Super admin is a future consideration | Direct database management via Supabase Dashboard |
+
+---
+
+## Alternatives Considered
+
+| Decision | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Config table sync | PowerSync global buckets | Supabase RPC on-demand fetch | Global buckets sync once and are available offline. RPC requires network, fails offline. Config data changes rarely = perfect for sync-once pattern |
+| Config table sync | PowerSync global buckets | Environment variables / hardcoded constants | Cannot update without code deploy. DB-driven = updatable via Supabase Dashboard |
+| Read-only enforcement | Connector ALLOWED_TABLES omission | PowerSync `insertOnly` or `localOnly` TableV2 options | `insertOnly` allows local writes to upload queue (wrong direction). `localOnly` prevents sync entirely (wrong -- we want sync DOWN). Omitting from ALLOWED_TABLES is simpler and already the established pattern |
+| Permission system | Extend existing matrix | Replace with CASL library | Existing system is simple, typed, and works. CASL adds ~15KB and an abstraction layer for a 4-role, 12-action system that fits in a single file |
+| Tier data shape | Flat columns on `subscription_tiers` | JSON blob with limits | Flat columns are queryable in PowerSync SQLite. JSON blobs require client-side parsing, cannot be filtered in SQL, and are harder to validate |
+| Subscription page | Extend existing SubscriptionPage | New dedicated TierManagement component | The existing page already shows seat usage. Adding tier info and well usage is an extension, not a replacement |
+
+---
+
+## Version Compatibility
+
+All installed packages are verified compatible with planned changes:
+
+| Package | Installed | Required Features | Compatible |
+|---------|-----------|-------------------|------------|
+| `@powersync/web` | 1.32.0 | `TableV2`, `Schema`, `column` types | Yes -- all used since v1.0 |
+| `@powersync/react` | 1.8.2 | `useQuery`, `useStatus` | Yes -- all used since v1.0 |
+| `@supabase/supabase-js` | 2.93.3 | Auth OTP, RPC calls, table operations | Yes -- all used since v1.0 |
+| `react-router` | 7.13.0 | `Routes`, `Route`, `Navigate`, `Outlet` | Yes -- all used since v1.0 |
+
+No version bumps required. No new packages to install.
+
+**Confidence: MEDIUM** -- Installed versions verified via `npm list`. Latest available versions could not be confirmed (npm registry returned 403). However, installed versions are from 2025-2026 and include all required features.
 
 ---
 
 ## Installation
 
 ```bash
-# The ONLY new dependency for this milestone:
-npm install @turf/distance
-
-# No dev dependencies needed
+# No new dependencies for this milestone
+# Zero npm install commands needed
 ```
 
 ---
 
-## Version Compatibility
+## Migration Checklist
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| @turf/distance ^7.3.3 | @turf/circle ^7.3.3 | Same Turf.js v7 release. Shared dependency on @turf/helpers ^7.3.3 (already installed as transitive dep of @turf/circle). |
-| @turf/distance ^7.3.3 | @powersync/web ^1.32.0 | No interaction. @turf is client-side geo math. PowerSync is sync engine. |
-| Native HTML5 date inputs | React ^19.2.0 | Standard HTML elements. React controlled inputs work with `value` and `onChange` as with any input. |
-| column.text (PowerSync schema) | @powersync/web ^1.32.0 | TEXT is a supported PowerSync column type. Values sync as strings. Parse client-side. |
+All changes are code and schema, not stack:
+
+1. **Supabase migrations** -- `subscription_tiers` table, `app_settings` table, `farms.subscription_tier_id` column, RLS policies, seed data
+2. **PowerSync Dashboard** -- Two new global buckets, updated farm bucket SELECT
+3. **PowerSync schema** -- Two new TableV2 definitions, one new column on farms
+4. **Connector** -- No changes (config tables intentionally omitted from ALLOWED_TABLES)
+5. **Permission matrix** -- Add `edit_well`, `delete_well`, `manage_allocations` actions
+6. **Hooks** -- New `useSubscriptionTier`, updated `useSeatUsage`, new `useWellLimitUsage`
+7. **Routes** -- Remove onboarding routes, add `/no-subscription` route
+8. **Pages** -- Remove `ProfilePage`, `CreateFarmPage`; add `NoSubscriptionPage`; update `SubscriptionPage`
+9. **Guards** -- Simplify `RequireOnboarded`, remove `RequireNotOnboarded`
+10. **Auth** -- Simplify `resolveNextRoute` to two-state logic
 
 ---
 
 ## Sources
 
-- [@turf/distance npm](https://www.npmjs.com/package/@turf/distance) -- HIGH confidence, v7.3.3 (matches project's @turf/circle version)
-- [Turf.js distance documentation](https://turfjs.org/docs/api/distance) -- HIGH confidence, official docs
-- [Haversine formula reference](https://www.movable-type.co.uk/scripts/latlong.html) -- HIGH confidence, definitive reference for GPS distance calculation
-- [SQLite Datatypes documentation](https://www.sqlite.org/datatype3.html) -- HIGH confidence, official SQLite docs (REAL precision limitations)
-- [SQLite Floating Point documentation](https://sqlite.org/floatingpoint.html) -- HIGH confidence, official (confirms IEEE 754 limitations for decimal storage)
-- [MDN: input type="date"](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/date) -- HIGH confidence, official web standards reference
-- [MDN: Geolocation watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition) -- HIGH confidence, official web API docs
-- [Water Measurement Units and Conversion Factors (Oklahoma State University)](https://extension.okstate.edu/fact-sheets/water-measurement-units-and-conversion-factors.html) -- HIGH confidence, academic/government source
-- [Unit Conversions (California Water Boards)](https://www.waterboards.ca.gov/waterrights/water_issues/programs/measurement_regulation/docs/water_measurement/units.pdf) -- HIGH confidence, government source
-- [Water Measurement Basics (Colorado River District)](https://www.coloradoriverdistrict.org/water-measurement/) -- HIGH confidence, authoritative water management source
-- [PowerSync JavaScript Web SDK docs](https://docs.powersync.com/client-sdks/reference/javascript-web) -- HIGH confidence, official docs (column types: text, integer, real)
-- [Can I use: input type=date](https://caniuse.com/input-datetime) -- HIGH confidence, browser compatibility data
+- [PowerSync Sync Rules -- Global Buckets](https://docs.powersync.com/usage/sync-rules) -- "If no Parameter Query is specified, the bucket is automatically a global bucket synced to all clients" (HIGH confidence, official docs)
+- [PowerSync TableV2 API Reference](https://powersync-ja.github.io/powersync-js/web-sdk/classes/TableV2) -- Constructor options, `localOnly`, `insertOnly` static factories (HIGH confidence, official SDK docs)
+- [PowerSync Client Architecture](https://docs.powersync.com/architecture/client-architecture) -- Upload queue processes via connector's `uploadData` (HIGH confidence, official docs)
+- [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) -- SELECT-only policies for read-only tables (HIGH confidence, official docs)
+- [PowerSync January 2026 Changelog](https://www.powersync.com/blog/powersync-changelog-january-2026) -- Latest SDK features, deprecations, version info (MEDIUM confidence, official blog)
+- [PowerSync JS Web Client SDK Releases](https://releases.powersync.com/announcements/powersync-js-web-client-sdk) -- v1.29.1+ release notes (MEDIUM confidence)
+- Codebase analysis of: `src/lib/permissions.ts`, `src/lib/subscription.ts`, `src/lib/powersync-connector.ts`, `src/lib/powersync-schema.ts`, `src/lib/AuthProvider.tsx`, `src/lib/resolveNextRoute.ts`, `src/App.tsx`, `src/hooks/useSeatUsage.ts`, `src/hooks/useUserRole.ts`, `src/components/RequireOnboarded.tsx`, `src/components/RequireRole.tsx`, `src/pages/SubscriptionPage.tsx` (HIGH confidence, direct source analysis)
 
 ---
-*Stack research for: AG Water Tracker -- Meter Readings, GPS Proximity, Allocations, Well Management*
-*Researched: 2026-02-19*
+*Stack research for: AG Water Tracker v3.0 -- Subscriptions & Permissions*
+*Researched: 2026-02-22*

@@ -1,457 +1,296 @@
-# Feature Landscape: Meter Reading, Allocation, and Well Management
+# Feature Research
 
-**Domain:** Agricultural water management -- meter reading recording, water allocation tracking, well detail/editing
-**Researched:** 2026-02-19
-**Overall Confidence:** HIGH (codebase analysis) / MEDIUM (domain patterns from real-world agricultural water apps)
+**Domain:** SaaS subscription tier management, role-based permission enforcement, and login-only auth flow for an offline-first agricultural water management PWA
+**Researched:** 2026-02-22
+**Confidence:** HIGH (features well-defined in PROJECT.md, codebase thoroughly analyzed, SaaS patterns well-established)
 
----
+## Feature Landscape
 
-## Table Stakes
+### Table Stakes (Users Expect These)
 
-Features users expect. Missing = product feels incomplete.
+Features users assume exist. Missing these = product feels broken or insecure.
 
-### Meter Reading Entry
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **DB-driven subscription tiers table** | Farms must have discoverable limits without hardcoded values. SaaS standard is config tables, not constants. | LOW | New `subscription_tiers` table with columns for well_limit, admin_seats, meter_checker_seats. Synced to app via PowerSync. Replaces hardcoded `PLAN_LIMITS` in `src/lib/subscription.ts`. |
+| **Farm-to-tier linkage** | Each farm needs a tier reference so limits are per-farm, not global. | LOW | Add `subscription_tier` TEXT column to `farms` table (default 'basic'). FK or soft reference to `subscription_tiers.id`. PowerSync schema needs this column added. |
+| **Well count enforcement per tier** | Growers expect to see how many wells they can create and be blocked at the limit. Basic: 5 wells, Pro: 10 wells. | MEDIUM | Enforce in UI (disable "New Well" button when at limit) AND in DB (RPC or trigger check on insert). Model after existing `useSeatUsage` pattern -- create parallel `useWellUsage` hook. |
+| **Seat limit enforcement per tier (DB-driven)** | Role seats must be enforced consistently. Tier-specific limits replace current hardcoded values. Basic: 1 admin / 1 meter checker, Pro: 1 admin / 3 meter checkers. | MEDIUM | Current `useSeatUsage` hook reads from `PLAN_LIMITS` constant. Must be refactored to read from the synced `subscription_tiers` table instead. Backend RPC `invite_user_by_phone_impl` should also enforce seat limits. |
+| **Meter checker cannot edit wells** | Field agents record readings, not manage well configuration. Every SaaS with RBAC hides actions users cannot perform. | LOW | `WellDetailPage` and `WellEditPage` currently have NO role checks. Hide Edit button for meter_checker. Redirect `/wells/:id/edit` for unauthorized roles. `permissions.ts` already defines `manage_wells` action that meter_checker lacks. |
+| **Meter checker cannot manage allocations** | Allocation management is an admin/grower concern. Meter checkers should see allocations (read-only) but not create/edit/delete. | LOW | `WellAllocationsPage` has no role gating. Add `hasPermission(role, 'manage_wells')` check to hide create/edit/delete controls. Route guard not needed -- read-only view is fine for all roles. |
+| **Meter checker cannot invite users** | User management is admin/grower territory. The existing `manage_invites` action already excludes meter_checker in the permission matrix. | LOW | `UsersPage` already renders the AddUserModal. Hide the "Add User" button for meter_checker. Backend RPC already checks role server-side, so this is a UI-only change. |
+| **Login-only flow (remove registration)** | App becomes invite-only. Users who are not pre-registered must see a clear "no access" state, not a broken onboarding flow. | MEDIUM | Remove `ProfilePage`, `CreateFarmPage`, `RequireNotOnboarded`, and onboarding routes from `App.tsx`. Modify `RequireOnboarded` to redirect to "no subscription" page instead of onboarding when user lacks profile/farm. |
+| **"No subscription" redirect page** | Users with valid Supabase auth but no `farm_member` record need a clear explanation, not a blank screen or cryptic error. | LOW | New simple page: "You don't have an active subscription. Contact your farm administrator or visit [website] to get started." Links to external subscription website URL from `app_settings`. |
+| **app_settings config table** | Global app configuration (subscription website URL, support contact) should be DB-driven, not hardcoded. | LOW | New `app_settings` table with key/value pairs. Synced to all users via PowerSync (public bucket, no farm filtering). Small table, minimal sync overhead. |
+| **Farm data isolation verification** | Multi-tenant SaaS demands verified data isolation. Each farm must only see its own data. Cross-farm leakage is a critical security bug. | MEDIUM | Audit all RLS policies on all tables (farms, users, farm_members, farm_invites, wells, readings, allocations). Verify PowerSync sync rules filter by farm_id. Verify super_admin cross-farm bypass is intentional and consistent across all tables. |
+| **Subscription page shows tier-specific data** | Growers need to see their current plan, what it includes, and how to manage/upgrade. | LOW | Replace hardcoded "Basic Plan" text with tier data from synced `subscription_tiers` table. Add well usage count alongside existing seat usage. "Manage Plan" links to external URL from `app_settings`. |
 
-| Feature | Why Expected | Complexity | Dependencies | Notes |
-|---------|--------------|------------|--------------|-------|
-| **Single numeric input for cumulative meter value** | Field agents read a physical meter and type the number. Must be dead simple -- one big input, one tap to submit. | Low | `readings` table (new), PowerSync schema update | Raw cumulative value. Usage is calculated, never entered directly. |
-| **Auto-populated reading date (now)** | 95% of readings happen "right now." Pre-filling saves taps on every entry. | Low | None | Allow manual override for backdated readings. |
-| **Last reading display on form** | Agent needs context: "last reading was 45,230 on Jan 15." Without it they cannot verify the number they see on the meter makes sense. | Low | `readings` query | Show both value and date of previous reading. |
-| **Calculated usage preview** | Show "(current - last) x multiplier = X AF" before saving. This is the core value proposition -- turning raw numbers into meaningful usage. | Low | Well's `multiplier` and `units` fields (exist) | Calculate on the fly as agent types. Formula: `(new_value - baseline) * multiplier_numeric`. |
-| **GPS auto-capture on reading** | GPS coordinates captured automatically when opening the reading form. Agent should not have to tap a separate button. | Med | `useGeolocation` hook (exists), reading GPS columns | Silently capture. Store lat/lng on the reading record. |
-| **GPS proximity indicator (non-blocking)** | Show "In Range" or "Out of Range" badge based on distance to well. Per project spec: flags but does NOT block submission. | Med | Well lat/lng, reading GPS, distance calc utility | Threshold should be configurable per farm (default ~100m per existing docs). Store `gps_verified` boolean. |
-| **Offline reading submission** | Readings must save to local PowerSync DB immediately and sync when online. This is the entire point of the offline-first architecture. | Med | PowerSync connector update (add `readings` to ALLOWED_TABLES), sync rules update | Already proven pattern for wells -- same approach for readings. |
-| **Reading history list on well detail** | Chronological list of past readings showing date, raw value, calculated usage, and GPS status. | Med | `readings` query, `useReadings` hook (new) | Newest first. Pagination or virtual scroll for wells with many readings. |
+### Differentiators (Competitive Advantage)
 
-### Water Allocation Management
+Features that add polish above baseline expectations for this milestone.
 
-| Feature | Why Expected | Complexity | Dependencies | Notes |
-|---------|--------------|------------|--------------|-------|
-| **Create allocation for a well** | Admin enters: start date, end date, allocated amount (acre-feet). This is the budget the well operates against. | Med | `allocations` table (new -- must recreate with period-based schema instead of year-only), PowerSync schema | Original schema used `year` integer. New design needs `start_date` / `end_date` for flexible periods. |
-| **View current allocation on well detail** | Show the active allocation period, how much is allocated, and how much has been used. | Low | Allocation query + usage calculation | Core dashboard-level info. |
-| **Usage vs. allocation gauge** | Visual indicator of percentage used. Color-coded: green (< 75%), yellow (75-90%), red (> 90%). | Med | SVG/CSS gauge component, usage calculation | The WellMarker already has a placeholder gauge (`allocationPercentage = 100`). This makes it real. |
-| **Multiple allocation periods** | A well may have different allocations for different periods (seasonal, annual, multi-year). List and manage them. | Med | One-to-many relationship wells -> allocations | Only one "active" allocation at any time (based on current date falling within start/end range). |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Offline-available tier limits** | Tier config syncs to local SQLite via PowerSync so limit enforcement works offline. No network needed to check if you can add a well or invite a user. | LOW | Natural consequence of the PowerSync architecture. Just add `subscription_tiers` and `app_settings` to sync rules. Competitors often require network for plan checks. |
+| **Graceful limit-reached UX** | Instead of error messages after action, show proactive "You've reached your plan limit" with clear upgrade path. Contextual at the point of action (New Well button, Add User button). | LOW | Extend existing pattern from `AddUserModal` which already shows "All seats are filled" with upgrade prompt. Apply same pattern to well creation. |
+| **Real-time tier changes via sync** | If a super_admin upgrades a farm's tier in the DB, PowerSync syncs the change to all farm members in near-real-time. No app restart needed. | LOW | PowerSync handles this automatically. The `farms.subscription_tier` change triggers sync, and the UI reads from local SQLite reactively via `useQuery`. |
+| **Permission matrix as single source of truth** | Existing `permissions.ts` with typed actions and role sets means adding new permission checks is trivial and type-safe. Zero scattered role string comparisons. | LOW | Already built. Just need to USE `hasPermission()` consistently in the components that currently lack checks. |
 
-### Well Detail Page
+### Anti-Features (Commonly Requested, Often Problematic)
 
-| Feature | Why Expected | Complexity | Dependencies | Notes |
-|---------|--------------|------------|--------------|-------|
-| **Well detail page at /wells/:id** | Currently missing entirely. Clicking a well in the list or map navigates to `/wells/:id` but no route or page exists. This is the highest-priority gap. | Med | New route, new page component | Hub for everything about a well: readings, allocation, status, location. |
-| **Well info display** | Show name, WMIS number, meter serial number, location, units, multiplier, status fields (battery, pump, meter). | Low | Existing `useWells` hook data | Read-only view of well properties. |
-| **Add reading button (prominent)** | Primary action on well detail. Large, obvious CTA that opens the reading form. | Low | Reading form component | Should be the most prominent action on the page. Meter checkers live here. |
-| **Well location on mini-map** | Small map snippet showing the well's GPS pin. Gives spatial context without leaving the detail page. | Med | Mapbox component reuse | Optional -- could be just lat/lng text for MVP and add map later. |
+Features that seem good but create problems for this milestone.
 
-### Well Editing
-
-| Feature | Why Expected | Complexity | Dependencies | Notes |
-|---------|--------------|------------|--------------|-------|
-| **Edit well properties** | Admin/grower modifies: name, meter serial number, WMIS number, location, units, multiplier, report preference. | Med | Reuse AddWellFormBottomSheet with pre-populated values, PowerSync update | Permission-gated: only admin/grower roles. |
-| **Update well status fields** | Change battery_state, pump_state, meter_status. These are operational status updates. | Low | PowerSync update on wells table | Can be done from well detail page or as part of reading submission. |
-
----
-
-## Differentiators
-
-Features that set product apart. Not expected, but valued.
-
-| Feature | Value Proposition | Complexity | Dependencies | Notes |
-|---------|-------------------|------------|--------------|-------|
-| **Similar reading warning** | When new reading is within 5 units of the last reading, show a yellow warning: "This reading is very similar to the last one. Are you sure?" Catches accidental re-entry of old values without blocking intentional low-usage readings (e.g., winter months). | Low | Compare new value to last reading value | Per project spec. Non-blocking -- warn, not prevent. Threshold of 5 units is sensible for cumulative meters. |
-| **Meter problem reporting** | Quick-select problem types: "Not Working", "Battery Dead", "Pump Off", "Dead Pump". Updates well status fields and optionally adds a note to the reading. | Low-Med | Well status field updates, optional reading with notes | Critical for field agents who encounter broken equipment. Faster than editing well properties manually. |
-| **GPS accuracy display** | Show GPS accuracy radius so workers understand reading trustworthiness. "GPS accurate to ~5m" vs "GPS accurate to ~200m". | Low | `coords.accuracy` from Geolocation API | Helps explain why a reading might be marked "out of range" despite being at the well. |
-| **Reading validation warnings** | Non-blocking warnings for: reading lower than previous (meter reset?), reading much higher than expected (data entry error?). | Low | Client-side checks before submit | Show warnings, allow override. Never block. |
-| **Reading submission with photo** | Agent takes photo of the meter face as evidence. Stored as attachment. | High | Supabase Storage, camera API, offline photo queue | HIGH value for audit trail. HIGH complexity for offline storage + sync. Defer to later phase. |
-| **Batch reading entry** | When checking multiple wells on a route, allow queuing readings across wells without navigating back to the list each time. | Med-High | Multi-well workflow UI, reading queue | Nice for efficiency but adds significant UX complexity. |
-| **Usage trend sparkline** | Small inline chart on well detail showing usage over the last N readings. Visual pattern recognition for anomalies. | Med | Chart library or simple SVG, historical readings query | Useful for admins reviewing well performance. |
-| **Allocation carryover / rollover** | When an allocation period ends with unused water, optionally carry it forward to the next period. Common in Kansas GMD regulations. | Med | Allocation period logic, admin setting | Relevant for districts that allow carryover. |
-| **Reading reminder notifications** | Push/SMS notification when a reading is overdue (e.g., monthly reading not submitted by end of month). | High | Push notification infrastructure, scheduling | Modeled after Edwards Aquifer Authority's Meter Matters app which prompts users when readings are due. |
-| **Export reading history to CSV** | Download all readings for a well or farm as CSV for reporting to water management districts. | Low-Med | CSV generation utility, download trigger | Important for compliance reporting to Kansas DWR/GMD. |
-
----
-
-## Anti-Features
-
-Features to explicitly NOT build.
-
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| **Reading value validation that blocks submission** | Meter readings can legitimately decrease (meter replacement, rollback). Blocking "lower than last" readings creates field frustration when agents cannot submit valid data. | Show warning for decreasing values but always allow submission. Flag for admin review. |
-| **Mandatory GPS for readings** | GPS may be unavailable (indoor meters, poor signal in rural areas). Blocking readings without GPS defeats offline-first purpose. | Auto-capture GPS when available. If unavailable, save reading without GPS. Mark as "unverified." |
-| **Automatic usage calculation from meter photos (OCR)** | High complexity, unreliable in field conditions (dirty meters, glare, different meter types), and adds a heavy dependency. | Manual numeric entry is faster and more reliable for agricultural field meters. |
-| **Complex allocation formulas** | Multi-variable allocation calculations (soil type, crop type, evapotranspiration) belong in specialized irrigation management software, not a meter reading app. | Simple: allocated amount in acre-feet per period. Usage = (current - baseline) x multiplier. |
-| **Real-time streaming of meter data** | Requires AMR/AMI hardware integration. AG Water Tracker is for manual reading scenarios where farmers walk to meters. | Focus on manual reading entry. If automated meters exist, data import is a future feature. |
-| **Multi-unit display toggle** | Showing readings simultaneously in AF, gallons, and cubic feet creates visual noise. The well has one configured unit. | Store readings in the well's configured unit. Admin sets unit at well creation. Conversion utility available if needed for reports. |
-| **Reading edit/delete by field agents** | Allowing meter checkers to edit or delete readings creates audit trail problems. | Only admin/grower can edit or delete readings. Field agents can only add new readings. |
-| **Notification system in-app** | Building a notification center, bell icon, and unread counts is a major feature that distracts from core reading workflow. | Rely on existing sync status banner for data status. Push notifications (if needed later) are a separate effort. |
-| **Charts/graphs of reading trends** | Adds charting library dependency. Reading history as a list is sufficient for MVP. | Sorted reading list with calculated usage column. Charts are a polish feature for a future milestone. |
-| **Editing past readings** | Auditing concern. Past readings should be immutable for compliance. | If a reading is wrong, add a new corrected reading with a note. Admins can add notes to existing readings. |
-
----
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| **In-app Stripe payment flow** | "Let users upgrade right in the app" | Massive complexity: Stripe SDK, webhooks, payment UI, error states, refunds, receipt handling. Explicitly out of scope per PROJECT.md. PWA Stripe integration has iOS/Android quirks with redirects. | External subscription website with Stripe Customer Portal. `app_settings` stores the URL. "Manage Plan" button opens external link. |
+| **Dynamic permission rules (admin-configurable)** | "Let growers customize what meter checkers can do" | Over-engineers a 4-role system with fixed expectations. Introduces UI complexity for permission management. Creates offline conflict potential when permission changes sync. | Fixed permission matrix in code. Roles have clear, documented capabilities. Changes require a code release (which is fine for a 4-role system). |
+| **Soft-delete subscription (grace period)** | "Don't immediately lock out users when subscription lapses" | Requires billing event tracking, grace period logic, partial access states. No billing integration exists yet. | Binary state: farm has a valid tier or it does not. When Stripe integration comes later, it can set `farms.subscription_tier` to null to trigger the "no subscription" redirect. |
+| **Per-well permission assignment** | "Let meter checkers only see certain wells" | Massively increases sync rule complexity. PowerSync would need per-well buckets instead of per-farm. Defeats the simplicity of the current farm-scoped model. | All farm members see all farm wells. Matches physical reality -- field agents drive to whichever well needs a reading. |
+| **Self-service registration (keep onboarding flow)** | "New users should be able to sign up themselves" | Registration moves to the landing page (separate project). Keeping dual flows (in-app + landing page) creates maintenance burden and UX confusion about where to sign up. | Remove in-app registration entirely. New growers register on the landing page (future). Meter checkers are always invited by growers via SMS. |
+| **Fine-grained resource limits (per-reading quotas, per-allocation limits)** | "Limit how many readings per month by tier" | Readings are the core value of the app -- field agents recording data in the field. Limiting them defeats the purpose and creates frustration in low-connectivity scenarios where retries are common. | Only limit the structural resources (wells, seats) that define the tier. Readings and allocations are unlimited within those constraints. |
+| **Tier-specific feature flags (reports for Pro only, etc.)** | "Differentiate tiers by features, not just limits" | Adds conditional rendering complexity throughout the app. Feature flags in an offline-first app create sync edge cases. The app is simple enough that feature segmentation is premature. | Differentiate tiers by resource limits only (wells, seats). All users get the same features. Simpler code, simpler support. Feature flags can be added later if market demands it. |
 
 ## Feature Dependencies
 
 ```
-Well Detail Page ──────────────> Reading Form
-     |                              |
-     |                              v
-     |                     GPS Proximity Check
-     |                              |
-     |                              v
-     |                     Similar Reading Warning
-     |                              |
-     v                              v
-Allocation Display <─────── Usage Calculation <──── readings table
-     |                              ^
-     v                              |
-Allocation Gauge ───────────────────┘
-     |
-     v
-WellMarker gauge (already exists as placeholder)
+subscription_tiers DB table
+    |
+    +--requires--> farms.subscription_tier column
+    |                  |
+    |                  +--enables--> Well count enforcement (reads farm tier -> tier limits)
+    |                  |
+    |                  +--enables--> Seat count enforcement (reads farm tier -> tier limits)
+    |                  |
+    |                  +--enables--> Subscription page tier display
+    |
+    +--requires--> PowerSync schema update (new table in sync rules)
+    |
+    +--requires--> useTierLimits hook (replaces PLAN_LIMITS constant)
 
-readings table ──────> PowerSync schema update
-                            |
-                            v
-                       Sync rules update
-                            |
-                            v
-                       Connector ALLOWED_TABLES update
+app_settings DB table
+    |
+    +--enables--> "No subscription" redirect page (reads subscription_website_url)
+    |
+    +--enables--> "Manage Plan" link on subscription page
+    |
+    +--requires--> PowerSync schema update (new table in sync rules)
 
-allocations table ──────> PowerSync schema update
-                               |
-                               v
-                          Sync rules update
+Login-only flow
+    |
+    +--requires--> "No subscription" redirect page (must exist before removing onboarding)
+    |
+    +--requires--> app_settings table (for redirect URLs)
+    |
+    +--blocks--> ProfilePage removal (cannot remove until redirect exists)
+    +--blocks--> CreateFarmPage removal
+    +--blocks--> RequireNotOnboarded removal
 
-Well Edit Form ──────> Reuse AddWellFormBottomSheet
-                            |
-                            v
-                       Permission check (admin/grower only)
+Role permission enforcement (UI gating)
+    |
+    +--depends-on--> existing permissions.ts (already built)
+    +--depends-on--> existing useUserRole hook (already built)
+    |
+    +--independent-of--> subscription tier work (can be done in parallel)
 
-Meter Problem Report ──────> Well status update
-                                 |
-                                 v
-                            Optional reading with notes
+Farm data isolation verification
+    |
+    +--independent-of--> all other features (audit task, no code dependencies)
+    +--should-run-after--> all DB schema changes are complete
 ```
 
-### Critical Path (must be built in order)
+### Dependency Notes
 
-1. **Database tables** (readings + allocations) -- everything else depends on these
-2. **PowerSync schema + sync rules + connector** -- offline capability for new tables
-3. **Well detail page** -- container for all reading/allocation features
-4. **Reading form** -- core user action
-5. **Reading history** -- verify readings are saving correctly
-6. **GPS proximity** -- enhance reading form
-7. **Allocation CRUD** -- admin function
-8. **Usage calculation + gauge** -- ties readings to allocations
-9. **Well editing** -- admin function
-10. **Similar reading warning + meter problem reporting** -- polish
+- **subscription_tiers requires farms.subscription_tier:** The tier lookup chain is: farm -> farm.subscription_tier -> subscription_tiers table -> limits. Both the column and reference table must exist for enforcement to work.
+- **Login-only flow requires "no subscription" page:** Cannot remove onboarding routes until there is somewhere to redirect users who lack farm membership. Otherwise they hit a blank/error state.
+- **Role permission enforcement is independent of subscription tiers:** These are orthogonal concerns. Permission checks use the existing role system, not the tier system. They can be implemented in any order or in parallel.
+- **Farm data isolation audit should run last:** It validates the final state of all DB changes. Running it before schema changes are complete would require re-running.
+- **useTierLimits hook replaces PLAN_LIMITS:** The existing `useSeatUsage` hook reads from `PLAN_LIMITS` constant. It must be refactored to read from the local SQLite subscription_tiers table. This is a breaking change that should happen atomically with the new table + sync rules to avoid a period where limits are missing.
+- **app_settings enables both redirect and subscription page:** The external URL stored in app_settings is consumed by two features. Build the table first, then both consumers can reference it.
 
----
+## MVP Definition
 
-## MVP Recommendation
+### This Milestone (v3.0 -- Subscriptions & Permissions)
 
-### Must Have (Phase 1: Database and Sync Foundation)
+Minimum viable set to ship. All items are P1.
 
-These must ship together because they form the data layer everything depends on:
+- [ ] `subscription_tiers` table in Supabase with Basic and Pro tier rows -- foundation for all limit enforcement
+- [ ] `app_settings` table in Supabase with `subscription_website_url` key -- needed for redirect page and manage plan links
+- [ ] `farms.subscription_tier` column defaulting to 'basic' -- links each farm to its tier
+- [ ] PowerSync schema + sync rules updated for new tables -- makes tier/settings data available offline
+- [ ] `useTierLimits` hook replacing `PLAN_LIMITS` constant -- single reactive source of truth for tier limits
+- [ ] Well count enforcement in UI -- disable "New Well" when at tier limit, show usage count
+- [ ] Seat count enforcement refactored to use DB tiers -- replaces hardcoded `PLAN_LIMITS` seat limits
+- [ ] Meter checker UI restrictions: hide well edit button, hide allocation create/edit/delete, hide invite button -- completes role enforcement
+- [ ] Remove onboarding routes and components (ProfilePage, CreateFarmPage, RequireNotOnboarded) -- login-only app
+- [ ] "No subscription" redirect page -- catches users without farm membership with clear messaging
+- [ ] Updated RequireOnboarded guard -- redirects to no-subscription page instead of onboarding
+- [ ] Updated subscription page showing tier-specific data and well usage -- replaces hardcoded "Basic Plan"
+- [ ] Farm data isolation audit (RLS policies + PowerSync sync rules) -- verifies multi-tenant security
 
-1. **readings table** in Supabase with RLS policies
-2. **allocations table** in Supabase with RLS policies (period-based: start_date, end_date, allocated_amount)
-3. **PowerSync schema update** adding readings and allocations tables
-4. **PowerSync sync rules update** for new tables
-5. **PowerSync connector update** adding readings and allocations to ALLOWED_TABLES
-6. **Unit conversion and usage calculation utilities** (pure functions, testable)
-7. **Haversine distance calculation utility** for GPS proximity
+### Add After This Milestone (v3.x)
 
-### Must Have (Phase 2: Well Detail and Core Reading Flow)
+Features to add once core subscription system is working.
 
-8. **Well detail page** at `/wells/:id` with well info, allocation status, reading history
-9. **Reading form** (bottom sheet) with numeric input, auto-date, last reading display, calculated usage preview
-10. **GPS auto-capture** on reading with proximity indicator (non-blocking)
-11. **Reading history list** on well detail page (newest first, with usage and GPS badges)
-12. **Similar reading warning** (within 5 units of last reading)
-13. **Meter problem reporting** (quick status update from well detail)
+- [ ] Backend enforcement of well/seat limits in RPC functions -- currently frontend-only for seat limits, add DB-level checks in `invite_user_by_phone_impl` and well creation RPC
+- [ ] Super admin tier management UI -- ability to change a farm's tier from a super admin view, currently requires direct DB edit
+- [ ] Tier upgrade/downgrade handling -- define policy for when a farm downgrades and exceeds new limits (soft-block new additions vs. force removal)
 
-### Must Have (Phase 3: Allocations and Visualization)
+### Future Consideration (v4+)
 
-14. **Create/edit allocation** for a well (start date, end date, acre-feet)
-15. **View active allocation** on well detail with usage percentage
-16. **Allocation gauge visualization** on well detail and map markers (replacing placeholder)
+Features to defer until landing page and Stripe integration are built.
 
-### Must Have (Phase 4: Well Editing)
+- [ ] Stripe Customer Portal integration -- webhook updates `farms.subscription_tier` on payment events
+- [ ] Landing page with grower registration flow -- new growers sign up on www. subdomain
+- [ ] Usage-based billing (per-well pricing) -- alternative to flat tier pricing
+- [ ] Enterprise tier with custom limits -- requires admin UI for per-farm limit overrides
+- [ ] Trial period with automatic downgrade -- requires billing event tracking and scheduling
 
-17. **Edit well properties** form (reuse creation form with pre-populated values)
-18. **Well status update** from detail page
+## Feature Prioritization Matrix
 
-### Defer
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| subscription_tiers DB table + PowerSync sync | HIGH | LOW | P1 |
+| app_settings DB table + PowerSync sync | MEDIUM | LOW | P1 |
+| farms.subscription_tier column | HIGH | LOW | P1 |
+| useTierLimits hook (replace PLAN_LIMITS) | HIGH | MEDIUM | P1 |
+| Well count enforcement (UI) | HIGH | MEDIUM | P1 |
+| Seat count enforcement (DB-driven refactor) | HIGH | LOW | P1 |
+| Meter checker: hide well edit button | HIGH | LOW | P1 |
+| Meter checker: hide allocation management controls | HIGH | LOW | P1 |
+| Meter checker: hide invite/user management controls | MEDIUM | LOW | P1 |
+| Login-only flow (remove onboarding) | HIGH | MEDIUM | P1 |
+| "No subscription" redirect page | HIGH | LOW | P1 |
+| Subscription page tier update | MEDIUM | LOW | P1 |
+| Farm data isolation audit | HIGH | MEDIUM | P1 |
+| Backend RPC limit enforcement (wells + seats) | MEDIUM | MEDIUM | P2 |
+| Super admin tier management UI | LOW | MEDIUM | P3 |
+| Tier upgrade/downgrade handling | LOW | MEDIUM | P3 |
 
-- **Reading photo capture**: High complexity for offline photo queue. Requires Supabase Storage setup.
-- **Batch reading entry**: Significant UX complexity. One-well-at-a-time flow works for initial use.
-- **Usage trend charts**: Not needed until users have enough historical data.
-- **Export to CSV**: Quick add later, not day-one essential.
-- **Allocation carryover**: Varies by district. Start with simple period-based.
-- **Reading reminders**: Requires push notification infrastructure.
+**Priority key:**
+- P1: Must have for this milestone (v3.0)
+- P2: Should have, add in v3.x
+- P3: Nice to have, future consideration
 
----
+## Existing Code Inventory (What Is Already Built)
 
-## Usage Calculation Details
+Understanding what exists is critical for accurate scoping. This milestone extends, not creates, the permission and subscription systems.
 
-This is the core business logic that ties everything together. Getting it right matters.
+| Existing Asset | Location | How It Applies to v3.0 | Effort to Extend |
+|----------------|----------|------------------------|------------------|
+| Permission matrix (9 actions, 4 roles) | `src/lib/permissions.ts` | `manage_wells`, `manage_invites`, `record_reading` already defined. meter_checker already excluded from management actions. Just need to USE it in more components. | Minimal -- call `hasPermission()` |
+| useUserRole hook | `src/hooks/useUserRole.ts` | Returns typed Role from farm_members via PowerSync. Works correctly. | None needed |
+| RequireRole route guard | `src/components/RequireRole.tsx` | Can gate routes by action. Already used for `/subscription`. Can reuse for `/wells/:id/edit`. | None needed |
+| useSeatUsage hook | `src/hooks/useSeatUsage.ts` | Pattern for counting resources against limits. Refactor from constant to DB-driven limits. | Medium -- swap limit source from `PLAN_LIMITS` to `useTierLimits()` |
+| PLAN_LIMITS constant | `src/lib/subscription.ts` | Currently hardcoded Basic tier (admin: 1, meter_checker: 3). Must be replaced entirely with DB-driven hook. | Remove file, replace all imports |
+| AddUserModal seat gating | `src/components/AddUserModal.tsx` | Already shows "All seats are filled" and disables submit. Proven pattern to reuse for well count limits. | Reuse pattern only |
+| RequireOnboarded guard | `src/components/RequireOnboarded.tsx` | Currently redirects to `/onboarding/profile` and `/onboarding/farm/create`. Must redirect to `/no-subscription` page instead. | Medium -- change redirect logic in 2 branches |
+| RequireNotOnboarded guard | `src/components/RequireNotOnboarded.tsx` | To be removed entirely -- no onboarding flow means no "already onboarded" guard needed. | Delete file + remove from App.tsx |
+| ProfilePage | `src/pages/onboarding/ProfilePage.tsx` | To be removed entirely. | Delete file + clean imports |
+| CreateFarmPage | `src/pages/onboarding/CreateFarmPage.tsx` | To be removed entirely. | Delete file + clean imports |
+| SubscriptionPage | `src/pages/SubscriptionPage.tsx` | Shows seat usage with hardcoded plan name. Refactor to show tier from DB + add well count usage. | Medium |
+| PowerSync schema | `src/lib/powersync-schema.ts` | Must add `subscription_tiers` and `app_settings` table definitions. `farms` table needs `subscription_tier` column. | Low -- add 2 new tables + 1 column |
+| App.tsx routes | `src/App.tsx` | Remove onboarding routes (lines 42-48). Add `/no-subscription` route. Keep all protected routes. | Low-Medium |
+| AuthProvider / onboardingStatus | `src/lib/AuthProvider.tsx` | `get_onboarding_status` RPC returns `hasProfile` and `hasFarmMembership`. The login-only flow changes how these are used but not the RPC itself. | Low -- consumer changes only |
+| RLS policies | `supabase/migrations/011_new_rls_policies.sql` | Existing policies use `get_user_farm_ids()` and `get_user_admin_farm_ids()` helper functions. New tables need similar policies. Audit needed for completeness. | Medium -- new policies for new tables + audit |
+| Custom Access Token Hook | `supabase/migrations/022_custom_access_token_hook.sql` | Embeds role in JWT for RLS. No changes needed for this milestone. | None needed |
 
-### Formula
+## Detailed Feature Specifications
+
+### subscription_tiers Table Design
 
 ```
-usage_in_units = (current_reading - baseline_reading) * multiplier_numeric
-```
-
-Where:
-- `current_reading` = the meter value just entered
-- `baseline_reading` = first reading of the allocation period (or the reading closest to allocation start date)
-- `multiplier_numeric` = the well's multiplier converted to a number
-
-### Multiplier Conversion
-
-The well stores multiplier as text: '0.01', '1', '10', '1000', 'MG'
-
-| Stored Value | Numeric Multiplier | Meaning |
-|-------------|-------------------|---------|
-| '0.01' | 0.01 | Each meter unit = 0.01 of configured unit |
-| '1' | 1 | Direct reading (most common) |
-| '10' | 10 | Each meter unit = 10 of configured unit |
-| '1000' | 1000 | Each meter unit = 1000 of configured unit |
-| 'MG' | 1000000 | Million gallons -- special case, needs unit conversion to AF |
-
-### Unit Conversions (for display and allocation comparison)
-
-| From | To Acre-Feet | Factor |
-|------|-------------|--------|
-| AF | AF | 1 |
-| GAL | AF | / 325,851 |
-| CF | AF | / 43,560 |
-| MG (million gallons) | AF | * 3.06889 |
-
-### Baseline Selection
-
-The baseline reading for usage calculation is determined by:
-1. The first reading on or after the allocation period start date
-2. If no reading exists at period start, use the last reading before period start
-3. If no prior readings exist, usage = 0 (new well)
-
-This logic is important to get right and should be a well-tested utility function.
-
----
-
-## Reading Form UX Patterns
-
-Based on analysis of agricultural water management apps (Edwards Aquifer Authority Meter Matters, WaterVize, Anyline, Axonator) and the specific needs of field agents:
-
-### Optimal Reading Entry Flow
-
-1. Agent navigates to well (from map tap or well list)
-2. Well detail page shows: well name, last reading, current usage, allocation gauge
-3. Agent taps prominent "New Reading" button
-4. **Reading form opens as bottom sheet** (consistent with existing AddWellFormBottomSheet pattern):
-   - Large numeric input for meter value (pre-focused, numeric keyboard)
-   - Last reading shown below input: "Last: 45,230 on Jan 15, 2026"
-   - Auto-calculated usage: "Usage: 125 AF (since last reading)"
-   - GPS status indicator: auto-captured, shows green/yellow badge
-   - Notes field (optional, collapsed by default)
-   - Similar reading warning (if triggered): yellow banner
-5. Agent taps "Save Reading"
-6. Returns to well detail with updated history
-
-### Key UX Principles for Field Agents
-
-- **Minimize taps**: Pre-fill everything possible (date, GPS). One input (meter value) is the only required action.
-- **Large touch targets**: Field workers have gloves, dirty hands, bright sun glare. Buttons must be 44px+ minimum.
-- **Immediate feedback**: Show calculated usage instantly as they type. No loading states for local operations.
-- **Non-blocking warnings**: Similar reading and GPS warnings are yellow banners, not modal dialogs. Agent can dismiss and continue.
-- **Offline confidence**: Show clear sync status. "Saved locally" with a pending sync icon. No ambiguity about whether the reading was captured.
-
-### GPS Proximity Check Pattern
-
-The GPS proximity check follows the geofencing "check-in" pattern used by field service apps (Mapsly, allGeo, Truein):
-
-1. Auto-capture GPS when reading form opens (using existing `useGeolocation` hook)
-2. Calculate distance between agent's position and well's stored coordinates
-3. Display result as badge:
-   - **Green "In Range"**: distance <= threshold (default 100m)
-   - **Yellow "Out of Range (X m)"**: distance > threshold, with actual distance shown
-   - **Gray "GPS Unavailable"**: location not obtained
-4. Store `gps_latitude`, `gps_longitude`, `gps_verified` on the reading record
-5. **Never block submission** based on GPS -- the flag is for admin review, not enforcement
-
-Distance calculation: Haversine formula for lat/lng to meters. Simple utility function, no external library needed.
-
----
-
-## Meter Problem Reporting Pattern
-
-When a field agent arrives at a well and finds equipment issues, they need a fast way to report it without going through the full reading form.
-
-### Problem Types (from project spec)
-
-| Problem | Updates | Effect |
-|---------|---------|--------|
-| Not Working | `meter_status = 'Dead'` | Well flagged as needing maintenance |
-| Battery Dead | `battery_state = 'Dead'` | Battery replacement needed |
-| Pump Off | `pump_state = 'Off'` | No water flowing, expected or unexpected |
-| Dead Pump | `pump_state = 'Dead'` | Pump hardware failure |
-
-### Recommended UX
-
-Option on well detail page: "Report Problem" button (secondary to "New Reading").
-
-Opens a simple picker with the four problem types. Selecting one:
-1. Updates the relevant well status field via PowerSync
-2. Optionally creates a reading record with notes describing the problem
-3. Shows confirmation toast
-4. Returns to well detail with updated status
-
-This should be a separate action from reading entry because the agent may not be able to take a reading at all (meter broken).
-
----
-
-## Allocation Period Model
-
-The original database used a simple `year` integer for allocations. The project context specifies "period-based (start/end dates)." The new allocation table should use:
-
-```sql
-allocations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  well_id UUID NOT NULL REFERENCES wells(id) ON DELETE CASCADE,
-  start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
-  allocated_amount NUMERIC(10,2) NOT NULL CHECK (allocated_amount > 0),
-  baseline_reading NUMERIC(15,2),
-  notes TEXT,
-  created_by UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(well_id, start_date)
+subscription_tiers (
+  id TEXT PRIMARY KEY,         -- 'basic', 'pro' (slug, not UUID)
+  name TEXT NOT NULL,           -- 'Basic', 'Pro' (display name)
+  well_limit INTEGER NOT NULL,  -- 5 for Basic, 10 for Pro
+  admin_seats INTEGER NOT NULL, -- 1 for both
+  meter_checker_seats INTEGER NOT NULL, -- 1 for Basic, 3 for Pro
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 )
 ```
 
-Key differences from original schema:
-- `start_date` / `end_date` instead of `year` -- supports seasonal, annual, or multi-year allocations
-- `allocated_amount` instead of `acre_feet` -- clearer naming, always stored in acre-feet
-- `baseline_reading` -- optional field to lock in the starting meter value for this period
-- `UNIQUE(well_id, start_date)` -- prevents duplicate allocation periods starting on the same date
+Why TEXT primary key instead of UUID: These are stable reference values ('basic', 'pro'), not generated records. Simpler foreign key from `farms.subscription_tier`, more readable in queries, and matches the pattern of using slugs for config data.
 
-**Note on overlap prevention**: A GiST exclusion constraint (preventing overlapping date ranges) would be ideal but requires the `btree_gist` extension. For MVP, enforce non-overlap at the application level with a check query before insert. Add the constraint later if needed.
+### app_settings Table Design
 
----
-
-## Readings Table Model
-
-```sql
-readings (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  well_id UUID NOT NULL REFERENCES wells(id) ON DELETE CASCADE,
-  meter_value NUMERIC(15,2) NOT NULL,
-  reading_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  gps_latitude NUMERIC(10,8),
-  gps_longitude NUMERIC(11,8),
-  gps_verified INTEGER NOT NULL DEFAULT 0,
-  notes TEXT,
-  created_by UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+```
+app_settings (
+  key TEXT PRIMARY KEY,        -- 'subscription_website_url', 'support_email', etc.
+  value TEXT NOT NULL,          -- The setting value
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 )
 ```
 
-Key notes:
-- `gps_verified` is INTEGER (0/1) not BOOLEAN because PowerSync does not support BOOLEAN type. The connector must convert 0/1 to boolean for Supabase (same pattern used for `wells.send_monthly_report`).
-- `meter_value` is cumulative -- never reset between readings
-- `reading_date` can differ from `created_at` -- supports backdated readings
-- `created_by` tracks which field agent recorded the reading (audit trail)
+Initial rows:
+- `subscription_website_url` = 'https://example.com/subscribe' (placeholder until landing page exists)
+- `support_email` = 'support@example.com' (placeholder)
 
----
+### "No Subscription" Page Behavior
 
-## Reading History Display
+**When shown:** User has valid Supabase session but:
+- No `farm_member` record exists (user was never invited/assigned), OR
+- User's farm has no `subscription_tier` (null -- subscription lapsed)
 
-### List View (on well detail page)
+**Page content:**
+- Clear heading: "No Active Subscription"
+- Explanation: "Your account doesn't have access to a farm. If you were invited by a farm owner, ask them to send you a new invite."
+- CTA: "Get Started" button linking to `subscription_website_url` from `app_settings`
+- Secondary: "Sign Out" button to return to login screen
 
-Each reading row shows:
-- **Date**: formatted relative (Today, Yesterday, 3 days ago) or absolute for older readings
-- **Raw Value**: the cumulative meter reading as entered
-- **Usage**: calculated difference from previous reading, with multiplier applied, in the well's unit
-- **GPS Badge**: green checkmark (verified), yellow warning (out of range), gray dash (no GPS)
-- **Notes**: truncated if present, expandable
+**Navigation:** No side menu, no header. Standalone page like the current auth pages.
 
-### Sorting and Filtering
+### Login-Only Flow (After Onboarding Removal)
 
-- Default sort: newest first
-- Optional date range filter for admin review
-- No pagination needed for MVP -- show last 50 readings with "Load More"
+**Current flow:**
+```
+Phone OTP -> Verify -> RequireAuth -> RequireOnboarded
+  -> hasProfile? No -> ProfilePage
+  -> hasFarmMembership? No -> CreateFarmPage
+  -> Yes -> Dashboard
+```
 
-### Empty State
+**New flow:**
+```
+Phone OTP -> Verify -> RequireAuth -> RequireOnboarded
+  -> hasFarmMembership? No -> /no-subscription page
+  -> Yes -> Dashboard
+```
 
-"No readings recorded yet. Tap 'New Reading' to record the first meter reading for this well."
+Key simplifications:
+- `hasProfile` check becomes irrelevant (profiles are created during invite acceptance, not self-service)
+- `hasFarmMembership` is the only gate
+- `RequireNotOnboarded` is deleted entirely
+- All `/onboarding/*` routes are deleted
 
----
+### Role Permission Enforcement Details
 
-## Existing Codebase Gaps Identified
+**Components requiring changes:**
 
-These are specific items that must be addressed for this milestone:
-
-| Gap | Current State | Needed |
-|-----|--------------|--------|
-| No `/wells/:id` route | `App.tsx` has no well detail route. Navigation to `/wells/:id` silently redirects to `/` via catch-all. | Add route and WellDetailPage component |
-| No `readings` table | Dropped in migration 013, never recreated | New migration creating readings table |
-| No `allocations` table | Dropped in migration 013, never recreated | New migration creating allocations table with period-based schema |
-| PowerSync schema missing readings/allocations | `powersync-schema.ts` only has farms, users, farm_members, farm_invites, wells | Add readings and allocations table definitions |
-| PowerSync connector blocks readings | `ALLOWED_TABLES` only includes farms, users, farm_members, farm_invites, wells | Add `readings` and `allocations` to ALLOWED_TABLES |
-| Sync rules missing readings/allocations | `powersync-sync-rules.yaml` has no bucket for readings or allocations | Add sync rule buckets for both tables |
-| WellMarker gauge is placeholder | `allocationPercentage = 100` hardcoded in WellMarker.tsx | Connect to real allocation data via readings query |
-| No `useReadings` hook | Only `useWells` hook exists for data queries | Create hook for querying readings by well_id |
-| No distance calculation utility | GPS verification concept documented but no implementation | Create Haversine distance function |
-| No usage calculation utility | Usage = (current - baseline) * multiplier documented but no implementation | Create utility function with proper multiplier/unit handling |
-| Connector missing boolean conversion for readings | `normalizeForSupabase` only handles `wells.send_monthly_report` | Add conversion for `readings.gps_verified` (0/1 to boolean) |
-
----
-
-## Confidence Assessment
-
-| Area | Confidence | Reason |
-|------|------------|--------|
-| Reading form UX | HIGH | Based on codebase analysis (existing bottom sheet pattern), Edwards Aquifer Meter Matters app patterns, and standard field data collection UX |
-| GPS proximity pattern | HIGH | Well-established geofencing check-in pattern (Mapsly, allGeo); existing `useGeolocation` hook proves the approach |
-| Allocation model | MEDIUM | Period-based model is correct per project spec, but overlap constraint approach needs PostgreSQL extension verification |
-| Usage calculation | HIGH | Standard formula confirmed by multiple sources; multiplier/unit system already exists in wells table |
-| Similar reading warning | HIGH | Simple threshold comparison, explicitly specified in project context (5 units) |
-| Meter problem reporting | MEDIUM | Problem types specified in project context; UX pattern is straightforward but needs user validation |
-| Anti-features | HIGH | Based on strong rationale: never block readings, never require GPS, keep it simple for field agents |
-| Database schema | HIGH | Follows established patterns in codebase (migrations, RLS, PowerSync); only new tables needed |
-
----
+| Component | Current State | Required Change |
+|-----------|--------------|-----------------|
+| `WellDetailPage.tsx` | No role check. Edit button always visible. | Conditionally render Edit button: `hasPermission(role, 'manage_wells')` |
+| `WellEditPage.tsx` | No route guard. Anyone can navigate to `/wells/:id/edit`. | Add `RequireRole action="manage_wells"` wrapper in `App.tsx` routes, OR redirect in component if role lacks permission. |
+| `WellAllocationsPage.tsx` | No role check. Create/Edit/Delete all visible. | Conditionally render mutation buttons: `hasPermission(role, 'manage_wells')`. Keep read-only view for all roles. |
+| `UsersPage.tsx` | "Add User" button visibility unclear. | Conditionally render "Add User" button: `hasPermission(role, 'manage_invites')`. |
+| `SideMenu.tsx` | All menu items visible to all roles. | Optionally hide "Users" menu item for meter_checker, or keep visible but with restricted actions on the page. |
 
 ## Sources
 
-### Codebase Analysis (PRIMARY -- HIGH confidence)
-- PowerSync schema: `src/lib/powersync-schema.ts` -- wells table structure, missing readings/allocations
-- PowerSync connector: `src/lib/powersync-connector.ts` -- ALLOWED_TABLES, uploadData pattern, boolean normalization
-- Well creation form: `src/components/AddWellFormBottomSheet.tsx` -- existing bottom sheet pattern for form reuse
-- Permissions: `src/lib/permissions.ts` -- `record_reading` action already defined for meter_checker role
-- Routes: `src/App.tsx` -- no well detail route exists, catch-all redirects `/wells/:id` to `/`
-- Geolocation: `src/hooks/useGeolocation.ts` -- existing hook with caching, StrictMode handling
-- Migrations: `supabase/migrations/013_drop_wells_tables.sql` -- readings/allocations dropped, never recreated
-- Current wells schema: `supabase/migrations/017_create_wells_table.sql` -- multiplier, units, status fields
-- WellMarker: `src/components/WellMarker.tsx` -- placeholder allocation gauge (`allocationPercentage = 100`)
-- WellListPage: `src/pages/WellListPage.tsx` -- navigates to `/wells/:id` but route does not exist
-- DashboardPage: `src/pages/DashboardPage.tsx` -- well save pattern via PowerSync `db.execute`
-
-### Domain Research (MEDIUM confidence)
-- [Edwards Aquifer Authority Meter Matters App](https://www.edwardsaquifer.org/groundwater-users/groundwater-use-reporting/meter-app/) -- real-world agricultural meter reading app with submission workflow and usage tracking against annual limits
-- [WaterVize Allocation Software](https://www.watervize.com/platform-allocations/) -- flexible water allocation tracking for irrigation districts
-- [Anyline Mobile Meter Reading](https://anyline.com/news/water-meter-reading) -- GPS location tagging, offline reading, photo verification patterns
-- [Axonator Meter Reading App](https://axonator.com/app/water-meter-reading-app/) -- field data collection with offline sync and validation alerts
-- [Mapsly Check-in with Geofencing](https://mapsly.com/check-in-check-out-with-geofencing/) -- GPS proximity verification pattern for field workers, distance-based check-in allowing unverified submissions
-- [Kansas GMD Association](https://www.gmdausa.org/kansas) -- groundwater management district regulations and reporting requirements
-- [Kansas DWR Water Use Reporting](https://www.agriculture.ks.gov/divisions-programs/division-of-water-resources/managing-kansas-water-resources/groundwater-management-districts) -- annual water use reporting requirements (March 1 deadline)
-- [WIMAS - Water Information Management and Analysis System](https://hub.kansasgis.org/documents/KU::wimas-water-information-management-and-analysis-system/about) -- Kansas state system (WMIS numbers likely reference this)
-- [Black Canyon Irrigation Water Usage Formula](https://blackcanyonirrigation.com/water-usage-formula) -- acre-feet calculation: Number of Acres x Allocation = Total Acre Feet
-- [Google Charts Gauge Visualization](https://developers.google.com/chart/interactive/docs/gallery/gauge) -- SVG-based gauge with color ranges reference
+- [Supabase Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) -- JWT claims for role-based access
+- [Supabase Custom Claims & RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac) -- Pattern for embedding roles in JWT
+- [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) -- RLS enforcement patterns
+- [Implementing RBAC in React (Permit.io)](https://www.permit.io/blog/implementing-react-rbac-authorization) -- Frontend RBAC patterns: enforce at backend, use frontend for UX only
+- [Enterprise Ready RBAC Guide](https://www.enterpriseready.io/features/role-based-access-control/) -- SaaS RBAC best practices for role hierarchy and permission design
+- [Entitlement Management for SaaS](https://verustrust-licensing.com/blog/entitlement-management-for-saas-guide/) -- Feature gating and subscription limit patterns
+- [SaaS Subscription Tier Design (HubiFi)](https://www.hubifi.com/blog/saas-subscription-tiers-design) -- Tier design strategy and pricing model approaches
+- [Modeling SaaS Subscriptions in Postgres](https://axellarsson.com/blog/modeling-saas-subscriptions-in-postgres/) -- DB schema patterns for subscription management
+- [Farmbrite Plans & Pricing](https://farmbrite.com/plans-pricing) -- Competitor tier structure for farm management SaaS
+- [RouteManager Meter Reading Software](https://www.alexander-co.com/software.php) -- Field agent role patterns for meter reading apps
+- [Edwards Aquifer Authority Meter App](https://www.edwardsaquifer.org/groundwater-users/groundwater-use-reporting/meter-app/) -- Role-based meter management in water tracking
+- Existing codebase analysis: `src/lib/permissions.ts`, `src/lib/subscription.ts`, `src/hooks/useSeatUsage.ts`, `src/components/RequireRole.tsx`, `src/components/RequireOnboarded.tsx`, `src/App.tsx`, all 32 migration files
 
 ---
-
-*Feature landscape researched: 2026-02-19*
-*Milestone: Meter Reading, Allocation, and Well Management*
+*Feature research for: AG Water Tracker v3.0 -- Subscriptions & Permissions*
+*Researched: 2026-02-22*
