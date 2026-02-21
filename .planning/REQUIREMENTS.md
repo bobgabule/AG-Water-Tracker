@@ -83,34 +83,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TIER-01 | — | Pending |
-| TIER-02 | — | Pending |
-| TIER-03 | — | Pending |
-| TIER-04 | — | Pending |
-| TIER-05 | — | Pending |
-| TIER-06 | — | Pending |
-| TIER-07 | — | Pending |
-| TIER-08 | — | Pending |
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| AUTH-07 | — | Pending |
-| PERM-01 | — | Pending |
-| PERM-02 | — | Pending |
-| PERM-03 | — | Pending |
-| PERM-04 | — | Pending |
-| ISO-01 | — | Pending |
-| ISO-02 | — | Pending |
-| ISO-03 | — | Pending |
+| TIER-01 | Phase 17 | Pending |
+| TIER-02 | Phase 17 | Pending |
+| TIER-03 | Phase 17 | Pending |
+| TIER-04 | Phase 18 | Pending |
+| TIER-05 | Phase 18 | Pending |
+| TIER-06 | Phase 20 | Pending |
+| TIER-07 | Phase 20 | Pending |
+| TIER-08 | Phase 20 | Pending |
+| AUTH-01 | Phase 21 | Pending |
+| AUTH-02 | Phase 21 | Pending |
+| AUTH-03 | Phase 21 | Pending |
+| AUTH-04 | Phase 21 | Pending |
+| AUTH-05 | Phase 21 | Pending |
+| AUTH-06 | Phase 21 | Pending |
+| AUTH-07 | Phase 21 | Pending |
+| PERM-01 | Phase 19 | Pending |
+| PERM-02 | Phase 19 | Pending |
+| PERM-03 | Phase 19 | Pending |
+| PERM-04 | Phase 19 | Pending |
+| ISO-01 | Phase 22 | Pending |
+| ISO-02 | Phase 22 | Pending |
+| ISO-03 | Phase 22 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after initial definition*
+*Last updated: 2026-02-22 after roadmap creation*
