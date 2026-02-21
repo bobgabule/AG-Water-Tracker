@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-21)
+See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Between milestones -- v2.0 shipped, next milestone not yet defined
+**Current focus:** v3.0 Subscriptions & Permissions
 
 ## Current Position
 
-Milestone: v2.0 complete (Meter Readings & Allocations)
-All phases: 16 of 16 shipped across v1.0, v1.1, v2.0
-Status: All milestones complete, ready for next milestone
-Last activity: 2026-02-21 -- v2.0 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-22 — Milestone v3.0 started
 
-Progress: [####################] 100% (40/40 plans across 3 milestones)
+Progress: ░░░░░░░░░░░░░░░░░░░░ 0%
 
 ## Performance Metrics
 
@@ -35,7 +35,7 @@ Progress: [####################] 100% (40/40 plans across 3 milestones)
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (25 decisions, all marked Good).
+All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 
 ### Pending Todos (manual steps)
 
@@ -46,10 +46,10 @@ All decisions logged in PROJECT.md Key Decisions table (25 decisions, all marked
 
 ### Blockers/Concerns
 
-No active blockers. All resolved during v2.0 execution.
+No active blockers.
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: v2.0 milestone archived
-Next action: /gsd:new-milestone
+Last session: 2026-02-22
+Stopped at: Defining v3.0 requirements
+Next action: Define REQUIREMENTS.md → Create ROADMAP.md
