@@ -50,11 +50,37 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ### Active
 
-(No active requirements -- next milestone not yet defined)
+<!-- Current scope: v3.0 Subscriptions & Permissions -->
+
+**Registration Removal:**
+- [ ] Remove in-app registration flow (ProfilePage, CreateFarmPage, onboarding routes)
+- [ ] Clean login-only flow: Phone OTP → farm check → dashboard or redirect
+- [ ] Full cleanup of old onboarding code paths (connector, guards, state, imports)
+- [ ] "No subscription" redirect page for users without a farm
+
+**Subscription Tiers:**
+- [ ] `subscription_tiers` DB config table (Basic/Pro limits, updatable without code deploy)
+- [ ] `app_settings` DB config table (subscription website URL, global config)
+- [ ] `farms.subscription_tier` column linking each farm to a tier
+- [ ] Seat limits enforced per tier (growers, admins, meter checkers)
+- [ ] Well limits enforced per tier (Basic: 5, Pro: 10)
+- [ ] Subscription page shows current tier, usage, and "Manage Plan" placeholder
+
+**Role Permissions:**
+- [ ] Well edit/delete gated to grower and admin only
+- [ ] Allocation management gated to grower and admin only
+- [ ] Well detail edit button hidden for meter checkers
+
+**Farm Data Isolation:**
+- [ ] Verify RLS policies filter all tables by farm_id
+- [ ] Verify PowerSync sync rules filter by farm_id
+- [ ] Verify super_admin cross-farm bypass is consistent
 
 ### Out of Scope
 
-- Stripe payment integration -- deferred to future milestone, UI placeholder only
+- Stripe payment integration -- deferred to landing page milestone
+- Landing page / marketing site -- separate project, future milestone
+- Automatic reporting -- listed as tier feature, implementation deferred
 - Push notifications -- not needed for current scale
 - Real-time chat between users -- out of scope
 - Email-based auth -- phone OTP only
@@ -67,6 +93,8 @@ Field agents can reliably record water meter readings in areas with poor connect
 ## Context
 
 **Shipped:** v1.0 MVP + v1.1 Dashboard & Map + v2.0 Meter Readings & Allocations.
+
+**Current milestone:** v3.0 Subscriptions & Permissions — multi-tier subscription system, login-only app (registration removed), role permission enforcement, farm data isolation.
 
 **Codebase:** ~10,439 LOC TypeScript/CSS. Stack is React 19 + Vite 6 + PowerSync + Supabase + Mapbox GL. The app has solid auth, role-based access, invite system, user management, subscription gating, polished map experience, and complete meter reading/allocation workflow.
 
@@ -90,7 +118,7 @@ Field agents can reliably record water meter readings in areas with poor connect
 | super_admin | Super Admin | App owner | Everything -- all farms, all users, all wells |
 | grower | Grower | Farm owner | Manage own farm, wells, users. Pays subscription |
 | admin | Admin | Assigned by grower | Manage members, check readings, reports. Must belong to a farm |
-| meter_checker | Meter Checker | Field agent | Manage wells, add meter readings. Must belong to a farm |
+| meter_checker | Meter Checker | Field agent | View wells, add meter readings. Must belong to a farm |
 
 ## Constraints
 
@@ -129,6 +157,10 @@ Field agents can reliably record water meter readings in areas with poor connect
 | Cascade delete via writeTransaction | PowerSync local SQLite doesn't enforce FK cascades, so manual cascade in transaction | ✓ Good |
 | react-mobile-picker for date selection | iOS-style scroll wheel for month/year. Better mobile UX than native date input | ✓ Good |
 | Batch query hooks with Map<id, T> | O(1) lookup in rendering loops for allocation/reading data per well | ✓ Good |
+| Login-only app | Registration moves to future landing page. Cleaner session handling, simpler app | — Pending |
+| Subscription tiers in DB table | Updatable without code deployment. PowerSync syncs to app. Better than env vars for runtime config | — Pending |
+| Separate landing page (future) | Marketing + Stripe on www. subdomain, app on app. subdomain. SEO, performance, independence | — Pending |
+| Stripe Customer Portal for upgrades | Zero payment UI to build. Webhook updates DB, PowerSync syncs in real-time | — Pending |
 
 ---
-*Last updated: 2026-02-21 after v2.0 milestone*
+*Last updated: 2026-02-21 after v3.0 milestone start*
