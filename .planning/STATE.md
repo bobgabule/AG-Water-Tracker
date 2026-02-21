@@ -2,126 +2,54 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-19)
+See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v2.0 Milestone -- Phase 16 complete: Reading Management & Map Integration
+**Current focus:** Between milestones -- v2.0 shipped, next milestone not yet defined
 
 ## Current Position
 
-Phase: 16 of 16 (Reading Management & Map Integration)
-Plan: 2 of 2 complete
-Status: Phase 16 complete, all plans executed
-Last activity: 2026-02-19 -- Phase 16 Plan 02 executed
+Milestone: v2.0 complete (Meter Readings & Allocations)
+All phases: 16 of 16 shipped across v1.0, v1.1, v2.0
+Status: All milestones complete, ready for next milestone
+Last activity: 2026-02-21 -- v2.0 milestone archived
 
-Progress: [###################░] 80% (39/~TBD plans -- v1.0+v1.1 complete, v2.0 in progress)
+Progress: [####################] 100% (40/40 plans across 3 milestones)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39 (25 v1.0 + 3 v1.1 + 11 v2.0)
-- Average duration: 5min
-- Total execution time: ~2.2 hours
+- Total plans completed: 40 (25 v1.0 + 3 v1.1 + 12 v2.0)
+- Average duration: ~4min
+- Total execution time: ~2.5 hours
 
-**By Phase (previous milestones):**
+**By Milestone:**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-session-stability | 5 | 21min | 4min |
-| 02-offline-session-resilience | 3 | 18min | 6min |
-| 03-role-foundation | 4 | 14min | 4min |
-| 04-permission-enforcement | 4 | 9min | 2min |
-| 05-grower-onboarding | 2 | 6min | 3min |
-| 06-invite-system | 2 | 16min | 8min |
-| 07-user-management | 2 | 5min | 3min |
-| 08-subscription-gating | 3 | 9min | 3min |
-| 09-map-default-view | 1 | ~5min | 5min |
-| 10-location-permission-flow | 1 | ~5min | 5min |
-| 11-dashboard-quality-fixes | 1 | 2min | 2min |
-| 12-data-foundation | 2/2 | 6min | 3min |
-
-*Updated after each plan completion*
-| Phase 12 P01 | 3min | 2 tasks | 4 files |
-| Phase 12 P02 | 3min | 2 tasks | 3 files |
-| 13-well-detail-page | 2/3 | 5min | 3min |
-
-*Updated after each plan completion*
-| Phase 13 P01 | 3min | 2 tasks | 7 files |
-| Phase 13 P02 | 2min | 2 tasks | 4 files |
-| 14-record-meter-reading | 2/2 | 5min | 3min |
-
-*Updated after each plan completion*
-| Phase 14 P01 | 2min | 2 tasks | 4 files |
-| Phase 14 P02 | 3min | 2 tasks | 3 files |
-| 15-well-editing-allocation-management | 3/3 | 8min | 3min |
-
-*Updated after each plan completion*
-| Phase 15 P01 | 2min | 2 tasks | 5 files |
-| Phase 15 P02 | 3min | 2 tasks | 3 files |
-| Phase 15 P03 | 3min | 2 tasks | 5 files |
-| 16-reading-management-map-integration | 2/2 | 6min | 3min |
-
-*Updated after each plan completion*
-| Phase 16 P01 | 3min | 2 tasks | 4 files |
-| Phase 16 P02 | 3min | 2 tasks | 6 files |
+| Milestone | Phases | Plans | Timeline |
+|-----------|--------|-------|----------|
+| v1.0 MVP | 1-8 | 25 | 2026-02-10 to 2026-02-11 |
+| v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
+| v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
+All decisions logged in PROJECT.md Key Decisions table (25 decisions, all marked Good).
 
-**v2.0 decisions:**
-- [v2.0]: Readings are raw cumulative meter values (not usage amounts)
-- [v2.0]: Period-based allocations with flexible start/end dates, multiple per well
-- [v2.0]: GPS proximity = display + flag, does NOT block recording
-- [v2.0]: Meter problems directly update well status fields (pump_state, battery_state, meter_status)
-- [v2.0]: Usage auto-calculated from readings within allocation period + manually overridable
-- [v2.0]: Well edit form is separate full-page form (not reuse of create bottom sheet)
-- [v2.0]: Similar reading warning (within 5 units) = warning, not blocker
-- [v2.0]: Anyone with well access can set allocations (not restricted to grower/admin)
-- [v2.0]: Reading edit/delete restricted to grower/admin
-- [v2.0]: Meter values stored as TEXT in PowerSync (not REAL) to preserve decimal precision
-- [v2.0]: GPS proximity via @turf/distance (client-side Haversine), not server-side
-- [Phase 12]: Denormalized farm_id on readings/allocations with BEFORE INSERT triggers for direct PowerSync sync rule filtering
-- [Phase 12]: GPS proximity split into getDistanceToWell + isInRange for UI flexibility (display distance even when out of range)
-- [Phase 12]: PowerSync text columns mapped with ?? '' for NOT NULL fields (type-level null vs database-level NOT NULL)
-- [Phase 13]: Sheet uses Headless UI Dialog with static prop -- backdrop tap does NOT dismiss (user decision)
-- [Phase 13]: Proximity ordering via @turf/distance: current well at index 0, rest sorted nearest-to-farthest
-- [Phase 13]: react-swipeable for gesture handling (swipe-down dismiss, swipe-left/right well cycling)
-- [Phase 13]: GPS proximity autoRequest: false -- does not prompt for location, only displays if previously granted
-- [Phase 13]: Current allocation found by date range match with fallback to most recent
-- [Phase 14]: Toast auto-dismiss after 3s with tap-to-dismiss fallback
-- [Phase 14]: State machine views (form/similar-warning/range-warning/submitting) for reading submission flow
-- [Phase 14]: GPS captured fresh on each submit via navigator.geolocation (not cached) for accuracy
-- [Phase 14]: Dead Pump overwrites Pump Off when both checked (severity precedence in checkbox mapping)
-- [Phase 14]: NewReadingSheet conditionally rendered (mount/unmount) rather than always-mounted with open prop
-- [Phase 15]: starting_reading stored as column.text in PowerSync (matches TEXT pattern for decimal precision)
-- [Phase 15]: Wells UPDATE/DELETE RLS relaxed to all farm members (matching INSERT and allocations pattern)
-- [Phase 15]: Cascade delete via writeTransaction (readings -> allocations -> well) since PowerSync local SQLite does not enforce FK cascades
-- [Phase 15]: Allocation nav saves draft to Zustand store with ref flag to bypass useBlocker
-- [Phase 15]: react-mobile-picker for iOS-style month/year scroll wheel in allocation date selection
-- [Phase 15]: Inline CRUD form pattern: selectedId null = create mode, non-null = edit mode
-- [Phase 16]: EditReadingSheet rendered as centered card dialog (z-[60]) above WellDetailSheet (z-50)
-- [Phase 16]: Conditional row element pattern: button when onReadingClick provided, div when not (backwards compatible)
-- [Phase 16]: Allocation percentage defaults to 0% when no allocation exists (empty gauge on map)
-- [Phase 16]: Latest reading date replaces well.updatedAt for well list display
+### Pending Todos (manual steps)
 
-### Pending Todos
-
-- [04-03]: PowerSync Dashboard sync rules for farms table need manual verification for super_admin cross-farm access
-- [v1.0 tech debt]: Custom Access Token Hook needs manual enablement in Supabase Dashboard
-- [v1.0 tech debt]: PowerSync Dashboard sync rules need manual verification for invited_first_name/invited_last_name
+- PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
+- Custom Access Token Hook needs manual enablement in Supabase Dashboard
+- PowerSync Dashboard sync rules need verification for invited_first_name/invited_last_name
+- PowerSync Dashboard sync rules for farms table need manual verification for super_admin cross-farm access
 
 ### Blockers/Concerns
 
-- ~~v2.0 requires new database tables (readings, allocations) -- tables were DROPPED in migration 013 and never recreated~~ RESOLVED in 12-01 (migration 031)
-- ~~PowerSync schema and sync rules need updates for new tables~~ RESOLVED in 12-01
-- ~~Allocation schema changed from year-only to period-based -- confirm before implementing~~ RESOLVED in 12-01 (period_start/period_end with CHECK constraint)
-- PowerSync Dashboard sync rules need updating with farm_readings and farm_allocations buckets (manual step)
+No active blockers. All resolved during v2.0 execution.
 
 ## Session Continuity
 
-Last session: 2026-02-19
-Stopped at: Completed 16-02-PLAN.md
-Resume file: .planning/phases/16-reading-management-map-integration/16-02-SUMMARY.md
+Last session: 2026-02-21
+Stopped at: v2.0 milestone archived
+Next action: /gsd:new-milestone
