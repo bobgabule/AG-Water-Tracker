@@ -45,7 +45,7 @@
 
 ### v3.0 -- Subscriptions & Permissions (In Progress)
 
-- [ ] **Phase 17: Subscription Database Foundation** - Create subscription_tiers and app_settings tables, add farms.subscription_tier column with tier linkage
+- [x] **Phase 17: Subscription Database Foundation** - Create subscription_tiers and app_settings tables, add farms.subscription_tier column with tier linkage
 - [ ] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits
 - [ ] **Phase 19: Permission Enforcement** - Extend permission matrix with fine-grained actions, gate well edit/delete and allocation management to grower/admin only
 - [ ] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage
@@ -172,13 +172,13 @@
 **Depends on**: Phase 16 (existing codebase)
 **Requirements**: TIER-01, TIER-02, TIER-03
 **Success Criteria** (what must be TRUE):
-  1. A `subscription_tiers` table exists with Basic and Pro tiers containing per-role seat limits and well limits
+  1. A `subscription_tiers` table exists with Starter and Pro tiers containing per-role seat limits and well limits
   2. An `app_settings` table exists with key-value config rows including subscription website URL
-  3. Every farm has a `subscription_tier` column defaulting to 'basic' that links to the tiers table
+  3. Every farm has a `subscription_tier` column (NOT NULL, no default) that links to subscription_tiers, with existing farms set to 'pro'
   4. Tier limits can be changed via direct DB update without redeploying the app
 **Plans**: 1 plan
 Plans:
-- [ ] 17-01-PLAN.md -- Create subscription tier tables, app settings, and farm-tier linkage migration
+- [x] 17-01-PLAN.md -- Create subscription tier tables, app settings, and farm-tier linkage migration
 
 ### Phase 18: Tier Sync & Hooks
 **Goal**: Subscription tier data is available offline in the app and accessed through reactive hooks instead of hardcoded constants
@@ -266,7 +266,7 @@ Plans:
 | 14. Record Meter Reading | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 15. Well Editing & Allocation Management | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
-| 17. Subscription Database Foundation | v3.0 | 0/1 | Not started | - |
+| 17. Subscription Database Foundation | v3.0 | 1/1 | Complete | 2026-02-22 |
 | 18. Tier Sync & Hooks | v3.0 | 0/TBD | Not started | - |
 | 19. Permission Enforcement | v3.0 | 0/TBD | Not started | - |
 | 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
