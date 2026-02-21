@@ -5,6 +5,7 @@
 - v1.0 MVP -- Phases 1-8 (shipped 2026-02-11)
 - v1.1 Dashboard & Map -- Phases 9-11 (shipped 2026-02-12)
 - v2.0 Meter Readings & Allocations -- Phases 12-16 (shipped 2026-02-21)
+- v3.0 Subscriptions & Permissions -- Phases 17-22 (in progress)
 
 ## Phases
 
@@ -34,13 +35,22 @@
 <details>
 <summary>v2.0 -- Meter Readings & Allocations (Phases 12-16) -- Complete</summary>
 
-- [x] **Phase 12: Data Foundation** - Supabase migration for readings + allocations tables, PowerSync schema, connector updates, query hooks, GPS proximity utility (completed 2026-02-19)
-- [x] **Phase 13: Well Detail Page** - Full-page slide-up sheet with well info header, usage gauge, status indicators, readings history, and empty states (completed 2026-02-19)
-- [x] **Phase 14: Record Meter Reading** - New reading form with GPS auto-capture, similar reading warning, meter problem reporting, and proximity flagging (completed 2026-02-19)
-- [x] **Phase 15: Well Editing & Allocation Management** - Well edit form, allocation CRUD (create/view/edit/delete), usage auto-calculation, and manual override (completed 2026-02-19)
-- [x] **Phase 16: Reading Management & Map Integration** - Reading edit/delete for grower/admin, real allocation percentage on map markers, and reading dates on well list (completed 2026-02-19)
+- [x] **Phase 12: Data Foundation** - Supabase migration for readings + allocations tables, PowerSync schema, connector updates, query hooks, GPS proximity utility
+- [x] **Phase 13: Well Detail Page** - Full-page slide-up sheet with well info header, usage gauge, status indicators, readings history, and empty states
+- [x] **Phase 14: Record Meter Reading** - New reading form with GPS auto-capture, similar reading warning, meter problem reporting, and proximity flagging
+- [x] **Phase 15: Well Editing & Allocation Management** - Well edit form, allocation CRUD (create/view/edit/delete), usage auto-calculation, and manual override
+- [x] **Phase 16: Reading Management & Map Integration** - Reading edit/delete for grower/admin, real allocation percentage on map markers, and reading dates on well list
 
 </details>
+
+### v3.0 -- Subscriptions & Permissions (In Progress)
+
+- [ ] **Phase 17: Subscription Database Foundation** - Create subscription_tiers and app_settings tables, add farms.subscription_tier column with tier linkage
+- [ ] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits
+- [ ] **Phase 19: Permission Enforcement** - Extend permission matrix with fine-grained actions, gate well edit/delete and allocation management to grower/admin only
+- [ ] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage
+- [ ] **Phase 21: Login-Only Auth Flow** - Backend invite auto-matching RPC, remove registration pages, clean login-only path with no-subscription redirect
+- [ ] **Phase 22: Farm Data Isolation Audit** - Verify RLS policies, PowerSync sync rules, and super_admin bypass filter all data by farm_id
 
 ## Phase Details
 
@@ -155,12 +165,86 @@
 
 </details>
 
+### v3.0 Phase Details
+
+### Phase 17: Subscription Database Foundation
+**Goal**: The database has subscription tier configuration tables and farm-to-tier linkage so that tier limits are queryable and updatable without code deploys
+**Depends on**: Phase 16 (existing codebase)
+**Requirements**: TIER-01, TIER-02, TIER-03
+**Success Criteria** (what must be TRUE):
+  1. A `subscription_tiers` table exists with Basic and Pro tiers containing per-role seat limits and well limits
+  2. An `app_settings` table exists with key-value config rows including subscription website URL
+  3. Every farm has a `subscription_tier` column defaulting to 'basic' that links to the tiers table
+  4. Tier limits can be changed via direct DB update without redeploying the app
+**Plans**: TBD
+
+### Phase 18: Tier Sync & Hooks
+**Goal**: Subscription tier data is available offline in the app and accessed through reactive hooks instead of hardcoded constants
+**Depends on**: Phase 17
+**Requirements**: TIER-04, TIER-05
+**Success Criteria** (what must be TRUE):
+  1. Opening the app offline shows correct subscription tier data from local SQLite (not stale or missing)
+  2. `useSubscriptionTier()` hook returns the farm's tier limits (seat counts, well limits) from synced data
+  3. Changing a tier value in the database propagates to the app within seconds when online
+  4. The hardcoded `PLAN_LIMITS` constant in `subscription.ts` is replaced by the DB-driven hook
+**Plans**: TBD
+
+### Phase 19: Permission Enforcement
+**Goal**: Meter checkers cannot access well editing or allocation management features in the UI
+**Depends on**: Phase 16 (existing codebase)
+**Requirements**: PERM-01, PERM-02, PERM-03, PERM-04
+**Success Criteria** (what must be TRUE):
+  1. Meter checker navigating to `/wells/:id/edit` is redirected away (route guard)
+  2. Meter checker viewing a well detail page does not see the edit button
+  3. Meter checker navigating to `/wells/:id/allocations` cannot create, edit, or delete allocations
+  4. `permissions.ts` contains `edit_well`, `delete_well`, and `manage_allocations` actions with grower/admin access only
+**Plans**: TBD
+
+### Phase 20: Subscription Limits & Page
+**Goal**: Users see their farm's subscription tier, current usage, and are prevented from exceeding tier limits for wells and seats
+**Depends on**: Phase 18, Phase 19
+**Requirements**: TIER-06, TIER-07, TIER-08
+**Success Criteria** (what must be TRUE):
+  1. "New Well" button is disabled with a message when the farm has reached its tier well limit (Basic: 5, Pro: 10)
+  2. Seat limits on the invite form read from DB-driven tier config instead of hardcoded constants
+  3. Subscription page displays current tier name, per-role seat usage, well count vs limit, and a "Manage Plan" link
+  4. All limit enforcement works correctly when the app is offline
+**Plans**: TBD
+
+### Phase 21: Login-Only Auth Flow
+**Goal**: The app is login-only with no self-service registration -- invited users auto-join on first OTP and users without a farm see a clear redirect
+**Depends on**: Phase 18 (app_settings for redirect URL), Phase 19 (permissions deployed before auth changes)
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07
+**Success Criteria** (what must be TRUE):
+  1. A user with a pending farm invite completes phone OTP and lands directly on the dashboard with correct farm membership (no profile or farm creation steps)
+  2. A user without any farm membership sees a "No Subscription" page with a link to the subscription website
+  3. The `/onboarding/*` routes, ProfilePage, and CreateFarmPage no longer exist in the app
+  4. No dead imports, unused hooks, or orphaned utilities from the old onboarding flow remain in the codebase
+  5. The supabaseConnector login path is simplified to: OTP verify -> farm check -> dashboard or no-subscription redirect
+**Plans**: TBD
+
+### Phase 22: Farm Data Isolation Audit
+**Goal**: Every database query and sync rule correctly isolates farm data, with verified super_admin cross-farm access
+**Depends on**: Phase 17, Phase 18, Phase 19, Phase 20, Phase 21
+**Requirements**: ISO-01, ISO-02, ISO-03
+**Success Criteria** (what must be TRUE):
+  1. RLS policies on wells, readings, allocations, and farm_members all filter by farm_id with no bypass for regular users
+  2. PowerSync sync rules filter every data table by the user's farm_id, preventing cross-farm data leakage
+  3. Super admin can access data across all farms consistently in both RLS policies and sync rules
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
 - v1.0: Phases 1 -> 8 (complete)
 - v1.1: Phases 9 -> 10 -> 11 (complete)
 - v2.0: Phases 12 -> 13 -> 14 + 15 (parallel after 13) -> 16 (complete)
+- v3.0: Phase 17 -> 18 + 19 (parallel) -> 20 -> 21 -> 22
+
+**Critical sequencing notes (v3.0):**
+- Phase 19 (Permission UI) must deploy BEFORE any RLS tightening to prevent offline queue corruption
+- Phase 21 requires AUTH-06 (backend auto-matching RPC) deployed BEFORE AUTH-01 (registration removal)
+- Phases 18 and 19 can run in parallel (no dependency between them)
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -180,3 +264,9 @@
 | 14. Record Meter Reading | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 15. Well Editing & Allocation Management | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
+| 17. Subscription Database Foundation | v3.0 | 0/TBD | Not started | - |
+| 18. Tier Sync & Hooks | v3.0 | 0/TBD | Not started | - |
+| 19. Permission Enforcement | v3.0 | 0/TBD | Not started | - |
+| 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
+| 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
+| 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |
