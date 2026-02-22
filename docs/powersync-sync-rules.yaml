@@ -10,6 +10,12 @@
 # This file is for documentation purposes only.
 #
 # Syntax: Modern PowerSync format using request.user_id()
+#
+# Super Admin Note:
+#   Super admin users have farm_members rows in ALL farms (via auto-add
+#   triggers from migration 025). This means all farm-scoped buckets
+#   naturally include all farms for super_admin users -- no special
+#   sync rule logic is needed.
 # =============================================================================
 
 bucket_definitions:
