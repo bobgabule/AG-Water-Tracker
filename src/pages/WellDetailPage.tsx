@@ -2,6 +2,8 @@ import { useParams, useNavigate } from 'react-router';
 import { useState, useCallback, useMemo } from 'react';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
+import { useUserRole } from '../hooks/useUserRole';
+import { hasPermission } from '../lib/permissions';
 import WellDetailSheet from '../components/WellDetailSheet';
 import NewReadingSheet from '../components/NewReadingSheet';
 
@@ -12,6 +14,9 @@ export default function WellDetailPage() {
   const { onboardingStatus, user } = useAuth();
   const farmName = onboardingStatus?.farmName ?? '';
   const farmId = onboardingStatus?.farmId ?? '';
+
+  const role = useUserRole();
+  const canEdit = hasPermission(role, 'edit_well');
 
   const [readingSheetOpen, setReadingSheetOpen] = useState(false);
 
@@ -34,7 +39,7 @@ export default function WellDetailPage() {
         well={currentWell}
         farmName={farmName}
         onClose={handleClose}
-        onEdit={handleEdit}
+        onEdit={canEdit ? handleEdit : undefined}
         onNewReading={handleNewReading}
       />
       {readingSheetOpen && currentWell && user && farmId && (
