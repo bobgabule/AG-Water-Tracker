@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from './useActiveFarm';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,8 +45,7 @@ export interface SubscriptionTierInfo {
  * Returns `null` while loading or if no farm is available.
  */
 export function useSubscriptionTier(): SubscriptionTierInfo | null {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
 
   // Step 1: Get farm's tier slug
   const farmQuery = farmId
