@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
+import { useAppSetting } from '../hooks/useAppSetting';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
+import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 
 interface AddUserBottomSheetProps {
   open: boolean;
@@ -35,6 +37,10 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
 
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
+  const subscriptionUrl = useAppSetting('subscription_website_url');
+  const upgradeUrl = subscriptionUrl && onboardingStatus?.farmId && tier
+    ? buildSubscriptionUrl(subscriptionUrl, onboardingStatus.farmId, tier.slug)
+    : null;
   const adminFull = seatUsage?.admin.isFull ?? false;
   const meterCheckerFull = seatUsage?.meter_checker.isFull ?? false;
   const allSeatsFull = adminFull && meterCheckerFull;
@@ -191,9 +197,26 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 <p className="text-white/70 text-sm mb-4">
                   Your plan allows {seatUsage?.admin.limit ?? 0} admin and {seatUsage?.meter_checker.limit ?? 0} meter checkers.
                 </p>
-                <p className="text-yellow-300 text-sm font-medium">
-                  Contact us to upgrade your plan
-                </p>
+                {(callerRole === 'grower' || callerRole === 'super_admin') && upgradeUrl ? (
+                  <a
+                    href={upgradeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-[#bdefda] font-medium mt-2 hover:text-white transition-colors"
+                  >
+                    Upgrade Plan
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                  </a>
+                ) : (callerRole === 'grower' || callerRole === 'super_admin') && !upgradeUrl ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-[#bdefda]/50 font-medium mt-2">
+                    Upgrade Plan
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                  </span>
+                ) : (
+                  <p className="text-yellow-300 text-sm font-medium">
+                    Contact your farm owner to upgrade
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-6">
