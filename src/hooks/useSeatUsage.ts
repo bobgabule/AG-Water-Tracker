@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
 import { useAuth } from '../lib/AuthProvider';
-import { PLAN_LIMITS } from '../lib/subscription';
+import { useSubscriptionTier } from './useSubscriptionTier';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -12,7 +12,7 @@ export interface RoleSeatUsage {
   used: number;
   /** Maximum seats allowed by plan */
   limit: number;
-  /** Remaining seats (max 0) */
+  /** Remaining seats (min 0) */
   available: number;
   /** Whether all seats for this role are taken */
   isFull: boolean;
@@ -36,7 +36,7 @@ interface RoleCountRow {
 // Seat-limited roles for SQL IN clause
 // ---------------------------------------------------------------------------
 
-const SEAT_LIMITED_ROLES = Object.keys(PLAN_LIMITS.seats);
+const SEAT_LIMITED_ROLES = ['admin', 'meter_checker'];
 const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
 
 // ---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
  * Returns per-role seat usage for the current farm.
  *
  * Counts farm members AND pending (unused, non-expired) invites per
- * seat-limited role, then compares against PLAN_LIMITS.
+ * seat-limited role, then compares against the farm's subscription tier limits.
  *
  * Exempt roles (grower, super_admin) are excluded from counting.
  * Used or expired invites are excluded.
@@ -55,6 +55,7 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
 export function useSeatUsage(): SeatUsage {
   const { onboardingStatus } = useAuth();
   const farmId = onboardingStatus?.farmId ?? null;
+  const tier = useSubscriptionTier();
 
   // --- Active members query (seat-limited roles only) ---
   const membersQuery = farmId
@@ -69,7 +70,7 @@ export function useSeatUsage(): SeatUsage {
   );
 
   // --- Pending invites query (unused, not expired, seat-limited roles only) ---
-  const now = new Date().toISOString();
+  const now = useMemo(() => new Date().toISOString(), []);
 
   const invitesQuery = farmId
     ? `SELECT role, COUNT(*) as count FROM farm_invites WHERE farm_id = ? AND uses_count = 0 AND expires_at > ? AND role IN (${ROLES_PLACEHOLDER}) GROUP BY role`
@@ -82,7 +83,7 @@ export function useSeatUsage(): SeatUsage {
     invitesParams
   );
 
-  // --- Combine counts and compare against limits ---
+  // --- Combine counts and compare against tier limits ---
   return useMemo(() => {
     // Build lookup maps from query results
     const memberCounts = new Map<string, number>();
@@ -96,19 +97,19 @@ export function useSeatUsage(): SeatUsage {
     }
 
     // Calculate usage for each seat-limited role
-    function calcRole(role: string): RoleSeatUsage {
+    function calcRole(role: string, tierLimit: number): RoleSeatUsage {
       const members = memberCounts.get(role) ?? 0;
       const invites = inviteCounts.get(role) ?? 0;
       const used = members + invites;
-      const limit = PLAN_LIMITS.seats[role]?.limit ?? 0;
+      const limit = tierLimit;
       const available = Math.max(0, limit - used);
       const isFull = used >= limit;
       return { used, limit, available, isFull };
     }
 
     return {
-      admin: calcRole('admin'),
-      meter_checker: calcRole('meter_checker'),
+      admin: calcRole('admin', tier?.maxAdmins ?? 0),
+      meter_checker: calcRole('meter_checker', tier?.maxMeterCheckers ?? 0),
     };
-  }, [membersData, invitesData]);
+  }, [membersData, invitesData, tier]);
 }
