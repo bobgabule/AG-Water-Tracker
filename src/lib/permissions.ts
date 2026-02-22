@@ -16,13 +16,16 @@ export type Role = (typeof ROLES)[number];
 // ---------------------------------------------------------------------------
 
 export const ACTIONS = [
-  'manage_farm',
-  'manage_users',
-  'manage_wells',
   'create_well',
+  'edit_well',
+  'delete_well',
+  'manage_allocations',
   'record_reading',
+  'edit_reading',
+  'delete_reading',
   'view_wells',
-  'view_members',
+  'manage_users',
+  'manage_farm',
   'manage_invites',
   'cross_farm_access',
 ] as const;
@@ -42,18 +45,22 @@ export const PERMISSION_MATRIX: Record<Role, Set<Action>> = {
   super_admin: ALL_ACTIONS,
   grower: ALL_EXCEPT_CROSS_FARM,
   admin: new Set<Action>([
-    'manage_users',
-    'manage_wells',
     'create_well',
+    'edit_well',
+    'delete_well',
+    'manage_allocations',
     'record_reading',
+    'edit_reading',
+    'delete_reading',
     'view_wells',
-    'view_members',
+    'manage_users',
     'manage_invites',
   ]),
   meter_checker: new Set<Action>([
     'record_reading',
+    'edit_reading',
+    'delete_reading',
     'view_wells',
-    'view_members',
   ]),
 };
 
@@ -71,15 +78,6 @@ export function hasPermission(
 ): boolean {
   if (!role) return false;
   return PERMISSION_MATRIX[role]?.has(action) ?? false;
-}
-
-/**
- * Check if a role is admin-level or above (super_admin, grower, admin).
- * Returns false for meter_checker, null, or undefined.
- */
-export function isAdminOrAbove(role: Role | null | undefined): boolean {
-  if (!role) return false;
-  return role === 'super_admin' || role === 'grower' || role === 'admin';
 }
 
 // ---------------------------------------------------------------------------
