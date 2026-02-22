@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
-import { useQuery } from '@powersync/react';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { useAppSetting } from '../hooks/useAppSetting';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
+import { useWellCount } from '../hooks/useWellCount';
+import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 
 export default function SubscriptionPage() {
   const { onboardingStatus } = useAuth();
@@ -12,21 +12,7 @@ export default function SubscriptionPage() {
 
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
-
-  // Well count query -- only count active wells against the tier limit
-  const wellCountQuery = farmId
-    ? `SELECT COUNT(*) as count FROM wells WHERE farm_id = ? AND status = 'active'`
-    : 'SELECT NULL WHERE 0';
-
-  const { data: wellCountData } = useQuery<{ count: number }>(
-    wellCountQuery,
-    farmId ? [farmId] : []
-  );
-
-  const wellCount = useMemo(
-    () => wellCountData?.[0]?.count ?? 0,
-    [wellCountData]
-  );
+  const wellCount = useWellCount();
 
   // Subscription management URL from app_settings
   const subscriptionUrl = useAppSetting('subscription_website_url');
@@ -88,9 +74,9 @@ export default function SubscriptionPage() {
         )}
 
         {/* Manage Plan button -- visible only when URL is set and non-empty */}
-        {subscriptionUrl && subscriptionUrl.trim() !== '' && farmId && (
+        {subscriptionUrl && subscriptionUrl.trim() !== '' && farmId && tier && (
           <a
-            href={`${subscriptionUrl}${subscriptionUrl.includes('?') ? '&' : '?'}farm_id=${farmId}`}
+            href={buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center justify-center gap-2 w-full bg-[#5f7248] text-white rounded-lg px-4 py-3 font-medium text-sm hover:bg-[#4e6339] transition-colors"
