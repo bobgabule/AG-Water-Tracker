@@ -48,7 +48,7 @@
 - [x] **Phase 17: Subscription Database Foundation** - Create subscription_tiers and app_settings tables, add farms.subscription_tier column with tier linkage
 - [x] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits (completed 2026-02-22)
 - [x] **Phase 19: Permission Enforcement** - Extend permission matrix with fine-grained actions, gate well edit/delete and allocation management to grower/admin only
-- [ ] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage
+- [x] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage (completed 2026-02-22)
 - [ ] **Phase 21: Login-Only Auth Flow** - Backend invite auto-matching RPC, remove registration pages, clean login-only path with no-subscription redirect
 - [ ] **Phase 22: Farm Data Isolation Audit** - Verify RLS policies, PowerSync sync rules, and super_admin bypass filter all data by farm_id
 
@@ -278,6 +278,6 @@ Plans:
 | 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
 | 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
 | 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
-| 20. Subscription Limits & Page | 1/2 | In Progress|  | - |
+| 20. Subscription Limits & Page | 2/2 | Complete   | 2026-02-22 | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
 | 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |

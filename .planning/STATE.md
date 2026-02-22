@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v3.0 Subscriptions & Permissions -- Phase 20 in progress
+**Current focus:** v3.0 Subscriptions & Permissions -- Phase 20 complete, ready for Phase 21
 
 ## Current Position
 
-Phase: 20 of 22 (Subscription Limits & Page) -- IN PROGRESS
-Plan: 1 of 2 in current phase (plan 01 complete)
-Status: Completed 20-01-PLAN.md -- ready for 20-02
-Last activity: 2026-02-22 -- Completed 20-01-PLAN.md (Well limit enforcement)
+Phase: 20 of 22 (Subscription Limits & Page) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Completed 20-02-PLAN.md -- phase complete, ready for Phase 21
+Last activity: 2026-02-22 -- Completed 20-02-PLAN.md (Subscription page & upgrade links)
 
-Progress: █████████░░░░░░░░░░░ ~55% (v3.0 -- 4 phases + 1 plan complete of 6 phases)
+Progress: ██████████░░░░░░░░░░ ~60% (v3.0 -- 5 phases complete of 6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 46 (25 v1.0 + 3 v1.1 + 12 v2.0 + 6 v3.0)
+- Total plans completed: 47 (25 v1.0 + 3 v1.1 + 12 v2.0 + 7 v3.0)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -30,7 +30,7 @@ Progress: █████████░░░░░░░░░░░ ~55% (v3.
 | v1.0 MVP | 1-8 | 25 | 2026-02-10 to 2026-02-11 |
 | v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
-| v3.0 Subscriptions | 17-22 | 6 | 2026-02-22 to ... |
+| v3.0 Subscriptions | 17-22 | 7 | 2026-02-22 to ... |
 
 ## Accumulated Context
 
@@ -71,6 +71,10 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 - Growers/super_admins see "Upgrade Plan" button, admins see dismiss-only modal
 - buildSubscriptionUrl uses encodeURIComponent for param safety
 
+**Phase 20 decisions (plan 02):**
+- SettingsPage subscription section uses dark theme (bg-gray-800) matching existing page design
+- Subscription section placed between Profile and Account sections for logical grouping
+
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -85,6 +89,6 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 20-01-PLAN.md (Well limit enforcement)
-Resume file: .planning/phases/20-subscription-limits-page/20-01-SUMMARY.md
-Next action: Execute 20-02-PLAN.md (Subscription page)
+Stopped at: Completed 20-02-PLAN.md (Subscription page & upgrade links)
+Resume file: .planning/phases/20-subscription-limits-page/20-02-SUMMARY.md
+Next action: Begin Phase 21 planning
