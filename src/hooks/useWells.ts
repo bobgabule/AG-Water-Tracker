@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from './useActiveFarm';
 
 export interface WellLocation {
   latitude: number;
@@ -43,8 +43,7 @@ interface WellRow {
 }
 
 export function useWells() {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
 
   // Guard against empty farmId to avoid unnecessary database queries
   const query = farmId

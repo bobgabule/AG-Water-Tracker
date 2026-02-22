@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from './useActiveFarm';
 import { useSubscriptionTier } from './useSubscriptionTier';
 
 // ---------------------------------------------------------------------------
@@ -53,8 +53,7 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
  * Used or expired invites are excluded.
  */
 export function useSeatUsage(): SeatUsage {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
   const tier = useSubscriptionTier();
 
   // --- Active members query (seat-limited roles only) ---

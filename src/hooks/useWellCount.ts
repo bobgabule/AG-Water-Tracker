@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from './useActiveFarm';
 
 interface CountRow {
   count: number;
@@ -13,8 +13,7 @@ interface CountRow {
  * so every row in the wells table is a live well.
  */
 export function useWellCount(): number {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
 
   const query = farmId
     ? 'SELECT COUNT(*) as count FROM wells WHERE farm_id = ?'
