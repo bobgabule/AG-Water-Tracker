@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import {
   ArrowLeftIcon,
   ArrowRightStartOnRectangleIcon,
+  ChevronRightIcon,
   Cog6ToothIcon,
+  CreditCardIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
@@ -247,6 +249,23 @@ export default function SettingsPage() {
             )}
           </div>
         </section>
+
+        {/* Subscription Section -- growers/super_admin only */}
+        {canManageFarm && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-white mb-4">Subscription</h2>
+            <div className="bg-gray-800 rounded-lg border border-gray-700">
+              <button
+                onClick={() => navigate('/subscription')}
+                className="w-full flex items-center gap-3 p-4 text-gray-300 hover:bg-gray-700/50 transition-colors text-left rounded-lg"
+              >
+                <CreditCardIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                <span className="text-sm font-medium flex-1">Manage Subscription</span>
+                <ChevronRightIcon className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* Account Section */}
         <section className="mb-8">
