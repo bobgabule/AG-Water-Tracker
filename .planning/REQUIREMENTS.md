@@ -37,9 +37,9 @@ Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
 
 ### Farm Data Isolation
 
-- [ ] **ISO-01**: Verify RLS policies filter wells, readings, allocations, members by farm_id
-- [ ] **ISO-02**: Verify PowerSync sync rules filter all data tables by farm_id
-- [ ] **ISO-03**: Verify super_admin cross-farm bypass is consistent across all tables and sync rules
+- [x] **ISO-01**: Verify RLS policies filter wells, readings, allocations, members by farm_id
+- [x] **ISO-02**: Verify PowerSync sync rules filter all data tables by farm_id
+- [x] **ISO-03**: Verify super_admin cross-farm bypass is consistent across all tables and sync rules
 
 ## Future Requirements
 
@@ -102,9 +102,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERM-02 | Phase 19 | Complete |
 | PERM-03 | Phase 19 | Complete |
 | PERM-04 | Phase 19 | Complete |
-| ISO-01 | Phase 22 | Pending |
-| ISO-02 | Phase 22 | Pending |
-| ISO-03 | Phase 22 | Pending |
+| ISO-01 | Phase 22 | Complete |
+| ISO-02 | Phase 22 | Complete |
+| ISO-03 | Phase 22 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 22 total
