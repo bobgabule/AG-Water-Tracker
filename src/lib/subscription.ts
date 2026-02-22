@@ -1,8 +1,6 @@
 // ---------------------------------------------------------------------------
-// Subscription Plan Constants
+// Subscription Types & Helpers
 // ---------------------------------------------------------------------------
-// Hardcoded plan limits for UI-side seat gating (SUBS-03).
-// No DB table, no migration, no Stripe -- pure client-side enforcement.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,16 +21,11 @@ export interface PlanLimits {
 }
 
 // ---------------------------------------------------------------------------
-// Default Plan Constants
+// Seat-Limited Roles
 // ---------------------------------------------------------------------------
 
-export const PLAN_LIMITS: PlanLimits = {
-  name: 'Basic',
-  seats: {
-    admin: { limit: 1, label: 'Admins' },
-    meter_checker: { limit: 3, label: 'Meter Checkers' },
-  },
-};
+/** Roles that consume seats (structural — does not vary by tier) */
+const SEAT_LIMITED_ROLES = new Set(['admin', 'meter_checker']);
 
 // ---------------------------------------------------------------------------
 // Exempt Roles
@@ -45,7 +38,7 @@ export const EXEMPT_ROLES = ['grower', 'super_admin'] as const;
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Check if a role is seat-limited (has a defined limit in PLAN_LIMITS) */
+/** Check if a role is seat-limited */
 export function isSeatLimited(role: string): boolean {
-  return role in PLAN_LIMITS.seats;
+  return SEAT_LIMITED_ROLES.has(role);
 }

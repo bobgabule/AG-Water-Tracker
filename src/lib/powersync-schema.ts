@@ -2,7 +2,7 @@ import { column, Schema, TableV2 } from '@powersync/web';
 
 const farms = new TableV2({
   name: column.text,
-  description: column.text,
+  subscription_tier: column.text,
   street_address: column.text,
   city: column.text,
   state: column.text,
@@ -92,6 +92,22 @@ const allocations = new TableV2({
   updated_at: column.text,
 });
 
+const subscription_tiers = new TableV2({
+  display_name: column.text,
+  max_admins: column.integer,
+  max_meter_checkers: column.integer,
+  max_wells: column.integer,
+  sort_order: column.integer,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+const app_settings = new TableV2({
+  value: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 export const AppSchema = new Schema({
   farms,
   users,
@@ -100,6 +116,8 @@ export const AppSchema = new Schema({
   wells,
   readings,
   allocations,
+  subscription_tiers,
+  app_settings,
 });
 
 export type Database = (typeof AppSchema)['types'];
@@ -110,3 +128,5 @@ export type FarmInvite = Database['farm_invites'];
 export type Well = Database['wells'];
 export type ReadingRow = Database['readings'];
 export type AllocationRow = Database['allocations'];
+export type SubscriptionTier = Database['subscription_tiers'];
+export type AppSetting = Database['app_settings'];
