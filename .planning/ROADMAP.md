@@ -203,7 +203,10 @@ Plans:
   2. Meter checker viewing a well detail page does not see the edit button
   3. Meter checker navigating to `/wells/:id/allocations` cannot create, edit, or delete allocations
   4. `permissions.ts` contains `edit_well`, `delete_well`, and `manage_allocations` actions with grower/admin access only
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 19-01-PLAN.md -- Update permission matrix to 12-action system, add route guards, gate Users nav item
+- [ ] 19-02-PLAN.md -- Hide edit button for meter checkers on well detail, hide farm settings on Settings page
 
 ### Phase 20: Subscription Limits & Page
 **Goal**: Users see their farm's subscription tier, current usage, and are prevented from exceeding tier limits for wells and seats
@@ -271,7 +274,7 @@ Plans:
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
 | 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
-| 19. Permission Enforcement | v3.0 | 0/TBD | Not started | - |
+| 19. Permission Enforcement | v3.0 | 0/2 | Not started | - |
 | 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
 | 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |
