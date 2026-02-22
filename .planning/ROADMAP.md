@@ -278,6 +278,6 @@ Plans:
 | 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
 | 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
 | 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
-| 20. Subscription Limits & Page | 2/2 | Complete   | 2026-02-22 | - |
+| 20. Subscription Limits & Page | 2/2 | Complete    | 2026-02-22 | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
 | 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |
