@@ -59,12 +59,18 @@ export default function App() {
             <Route element={<RequireRole action="manage_farm" />}>
               <Route path="/subscription" element={<SubscriptionPage />} />
             </Route>
-            <Route path="/users" element={<UsersPage />} />
+            <Route element={<RequireRole action="manage_users" />}>
+              <Route path="/users" element={<UsersPage />} />
+            </Route>
             <Route path="/language" element={<LanguagePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/wells/:id" element={<WellDetailPage />} />
-            <Route path="/wells/:id/edit" element={<WellEditPage />} />
-            <Route path="/wells/:id/allocations" element={<WellAllocationsPage />} />
+            <Route element={<RequireRole action="edit_well" fallbackPath={(params) => `/wells/${params.id}`} />}>
+              <Route path="/wells/:id/edit" element={<WellEditPage />} />
+            </Route>
+            <Route element={<RequireRole action="manage_allocations" fallbackPath={(params) => `/wells/${params.id}`} />}>
+              <Route path="/wells/:id/allocations" element={<WellAllocationsPage />} />
+            </Route>
           </Route>
         </Route>
       </Route>
