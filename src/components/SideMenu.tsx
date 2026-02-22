@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   { label: 'Map', icon: MapIcon, path: '/' },
   { label: 'Well List', icon: ListBulletIcon, path: '/wells' },
   { label: 'Reports', icon: ChartBarIcon, path: '/reports' },
-  { label: 'Users', icon: UsersIcon, path: '/users' },
+  { label: 'Users', icon: UsersIcon, path: '/users', requiredAction: 'manage_users' },
   { label: 'Subscription', icon: CreditCardIcon, path: '/subscription', requiredAction: 'manage_farm' },
   { label: 'Language', icon: GlobeAltIcon, path: '/language' },
   { label: 'Settings', icon: Cog6ToothIcon, path: '/settings' },
