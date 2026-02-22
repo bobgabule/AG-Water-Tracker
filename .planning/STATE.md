@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v3.0 Subscriptions & Permissions -- Phase 18 complete, ready for Phase 19
+**Current focus:** v3.0 Subscriptions & Permissions -- Phase 19 in progress
 
 ## Current Position
 
-Phase: 18 of 22 (Tier Sync & Hooks) -- COMPLETE
-Plan: 2 of 2 in current phase (COMPLETE -- all plans done)
-Status: Phase 18 complete -- ready for Phase 19
-Last activity: 2026-02-22 -- Completed 18-02-PLAN.md (SubscriptionPage enhancements + DB-driven tier limits)
+Phase: 19 of 22 (Permission Enforcement)
+Plan: 1 of 2 in current phase (19-01 complete)
+Status: Executing Phase 19 -- Plan 01 complete, ready for Plan 02
+Last activity: 2026-02-22 -- Completed 19-01-PLAN.md (Permission matrix + route guards)
 
-Progress: █████░░░░░░░░░░░░░░░ ~37% (v3.0 -- 2 phases complete of 6 phases)
+Progress: ██████░░░░░░░░░░░░░░ ~42% (v3.0 -- 3 phases complete of 6 phases, plan 1/2 in phase 19)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 43 (25 v1.0 + 3 v1.1 + 12 v2.0 + 3 v3.0)
+- Total plans completed: 44 (25 v1.0 + 3 v1.1 + 12 v2.0 + 4 v3.0)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -30,7 +30,7 @@ Progress: █████░░░░░░░░░░░░░░░ ~37% (v3.
 | v1.0 MVP | 1-8 | 25 | 2026-02-10 to 2026-02-11 |
 | v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
-| v3.0 Subscriptions | 17-22 | 3 | 2026-02-22 to ... |
+| v3.0 Subscriptions | 17-22 | 4 | 2026-02-22 to ... |
 
 ## Accumulated Context
 
@@ -57,6 +57,10 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 - PLAN_LIMITS hardcoded constant fully removed; replaced by DB-driven useSubscriptionTier() hook
 - All deferred tier replacement files from 18-01 committed as part of 18-02
 
+**Phase 19 decisions (plan 01):**
+- Removed isAdminOrAbove helper -- confirmed zero imports across codebase
+- useParams called unconditionally in RequireRole for dynamic fallback resolution
+
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -71,6 +75,6 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 18-02-PLAN.md (Phase 18 complete)
-Resume file: .planning/phases/18-tier-sync-hooks/18-02-SUMMARY.md
-Next action: Plan and execute Phase 19 (Permission UI)
+Stopped at: Completed 19-01-PLAN.md (Permission matrix + route guards)
+Resume file: .planning/phases/19-permission-enforcement/19-01-SUMMARY.md
+Next action: Execute Phase 19 Plan 02 (button/component-level permission checks)
