@@ -189,7 +189,10 @@ Plans:
   2. `useSubscriptionTier()` hook returns the farm's tier limits (seat counts, well limits) from synced data
   3. Changing a tier value in the database propagates to the app within seconds when online
   4. The hardcoded `PLAN_LIMITS` constant in `subscription.ts` is replaced by the DB-driven hook
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 18-01-PLAN.md -- Create useAppSetting hook, add AddUserModal loading state, deploy sync rules
+- [ ] 18-02-PLAN.md -- Add well count display and Manage Plan button to SubscriptionPage
 
 ### Phase 19: Permission Enforcement
 **Goal**: Meter checkers cannot access well editing or allocation management features in the UI
@@ -267,7 +270,7 @@ Plans:
 | 15. Well Editing & Allocation Management | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
-| 18. Tier Sync & Hooks | v3.0 | 0/TBD | Not started | - |
+| 18. Tier Sync & Hooks | v3.0 | 0/2 | Planned | - |
 | 19. Permission Enforcement | v3.0 | 0/TBD | Not started | - |
 | 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
