@@ -9,6 +9,7 @@ import {
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { ROLE_DISPLAY_NAMES, hasPermission } from '../lib/permissions';
@@ -17,7 +18,8 @@ import { supabase } from '../lib/supabase';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user, onboardingStatus, signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { farmId } = useActiveFarm();
   const userRole = useUserRole();
   const canManageFarm = hasPermission(userRole, 'manage_farm');
   const userProfile = useUserProfile();
@@ -278,10 +280,10 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {canManageFarm && onboardingStatus?.farmId && (
+            {canManageFarm && farmId && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Farm ID</p>
-                <p className="text-white font-mono text-sm">{onboardingStatus.farmId}</p>
+                <p className="text-white font-mono text-sm">{farmId}</p>
               </div>
             )}
 

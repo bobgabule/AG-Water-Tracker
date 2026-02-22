@@ -1,5 +1,5 @@
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useAppSetting } from '../hooks/useAppSetting';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
@@ -7,8 +7,7 @@ import { useWellCount } from '../hooks/useWellCount';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 
 export default function SubscriptionPage() {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
 
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();

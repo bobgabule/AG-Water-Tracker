@@ -4,7 +4,7 @@ import { MapIcon, PlusIcon, PlayIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
 import { useLatestReadings } from '../hooks/useLatestReadings';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
@@ -84,8 +84,7 @@ function computeWellDisplayData(
 export default function WellListPage() {
   const { wells, loading } = useWells();
   const navigate = useNavigate();
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId ?? null;
+  const { farmId } = useActiveFarm();
   const { latestByWellId } = useLatestReadings(farmId);
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
