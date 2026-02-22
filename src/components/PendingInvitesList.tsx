@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useQuery } from '@powersync/react';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
@@ -29,8 +29,7 @@ function formatPhone(phone: string): string {
 }
 
 export default function PendingInvitesList() {
-  const { onboardingStatus } = useAuth();
-  const farmId = onboardingStatus?.farmId;
+  const { farmId } = useActiveFarm();
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

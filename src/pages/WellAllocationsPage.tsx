@@ -10,7 +10,7 @@ import { useWellAllocations, type Allocation } from '../hooks/useWellAllocations
 import { useWellReadings } from '../hooks/useWellReadings';
 import { calculateUsageAf } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 
 function formatPeriodDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
@@ -41,9 +41,9 @@ export default function WellAllocationsPage() {
   const { wells } = useWells();
   const { allocations } = useWellAllocations(id ?? null);
   const { readings } = useWellReadings(id ?? null);
-  const { onboardingStatus } = useAuth();
-  const farmName = onboardingStatus?.farmName ?? '';
-  const farmId = onboardingStatus?.farmId ?? '';
+  const { farmId: activeFarmId, farmName: activeFarmName } = useActiveFarm();
+  const farmName = activeFarmName ?? '';
+  const farmId = activeFarmId ?? '';
 
   const well = useMemo(() => wells.find((w) => w.id === id) ?? null, [wells, id]);
 

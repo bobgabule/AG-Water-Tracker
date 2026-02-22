@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useState, useCallback, useMemo } from 'react';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 import WellDetailSheet from '../components/WellDetailSheet';
@@ -11,9 +12,10 @@ export default function WellDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { wells } = useWells();
-  const { onboardingStatus, user } = useAuth();
-  const farmName = onboardingStatus?.farmName ?? '';
-  const farmId = onboardingStatus?.farmId ?? '';
+  const { user } = useAuth();
+  const { farmId: activeFarmId, farmName: activeFarmName } = useActiveFarm();
+  const farmName = activeFarmName ?? '';
+  const farmId = activeFarmId ?? '';
 
   const role = useUserRole();
   const canEdit = hasPermission(role, 'edit_well');

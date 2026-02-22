@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@powersync/react';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission, ROLE_DISPLAY_NAMES, ROLE_BADGE_STYLES } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
@@ -20,9 +21,9 @@ interface FarmMemberRow {
 }
 
 export default function UsersPage() {
-  const { user, onboardingStatus } = useAuth();
+  const { user } = useAuth();
+  const { farmId } = useActiveFarm();
   const userRole = useUserRole();
-  const farmId = onboardingStatus?.farmId ?? null;
   const canManageUsers = hasPermission(userRole, 'manage_users');
 
   // Query farm members

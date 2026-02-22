@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { CheckIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 import { useAppSetting } from '../hooks/useAppSetting';
@@ -24,7 +24,7 @@ function formatPhoneDisplay(digits: string): string {
 }
 
 export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
-  const { onboardingStatus } = useAuth();
+  const { farmId, farmName } = useActiveFarm();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -38,8 +38,8 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const subscriptionUrl = useAppSetting('subscription_website_url');
-  const upgradeUrl = subscriptionUrl && onboardingStatus?.farmId && tier
-    ? buildSubscriptionUrl(subscriptionUrl, onboardingStatus.farmId, tier.slug)
+  const upgradeUrl = subscriptionUrl && farmId && tier
+    ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
     : null;
   const adminFull = seatUsage?.admin.isFull ?? false;
   const meterCheckerFull = seatUsage?.meter_checker.isFull ?? false;
@@ -73,7 +73,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!onboardingStatus?.farmId) return;
+    if (!farmId) return;
 
     if (!firstName.trim()) {
       setError('First name is required');
@@ -95,7 +95,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
       setError('');
 
       const { error: rpcError } = await supabase.rpc('invite_user_by_phone', {
-        p_farm_id: onboardingStatus.farmId,
+        p_farm_id: farmId,
         p_phone: fullPhone,
         p_first_name: firstName.trim(),
         p_last_name: lastName.trim(),
@@ -109,7 +109,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
         const { error: smsError } = await supabase.functions.invoke('send-invite-sms', {
           body: {
             phone: fullPhone,
-            farmName: onboardingStatus.farmName,
+            farmName: farmName,
           },
         });
         if (smsError) {
@@ -138,7 +138,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     } finally {
       setLoading(false);
     }
-  }, [onboardingStatus?.farmId, onboardingStatus?.farmName, firstName, lastName, phoneDigits, role]);
+  }, [farmId, farmName, firstName, lastName, phoneDigits, role]);
 
   const handleClose = useCallback(() => {
     setFirstName('');
@@ -320,7 +320,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || !onboardingStatus?.farmId || !tier || (role === 'admin' ? adminFull : meterCheckerFull)}
+                disabled={loading || !farmId || !tier || (role === 'admin' ? adminFull : meterCheckerFull)}
                 className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
               >
                 {loading ? (
