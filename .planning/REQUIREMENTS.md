@@ -14,7 +14,7 @@ Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
 - [x] **TIER-03**: `farms.subscription_tier` column linking each farm to a tier (no default, existing farms backfilled to 'pro')
 - [x] **TIER-04**: PowerSync global bucket sync for subscription_tiers and app_settings (available offline)
 - [x] **TIER-05**: `useSubscriptionTier()` hook replacing hardcoded `PLAN_LIMITS` in `src/lib/subscription.ts`
-- [ ] **TIER-06**: Well count enforcement — disable "New Well" button at tier limit (Basic: 5, Pro: 10)
+- [x] **TIER-06**: Well count enforcement — disable "New Well" button at tier limit (Basic: 5, Pro: 10)
 - [ ] **TIER-07**: Seat limit enforcement reads from DB-driven tier config instead of hardcoded constants
 - [ ] **TIER-08**: Subscription page shows current tier, usage per role, well count, and "Manage Plan" placeholder
 
@@ -88,7 +88,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIER-03 | Phase 17 | Complete |
 | TIER-04 | Phase 18 | Complete |
 | TIER-05 | Phase 18 | Complete |
-| TIER-06 | Phase 20 | Pending |
+| TIER-06 | Phase 20 | Complete |
 | TIER-07 | Phase 20 | Pending |
 | TIER-08 | Phase 20 | Pending |
 | AUTH-01 | Phase 21 | Pending |
