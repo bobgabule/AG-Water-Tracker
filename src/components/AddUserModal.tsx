@@ -5,6 +5,7 @@ import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 import { useSeatUsage } from '../hooks/useSeatUsage';
+import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 
 interface AddUserBottomSheetProps {
   open: boolean;
@@ -32,6 +33,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   const [success, setSuccess] = useState(false);
   const [smsWarning, setSmsWarning] = useState(false);
 
+  const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const adminFull = seatUsage?.admin.isFull ?? false;
   const meterCheckerFull = seatUsage?.meter_checker.isFull ?? false;
@@ -178,6 +180,11 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                   </p>
                 )}
               </div>
+            ) : !tier ? (
+              <div className="py-8 text-center flex flex-col items-center justify-center">
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mb-3" />
+                <p className="text-white font-medium">Loading plan limits...</p>
+              </div>
             ) : allSeatsFull ? (
               <div className="py-8 text-center">
                 <p className="text-white font-medium mb-2">All seats are filled</p>
@@ -290,7 +297,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || !onboardingStatus?.farmId || (role === 'admin' ? adminFull : meterCheckerFull)}
+                disabled={loading || !onboardingStatus?.farmId || !tier || (role === 'admin' ? adminFull : meterCheckerFull)}
                 className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
               >
                 {loading ? (
