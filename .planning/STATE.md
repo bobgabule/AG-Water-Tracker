@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v3.0 Subscriptions & Permissions -- Phase 22 in progress (plan 01 complete)
+**Current focus:** v3.0 Subscriptions & Permissions -- Phase 22 COMPLETE
 
 ## Current Position
 
-Phase: 22 of 22 (Farm Data Isolation Audit) -- IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Completed 22-01-PLAN.md -- migration + audit report done, ready for Plan 22-02
-Last activity: 2026-02-22 -- Completed 22-01-PLAN.md (Isolation audit fixes + audit report)
+Phase: 22 of 22 (Farm Data Isolation Audit) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Completed 22-02-PLAN.md -- phase complete
+Last activity: 2026-02-22 -- Completed 22-02-PLAN.md (useActiveFarm migration + super admin UI)
 
-Progress: ██████████████████░░ ~90% (v3.0 -- Plan 22-01 complete, 22-02 remaining)
+Progress: ████████████████████ ~100% (v3.0 -- all 6 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (25 v1.0 + 3 v1.1 + 12 v2.0 + 8 v3.0)
+- Total plans completed: 49 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -30,7 +30,7 @@ Progress: ██████████████████░░ ~90% (v3.
 | v1.0 MVP | 1-8 | 25 | 2026-02-10 to 2026-02-11 |
 | v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
-| v3.0 Subscriptions | 17-22 | 8 | 2026-02-22 to ... |
+| v3.0 Subscriptions | 17-22 | 9 | 2026-02-22 |
 
 ## Accumulated Context
 
@@ -80,6 +80,12 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 - super_admin_user_id starts empty -- set when the account is created
 - No new GRANT needed for updated join_farm_with_code_impl -- existing grants from migration 024 cover it
 
+**Phase 22 decisions (plan 02):**
+- useUserRole.ts keeps authStatus.farmId to avoid circular dependency with useActiveFarm
+- FarmSelector.tsx keeps authStatus.farmId as ownFarmId for own-farm vs override comparison
+- AppLayout.tsx farmName prop to Header is correct -- only used for non-super_admin users
+- WellEditPage added as deviation fix for consistent farm name display during farm override
+
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -94,6 +100,6 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 22-01-PLAN.md (Isolation audit fixes + audit report)
-Resume file: .planning/phases/22-farm-data-isolation-audit/22-01-SUMMARY.md
-Next action: Execute Plan 22-02 (client-side useActiveFarm migration + super admin UI)
+Stopped at: Completed 22-02-PLAN.md (useActiveFarm migration + super admin UI)
+Resume file: .planning/phases/22-farm-data-isolation-audit/22-02-SUMMARY.md
+Next action: v3.0 Subscriptions & Permissions milestone complete -- all phases done
