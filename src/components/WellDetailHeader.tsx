@@ -8,7 +8,7 @@ interface WellDetailHeaderProps {
   farmName: string;
   proximityInRange: boolean | null;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 const WellDetailHeader = React.memo(function WellDetailHeader({
@@ -71,15 +71,17 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
             <ArrowLeftIcon className="w-4 h-4" />
             <span className="text-sm font-medium">Back</span>
           </button>
-          <button
-            type="button"
-            onClick={onEdit}
-            className="flex items-center gap-1.5 text-white bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
-            aria-label="Edit well"
-          >
-            <PencilSquareIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">Edit</span>
-          </button>
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="flex items-center gap-1.5 text-white bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
+              aria-label="Edit well"
+            >
+              <PencilSquareIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">Edit</span>
+            </button>
+          )}
         </div>
 
         {/* Centered map pin */}

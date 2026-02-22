@@ -15,7 +15,7 @@ interface WellDetailSheetProps {
   well: WellWithReading | null;
   farmName: string;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
   onNewReading: () => void;
 }
 
