@@ -12,7 +12,7 @@ Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
 - [x] **TIER-01**: `subscription_tiers` table in Supabase with per-role seat limits and well limits per tier (Starter: 5 wells, 1 admin, 1 meter checker | Pro: 10 wells, 1 admin, 3 meter checkers)
 - [x] **TIER-02**: `app_settings` table in Supabase for global key-value config (subscription website URL, support email)
 - [x] **TIER-03**: `farms.subscription_tier` column linking each farm to a tier (no default, existing farms backfilled to 'pro')
-- [ ] **TIER-04**: PowerSync global bucket sync for subscription_tiers and app_settings (available offline)
+- [x] **TIER-04**: PowerSync global bucket sync for subscription_tiers and app_settings (available offline)
 - [ ] **TIER-05**: `useSubscriptionTier()` hook replacing hardcoded `PLAN_LIMITS` in `src/lib/subscription.ts`
 - [ ] **TIER-06**: Well count enforcement — disable "New Well" button at tier limit (Basic: 5, Pro: 10)
 - [ ] **TIER-07**: Seat limit enforcement reads from DB-driven tier config instead of hardcoded constants
@@ -86,7 +86,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIER-01 | Phase 17 | Complete |
 | TIER-02 | Phase 17 | Complete |
 | TIER-03 | Phase 17 | Complete |
-| TIER-04 | Phase 18 | Pending |
+| TIER-04 | Phase 18 | Complete |
 | TIER-05 | Phase 18 | Pending |
 | TIER-06 | Phase 20 | Pending |
 | TIER-07 | Phase 20 | Pending |
