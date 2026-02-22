@@ -10,11 +10,16 @@ import { hasPermission } from '../lib/permissions';
 import { debugError } from '../lib/debugLog';
 import { useFarmState } from '../hooks/useFarmState';
 import { useToastStore } from '../stores/toastStore';
+import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
+import { useWellCount } from '../hooks/useWellCount';
+import { useAppSetting } from '../hooks/useAppSetting';
+import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
 import LocationPickerBottomSheet from '../components/LocationPickerBottomSheet';
 import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWellFormBottomSheet';
+import WellLimitModal from '../components/WellLimitModal';
 
 export default function DashboardPage() {
   const { wells } = useWells();
@@ -26,6 +31,14 @@ export default function DashboardPage() {
   const farmId = onboardingStatus?.farmId ?? null;
   const farmName = onboardingStatus?.farmName ?? null;
   const farmState = useFarmState(farmId);
+  const tier = useSubscriptionTier();
+  const wellCount = useWellCount();
+  const subscriptionUrl = useAppSetting('subscription_website_url');
+  const isGrower = role === 'grower' || role === 'super_admin';
+  const upgradeUrl =
+    subscriptionUrl && farmId && tier
+      ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
+      : null;
 
   // MapView error recovery: increment key to force remount (WebGL context recovery)
   const [mapKey, setMapKey] = useState(0);
@@ -42,6 +55,9 @@ export default function DashboardPage() {
     return () => clearTimeout(errorTimeoutRef.current);
   }, []);
 
+  // Well limit modal state
+  const [showLimitModal, setShowLimitModal] = useState(false);
+
   // Bottom sheet flow state
   const [currentStep, setCurrentStep] = useState<'closed' | 'location' | 'form'>('closed');
   const [pickedLocation, setPickedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -54,7 +70,16 @@ export default function DashboardPage() {
 
   // New Well flow handlers
   const handleNewWell = useCallback(() => {
+    // Allow creation if tier data hasn't loaded (offline edge case per user decision)
+    if (tier && wellCount >= tier.maxWells) {
+      setShowLimitModal(true);
+      return;
+    }
     setCurrentStep('location');
+  }, [tier, wellCount]);
+
+  const handleLimitModalClose = useCallback(() => {
+    setShowLimitModal(false);
   }, []);
 
   const handleLocationClose = useCallback(() => {
@@ -228,6 +253,14 @@ export default function DashboardPage() {
           isSaving={isSaving}
         />
       )}
+
+      {/* Well Limit Modal */}
+      <WellLimitModal
+        open={showLimitModal}
+        onClose={handleLimitModalClose}
+        upgradeUrl={upgradeUrl}
+        isGrower={isGrower}
+      />
     </div>
   );
 }

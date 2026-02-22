@@ -7,6 +7,11 @@ import { useLatestReadings } from '../hooks/useLatestReadings';
 import { useAuth } from '../lib/AuthProvider';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
+import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
+import { useWellCount } from '../hooks/useWellCount';
+import { useAppSetting } from '../hooks/useAppSetting';
+import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
+import WellLimitModal from '../components/WellLimitModal';
 
 // Date threshold constants (in days)
 const RECENT_THRESHOLD = 3;
@@ -84,6 +89,15 @@ export default function WellListPage() {
   const { latestByWellId } = useLatestReadings(farmId);
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
+  const tier = useSubscriptionTier();
+  const wellCount = useWellCount();
+  const subscriptionUrl = useAppSetting('subscription_website_url');
+  const isGrower = role === 'grower' || role === 'super_admin';
+  const upgradeUrl =
+    subscriptionUrl && farmId && tier
+      ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
+      : null;
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleWellClick = useCallback(
@@ -93,7 +107,18 @@ export default function WellListPage() {
     },
     [navigate],
   );
-  const handleNewWell = useCallback(() => navigate('/wells/new'), [navigate]);
+  const handleNewWell = useCallback(() => {
+    // Allow creation if tier data hasn't loaded (offline edge case)
+    if (tier && wellCount >= tier.maxWells) {
+      setShowLimitModal(true);
+      return;
+    }
+    navigate('/wells/new');
+  }, [tier, wellCount, navigate]);
+
+  const handleLimitModalClose = useCallback(() => {
+    setShowLimitModal(false);
+  }, []);
   const handleWellMap = useCallback(() => navigate('/'), [navigate]);
 
   const wellsWithDisplayData = useMemo(
@@ -203,6 +228,14 @@ export default function WellListPage() {
           )}
         </div>
       </div>
+
+      {/* Well Limit Modal */}
+      <WellLimitModal
+        open={showLimitModal}
+        onClose={handleLimitModalClose}
+        upgradeUrl={upgradeUrl}
+        isGrower={isGrower}
+      />
     </div>
   );
 }
