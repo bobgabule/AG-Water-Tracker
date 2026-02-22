@@ -32,7 +32,7 @@ Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
 
 - [x] **PERM-01**: Well edit/delete gated to grower and admin only (WellEditPage route guard + WellDetailHeader)
 - [x] **PERM-02**: Allocation management gated to grower and admin only (WellAllocationsPage route guard)
-- [ ] **PERM-03**: Well detail edit button hidden for meter checkers
+- [x] **PERM-03**: Well detail edit button hidden for meter checkers
 - [x] **PERM-04**: Extend permission matrix in `permissions.ts` with fine-grained actions (edit_well, delete_well, manage_allocations)
 
 ### Farm Data Isolation
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-07 | Phase 21 | Pending |
 | PERM-01 | Phase 19 | Complete |
 | PERM-02 | Phase 19 | Complete |
-| PERM-03 | Phase 19 | Pending |
+| PERM-03 | Phase 19 | Complete |
 | PERM-04 | Phase 19 | Complete |
 | ISO-01 | Phase 22 | Pending |
 | ISO-02 | Phase 22 | Pending |
