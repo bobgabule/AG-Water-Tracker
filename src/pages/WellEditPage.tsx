@@ -18,7 +18,7 @@ import {
 } from '../lib/validation';
 import { useToastStore } from '../stores/toastStore';
 import { useWellEditDraftStore } from '../stores/wellEditDraftStore';
-import { useAuth } from '../lib/AuthProvider';
+import { useActiveFarm } from '../hooks/useActiveFarm';
 import ConfirmDeleteWellDialog from '../components/ConfirmDeleteWellDialog';
 
 type Units = 'AF' | 'GAL' | 'CF';
@@ -47,8 +47,8 @@ export default function WellEditPage() {
   const db = usePowerSync();
   const { wells } = useWells();
   const { allocations } = useWellAllocations(id ?? null);
-  const { onboardingStatus } = useAuth();
-  const farmName = onboardingStatus?.farmName ?? '';
+  const { farmName: activeFarmName } = useActiveFarm();
+  const farmName = activeFarmName ?? '';
 
   const well = wells.find((w) => w.id === id) ?? null;
 
