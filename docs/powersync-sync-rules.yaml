@@ -15,6 +15,30 @@
 bucket_definitions:
 
   # ---------------------------------------------------------------------------
+  # Subscription Tiers (Global)
+  # ---------------------------------------------------------------------------
+  # All authenticated users receive all tier definitions.
+  # Small dataset (2-3 rows) — no farm filtering needed.
+  # PK mapping: slug → id (same pattern as farm_invites.code)
+  # ---------------------------------------------------------------------------
+  subscription_tiers_global:
+    parameters: SELECT 'global' as scope
+    data:
+      - SELECT slug AS id, display_name, max_admins, max_meter_checkers, max_wells, sort_order, created_at, updated_at FROM subscription_tiers WHERE 'global' = bucket.scope
+
+  # ---------------------------------------------------------------------------
+  # App Settings (Global)
+  # ---------------------------------------------------------------------------
+  # All authenticated users receive all app settings.
+  # Small dataset — global key-value config.
+  # PK mapping: key → id
+  # ---------------------------------------------------------------------------
+  app_settings_global:
+    parameters: SELECT 'global' as scope
+    data:
+      - SELECT key AS id, value, created_at, updated_at FROM app_settings WHERE 'global' = bucket.scope
+
+  # ---------------------------------------------------------------------------
   # Farms (via farm_members join table)
   # ---------------------------------------------------------------------------
   # Syncs farms where the user has a membership.
@@ -23,7 +47,7 @@ bucket_definitions:
   user_farms:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT id, name, street_address, city, state, zip_code, created_at, updated_at FROM farms WHERE id = bucket.farm_id
+      - SELECT id, name, subscription_tier, street_address, city, state, zip_code, created_at, updated_at FROM farms WHERE id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Farm Members (via farm_members join table)
@@ -37,43 +61,14 @@ bucket_definitions:
       - SELECT id, farm_id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
-  # Farm Invites (for Super Admins)
+  # Farm Invites (all farm members)
   # ---------------------------------------------------------------------------
-  # Syncs farm_invites for farms where the user is a super_admin.
-  # Note: PowerSync doesn't support IN (literal list), so we use separate buckets.
+  # Syncs farm_invites for all farms the user belongs to.
+  # UI handles permission checks for who can view/manage invites.
+  # PK mapping: code → id
   # ---------------------------------------------------------------------------
-  farm_invites_super_admin:
-    parameters: |
-      SELECT farm_id FROM farm_members
-      WHERE user_id = request.user_id()
-      AND role = 'super_admin'
-    data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
-
-  # ---------------------------------------------------------------------------
-  # Farm Invites (for Growers)
-  # ---------------------------------------------------------------------------
-  # Syncs farm_invites for farms where the user is a grower.
-  # Separate bucket since PowerSync doesn't support IN (literal list).
-  # ---------------------------------------------------------------------------
-  farm_invites_grower:
-    parameters: |
-      SELECT farm_id FROM farm_members
-      WHERE user_id = request.user_id()
-      AND role = 'grower'
-    data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
-
-  # ---------------------------------------------------------------------------
-  # Farm Invites (for Admins)
-  # ---------------------------------------------------------------------------
-  # Separate bucket for admin role since PowerSync doesn't support IN (literal list).
-  # ---------------------------------------------------------------------------
-  farm_invites_admin:
-    parameters: |
-      SELECT farm_id FROM farm_members
-      WHERE user_id = request.user_id()
-      AND role = 'admin'
+  farm_invites:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
       - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
@@ -132,7 +127,9 @@ bucket_definitions:
 #    Ensure your Supabase JWT is properly configured in the PowerSync dashboard.
 #
 # 2. Parameter Query Pattern:
-#    All buckets use a simple pattern: SELECT farm_id FROM farm_members
+#    Farm-scoped buckets: SELECT farm_id FROM farm_members
+#    Global buckets: SELECT 'global' as scope (creates one shared bucket for all users)
+#    Global data queries use WHERE 'global' = bucket.scope (always-true equality)
 #    This avoids subqueries which are not supported by PowerSync.
 #
 # 3. Denormalized Columns:
@@ -142,16 +139,19 @@ bucket_definitions:
 #
 # 4. Data Query Requirements:
 #    - Must SELECT from a single table (no joins)
-#    - Must include the table's primary key column (usually 'id', but 'code' for farm_invites)
+#    - Must include the table's primary key column (usually 'id')
+#    - PK mapping: farm_invites uses code AS id, subscription_tiers uses slug AS id,
+#      app_settings uses key AS id
 #    - Use bucket.<param> to filter
 #
 # 5. Bucket Granularity:
 #    - user_profile: 1 bucket per user
+#    - subscription_tiers_global, app_settings_global: 1 shared bucket (global data)
 #    - All other buckets: 1 bucket per farm membership
 #
 # 6. Security:
 #    - These sync rules work in conjunction with Supabase RLS policies
-#    - Invite codes use separate buckets for super_admin/grower/admin roles
+#    - subscription_tiers and app_settings are read-only (no INSERT/UPDATE/DELETE RLS)
 #
 # =============================================================================
 # Dashboard Configuration Steps
