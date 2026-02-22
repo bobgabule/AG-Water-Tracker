@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 19 of 22 (Permission Enforcement)
-Plan: 1 of 2 in current phase (19-01 complete)
-Status: Executing Phase 19 -- Plan 01 complete, ready for Plan 02
-Last activity: 2026-02-22 -- Completed 19-01-PLAN.md (Permission matrix + route guards)
+Phase: 19 of 22 (Permission Enforcement) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 19 complete -- ready for Phase 20
+Last activity: 2026-02-22 -- Completed 19-02-PLAN.md (Component-level permission checks)
 
-Progress: ██████░░░░░░░░░░░░░░ ~42% (v3.0 -- 3 phases complete of 6 phases, plan 1/2 in phase 19)
+Progress: ████████░░░░░░░░░░░░ ~50% (v3.0 -- 4 phases complete of 6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 44 (25 v1.0 + 3 v1.1 + 12 v2.0 + 4 v3.0)
+- Total plans completed: 45 (25 v1.0 + 3 v1.1 + 12 v2.0 + 5 v3.0)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -30,7 +30,7 @@ Progress: ██████░░░░░░░░░░░░░░ ~42% (v3.
 | v1.0 MVP | 1-8 | 25 | 2026-02-10 to 2026-02-11 |
 | v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
-| v3.0 Subscriptions | 17-22 | 4 | 2026-02-22 to ... |
+| v3.0 Subscriptions | 17-22 | 5 | 2026-02-22 to ... |
 
 ## Accumulated Context
 
@@ -61,6 +61,10 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 - Removed isAdminOrAbove helper -- confirmed zero imports across codebase
 - useParams called unconditionally in RequireRole for dynamic fallback resolution
 
+**Phase 19 decisions (plan 02):**
+- Permission check lifted to WellDetailPage (top of chain) rather than inside React.memo components
+- Edit button completely hidden (not disabled) for meter checkers per user decision
+
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -75,6 +79,6 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 19-01-PLAN.md (Permission matrix + route guards)
-Resume file: .planning/phases/19-permission-enforcement/19-01-SUMMARY.md
-Next action: Execute Phase 19 Plan 02 (button/component-level permission checks)
+Stopped at: Completed 19-02-PLAN.md (Component-level permission checks)
+Resume file: .planning/phases/19-permission-enforcement/19-02-SUMMARY.md
+Next action: Execute Phase 20 (Subscription Limits & Page)
