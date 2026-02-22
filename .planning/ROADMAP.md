@@ -242,7 +242,10 @@ Plans:
   1. RLS policies on wells, readings, allocations, and farm_members all filter by farm_id with no bypass for regular users
   2. PowerSync sync rules filter every data table by the user's farm_id, preventing cross-farm data leakage
   3. Super admin can access data across all farms consistently in both RLS policies and sync rules
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 22-01-PLAN.md -- Clean stale RPC code, add super_admin_user_id setting, write audit report
+- [ ] 22-02-PLAN.md -- Fix 13 client-side files to use useActiveFarm, add persist + maroon header
 
 ## Progress
 
@@ -280,4 +283,4 @@ Plans:
 | 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
 | 20. Subscription Limits & Page | 2/2 | Complete    | 2026-02-22 | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
-| 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |
+| 22. Farm Data Isolation Audit | v3.0 | 1/2 | In progress | - |
