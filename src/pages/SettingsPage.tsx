@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../lib/AuthProvider';
 import { useUserRole } from '../hooks/useUserRole';
 import { useUserProfile } from '../hooks/useUserProfile';
-import { ROLE_DISPLAY_NAMES } from '../lib/permissions';
+import { ROLE_DISPLAY_NAMES, hasPermission } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
 import { supabase } from '../lib/supabase';
 
@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, onboardingStatus, signOut } = useAuth();
   const userRole = useUserRole();
+  const canManageFarm = hasPermission(userRole, 'manage_farm');
   const userProfile = useUserProfile();
 
   const [signOutLoading, setSignOutLoading] = useState(false);
@@ -258,7 +259,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {onboardingStatus?.farmId && (
+            {canManageFarm && onboardingStatus?.farmId && (
               <div className="p-4">
                 <p className="text-sm text-gray-400">Farm ID</p>
                 <p className="text-white font-mono text-sm">{onboardingStatus.farmId}</p>
