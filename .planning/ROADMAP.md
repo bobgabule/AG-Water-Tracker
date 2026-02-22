@@ -217,7 +217,10 @@ Plans:
   2. Seat limits on the invite form read from DB-driven tier config instead of hardcoded constants
   3. Subscription page displays current tier name, per-role seat usage, well count vs limit, and a "Manage Plan" link
   4. All limit enforcement works correctly when the app is offline
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md -- Create well limit enforcement with WellLimitModal, useWellCount hook, and subscriptionUrls utility
+- [ ] 20-02-PLAN.md -- Add upgrade links to seat limit UI, fix subscription page well count, add Settings subscription link
 
 ### Phase 21: Login-Only Auth Flow
 **Goal**: The app is login-only with no self-service registration -- invited users auto-join on first OTP and users without a farm see a clear redirect
@@ -275,6 +278,6 @@ Plans:
 | 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
 | 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
 | 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
-| 20. Subscription Limits & Page | v3.0 | 0/TBD | Not started | - |
+| 20. Subscription Limits & Page | v3.0 | 0/2 | Not started | - |
 | 21. Login-Only Auth Flow | v3.0 | 0/TBD | Not started | - |
 | 22. Farm Data Isolation Audit | v3.0 | 0/TBD | Not started | - |
