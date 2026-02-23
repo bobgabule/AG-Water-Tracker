@@ -23,9 +23,9 @@ Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
 - [ ] **AUTH-01**: Remove ProfilePage, CreateFarmPage, and `/onboarding/*` routes from app
 - [ ] **AUTH-02**: Remove RequireNotOnboarded guard and all onboarding status logic from connector
 - [ ] **AUTH-03**: Clean up supabaseConnector — remove onboarding flows, simplify to login-only path
-- [ ] **AUTH-04**: "No subscription" page for users without farm membership with redirect to subscription website URL (from app_settings)
-- [ ] **AUTH-05**: Invited users auto-matched on login go straight to dashboard (no profile step)
-- [ ] **AUTH-06**: Move invite auto-matching logic to backend RPC (decouple from removed onboarding pages)
+- [x] **AUTH-04**: "No subscription" page for users without farm membership with redirect to subscription website URL (from app_settings)
+- [x] **AUTH-05**: Invited users auto-matched on login go straight to dashboard (no profile step)
+- [x] **AUTH-06**: Move invite auto-matching logic to backend RPC (decouple from removed onboarding pages)
 - [ ] **AUTH-07**: Remove all dead imports, unused hooks, and orphaned utilities from old onboarding flow
 
 ### Role Permissions
@@ -94,9 +94,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 21 | Pending |
 | AUTH-02 | Phase 21 | Pending |
 | AUTH-03 | Phase 21 | Pending |
-| AUTH-04 | Phase 21 | Pending |
-| AUTH-05 | Phase 21 | Pending |
-| AUTH-06 | Phase 21 | Pending |
+| AUTH-04 | Phase 21 | Complete |
+| AUTH-05 | Phase 21 | Complete |
+| AUTH-06 | Phase 21 | Complete |
 | AUTH-07 | Phase 21 | Pending |
 | PERM-01 | Phase 19 | Complete |
 | PERM-02 | Phase 19 | Complete |
