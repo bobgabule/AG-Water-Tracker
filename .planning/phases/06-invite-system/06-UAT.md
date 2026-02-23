@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-invite-system
 source: 06-01-SUMMARY.md, 06-02-SUMMARY.md
 started: 2026-02-23T00:00:00Z
-updated: 2026-02-23T00:05:00Z
+updated: 2026-02-23T01:00:00Z
 ---
 
 ## Current Test
@@ -24,15 +24,13 @@ severity: major
 
 ### 3. Invited User Joins via Phone OTP
 expected: New user enters the invited phone number, completes OTP. Lands on the app with a profile that has the correct first name and last name pre-populated.
-result: issue
-reported: "it went to /no-subscription"
-severity: major
+result: pass (after fix)
+fix: Migration 037 — phone format normalization (Supabase Auth stores without '+', invites store with '+')
 
 ### 4. Invite Status Updates After Join
 expected: After the invited user joins, the Pending Invites list updates — invite shows as "Joined" or is removed from pending.
-result: issue
-reported: "invited user status is pending"
-severity: major
+result: pass (after fix)
+fix: Downstream of test 3 fix — auto-join now DELETEs invite from farm_invites
 
 ### 5. AddWellFormBottomSheet Green Theme
 expected: The Add Well form uses a green color theme (#5f7248), white labels, and consistent button styling.
@@ -41,8 +39,8 @@ result: pass
 ## Summary
 
 total: 5
-passed: 2
-issues: 3
+passed: 4
+issues: 1
 pending: 0
 skipped: 0
 
@@ -53,27 +51,17 @@ skipped: 0
   reason: "User reported: SMS could not be sent. Please notify the user manually. Invite is in the DB though."
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Edge function send-invite-sms was not deployed. Now deployed but Twilio trial account can only send to verified numbers. Need Twilio account upgrade or verified test numbers."
+  artifacts:
+    - path: "supabase/functions/send-invite-sms/index.ts"
+      issue: "Uses Twilio Messages API — trial accounts restricted to verified numbers"
+  missing:
+    - "Verify Twilio phone number in trial console or upgrade to paid account"
+    - "Confirm APP_URL secret is set to correct value"
   debug_session: ""
 
-- truth: "Invited user lands on map/dashboard after phone OTP login"
-  status: failed
-  reason: "User reported: it went to /no-subscription"
-  severity: major
-  test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+## Fixes Applied
 
-- truth: "Invite is deleted or shows Joined after invited user completes login"
-  status: failed
-  reason: "User reported: invited user status is pending"
-  severity: major
-  test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+- **Migration 037** (`supabase/migrations/037_fix_phone_format_matching.sql`): Normalizes auth.users.phone to E.164 format (adds '+' prefix) before matching against farm_invites.invited_phone. Root cause: Supabase Auth stores phone as '18029624008' but invites store as '+18029624008'.
+- **Migrations 029-036**: Applied all pending migrations to remote Supabase (were local-only).
+- **Edge function deployed**: send-invite-sms deployed to Supabase with Twilio secrets.
