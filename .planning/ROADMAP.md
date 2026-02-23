@@ -49,7 +49,7 @@
 - [x] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits (completed 2026-02-22)
 - [x] **Phase 19: Permission Enforcement** - Extend permission matrix with fine-grained actions, gate well edit/delete and allocation management to grower/admin only
 - [x] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage (completed 2026-02-22)
-- [ ] **Phase 21: Login-Only Auth Flow** - Backend invite auto-matching RPC, remove registration pages, clean login-only path with no-subscription redirect
+- [x] **Phase 21: Login-Only Auth Flow** - Backend invite auto-matching RPC, remove registration pages, clean login-only path with no-subscription redirect
 - [x] **Phase 22: Farm Data Isolation Audit** - Verify RLS policies, PowerSync sync rules, and super_admin bypass filter all data by farm_id (completed 2026-02-22)
 
 ## Phase Details
@@ -236,7 +236,7 @@ Plans:
 Plans:
 - [x] 21-01-PLAN.md -- Backend auto-join RPC update (invite delete after use)
 - [x] 21-02-PLAN.md -- Frontend onboarding removal, NoSubscriptionPage, auth flow simplification
-- [ ] 21-03-PLAN.md -- Gap closure: fix RPC wrapper, auto-redirect race condition, sign-out speed
+- [x] 21-03-PLAN.md -- Gap closure: fix RPC wrapper, auto-redirect race condition, sign-out speed
 
 ### Phase 22: Farm Data Isolation Audit
 **Goal**: Every database query and sync rule correctly isolates farm data, with verified super_admin cross-farm access
@@ -286,5 +286,5 @@ Plans:
 | 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
 | 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
 | 20. Subscription Limits & Page | 2/2 | Complete    | 2026-02-22 | - |
-| 21. Login-Only Auth Flow | v3.0 | 2/3 | In progress | - |
+| 21. Login-Only Auth Flow | v3.0 | 3/3 | Complete | 2026-02-23 |
 | 22. Farm Data Isolation Audit | 2/2 | Complete    | 2026-02-22 | - |

@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 22 of 22 (Farm Data Isolation Audit) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Completed 22-02-PLAN.md -- phase complete
-Last activity: 2026-02-22 -- Completed 22-02-PLAN.md (useActiveFarm migration + super admin UI)
+Phase: 21 of 22 (Login-Only Auth Flow) -- gap closure complete
+Plan: 3 of 3 in current phase (all plans complete)
+Status: Completed 21-03-PLAN.md -- gap closure for UAT failures
+Last activity: 2026-02-23 -- Completed 21-03-PLAN.md (RPC wrapper fix, auto-redirect fix, sign-out timeout)
 
-Progress: ████████████████████ ~100% (v3.0 -- all 6 phases complete)
+Progress: ████████████████████ ~100% (v3.0 -- all phases complete, Phase 21 UAT gaps closed)
 
 ## Performance Metrics
 
@@ -99,7 +99,7 @@ All decisions logged in PROJECT.md Key Decisions table (29 decisions).
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 22-02-PLAN.md (useActiveFarm migration + super admin UI)
-Resume file: .planning/phases/22-farm-data-isolation-audit/22-02-SUMMARY.md
-Next action: v3.0 Subscriptions & Permissions milestone complete -- all phases done
+Last session: 2026-02-23
+Stopped at: Completed 21-03-PLAN.md (gap closure for 3 UAT failures)
+Resume file: .planning/phases/21-login-only-auth-flow/21-03-SUMMARY.md
+Next action: Re-test Phase 21 UAT after deploying migration 035 to Supabase
