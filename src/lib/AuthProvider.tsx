@@ -17,7 +17,7 @@ import { useActiveFarmStore } from '../stores/activeFarmStore';
 // Constants
 // ---------------------------------------------------------------------------
 
-const ONBOARDING_CACHE_KEY = 'ag-onboarding-status';
+const AUTH_STATUS_CACHE_KEY = 'ag-auth-status';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,8 +44,7 @@ const isAuthRpcError = (error: unknown): boolean => {
 // Types
 // ---------------------------------------------------------------------------
 
-export interface OnboardingStatus {
-  hasProfile: boolean;
+export interface AuthStatus {
   hasFarmMembership: boolean;
   farmId: string | null;
   farmName: string | null;
@@ -56,26 +55,26 @@ export interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthReady: boolean;
-  onboardingStatus: OnboardingStatus | null;
-  isFetchingOnboarding: boolean;
+  authStatus: AuthStatus | null;
+  isFetchingAuth: boolean;
   sessionExpired: boolean;
 
   // Methods
   sendOtp: (phone: string) => Promise<void>;
   verifyOtp: (phone: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
-  refreshOnboardingStatus: () => Promise<OnboardingStatus | null>;
+  refreshAuthStatus: () => Promise<AuthStatus | null>;
   clearSessionExpired: () => void;
 }
 
 /**
- * Fetch onboarding status with timeout and one auto-retry.
+ * Fetch auth status with timeout and one auto-retry.
  * Returns null only if both attempts fail/timeout.
  */
 async function fetchWithRetry(
-  fetchFn: () => Promise<OnboardingStatus | null>,
+  fetchFn: () => Promise<AuthStatus | null>,
   timeout = 10000
-): Promise<OnboardingStatus | null> {
+): Promise<AuthStatus | null> {
   const attempt = () =>
     Promise.race([
       fetchFn().catch(() => null),
@@ -103,10 +102,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
-  const [onboardingStatus, setOnboardingStatus] =
-    useState<OnboardingStatus | null>(null);
+  const [authStatus, setAuthStatus] =
+    useState<AuthStatus | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
-  const [isFetchingOnboarding, setIsFetchingOnboarding] = useState(false);
+  const [isFetchingAuth, setIsFetchingAuth] = useState(false);
 
   // Track if we're in the middle of OTP verification to prevent race conditions
   const isVerifyingRef = useRef(false);
@@ -118,33 +117,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isRecoveringAuthRef = useRef(false);
 
   // ---------------------------------------------------------------------------
-  // Onboarding Status
+  // Auth Status
   // ---------------------------------------------------------------------------
 
   /**
    * Attempt to recover from an auth RPC error by refreshing the token and
-   * retrying the onboarding RPC. Returns the status on success, or null if
+   * retrying the auth status RPC. Returns the status on success, or null if
    * recovery failed (caller should then expire the session).
    */
-  const attemptAuthRecovery = useCallback(async (): Promise<OnboardingStatus | null> => {
+  const attemptAuthRecovery = useCallback(async (): Promise<AuthStatus | null> => {
     try {
       isRecoveringAuthRef.current = true;
       const { data: { session: refreshed }, error: refreshError } =
         await supabase.auth.refreshSession();
 
       if (refreshed && !refreshError) {
-        debugLog('Auth', 'Token refresh succeeded, retrying onboarding RPC');
+        debugLog('Auth', 'Token refresh succeeded, retrying auth status RPC');
         const { data: retryData, error: retryError } =
           await supabase.rpc('get_onboarding_status');
 
         if (!retryError && retryData) {
-          const status: OnboardingStatus = {
-            hasProfile: retryData.has_profile ?? false,
+          const status: AuthStatus = {
             hasFarmMembership: retryData.has_farm_membership ?? false,
             farmId: retryData.farm_id ?? null,
             farmName: retryData.farm_name ?? null,
           };
-          try { localStorage.setItem(ONBOARDING_CACHE_KEY, JSON.stringify(status)); } catch { /* non-critical */ }
+          try { localStorage.setItem(AUTH_STATUS_CACHE_KEY, JSON.stringify(status)); } catch { /* non-critical */ }
           return status;
         }
         debugLog('Auth', 'Retry RPC failed after refresh');
@@ -163,17 +161,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSessionExpired(true);
     setSession(null);
     setUser(null);
-    setOnboardingStatus(null);
-    try { localStorage.removeItem(ONBOARDING_CACHE_KEY); } catch { /* non-critical */ }
+    setAuthStatus(null);
+    try { localStorage.removeItem(AUTH_STATUS_CACHE_KEY); } catch { /* non-critical */ }
   }, []);
 
-  const fetchOnboardingStatus =
-    useCallback(async (): Promise<OnboardingStatus | null> => {
+  const fetchAuthStatus =
+    useCallback(async (): Promise<AuthStatus | null> => {
       try {
         const { data, error } = await supabase.rpc('get_onboarding_status');
 
         if (error) {
-          debugError('Auth', 'Failed to fetch onboarding status:', error);
+          debugError('Auth', 'Failed to fetch auth status:', error);
 
           // Auth errors — try refreshing the token before expiring the session
           if (isAuthRpcError(error)) {
@@ -186,10 +184,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Non-auth errors: attempt to serve from cache (existing behavior)
           try {
-            const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+            const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
             if (cached) {
-              debugLog('Auth', 'Serving onboarding status from cache (RPC error)');
-              return JSON.parse(cached) as OnboardingStatus;
+              debugLog('Auth', 'Serving auth status from cache (RPC error)');
+              return JSON.parse(cached) as AuthStatus;
             }
           } catch {
             // Cache read failed (invalid JSON, etc.) -- fall through
@@ -197,9 +195,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return null;
         }
 
-        // RPC returns a single object with has_profile, has_farm_membership, farm_id, farm_name
-        const status: OnboardingStatus = {
-          hasProfile: data?.has_profile ?? false,
+        const status: AuthStatus = {
           hasFarmMembership: data?.has_farm_membership ?? false,
           farmId: data?.farm_id ?? null,
           farmName: data?.farm_name ?? null,
@@ -207,15 +203,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Cache successful result for offline fallback
         try {
-          localStorage.setItem(ONBOARDING_CACHE_KEY, JSON.stringify(status));
+          localStorage.setItem(AUTH_STATUS_CACHE_KEY, JSON.stringify(status));
         } catch {
           // localStorage may be full -- non-critical failure
-          debugError('Auth', 'Failed to cache onboarding status');
+          debugError('Auth', 'Failed to cache auth status');
         }
 
         return status;
       } catch (err) {
-        debugError('Auth', 'Error fetching onboarding status:', err);
+        debugError('Auth', 'Error fetching auth status:', err);
 
         // Auth errors — try refreshing the token before expiring the session
         if (isAuthRpcError(err)) {
@@ -228,10 +224,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Non-auth errors: attempt to serve from cache (existing behavior)
         try {
-          const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+          const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
           if (cached) {
-            debugLog('Auth', 'Serving onboarding status from cache (network error)');
-            return JSON.parse(cached) as OnboardingStatus;
+            debugLog('Auth', 'Serving auth status from cache (network error)');
+            return JSON.parse(cached) as AuthStatus;
           }
         } catch {
           // Cache read failed -- fall through
@@ -240,12 +236,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }, [attemptAuthRecovery, expireSession]);
 
-  const refreshOnboardingStatus =
-    useCallback(async (): Promise<OnboardingStatus | null> => {
-      const status = await fetchOnboardingStatus();
-      setOnboardingStatus(status);
+  const refreshAuthStatus =
+    useCallback(async (): Promise<AuthStatus | null> => {
+      const status = await fetchAuthStatus();
+      setAuthStatus(status);
       return status;
-    }, [fetchOnboardingStatus]);
+    }, [fetchAuthStatus]);
 
   // ---------------------------------------------------------------------------
   // Auth State Change Handler
@@ -264,9 +260,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Serve cached status immediately for instant rendering (returning users)
             let hasCachedStatus = false;
             try {
-              const cached = localStorage.getItem(ONBOARDING_CACHE_KEY);
+              const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
               if (cached) {
-                setOnboardingStatus(JSON.parse(cached) as OnboardingStatus);
+                setAuthStatus(JSON.parse(cached) as AuthStatus);
                 hasCachedStatus = true;
               }
             } catch { /* ignore cache read errors */ }
@@ -274,24 +270,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (hasCachedStatus) {
               // Cache available: mark auth ready immediately, refresh in background
               setIsAuthReady(true);
-              fetchOnboardingStatus().then(status => {
-                if (status) setOnboardingStatus(status);
+              fetchAuthStatus().then(status => {
+                if (status) setAuthStatus(status);
               }).catch(() => { /* non-critical: cached status is sufficient */ });
             } else {
               // No cache (new user / post-sign-out): mark auth ready immediately
               // and fetch in background. RequireOnboarded shows a clean spinner
-              // via isFetchingOnboarding, then retry UI if fetch fails.
-              setIsFetchingOnboarding(true);
+              // via isFetchingAuth, then retry UI if fetch fails.
+              setIsFetchingAuth(true);
               setIsAuthReady(true);
-              fetchOnboardingStatus()
+              fetchAuthStatus()
                 .then((status) => {
-                  if (status) setOnboardingStatus(status);
+                  if (status) setAuthStatus(status);
                 })
                 .catch(() => { /* RequireOnboarded retry UI handles this */ })
-                .finally(() => setIsFetchingOnboarding(false));
+                .finally(() => setIsFetchingAuth(false));
             }
           } else {
-            setOnboardingStatus(null);
+            setAuthStatus(null);
             setIsAuthReady(true);
           }
           break;
@@ -305,19 +301,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(authUser);
 
           if (authUser) {
-            setIsFetchingOnboarding(true);
+            setIsFetchingAuth(true);
             try {
-              const status = await fetchWithRetry(fetchOnboardingStatus);
-              if (status) setOnboardingStatus(status);
+              const status = await fetchWithRetry(fetchAuthStatus);
+              if (status) setAuthStatus(status);
             } finally {
-              setIsFetchingOnboarding(false);
+              setIsFetchingAuth(false);
             }
           }
           break;
         }
 
         case 'TOKEN_REFRESHED': {
-          // Update session and user, no need to re-fetch onboarding status
+          // Update session and user, no need to re-fetch auth status
           setSession(newSession);
           setUser(authUser);
           break;
@@ -332,7 +328,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSessionExpired(true);
           setSession(null);
           setUser(null);
-          setOnboardingStatus(null);
+          setAuthStatus(null);
           break;
         }
 
@@ -340,21 +336,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSession(newSession);
           setUser(authUser);
 
-          // Refresh onboarding status in case user data changed
+          // Refresh auth status in case user data changed
           if (authUser) {
-            setIsFetchingOnboarding(true);
+            setIsFetchingAuth(true);
             try {
-              const status = await fetchWithRetry(fetchOnboardingStatus);
-              if (status) setOnboardingStatus(status);
+              const status = await fetchWithRetry(fetchAuthStatus);
+              if (status) setAuthStatus(status);
             } finally {
-              setIsFetchingOnboarding(false);
+              setIsFetchingAuth(false);
             }
           }
           break;
         }
       }
     },
-    [fetchOnboardingStatus]
+    [fetchAuthStatus]
   );
 
   // ---------------------------------------------------------------------------
@@ -432,19 +428,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setSession(authSession);
         setUser(authUser);
 
-        // Fetch onboarding status for the newly verified user
-        setIsFetchingOnboarding(true);
+        // Fetch auth status for the newly verified user
+        setIsFetchingAuth(true);
         try {
-          const status = await fetchOnboardingStatus();
-          setOnboardingStatus(status);
+          const status = await fetchAuthStatus();
+          setAuthStatus(status);
         } finally {
-          setIsFetchingOnboarding(false);
+          setIsFetchingAuth(false);
         }
       } finally {
         isVerifyingRef.current = false;
       }
     },
-    [fetchOnboardingStatus]
+    [fetchAuthStatus]
   );
 
   const signOut = useCallback(async (): Promise<void> => {
@@ -458,9 +454,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       debugError('Auth', 'Sign out error:', error);
     }
 
-    // Clear PowerSync local database
+    // Clear PowerSync local database (timeout prevents hanging on uninitialized instance)
     try {
-      await disconnectAndClear();
+      await Promise.race([
+        disconnectAndClear(),
+        new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+      ]);
     } catch (error) {
       debugError('Auth', 'Failed to clear PowerSync:', error);
     }
@@ -468,9 +467,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Clear active farm override (super admin cross-farm state)
     useActiveFarmStore.getState().clearOverride();
 
-    // Clear onboarding status cache BEFORE state setters
+    // Clear auth status cache BEFORE state setters
     try {
-      localStorage.removeItem(ONBOARDING_CACHE_KEY);
+      localStorage.removeItem(AUTH_STATUS_CACHE_KEY);
     } catch {
       // Non-critical -- localStorage may be unavailable
     }
@@ -478,7 +477,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Clear local state
     setSession(null);
     setUser(null);
-    setOnboardingStatus(null);
+    setAuthStatus(null);
 
     userInitiatedSignOut.current = false;
   }, []);
@@ -495,13 +494,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     session,
     isAuthReady,
-    onboardingStatus,
-    isFetchingOnboarding,
+    authStatus,
+    isFetchingAuth,
     sessionExpired,
     sendOtp,
     verifyOtp,
     signOut,
-    refreshOnboardingStatus,
+    refreshAuthStatus,
     clearSessionExpired,
   };
 
