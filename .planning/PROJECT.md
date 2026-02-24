@@ -8,6 +8,17 @@ An offline-first PWA for agricultural water management. Farm owners (growers) tr
 
 Field agents can reliably record water meter readings in areas with poor connectivity, and that data syncs automatically when they're back online. The app must never lose data and must never lock users out when they're offline.
 
+## Current Milestone: v4.0 Performance & Perceived Speed
+
+**Goal:** Transform the app from "works correctly" to "feels native-fast" by addressing code splitting, loading state UX, asset optimization, service worker intelligence, and navigation fluidity.
+
+**Target features:**
+- Route-level code splitting with lazy-loaded pages and isolated Mapbox chunk
+- Loading state collapse (3 sequential spinners → skeleton screens)
+- Asset optimization (11MB auth background → <300KB modern formats)
+- Intelligent service worker caching for app code and offline auth
+- Navigation fluidity (query waterfalls, View Transitions, optimistic UI)
+
 ## Requirements
 
 ### Validated
@@ -47,34 +58,45 @@ Field agents can reliably record water meter readings in areas with poor connect
 - ✓ Reading edit/delete for grower/admin roles -- v2.0
 - ✓ Real allocation percentage on map markers -- v2.0
 - ✓ Latest reading dates on well list page -- v2.0
+- ✓ Subscription tier DB tables with offline sync -- v3.0
+- ✓ DB-driven tier hooks replacing hardcoded limits -- v3.0
+- ✓ Well count and seat limit enforcement from DB config -- v3.0
+- ✓ Subscription page with tier usage display -- v3.0
+- ✓ Permission enforcement (meter checkers gated from editing) -- v3.0
+- ✓ Login-only auth flow (onboarding removed) -- v3.0
+- ✓ Farm data isolation audit (RLS + sync rules verified) -- v3.0
 
 ### Active
 
-<!-- Current scope: v3.0 Subscriptions & Permissions -->
+<!-- Current scope: v4.0 Performance & Perceived Speed -->
 
-**Registration Removal:**
-- [ ] Remove in-app registration flow (ProfilePage, CreateFarmPage, onboarding routes)
-- [ ] Clean login-only flow: Phone OTP → farm check → dashboard or redirect
-- [ ] Full cleanup of old onboarding code paths (connector, guards, state, imports)
-- [ ] "No subscription" redirect page for users without a farm
+**Code Splitting & Bundle:**
+- [ ] Route-level lazy loading for all page components
+- [ ] Mapbox GL JS isolated to its own chunk (not in vendor bundle)
+- [ ] Preconnect/preload resource hints in HTML
+- [ ] Navigation-intent prefetch on menu hover/touch
 
-**Subscription Tiers:**
-- [ ] `subscription_tiers` DB config table (Basic/Pro limits, updatable without code deploy)
-- [ ] `app_settings` DB config table (subscription website URL, global config)
-- [ ] `farms.subscription_tier` column linking each farm to a tier
-- [ ] Seat limits enforced per tier (growers, admins, meter checkers)
-- [ ] Well limits enforced per tier (Basic: 5, Pro: 10)
-- [ ] Subscription page shows current tier, usage, and "Manage Plan" placeholder
+**Loading States:**
+- [ ] PowerSync provider renders children immediately (non-blocking)
+- [ ] Sequential auth spinners collapsed into single loading state
+- [ ] Skeleton screens for Dashboard, Well List, Well Detail
+- [ ] RequireRole shows skeleton instead of blank during loading
+- [ ] Sign-out completes in <500ms (was 2s)
 
-**Role Permissions:**
-- [ ] Well edit/delete gated to grower and admin only
-- [ ] Allocation management gated to grower and admin only
-- [ ] Well detail edit button hidden for meter checkers
+**Asset Optimization:**
+- [ ] bg-farm.jpg compressed from 11MB to <300KB (AVIF/WebP)
+- [ ] Background image lazy-loaded (not fetched for authenticated users)
+- [ ] Preconnect hints for Supabase, Mapbox, PowerSync endpoints
 
-**Farm Data Isolation:**
-- [ ] Verify RLS policies filter all tables by farm_id
-- [ ] Verify PowerSync sync rules filter by farm_id
-- [ ] Verify super_admin cross-farm bypass is consistent
+**Service Worker:**
+- [ ] Navigation preload enabled
+- [ ] App code cached intelligently (not just map tiles)
+- [ ] Auth pages cached for offline returnability
+
+**Navigation Fluidity:**
+- [ ] useSubscriptionTier query waterfall collapsed to single JOIN
+- [ ] View Transitions API for smooth page changes
+- [ ] Optimistic UI for well creation
 
 ### Out of Scope
 
@@ -92,20 +114,31 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ## Context
 
-**Shipped:** v1.0 MVP + v1.1 Dashboard & Map + v2.0 Meter Readings & Allocations.
+**Shipped:** v1.0 MVP + v1.1 Dashboard & Map + v2.0 Meter Readings & Allocations + v3.0 Subscriptions & Permissions.
 
-**Current milestone:** v3.0 Subscriptions & Permissions — multi-tier subscription system, login-only app (registration removed), role permission enforcement, farm data isolation.
+**Current milestone:** v4.0 Performance & Perceived Speed — code splitting, loading state optimization, asset compression, service worker intelligence, navigation fluidity.
 
 **Codebase:** ~10,439 LOC TypeScript/CSS. Stack is React 19 + Vite 6 + PowerSync + Supabase + Mapbox GL. The app has solid auth, role-based access, invite system, user management, subscription gating, polished map experience, and complete meter reading/allocation workflow.
 
 **What's built:**
-- Auth: Phone OTP, session recovery, offline persistence, error boundaries
+- Auth: Phone OTP, session recovery, offline persistence, error boundaries, login-only flow
 - Roles: 4-role system with RLS, route guards, UI gating, super admin cross-farm
 - Users: Invite system with SMS, user management, disable/enable, subscription gating
 - Map: Satellite view with well markers showing real allocation gauges, GPS fly-to, soft-ask location
 - Wells: Detail page with slide-up sheet, usage gauge, status indicators, readings history
 - Readings: Record/edit/delete with GPS capture, similar reading warning, meter problem reporting
 - Allocations: Period-based CRUD with auto-calculated usage and manual override
+- Subscriptions: DB-driven tiers, well/seat limits, subscription page, permission enforcement
+
+**Performance bottlenecks identified:**
+- No route-level code splitting (all 13 pages eagerly imported, Mapbox bundled with vendor)
+- 3 sequential full-screen spinners (RequireAuth → RequireOnboarded → PowerSync init)
+- 11.46MB bg-farm.jpg on auth pages (no compression, no modern formats)
+- 2-second sign-out delay (PowerSync disconnect timeout)
+- RequireRole renders null during loading (blank flash)
+- No preconnect/preload hints in HTML
+- useSubscriptionTier 2-step query waterfall
+- Service worker only caches map tiles, not app code
 
 **Known tech debt / manual steps:**
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -157,10 +190,10 @@ Field agents can reliably record water meter readings in areas with poor connect
 | Cascade delete via writeTransaction | PowerSync local SQLite doesn't enforce FK cascades, so manual cascade in transaction | ✓ Good |
 | react-mobile-picker for date selection | iOS-style scroll wheel for month/year. Better mobile UX than native date input | ✓ Good |
 | Batch query hooks with Map<id, T> | O(1) lookup in rendering loops for allocation/reading data per well | ✓ Good |
-| Login-only app | Registration moves to future landing page. Cleaner session handling, simpler app | — Pending |
-| Subscription tiers in DB table | Updatable without code deployment. PowerSync syncs to app. Better than env vars for runtime config | — Pending |
+| Login-only app | Registration moves to future landing page. Cleaner session handling, simpler app | ✓ Good |
+| Subscription tiers in DB table | Updatable without code deployment. PowerSync syncs to app. Better than env vars for runtime config | ✓ Good |
 | Separate landing page (future) | Marketing + Stripe on www. subdomain, app on app. subdomain. SEO, performance, independence | — Pending |
 | Stripe Customer Portal for upgrades | Zero payment UI to build. Webhook updates DB, PowerSync syncs in real-time | — Pending |
 
 ---
-*Last updated: 2026-02-21 after v3.0 milestone start*
+*Last updated: 2026-02-24 after v4.0 milestone start*
