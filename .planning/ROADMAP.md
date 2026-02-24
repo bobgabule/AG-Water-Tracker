@@ -5,7 +5,8 @@
 - v1.0 MVP -- Phases 1-8 (shipped 2026-02-11)
 - v1.1 Dashboard & Map -- Phases 9-11 (shipped 2026-02-12)
 - v2.0 Meter Readings & Allocations -- Phases 12-16 (shipped 2026-02-21)
-- v3.0 Subscriptions & Permissions -- Phases 17-22 (in progress)
+- v3.0 Subscriptions & Permissions -- Phases 17-22 (shipped 2026-02-23)
+- v4.0 Performance & Perceived Speed -- Phases 23-27 (in progress)
 
 ## Phases
 
@@ -43,14 +44,25 @@
 
 </details>
 
-### v3.0 -- Subscriptions & Permissions (In Progress)
+<details>
+<summary>v3.0 -- Subscriptions & Permissions (Phases 17-22) -- Complete</summary>
 
 - [x] **Phase 17: Subscription Database Foundation** - Create subscription_tiers and app_settings tables, add farms.subscription_tier column with tier linkage
-- [x] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits (completed 2026-02-22)
+- [x] **Phase 18: Tier Sync & Hooks** - PowerSync global bucket sync for config tables, reactive hooks replacing hardcoded plan limits
 - [x] **Phase 19: Permission Enforcement** - Extend permission matrix with fine-grained actions, gate well edit/delete and allocation management to grower/admin only
-- [x] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage (completed 2026-02-22)
+- [x] **Phase 20: Subscription Limits & Page** - Well count and seat limit enforcement from DB-driven config, subscription page showing tier usage
 - [x] **Phase 21: Login-Only Auth Flow** - Backend invite auto-matching RPC, remove registration pages, clean login-only path with no-subscription redirect
-- [x] **Phase 22: Farm Data Isolation Audit** - Verify RLS policies, PowerSync sync rules, and super_admin bypass filter all data by farm_id (completed 2026-02-22)
+- [x] **Phase 22: Farm Data Isolation Audit** - Verify RLS policies, PowerSync sync rules, and super_admin bypass filter all data by farm_id
+
+</details>
+
+### v4.0 -- Performance & Perceived Speed (In Progress)
+
+- [ ] **Phase 23: Route-Level Code Splitting & Bundle Optimization** - Lazy-load all pages, isolate Mapbox chunk, add resource hints, menu prefetch
+- [ ] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay
+- [ ] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users
+- [ ] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience
+- [ ] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation
 
 ## Phase Details
 
@@ -165,91 +177,96 @@
 
 </details>
 
-### v3.0 Phase Details
+<details>
+<summary>v3.0 Phase Details (Complete)</summary>
 
 ### Phase 17: Subscription Database Foundation
 **Goal**: The database has subscription tier configuration tables and farm-to-tier linkage so that tier limits are queryable and updatable without code deploys
 **Depends on**: Phase 16 (existing codebase)
 **Requirements**: TIER-01, TIER-02, TIER-03
-**Success Criteria** (what must be TRUE):
-  1. A `subscription_tiers` table exists with Starter and Pro tiers containing per-role seat limits and well limits
-  2. An `app_settings` table exists with key-value config rows including subscription website URL
-  3. Every farm has a `subscription_tier` column (NOT NULL, no default) that links to subscription_tiers, with existing farms set to 'pro'
-  4. Tier limits can be changed via direct DB update without redeploying the app
-**Plans**: 1 plan
-Plans:
-- [x] 17-01-PLAN.md -- Create subscription tier tables, app settings, and farm-tier linkage migration
+**Plans**: 1 plan (17-01)
 
 ### Phase 18: Tier Sync & Hooks
 **Goal**: Subscription tier data is available offline in the app and accessed through reactive hooks instead of hardcoded constants
 **Depends on**: Phase 17
 **Requirements**: TIER-04, TIER-05
-**Success Criteria** (what must be TRUE):
-  1. Opening the app offline shows correct subscription tier data from local SQLite (not stale or missing)
-  2. `useSubscriptionTier()` hook returns the farm's tier limits (seat counts, well limits) from synced data
-  3. Changing a tier value in the database propagates to the app within seconds when online
-  4. The hardcoded `PLAN_LIMITS` constant in `subscription.ts` is replaced by the DB-driven hook
-**Plans**: 2 plans
-Plans:
-- [x] 18-01-PLAN.md -- Create useAppSetting hook, add AddUserModal loading state, deploy sync rules
-- [ ] 18-02-PLAN.md -- Add well count display and Manage Plan button to SubscriptionPage
+**Plans**: 2 plans (18-01, 18-02)
 
 ### Phase 19: Permission Enforcement
 **Goal**: Meter checkers cannot access well editing or allocation management features in the UI
 **Depends on**: Phase 16 (existing codebase)
 **Requirements**: PERM-01, PERM-02, PERM-03, PERM-04
-**Success Criteria** (what must be TRUE):
-  1. Meter checker navigating to `/wells/:id/edit` is redirected away (route guard)
-  2. Meter checker viewing a well detail page does not see the edit button
-  3. Meter checker navigating to `/wells/:id/allocations` cannot create, edit, or delete allocations
-  4. `permissions.ts` contains `edit_well`, `delete_well`, and `manage_allocations` actions with grower/admin access only
-**Plans**: 2 plans
-Plans:
-- [x] 19-01-PLAN.md -- Update permission matrix to 12-action system, add route guards, gate Users nav item
-- [x] 19-02-PLAN.md -- Hide edit button for meter checkers on well detail, hide farm settings on Settings page
+**Plans**: 2 plans (19-01, 19-02)
 
 ### Phase 20: Subscription Limits & Page
 **Goal**: Users see their farm's subscription tier, current usage, and are prevented from exceeding tier limits for wells and seats
 **Depends on**: Phase 18, Phase 19
 **Requirements**: TIER-06, TIER-07, TIER-08
-**Success Criteria** (what must be TRUE):
-  1. "New Well" button is disabled with a message when the farm has reached its tier well limit (Basic: 5, Pro: 10)
-  2. Seat limits on the invite form read from DB-driven tier config instead of hardcoded constants
-  3. Subscription page displays current tier name, per-role seat usage, well count vs limit, and a "Manage Plan" link
-  4. All limit enforcement works correctly when the app is offline
-**Plans**: 2 plans
-Plans:
-- [ ] 20-01-PLAN.md -- Create well limit enforcement with WellLimitModal, useWellCount hook, and subscriptionUrls utility
-- [ ] 20-02-PLAN.md -- Add upgrade links to seat limit UI, fix subscription page well count, add Settings subscription link
+**Plans**: 2 plans (20-01, 20-02)
 
 ### Phase 21: Login-Only Auth Flow
 **Goal**: The app is login-only with no self-service registration -- invited users auto-join on first OTP and users without a farm see a clear redirect
-**Depends on**: Phase 18 (app_settings for redirect URL), Phase 19 (permissions deployed before auth changes)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07
-**Success Criteria** (what must be TRUE):
-  1. A user with a pending farm invite completes phone OTP and lands directly on the dashboard with correct farm membership (no profile or farm creation steps)
-  2. A user without any farm membership sees a "No Subscription" page with a link to the subscription website
-  3. The `/onboarding/*` routes, ProfilePage, and CreateFarmPage no longer exist in the app
-  4. No dead imports, unused hooks, or orphaned utilities from the old onboarding flow remain in the codebase
-  5. The supabaseConnector login path is simplified to: OTP verify -> farm check -> dashboard or no-subscription redirect
-**Plans**: 3 plans
-Plans:
-- [x] 21-01-PLAN.md -- Backend auto-join RPC update (invite delete after use)
-- [x] 21-02-PLAN.md -- Frontend onboarding removal, NoSubscriptionPage, auth flow simplification
-- [x] 21-03-PLAN.md -- Gap closure: fix RPC wrapper, auto-redirect race condition, sign-out speed
+**Depends on**: Phase 18, Phase 19
+**Requirements**: AUTH-01 through AUTH-07
+**Plans**: 3 plans (21-01, 21-02, 21-03)
 
 ### Phase 22: Farm Data Isolation Audit
 **Goal**: Every database query and sync rule correctly isolates farm data, with verified super_admin cross-farm access
 **Depends on**: Phase 17, Phase 18, Phase 19, Phase 20, Phase 21
 **Requirements**: ISO-01, ISO-02, ISO-03
+**Plans**: 2 plans (22-01, 22-02)
+
+</details>
+
+### v4.0 Phase Details
+
+### Phase 23: Route-Level Code Splitting & Bundle Optimization
+**Goal**: Each app section loads only the code it needs -- auth pages never download Mapbox GL JS, and resource hints eliminate DNS waterfalls
+**Depends on**: Nothing (first v4.0 phase)
+**Requirements**: SPLIT-01, SPLIT-02, SPLIT-03, SPLIT-04, SPLIT-05, ASSET-03
 **Success Criteria** (what must be TRUE):
-  1. RLS policies on wells, readings, allocations, and farm_members all filter by farm_id with no bypass for regular users
-  2. PowerSync sync rules filter every data table by the user's farm_id, preventing cross-farm data leakage
-  3. Super admin can access data across all farms consistently in both RLS policies and sync rules
-**Plans**: 2 plans
-Plans:
-- [x] 22-01-PLAN.md -- Clean stale RPC code, add super_admin_user_id setting, write audit report
-- [ ] 22-02-PLAN.md -- Fix 13 client-side files to use useActiveFarm, add persist + maroon header
+  1. User opening the login page downloads an auth chunk under 50KB (no Mapbox, no well management code)
+  2. Mapbox GL JS loads as a separate chunk only when the user navigates to the dashboard or map view
+  3. Every page component is lazy-loaded via React.lazy with a consistent Suspense fallback
+  4. Browser DevTools shows preconnect requests for Supabase, Mapbox, PowerSync before any app JS executes
+  5. Hovering or touching a side menu link triggers a prefetch of that page's chunk before the user taps
+
+### Phase 24: Loading State Collapse & Skeleton Screens
+**Goal**: Returning users see the app shell instantly, and every data page shows structured placeholders instead of blank screens or sequential spinners
+**Depends on**: Phase 23 (Suspense boundaries must exist)
+**Requirements**: LOAD-01, LOAD-02, LOAD-03, LOAD-04, LOAD-05, LOAD-06, LOAD-07
+**Success Criteria** (what must be TRUE):
+  1. Returning user with cached auth sees the app shell (header + side menu) within 300ms -- no full-screen spinner
+  2. Dashboard shows skeleton screen with placeholder map area and button outlines while data loads
+  3. Well List and Well Detail pages show animated skeleton rows/cards instead of blank screen while data loads
+  4. RequireRole renders the page skeleton (not blank) while user's role loads from PowerSync
+  5. Tapping sign-out returns user to login page in under 500ms (no 2-second freeze)
+
+### Phase 25: Asset Optimization
+**Goal**: Auth page background loads fast on any connection and is never fetched by dashboard users
+**Depends on**: Nothing (independent -- can run in parallel with Phase 24)
+**Requirements**: ASSET-01, ASSET-02
+**Success Criteria** (what must be TRUE):
+  1. Auth page background loads in under 1 second on 3G -- under 300KB using AVIF/WebP/JPEG fallbacks
+  2. Authenticated users navigating directly to dashboard see zero network requests for the background image
+
+### Phase 26: Service Worker Intelligence
+**Goal**: The service worker caches app code intelligently, serves pages from cache on repeat visits, and provides a usable offline auth experience
+**Depends on**: Phase 23 (needs final chunk structure for caching strategy)
+**Requirements**: SW-01, SW-02, SW-03
+**Success Criteria** (what must be TRUE):
+  1. Navigation preload enabled so service worker boot and navigation fetch happen in parallel
+  2. After visiting a page once, subsequent visits load from service worker cache with zero network requests for that chunk
+  3. Opening the app offline on the login page shows the cached auth shell with an offline message (not a browser error page)
+
+### Phase 27: Query Optimization & Navigation Fluidity
+**Goal**: Data queries are optimized, page transitions are smooth, and well creation feels instant
+**Depends on**: Phase 24 (skeleton screens must exist for deferred loading)
+**Requirements**: NAV-01, NAV-02, NAV-03
+**Success Criteria** (what must be TRUE):
+  1. useSubscriptionTier fires a single SQL JOIN query instead of two sequential queries
+  2. Page transitions show smooth cross-fade via View Transitions API on supported browsers (graceful fallback on others)
+  3. New well marker appears on the map immediately after creation, before PowerSync sync completes
 
 ## Progress
 
@@ -257,12 +274,8 @@ Plans:
 - v1.0: Phases 1 -> 8 (complete)
 - v1.1: Phases 9 -> 10 -> 11 (complete)
 - v2.0: Phases 12 -> 13 -> 14 + 15 (parallel after 13) -> 16 (complete)
-- v3.0: Phase 17 -> 18 + 19 (parallel) -> 20 -> 21 -> 22
-
-**Critical sequencing notes (v3.0):**
-- Phase 19 (Permission UI) must deploy BEFORE any RLS tightening to prevent offline queue corruption
-- Phase 21 requires AUTH-06 (backend auto-matching RPC) deployed BEFORE AUTH-01 (registration removal)
-- Phases 18 and 19 can run in parallel (no dependency between them)
+- v3.0: Phase 17 -> 18 + 19 (parallel) -> 20 -> 21 -> 22 (complete)
+- v4.0: Phase 23 -> 24 + 25 (parallel) -> 26 -> 27
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -282,9 +295,14 @@ Plans:
 | 14. Record Meter Reading | v2.0 | 2/2 | Complete | 2026-02-19 |
 | 15. Well Editing & Allocation Management | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 16. Reading Management & Map Integration | v2.0 | 2/2 | Complete | 2026-02-19 |
-| 17. Subscription Database Foundation | v3.0 | Complete    | 2026-02-21 | 2026-02-22 |
-| 18. Tier Sync & Hooks | 2/2 | Complete    | 2026-02-22 | - |
-| 19. Permission Enforcement | v3.0 | Complete    | 2026-02-22 | 2026-02-22 |
-| 20. Subscription Limits & Page | 2/2 | Complete    | 2026-02-22 | - |
-| 21. Login-Only Auth Flow | v3.0 | Complete    | 2026-02-23 | 2026-02-23 |
-| 22. Farm Data Isolation Audit | 2/2 | Complete    | 2026-02-22 | - |
+| 17. Subscription Database Foundation | v3.0 | 1/1 | Complete | 2026-02-22 |
+| 18. Tier Sync & Hooks | v3.0 | 2/2 | Complete | 2026-02-22 |
+| 19. Permission Enforcement | v3.0 | 2/2 | Complete | 2026-02-22 |
+| 20. Subscription Limits & Page | v3.0 | 2/2 | Complete | 2026-02-22 |
+| 21. Login-Only Auth Flow | v3.0 | 3/3 | Complete | 2026-02-23 |
+| 22. Farm Data Isolation Audit | v3.0 | 2/2 | Complete | 2026-02-22 |
+| 23. Code Splitting & Bundle | v4.0 | 0/? | Not Started | — |
+| 24. Loading States & Skeletons | v4.0 | 0/? | Not Started | — |
+| 25. Asset Optimization | v4.0 | 0/? | Not Started | — |
+| 26. Service Worker Intelligence | v4.0 | 0/? | Not Started | — |
+| 27. Query & Navigation Fluidity | v4.0 | 0/? | Not Started | — |
