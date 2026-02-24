@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import bgFarm from '../../assets/bg-farm.webp';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -17,7 +18,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(20, 40, 60, 0.9), rgba(10, 30, 20, 0.7)),
-            url('/bg-farm.jpg')`,
+            url(${bgFarm})`,
           backgroundColor: '#1a3a2a',
         }}
       />
