@@ -262,6 +262,9 @@ Plans:
 **Goal**: The service worker caches app code intelligently, serves pages from cache on repeat visits, and provides a usable offline auth experience
 **Depends on**: Phase 23 (needs final chunk structure for caching strategy)
 **Requirements**: SW-01, SW-02, SW-03
+**Plans**: 1 plan
+Plans:
+- [ ] 26-01-PLAN.md — Workbox navigation preload + WebP precaching, offline auth page banner with disabled form
 **Success Criteria** (what must be TRUE):
   1. Navigation preload enabled so service worker boot and navigation fetch happen in parallel
   2. After visiting a page once, subsequent visits load from service worker cache with zero network requests for that chunk
