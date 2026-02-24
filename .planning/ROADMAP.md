@@ -224,6 +224,10 @@
 **Goal**: Each app section loads only the code it needs -- auth pages never download Mapbox GL JS, and resource hints eliminate DNS waterfalls
 **Depends on**: Nothing (first v4.0 phase)
 **Requirements**: SPLIT-01, SPLIT-02, SPLIT-03, SPLIT-04, SPLIT-05, ASSET-03
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Per-route Suspense/error boundaries, PageLoader, LazyErrorBoundary, Vite chunk config, resource hints
+- [ ] 23-02-PLAN.md — Prefetch system with debounce, dedup, network awareness, mobile sequential prefetch
 **Success Criteria** (what must be TRUE):
   1. User opening the login page downloads an auth chunk under 50KB (no Mapbox, no well management code)
   2. Mapbox GL JS loads as a separate chunk only when the user navigates to the dashboard or map view
@@ -301,7 +305,7 @@
 | 20. Subscription Limits & Page | v3.0 | 2/2 | Complete | 2026-02-22 |
 | 21. Login-Only Auth Flow | v3.0 | 3/3 | Complete | 2026-02-23 |
 | 22. Farm Data Isolation Audit | v3.0 | 2/2 | Complete | 2026-02-22 |
-| 23. Code Splitting & Bundle | v4.0 | 0/? | Not Started | — |
+| 23. Code Splitting & Bundle | v4.0 | 0/2 | Planned | — |
 | 24. Loading States & Skeletons | v4.0 | 0/? | Not Started | — |
 | 25. Asset Optimization | v4.0 | 0/? | Not Started | — |
 | 26. Service Worker Intelligence | v4.0 | 0/? | Not Started | — |
