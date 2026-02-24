@@ -19,10 +19,10 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 - [x] **LOAD-01**: PowerSync provider renders app shell (Header + SideMenu) immediately while database initializes in the background
 - [x] **LOAD-02**: Returning user with cached auth sees app shell within 300ms, not a full-screen spinner
-- [ ] **LOAD-03**: Dashboard shows skeleton screen (placeholder map area, floating button outlines) while data loads
-- [ ] **LOAD-04**: Well List page shows skeleton screen (animated placeholder rows) while data loads
-- [ ] **LOAD-05**: Well Detail page shows skeleton screen (header shimmer, metrics placeholders) while data loads
-- [ ] **LOAD-06**: RequireRole shows page skeleton instead of blank screen while role loads from PowerSync
+- [x] **LOAD-03**: Dashboard shows skeleton screen (placeholder map area, floating button outlines) while data loads
+- [x] **LOAD-04**: Well List page shows skeleton screen (animated placeholder rows) while data loads
+- [x] **LOAD-05**: Well Detail page shows skeleton screen (header shimmer, metrics placeholders) while data loads
+- [x] **LOAD-06**: RequireRole shows page skeleton instead of blank screen while role loads from PowerSync
 - [x] **LOAD-07**: Sign-out completes in under 500ms (currently 2000ms due to PowerSync disconnect timeout)
 
 ### Asset Optimization
@@ -98,10 +98,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SPLIT-05 | Phase 23 | Complete |
 | LOAD-01 | Phase 24 | Complete |
 | LOAD-02 | Phase 24 | Complete |
-| LOAD-03 | Phase 24 | Pending |
-| LOAD-04 | Phase 24 | Pending |
-| LOAD-05 | Phase 24 | Pending |
-| LOAD-06 | Phase 24 | Pending |
+| LOAD-03 | Phase 24 | Complete |
+| LOAD-04 | Phase 24 | Complete |
+| LOAD-05 | Phase 24 | Complete |
+| LOAD-06 | Phase 24 | Complete |
 | LOAD-07 | Phase 24 | Complete |
 | ASSET-01 | Phase 25 | Pending |
 | ASSET-02 | Phase 25 | Pending |
