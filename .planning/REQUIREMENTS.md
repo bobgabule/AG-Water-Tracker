@@ -91,32 +91,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SPLIT-01 | — | Pending |
-| SPLIT-02 | — | Pending |
-| SPLIT-03 | — | Pending |
-| SPLIT-04 | — | Pending |
-| SPLIT-05 | — | Pending |
-| LOAD-01 | — | Pending |
-| LOAD-02 | — | Pending |
-| LOAD-03 | — | Pending |
-| LOAD-04 | — | Pending |
-| LOAD-05 | — | Pending |
-| LOAD-06 | — | Pending |
-| LOAD-07 | — | Pending |
-| ASSET-01 | — | Pending |
-| ASSET-02 | — | Pending |
-| ASSET-03 | — | Pending |
-| SW-01 | — | Pending |
-| SW-02 | — | Pending |
-| SW-03 | — | Pending |
-| NAV-01 | — | Pending |
-| NAV-02 | — | Pending |
-| NAV-03 | — | Pending |
+| SPLIT-01 | Phase 23 | Pending |
+| SPLIT-02 | Phase 23 | Pending |
+| SPLIT-03 | Phase 23 | Pending |
+| SPLIT-04 | Phase 23 | Pending |
+| SPLIT-05 | Phase 23 | Pending |
+| LOAD-01 | Phase 24 | Pending |
+| LOAD-02 | Phase 24 | Pending |
+| LOAD-03 | Phase 24 | Pending |
+| LOAD-04 | Phase 24 | Pending |
+| LOAD-05 | Phase 24 | Pending |
+| LOAD-06 | Phase 24 | Pending |
+| LOAD-07 | Phase 24 | Pending |
+| ASSET-01 | Phase 25 | Pending |
+| ASSET-02 | Phase 25 | Pending |
+| ASSET-03 | Phase 23 | Pending |
+| SW-01 | Phase 26 | Pending |
+| SW-02 | Phase 26 | Pending |
+| SW-03 | Phase 26 | Pending |
+| NAV-01 | Phase 27 | Pending |
+| NAV-02 | Phase 27 | Pending |
+| NAV-03 | Phase 27 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-24*
