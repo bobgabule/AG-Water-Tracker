@@ -239,6 +239,10 @@ Plans:
 **Goal**: Returning users see the app shell instantly, and every data page shows structured placeholders instead of blank screens or sequential spinners
 **Depends on**: Phase 23 (Suspense boundaries must exist)
 **Requirements**: LOAD-01, LOAD-02, LOAD-03, LOAD-04, LOAD-05, LOAD-06, LOAD-07
+**Plans**: 2 plans
+Plans:
+- [ ] 24-01-PLAN.md — Skeleton primitives, non-blocking PowerSync provider, fast sign-out
+- [ ] 24-02-PLAN.md — Page-specific skeleton screens, RequireRole skeleton fallback, fade transitions
 **Success Criteria** (what must be TRUE):
   1. Returning user with cached auth sees the app shell (header + side menu) within 300ms -- no full-screen spinner
   2. Dashboard shows skeleton screen with placeholder map area and button outlines while data loads
