@@ -5,23 +5,37 @@ import { useQuery } from '@powersync/react';
 import Header from './Header';
 import SideMenu from './SideMenu';
 import { ErrorFallback } from './ErrorFallback';
-import { PowerSyncProvider } from '../lib/PowerSyncContext';
+import { PowerSyncProvider, usePowerSyncStatus } from '../lib/PowerSyncContext';
 import { useAuth } from '../lib/AuthProvider';
 import { useRoleChangeDetector } from '../hooks/useRoleChangeDetector';
 import Toast from './Toast';
+import { SkeletonBlock, SkeletonLine } from './skeletons/SkeletonPrimitives';
 
 /**
- * Inner component rendered inside PowerSyncProvider.
- * Farm name comes from auth state (no PowerSync query needed).
- *
- * ErrorBoundary wraps only <Outlet /> so that page crashes preserve
- * Header and SideMenu navigation — users can navigate away without a
- * full page reload. resetKeys tied to pathname ensures the boundary
- * resets automatically when the user navigates to a different route.
+ * Lightweight skeleton shown in the content area while PowerSync initializes.
+ * The app shell (Header + SideMenu) is already rendered and interactive.
  */
-function AppLayoutContent() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const { user, onboardingStatus, signOut } = useAuth();
+function ContentSkeleton() {
+  return (
+    <div className="p-4 space-y-4">
+      <SkeletonLine width="w-1/3" height="h-6" />
+      <SkeletonBlock height="h-48" />
+      <div className="space-y-2">
+        <SkeletonLine width="w-full" />
+        <SkeletonLine width="w-2/3" />
+        <SkeletonLine width="w-1/2" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Content rendered inside PowerSyncProvider once the database is ready.
+ * Contains membership detection and role change monitoring that depend
+ * on PowerSync queries.
+ */
+function PowerSyncContent() {
+  const { user, authStatus, signOut } = useAuth();
   const location = useLocation();
 
   // Detect server-side role changes and force data refresh
@@ -34,10 +48,10 @@ function AppLayoutContent() {
   const removalTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data: membershipRows } = useQuery<{ cnt: number }>(
-    user?.id && onboardingStatus?.hasFarmMembership
+    user?.id && authStatus?.hasFarmMembership
       ? 'SELECT COUNT(*) as cnt FROM farm_members WHERE user_id = ?'
       : 'SELECT NULL WHERE 0',
-    user?.id && onboardingStatus?.hasFarmMembership ? [user.id] : []
+    user?.id && authStatus?.hasFarmMembership ? [user.id] : []
   );
 
   useEffect(() => {
@@ -66,8 +80,47 @@ function AppLayoutContent() {
     };
   }, [membershipRows, signOut]);
 
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      resetKeys={[location.pathname]}
+    >
+      <Outlet />
+    </ErrorBoundary>
+  );
+}
+
+/**
+ * Gate that renders content skeleton while PowerSync initializes,
+ * then renders the PowerSync-dependent content once the database is ready.
+ * Must be a child of PowerSyncProvider.
+ */
+function PowerSyncGate() {
+  const { loading } = usePowerSyncStatus();
+
+  if (loading) {
+    return <ContentSkeleton />;
+  }
+
+  return <PowerSyncContent />;
+}
+
+/**
+ * Inner component that renders the app shell immediately.
+ * Header and SideMenu render without PowerSync dependency.
+ * The main content area is gated on PowerSync readiness.
+ *
+ * ErrorBoundary wraps only <Outlet /> so that page crashes preserve
+ * Header and SideMenu navigation — users can navigate away without a
+ * full page reload. resetKeys tied to pathname ensures the boundary
+ * resets automatically when the user navigates to a different route.
+ */
+function AppLayoutContent() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { authStatus } = useAuth();
+
   // Farm name comes directly from auth state - no need for PowerSync query
-  const farmName = onboardingStatus?.farmName ?? null;
+  const farmName = authStatus?.farmName ?? null;
 
   const handleMenuOpen = useCallback(() => setMenuOpen(true), []);
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
@@ -77,12 +130,7 @@ function AppLayoutContent() {
       <Header farmName={farmName} onMenuOpen={handleMenuOpen} />
       <SideMenu open={menuOpen} onClose={handleMenuClose} />
       <main>
-        <ErrorBoundary
-          FallbackComponent={ErrorFallback}
-          resetKeys={[location.pathname]}
-        >
-          <Outlet />
-        </ErrorBoundary>
+        <PowerSyncGate />
       </main>
       <Toast />
     </div>
@@ -93,8 +141,9 @@ function AppLayoutContent() {
  * Layout wrapper for the main app (protected routes).
  * Provides:
  * - PowerSyncProvider for offline-first data
- * - Header with farm name
- * - SideMenu for navigation
+ * - Header with farm name (renders immediately, no PowerSync dependency)
+ * - SideMenu for navigation (renders immediately)
+ * - Skeleton content while PowerSync initializes
  * - ErrorBoundary scoped to page content (Outlet only)
  */
 export default function AppLayout() {
