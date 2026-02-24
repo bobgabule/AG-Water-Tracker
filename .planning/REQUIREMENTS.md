@@ -9,10 +9,10 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 ### Code Splitting & Bundle
 
-- [ ] **SPLIT-01**: User opening auth pages downloads only the auth chunk, not Mapbox GL JS or well management code
-- [ ] **SPLIT-02**: Mapbox GL JS is isolated to its own chunk, loaded only when the dashboard/map is visited
-- [ ] **SPLIT-03**: All 13 page components are lazy-loaded with React.lazy and wrapped in Suspense with consistent fallback UI
-- [ ] **SPLIT-04**: index.html includes preconnect hints for Supabase, Mapbox, and PowerSync endpoints
+- [x] **SPLIT-01**: User opening auth pages downloads only the auth chunk, not Mapbox GL JS or well management code
+- [x] **SPLIT-02**: Mapbox GL JS is isolated to its own chunk, loaded only when the dashboard/map is visited
+- [x] **SPLIT-03**: All 13 page components are lazy-loaded with React.lazy and wrapped in Suspense with consistent fallback UI
+- [x] **SPLIT-04**: index.html includes preconnect hints for Supabase, Mapbox, and PowerSync endpoints
 - [x] **SPLIT-05**: Side menu prefetches target page chunks on hover/touchstart before the user taps
 
 ### Loading States
@@ -29,7 +29,7 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 - [ ] **ASSET-01**: Auth page background image is under 300KB using AVIF/WebP with compressed JPEG fallback (currently 11.46MB)
 - [ ] **ASSET-02**: Background image is not fetched by authenticated users navigating directly to the dashboard
-- [ ] **ASSET-03**: Preconnect and dns-prefetch hints eliminate DNS lookup waterfalls for external services
+- [x] **ASSET-03**: Preconnect and dns-prefetch hints eliminate DNS lookup waterfalls for external services
 
 ### Service Worker
 
@@ -91,10 +91,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SPLIT-01 | Phase 23 | Pending |
-| SPLIT-02 | Phase 23 | Pending |
-| SPLIT-03 | Phase 23 | Pending |
-| SPLIT-04 | Phase 23 | Pending |
+| SPLIT-01 | Phase 23 | Complete |
+| SPLIT-02 | Phase 23 | Complete |
+| SPLIT-03 | Phase 23 | Complete |
+| SPLIT-04 | Phase 23 | Complete |
 | SPLIT-05 | Phase 23 | Complete |
 | LOAD-01 | Phase 24 | Pending |
 | LOAD-02 | Phase 24 | Pending |
@@ -105,7 +105,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LOAD-07 | Phase 24 | Pending |
 | ASSET-01 | Phase 25 | Pending |
 | ASSET-02 | Phase 25 | Pending |
-| ASSET-03 | Phase 23 | Pending |
+| ASSET-03 | Phase 23 | Complete |
 | SW-01 | Phase 26 | Pending |
 | SW-02 | Phase 26 | Pending |
 | SW-03 | Phase 26 | Pending |
