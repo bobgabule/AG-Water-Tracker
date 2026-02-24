@@ -33,12 +33,21 @@ Progress: ####################---- 10% (v4.0)
 | v3.0 Subscriptions | 17-22 | 9 | 2026-02-22 to 2026-02-23 |
 | v4.0 Performance | 23-27 | 2 | 2026-02-24 (started) |
 
+**Recent Executions:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 23 P01 | 3min | 2 | 5 |
+
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 
+- Phase 23-01: LazyRoute helper component wraps each route in per-route LazyErrorBoundary + Suspense
+- Phase 23-01: Removed PowerSync manual chunk per CONTEXT decisions -- Vite handles naturally
+- Phase 23-01: Added tiles.mapbox.com and events.mapbox.com preconnect (runtime requests, not CDN)
 - Phase 23-02: Add prefetched entries to Set before import() call to prevent concurrent duplicate fetches
 - Phase 23-02: Keep touch prefetch immediate (no debounce) since touch indicates user commitment
 - Phase 23-02: Mark both routes in prefetched set upfront in prefetchOnMenuOpen to prevent races
@@ -56,6 +65,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 23-02-PLAN.md (Phase 23 complete)
-Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-02-SUMMARY.md
+Stopped at: Re-executed 23-01-PLAN.md (revised version with Mapbox CSS compliance)
+Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-01-SUMMARY.md
 Next action: /gsd:plan-phase 24
