@@ -27,8 +27,8 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 ### Asset Optimization
 
-- [ ] **ASSET-01**: Auth page background image is under 300KB using AVIF/WebP with compressed JPEG fallback (currently 11.46MB)
-- [ ] **ASSET-02**: Background image is not fetched by authenticated users navigating directly to the dashboard
+- [x] **ASSET-01**: Auth page background image is under 300KB using AVIF/WebP with compressed JPEG fallback (currently 11.46MB)
+- [x] **ASSET-02**: Background image is not fetched by authenticated users navigating directly to the dashboard
 - [x] **ASSET-03**: Preconnect and dns-prefetch hints eliminate DNS lookup waterfalls for external services
 
 ### Service Worker
@@ -103,8 +103,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LOAD-05 | Phase 24 | Complete |
 | LOAD-06 | Phase 24 | Complete |
 | LOAD-07 | Phase 24 | Complete |
-| ASSET-01 | Phase 25 | Pending |
-| ASSET-02 | Phase 25 | Pending |
+| ASSET-01 | Phase 25 | Complete |
+| ASSET-02 | Phase 25 | Complete |
 | ASSET-03 | Phase 23 | Complete |
 | SW-01 | Phase 26 | Pending |
 | SW-02 | Phase 26 | Pending |
