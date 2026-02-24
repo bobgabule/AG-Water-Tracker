@@ -4,6 +4,14 @@ import { SupabaseConnector } from './powersync-connector.ts';
 import { debugLog } from './debugLog';
 
 let powerSyncInstance: PowerSyncDatabase | null = null;
+let initPromise: Promise<PowerSyncDatabase> | null = null;
+
+/** Pre-warm: start WASM load + SQLite init in parallel with auth. */
+export function preWarmPowerSync(): void {
+  if (!initPromise) {
+    initPromise = setupPowerSync();
+  }
+}
 
 export async function setupPowerSync(): Promise<PowerSyncDatabase> {
   if (powerSyncInstance) {
@@ -58,6 +66,7 @@ export function getPowerSyncInstance(): PowerSyncDatabase | null {
 }
 
 export async function disconnectAndClear(): Promise<void> {
+  initPromise = null; // Cancel in-flight pre-warm
   if (powerSyncInstance) {
     await powerSyncInstance.disconnectAndClear();
     powerSyncInstance = null;
