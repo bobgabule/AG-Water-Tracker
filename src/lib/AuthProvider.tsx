@@ -440,40 +440,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = useCallback(async (): Promise<void> => {
     userInitiatedSignOut.current = true;
 
-    try {
-      // Sign out from Supabase
-      await supabase.auth.signOut();
-    } catch (error) {
-      // Log but continue with local cleanup even if server call fails
-      debugError('Auth', 'Sign out error:', error);
-    }
-
-    // Clear PowerSync local database (timeout prevents hanging on uninitialized instance)
-    try {
-      await Promise.race([
-        disconnectAndClear(),
-        new Promise<void>((resolve) => setTimeout(resolve, 2000)),
-      ]);
-    } catch (error) {
-      debugError('Auth', 'Failed to clear PowerSync:', error);
-    }
-
     // Clear active farm override (super admin cross-farm state)
     useActiveFarmStore.getState().clearOverride();
 
-    // Clear auth status cache BEFORE state setters
+    // Clear auth status cache
     try {
       localStorage.removeItem(AUTH_STATUS_CACHE_KEY);
     } catch {
       // Non-critical -- localStorage may be unavailable
     }
 
-    // Clear local state
+    // Clear local state IMMEDIATELY for instant redirect to login
     setSession(null);
     setUser(null);
     setAuthStatus(null);
 
-    userInitiatedSignOut.current = false;
+    // Background cleanup -- no await, no blocking the UI
+    // Supabase sign-out and PowerSync disconnect run after redirect
+    (async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        debugError('Auth', 'Sign out error:', error);
+      }
+      try {
+        await disconnectAndClear();
+      } catch (error) {
+        debugError('Auth', 'Failed to clear PowerSync:', error);
+      }
+      userInitiatedSignOut.current = false;
+    })();
   }, []);
 
   const clearSessionExpired = useCallback(() => {
