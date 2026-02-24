@@ -13,7 +13,7 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 - [ ] **SPLIT-02**: Mapbox GL JS is isolated to its own chunk, loaded only when the dashboard/map is visited
 - [ ] **SPLIT-03**: All 13 page components are lazy-loaded with React.lazy and wrapped in Suspense with consistent fallback UI
 - [ ] **SPLIT-04**: index.html includes preconnect hints for Supabase, Mapbox, and PowerSync endpoints
-- [ ] **SPLIT-05**: Side menu prefetches target page chunks on hover/touchstart before the user taps
+- [x] **SPLIT-05**: Side menu prefetches target page chunks on hover/touchstart before the user taps
 
 ### Loading States
 
@@ -95,7 +95,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SPLIT-02 | Phase 23 | Pending |
 | SPLIT-03 | Phase 23 | Pending |
 | SPLIT-04 | Phase 23 | Pending |
-| SPLIT-05 | Phase 23 | Pending |
+| SPLIT-05 | Phase 23 | Complete |
 | LOAD-01 | Phase 24 | Pending |
 | LOAD-02 | Phase 24 | Pending |
 | LOAD-03 | Phase 24 | Pending |

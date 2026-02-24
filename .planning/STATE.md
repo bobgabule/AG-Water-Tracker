@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v4.0 Performance & Perceived Speed — Phase 23 ready to plan
+**Current focus:** v4.0 Performance & Perceived Speed — Phase 23 complete
 
 ## Current Position
 
 Phase: 23 of 27 (Route-Level Code Splitting & Bundle Optimization)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-02-24 — Milestone v4.0 roadmap created (5 phases, 21 requirements)
+Plan: 2 of 2 (complete)
+Status: Phase complete
+Last activity: 2026-02-24 — Phase 23 plans 01 and 02 executed
 
-Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (v4.0)
+Progress: ####################---- 10% (v4.0)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0)
+- Total plans completed: 51 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 2 v4.0)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -31,13 +31,17 @@ Progress: ░░░░░░░░░░░░░░░░░░░░ 0% (v4.0)
 | v1.1 Dashboard & Map | 9-11 | 3 | 2026-02-12 |
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
 | v3.0 Subscriptions | 17-22 | 9 | 2026-02-22 to 2026-02-23 |
-| v4.0 Performance | 23-27 | 0 | 2026-02-24 (started) |
+| v4.0 Performance | 23-27 | 2 | 2026-02-24 (started) |
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table (31 decisions).
+
+- Phase 23-02: Add prefetched entries to Set before import() call to prevent concurrent duplicate fetches
+- Phase 23-02: Keep touch prefetch immediate (no debounce) since touch indicates user commitment
+- Phase 23-02: Mark both routes in prefetched set upfront in prefetchOnMenuOpen to prevent races
 
 ### Pending Todos (manual steps)
 
@@ -52,6 +56,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 23 context gathered
-Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-CONTEXT.md
-Next action: /gsd:plan-phase 23
+Stopped at: Completed 23-02-PLAN.md (Phase 23 complete)
+Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-02-SUMMARY.md
+Next action: /gsd:plan-phase 24
