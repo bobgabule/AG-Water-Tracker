@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { MapIcon, PlusIcon, PlayIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
+import WellListSkeleton from '../components/skeletons/WellListSkeleton';
 import { useLatestReadings } from '../hooks/useLatestReadings';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
@@ -139,16 +140,18 @@ export default function WellListPage() {
     setSearchQuery(e.target.value);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#c5cdb4] pt-14 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-[#5f7248] border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  // Fade transition from skeleton to real content
+  const [showContent, setShowContent] = useState(!loading);
+  useEffect(() => {
+    if (!loading && !showContent) {
+      requestAnimationFrame(() => setShowContent(true));
+    }
+  }, [loading, showContent]);
+
+  if (loading) return <WellListSkeleton />;
 
   return (
-    <div className="min-h-screen bg-[#c5cdb4] pt-14">
+    <div className={`min-h-screen bg-[#c5cdb4] pt-14 transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <div className="px-4 py-4">
         {/* Title */}
         <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-4">WELLS</h1>

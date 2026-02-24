@@ -21,9 +21,10 @@ import SyncStatusBanner from '../components/SyncStatusBanner';
 import LocationPickerBottomSheet from '../components/LocationPickerBottomSheet';
 import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWellFormBottomSheet';
 import WellLimitModal from '../components/WellLimitModal';
+import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
 export default function DashboardPage() {
-  const { wells } = useWells();
+  const { wells, loading } = useWells();
   const navigate = useNavigate();
   const db = usePowerSync();
   const { user } = useAuth();
@@ -39,6 +40,14 @@ export default function DashboardPage() {
     subscriptionUrl && farmId && tier
       ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
       : null;
+
+  // Fade transition from skeleton to real content
+  const [showContent, setShowContent] = useState(!loading);
+  useEffect(() => {
+    if (!loading && !showContent) {
+      requestAnimationFrame(() => setShowContent(true));
+    }
+  }, [loading, showContent]);
 
   // MapView error recovery: increment key to force remount (WebGL context recovery)
   const [mapKey, setMapKey] = useState(0);
@@ -162,8 +171,11 @@ export default function DashboardPage() {
     }
   }, [db, farmId, role, user, showToast]);
 
+  // Show skeleton while wells data is loading
+  if (loading) return <DashboardSkeleton />;
+
   return (
-    <div className="relative w-full h-dvh overflow-hidden">
+    <div className={`relative w-full h-dvh overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {/* Map layer */}
       <ErrorBoundary
         FallbackComponent={MapErrorFallback}
