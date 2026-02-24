@@ -1,45 +1,47 @@
 # Requirements: AG Water Tracker
 
-**Defined:** 2026-02-22
+**Defined:** 2026-02-24
 **Core Value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
 
-## v3.0 Requirements
+## v4.0 Requirements
 
-Requirements for v3.0 Subscriptions & Permissions. Each maps to roadmap phases.
+Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases.
 
-### Subscription Tiers
+### Code Splitting & Bundle
 
-- [x] **TIER-01**: `subscription_tiers` table in Supabase with per-role seat limits and well limits per tier (Starter: 5 wells, 1 admin, 1 meter checker | Pro: 10 wells, 1 admin, 3 meter checkers)
-- [x] **TIER-02**: `app_settings` table in Supabase for global key-value config (subscription website URL, support email)
-- [x] **TIER-03**: `farms.subscription_tier` column linking each farm to a tier (no default, existing farms backfilled to 'pro')
-- [x] **TIER-04**: PowerSync global bucket sync for subscription_tiers and app_settings (available offline)
-- [x] **TIER-05**: `useSubscriptionTier()` hook replacing hardcoded `PLAN_LIMITS` in `src/lib/subscription.ts`
-- [x] **TIER-06**: Well count enforcement — disable "New Well" button at tier limit (Basic: 5, Pro: 10)
-- [x] **TIER-07**: Seat limit enforcement reads from DB-driven tier config instead of hardcoded constants
-- [x] **TIER-08**: Subscription page shows current tier, usage per role, well count, and "Manage Plan" placeholder
+- [ ] **SPLIT-01**: User opening auth pages downloads only the auth chunk, not Mapbox GL JS or well management code
+- [ ] **SPLIT-02**: Mapbox GL JS is isolated to its own chunk, loaded only when the dashboard/map is visited
+- [ ] **SPLIT-03**: All 13 page components are lazy-loaded with React.lazy and wrapped in Suspense with consistent fallback UI
+- [ ] **SPLIT-04**: index.html includes preconnect hints for Supabase, Mapbox, and PowerSync endpoints
+- [ ] **SPLIT-05**: Side menu prefetches target page chunks on hover/touchstart before the user taps
 
-### Auth Flow
+### Loading States
 
-- [ ] **AUTH-01**: Remove ProfilePage, CreateFarmPage, and `/onboarding/*` routes from app
-- [ ] **AUTH-02**: Remove RequireNotOnboarded guard and all onboarding status logic from connector
-- [ ] **AUTH-03**: Clean up supabaseConnector — remove onboarding flows, simplify to login-only path
-- [x] **AUTH-04**: "No subscription" page for users without farm membership with redirect to subscription website URL (from app_settings)
-- [x] **AUTH-05**: Invited users auto-matched on login go straight to dashboard (no profile step)
-- [x] **AUTH-06**: Move invite auto-matching logic to backend RPC (decouple from removed onboarding pages)
-- [ ] **AUTH-07**: Remove all dead imports, unused hooks, and orphaned utilities from old onboarding flow
+- [ ] **LOAD-01**: PowerSync provider renders app shell (Header + SideMenu) immediately while database initializes in the background
+- [ ] **LOAD-02**: Returning user with cached auth sees app shell within 300ms, not a full-screen spinner
+- [ ] **LOAD-03**: Dashboard shows skeleton screen (placeholder map area, floating button outlines) while data loads
+- [ ] **LOAD-04**: Well List page shows skeleton screen (animated placeholder rows) while data loads
+- [ ] **LOAD-05**: Well Detail page shows skeleton screen (header shimmer, metrics placeholders) while data loads
+- [ ] **LOAD-06**: RequireRole shows page skeleton instead of blank screen while role loads from PowerSync
+- [ ] **LOAD-07**: Sign-out completes in under 500ms (currently 2000ms due to PowerSync disconnect timeout)
 
-### Role Permissions
+### Asset Optimization
 
-- [x] **PERM-01**: Well edit/delete gated to grower and admin only (WellEditPage route guard + WellDetailHeader)
-- [x] **PERM-02**: Allocation management gated to grower and admin only (WellAllocationsPage route guard)
-- [x] **PERM-03**: Well detail edit button hidden for meter checkers
-- [x] **PERM-04**: Extend permission matrix in `permissions.ts` with fine-grained actions (edit_well, delete_well, manage_allocations)
+- [ ] **ASSET-01**: Auth page background image is under 300KB using AVIF/WebP with compressed JPEG fallback (currently 11.46MB)
+- [ ] **ASSET-02**: Background image is not fetched by authenticated users navigating directly to the dashboard
+- [ ] **ASSET-03**: Preconnect and dns-prefetch hints eliminate DNS lookup waterfalls for external services
 
-### Farm Data Isolation
+### Service Worker
 
-- [x] **ISO-01**: Verify RLS policies filter wells, readings, allocations, members by farm_id
-- [x] **ISO-02**: Verify PowerSync sync rules filter all data tables by farm_id
-- [x] **ISO-03**: Verify super_admin cross-farm bypass is consistent across all tables and sync rules
+- [ ] **SW-01**: Navigation preload enabled so service worker boot and navigation fetch happen in parallel
+- [ ] **SW-02**: Lazy-loaded page chunks are cached after first visit and served from cache on subsequent visits
+- [ ] **SW-03**: Auth pages show app shell from cache when offline (not browser error page), with offline messaging
+
+### Navigation Fluidity
+
+- [ ] **NAV-01**: useSubscriptionTier performs a single JOIN query instead of two sequential queries
+- [ ] **NAV-02**: Page transitions use View Transitions API for smooth cross-fade (graceful fallback on unsupported browsers)
+- [ ] **NAV-03**: Well creation shows optimistically on the map immediately, before PowerSync sync completes
 
 ## Future Requirements
 
@@ -64,6 +66,12 @@ Deferred to future release. Tracked but not in current roadmap.
 
 - **RPT-01**: Automatic reporting feature (listed on subscription page, implementation deferred)
 
+### Advanced Performance
+
+- **PERF-D1**: Offline map tile pre-download for specific farm regions
+- **PERF-D2**: Background Sync API for queued writes
+- **PERF-D3**: Storage quota indicators in Settings
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -71,11 +79,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | Stripe payment processing | Deferred to landing page milestone |
 | Landing page / marketing site | Separate project, future milestone |
 | Automatic reporting implementation | Listed as tier feature, built later |
-| In-app tier upgrade/downgrade | Handled by Stripe Customer Portal (future) |
+| Offline map tile pre-download | Complexity high, current CacheFirst is sufficient for now |
+| Background Sync API | PowerSync handles offline sync well enough |
 | Push notifications | Not needed for current scale |
 | Real-time chat | Out of scope for this product |
-| Email-based auth | Phone OTP only |
-| Multi-farm membership | One user per farm |
+| Custom install prompt | Default browser install prompt is sufficient |
 
 ## Traceability
 
@@ -83,34 +91,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TIER-01 | Phase 17 | Complete |
-| TIER-02 | Phase 17 | Complete |
-| TIER-03 | Phase 17 | Complete |
-| TIER-04 | Phase 18 | Complete |
-| TIER-05 | Phase 18 | Complete |
-| TIER-06 | Phase 20 | Complete |
-| TIER-07 | Phase 20 | Complete |
-| TIER-08 | Phase 20 | Complete |
-| AUTH-01 | Phase 21 | Pending |
-| AUTH-02 | Phase 21 | Pending |
-| AUTH-03 | Phase 21 | Pending |
-| AUTH-04 | Phase 21 | Complete |
-| AUTH-05 | Phase 21 | Complete |
-| AUTH-06 | Phase 21 | Complete |
-| AUTH-07 | Phase 21 | Pending |
-| PERM-01 | Phase 19 | Complete |
-| PERM-02 | Phase 19 | Complete |
-| PERM-03 | Phase 19 | Complete |
-| PERM-04 | Phase 19 | Complete |
-| ISO-01 | Phase 22 | Complete |
-| ISO-02 | Phase 22 | Complete |
-| ISO-03 | Phase 22 | Complete |
+| SPLIT-01 | — | Pending |
+| SPLIT-02 | — | Pending |
+| SPLIT-03 | — | Pending |
+| SPLIT-04 | — | Pending |
+| SPLIT-05 | — | Pending |
+| LOAD-01 | — | Pending |
+| LOAD-02 | — | Pending |
+| LOAD-03 | — | Pending |
+| LOAD-04 | — | Pending |
+| LOAD-05 | — | Pending |
+| LOAD-06 | — | Pending |
+| LOAD-07 | — | Pending |
+| ASSET-01 | — | Pending |
+| ASSET-02 | — | Pending |
+| ASSET-03 | — | Pending |
+| SW-01 | — | Pending |
+| SW-02 | — | Pending |
+| SW-03 | — | Pending |
+| NAV-01 | — | Pending |
+| NAV-02 | — | Pending |
+| NAV-03 | — | Pending |
 
 **Coverage:**
-- v3.0 requirements: 22 total
-- Mapped to phases: 22
-- Unmapped: 0
+- v4.0 requirements: 21 total
+- Mapped to phases: 0
+- Unmapped: 21
 
 ---
-*Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after roadmap creation*
+*Requirements defined: 2026-02-24*
+*Last updated: 2026-02-24 after initial definition*
