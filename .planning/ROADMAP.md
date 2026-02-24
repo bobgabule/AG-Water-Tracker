@@ -59,7 +59,7 @@
 ### v4.0 -- Performance & Perceived Speed (In Progress)
 
 - [x] **Phase 23: Route-Level Code Splitting & Bundle Optimization** - Lazy-load all pages, isolate Mapbox chunk, add resource hints, menu prefetch (completed 2026-02-24)
-- [ ] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay
+- [x] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay (completed 2026-02-24)
 - [ ] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users
 - [ ] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience
 - [ ] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation
@@ -310,7 +310,7 @@ Plans:
 | 21. Login-Only Auth Flow | v3.0 | 3/3 | Complete | 2026-02-23 |
 | 22. Farm Data Isolation Audit | v3.0 | 2/2 | Complete | 2026-02-22 |
 | 23. Code Splitting & Bundle | 2/2 | Complete    | 2026-02-24 | — |
-| 24. Loading States & Skeletons | 1/2 | In Progress|  | — |
+| 24. Loading States & Skeletons | 2/2 | Complete   | 2026-02-24 | — |
 | 25. Asset Optimization | v4.0 | 0/? | Not Started | — |
 | 26. Service Worker Intelligence | v4.0 | 0/? | Not Started | — |
 | 27. Query & Navigation Fluidity | v4.0 | 0/? | Not Started | — |
