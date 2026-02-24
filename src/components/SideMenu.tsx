@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import {
   XMarkIcon,
@@ -16,6 +16,7 @@ import { useAuth } from '../lib/AuthProvider';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission, type Action } from '../lib/permissions';
+import { prefetchRoute, prefetchRouteDebounced, prefetchOnMenuOpen } from '../lib/routePrefetch';
 
 interface SideMenuProps {
   open: boolean;
@@ -48,6 +49,11 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
   const visibleItems = navItems.filter(
     (item) => !item.requiredAction || hasPermission(role, item.requiredAction)
   );
+
+  // Prefetch Dashboard + Well List chunks when menu opens (benefits mobile especially)
+  useEffect(() => {
+    if (open) prefetchOnMenuOpen();
+  }, [open]);
 
   const handleNav = (path: string) => {
     onClose();
@@ -108,6 +114,8 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
               <button
                 key={item.path}
                 onClick={() => handleNav(item.path)}
+                onMouseEnter={() => prefetchRouteDebounced(item.path)}
+                onTouchStart={() => prefetchRoute(item.path)}
                 className="w-full flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-gray-100 transition-colors text-left"
               >
                 <item.icon className="h-5 w-5 text-gray-500" />
