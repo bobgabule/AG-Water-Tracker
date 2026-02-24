@@ -65,6 +65,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Re-executed 23-01-PLAN.md (revised version with Mapbox CSS compliance)
-Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-01-SUMMARY.md
+Stopped at: Phase 24 context gathered
+Resume file: .planning/phases/24-loading-state-collapse-skeleton-screens/24-CONTEXT.md
 Next action: /gsd:plan-phase 24
