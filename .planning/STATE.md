@@ -52,5 +52,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Milestone v4.0 roadmap created
+Stopped at: Phase 23 context gathered
+Resume file: .planning/phases/23-route-level-code-splitting-bundle-optimization/23-CONTEXT.md
 Next action: /gsd:plan-phase 23
