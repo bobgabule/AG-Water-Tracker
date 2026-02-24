@@ -4,6 +4,10 @@ import { BrowserRouter } from 'react-router'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './lib/AuthProvider'
+import { preWarmPowerSync } from './lib/powersync'
+
+// Start WASM + SQLite init in parallel with auth (saves ~200-500ms)
+preWarmPowerSync()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

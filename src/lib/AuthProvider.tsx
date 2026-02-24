@@ -358,39 +358,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        // Timeout getSession so a cold/unreachable Supabase can't block forever
-        const sessionResult = await Promise.race([
-          supabase.auth.getSession(),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000)),
-        ]);
+    let didInit = false;
 
-        const initialSession = sessionResult?.data?.session ?? null;
-
-        // Manually trigger INITIAL_SESSION handling
-        await handleAuthStateChange('INITIAL_SESSION', initialSession);
-      } catch (error) {
-        debugError('Auth', 'Failed to get initial session:', error);
-        // Even on error, mark auth as ready so the app can proceed
+    // Safety timeout — if Supabase never fires INITIAL_SESSION (cold/unreachable),
+    // mark auth ready so the app doesn't hang forever on the spinner.
+    const timeout = setTimeout(() => {
+      if (!didInit) {
+        debugError('Auth', 'Auth initialization timed out after 8s');
         setIsAuthReady(true);
       }
-    };
+    }, 8_000);
 
-    initializeAuth();
-
-    // Subscribe to auth state changes
+    // Subscribe to auth state changes.
+    // Supabase replays INITIAL_SESSION on subscribe, avoiding the lock
+    // contention that getSession() can cause with navigator.locks.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      // Skip INITIAL_SESSION here since we handle it manually above
-      if (event === 'INITIAL_SESSION') return;
+      if (event === 'INITIAL_SESSION') {
+        didInit = true;
+        clearTimeout(timeout);
+      }
 
       await handleAuthStateChange(event, newSession);
     });
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [handleAuthStateChange]);

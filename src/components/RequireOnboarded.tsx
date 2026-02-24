@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router';
+import { useState } from 'react';
+import { Navigate, Outlet } from 'react-router';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 
@@ -8,35 +8,11 @@ interface RequireOnboardedProps {
 }
 
 export default function RequireOnboarded({ children }: RequireOnboardedProps) {
-  const { onboardingStatus, isAuthReady, isFetchingOnboarding, session, refreshOnboardingStatus } = useAuth();
-  const location = useLocation();
-  const [showSlowMessage, setShowSlowMessage] = useState(false);
+  const { authStatus, isFetchingAuth, session, refreshAuthStatus } = useAuth();
   const [isRetrying, setIsRetrying] = useState(false);
 
-  // Slow-load detection: show message after 5 seconds of waiting
-  useEffect(() => {
-    if (isAuthReady) return;
-
-    const timer = setTimeout(() => setShowSlowMessage(true), 5000);
-    return () => clearTimeout(timer);
-  }, [isAuthReady]);
-
-  // Auth still initializing - show loading spinner
-  if (!isAuthReady) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-          {showSlowMessage && (
-            <p className="text-gray-400 text-sm">Loading account info...</p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Auth ready but onboarding fetch still in-flight - show loading spinner (not error UI)
-  if (!onboardingStatus && session && isFetchingOnboarding) {
+  // Auth status fetch still in-flight - show loading spinner (not error UI)
+  if (!authStatus && session && isFetchingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="text-center">
@@ -47,11 +23,11 @@ export default function RequireOnboarded({ children }: RequireOnboardedProps) {
   }
 
   // Auth ready and fetch completed but RPC failed (null status with active session) - show retry UI
-  if (!onboardingStatus && session && !isFetchingOnboarding) {
+  if (!authStatus && session && !isFetchingAuth) {
     const handleRetry = async () => {
       setIsRetrying(true);
       try {
-        await refreshOnboardingStatus();
+        await refreshAuthStatus();
       } finally {
         setIsRetrying(false);
       }
@@ -85,22 +61,15 @@ export default function RequireOnboarded({ children }: RequireOnboardedProps) {
   }
 
   // No session at all - redirect to auth (shouldn't normally happen since RequireAuth catches this)
-  if (!onboardingStatus) {
+  if (!authStatus) {
     return <Navigate to="/auth/phone" replace />;
   }
 
-  // Profile not complete - redirect to profile creation
-  if (!onboardingStatus.hasProfile) {
-    return (
-      <Navigate to="/onboarding/profile" state={{ from: location }} replace />
-    );
+  // No farm membership - redirect to no-subscription page
+  if (!authStatus.hasFarmMembership) {
+    return <Navigate to="/no-subscription" replace />;
   }
 
-  // No farm membership - redirect to farm setup
-  if (!onboardingStatus.hasFarmMembership) {
-    return <Navigate to="/onboarding/farm/create" state={{ from: location }} replace />;
-  }
-
-  // Fully onboarded - render children or outlet
+  // Authenticated with farm membership - render children or outlet
   return children ? <>{children}</> : <Outlet />;
 }
