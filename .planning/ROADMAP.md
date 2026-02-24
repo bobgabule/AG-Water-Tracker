@@ -311,6 +311,6 @@ Plans:
 | 22. Farm Data Isolation Audit | v3.0 | 2/2 | Complete | 2026-02-22 |
 | 23. Code Splitting & Bundle | 2/2 | Complete    | 2026-02-24 | — |
 | 24. Loading States & Skeletons | 2/2 | Complete    | 2026-02-24 | — |
-| 25. Asset Optimization | 1/1 | Complete   | 2026-02-24 | — |
+| 25. Asset Optimization | 1/1 | Complete    | 2026-02-24 | — |
 | 26. Service Worker Intelligence | v4.0 | 0/? | Not Started | — |
 | 27. Query & Navigation Fluidity | v4.0 | 0/? | Not Started | — |
