@@ -3,24 +3,10 @@ import type { KeyboardEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
-import { resolveNextRoute } from '../../lib/resolveNextRoute';
 import AuthLayout from '../../components/auth/AuthLayout';
 import OtpInput from '../../components/auth/OtpInput';
-
-/**
- * Format phone number for display: +1 (XXX) XXX-XXXX
- */
-function formatPhoneForDisplay(phone: string): string {
-  // Assuming phone is in format +1XXXXXXXXXX
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 11 && digits.startsWith('1')) {
-    const area = digits.slice(1, 4);
-    const prefix = digits.slice(4, 7);
-    const line = digits.slice(7, 11);
-    return `+1 (${area}) ${prefix}-${line}`;
-  }
-  return phone;
-}
+import { formatPhoneForDisplay } from '../../lib/formatPhone';
+import { prefetchDashboard } from '../../lib/routePrefetch';
 
 /** Cooldown duration in seconds */
 const RESEND_COOLDOWN = 30;
@@ -31,7 +17,7 @@ const RESEND_COOLDOWN = 30;
  * Features auto-advance, auto-submit, and resend with cooldown.
  */
 export default function VerifyPage() {
-  const { verifyOtp, sendOtp, refreshOnboardingStatus, user, isAuthReady, onboardingStatus } = useAuth();
+  const { verifyOtp, sendOtp, refreshAuthStatus, user, isAuthReady, authStatus } = useAuth();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,11 +35,10 @@ export default function VerifyPage() {
 
   // Redirect if already logged in (only when status is loaded to avoid flash)
   useEffect(() => {
-    if (isAuthReady && user && onboardingStatus) {
-      const nextRoute = resolveNextRoute(onboardingStatus);
-      navigate(nextRoute, { replace: true });
+    if (isAuthReady && user && authStatus) {
+      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
     }
-  }, [isAuthReady, user, onboardingStatus, navigate]);
+  }, [isAuthReady, user, authStatus, navigate]);
 
   // Redirect if no phone in state (and not logged in)
   useEffect(() => {
@@ -112,11 +97,9 @@ export default function VerifyPage() {
         setLoading(true);
         setError('');
         await verifyOtp(phone, fullCode);
-        const status = await refreshOnboardingStatus();
-        // After successful OTP, user IS authenticated. If status fetch failed,
-        // default to profile page — never send back to login.
-        const nextRoute = status ? resolveNextRoute(status) : '/onboarding/profile';
-        navigate(nextRoute, { replace: true });
+        const status = await refreshAuthStatus();
+        prefetchDashboard();
+        navigate(status?.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
       } catch (err) {
         if (!navigator.onLine) {
           setError('No internet connection. Connect to the internet to verify your code.');
@@ -132,7 +115,7 @@ export default function VerifyPage() {
         verifyingRef.current = false;
       }
     },
-    [phone, isOnline, verifyOtp, refreshOnboardingStatus, navigate]
+    [phone, isOnline, verifyOtp, refreshAuthStatus, navigate]
   );
 
   // Auto-submit when all 4 digits are entered
