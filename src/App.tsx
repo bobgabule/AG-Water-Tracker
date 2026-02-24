@@ -1,75 +1,141 @@
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
 import RequireAuth from './components/RequireAuth';
 import RequireOnboarded from './components/RequireOnboarded';
 import RequireRole from './components/RequireRole';
-import RequireNotOnboarded from './components/RequireNotOnboarded';
-
-// Auth pages
-import PhonePage from './pages/auth/PhonePage';
-import VerifyPage from './pages/auth/VerifyPage';
-
-// Onboarding pages
-import ProfilePage from './pages/onboarding/ProfilePage';
-import CreateFarmPage from './pages/onboarding/CreateFarmPage';
-
-// App pages
 import AppLayout from './components/AppLayout';
-import DashboardPage from './pages/DashboardPage';
-import WellDetailPage from './pages/WellDetailPage';
-import WellEditPage from './pages/WellEditPage';
-import WellAllocationsPage from './pages/WellAllocationsPage';
-import WellListPage from './pages/WellListPage';
-import ReportsPage from './pages/ReportsPage';
-import SubscriptionPage from './pages/SubscriptionPage';
-import LanguagePage from './pages/LanguagePage';
-import SettingsPage from './pages/SettingsPage';
-import UsersPage from './pages/UsersPage';
+import PageLoader from './components/PageLoader';
+import LazyErrorBoundary from './components/LazyErrorBoundary';
+
+// Lazy-loaded page components — each becomes its own chunk
+const PhonePage = lazy(() => import('./pages/auth/PhonePage'));
+const VerifyPage = lazy(() => import('./pages/auth/VerifyPage'));
+const NoSubscriptionPage = lazy(() => import('./pages/NoSubscriptionPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const WellDetailPage = lazy(() => import('./pages/WellDetailPage'));
+const WellEditPage = lazy(() => import('./pages/WellEditPage'));
+const WellAllocationsPage = lazy(() => import('./pages/WellAllocationsPage'));
+const WellListPage = lazy(() => import('./pages/WellListPage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
+const LanguagePage = lazy(() => import('./pages/LanguagePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const UsersPage = lazy(() => import('./pages/UsersPage'));
+
+/** Per-route Suspense + error boundary wrapper */
+function LazyRoute({
+  children,
+  routePath,
+  fullScreen = false,
+}: {
+  children: ReactNode;
+  routePath: string;
+  fullScreen?: boolean;
+}) {
+  return (
+    <LazyErrorBoundary key={routePath}>
+      <Suspense fallback={<PageLoader fullScreen={fullScreen} />}>
+        {children}
+      </Suspense>
+    </LazyErrorBoundary>
+  );
+}
 
 export default function App() {
   return (
     <Routes>
       {/* Auth routes - redirect if already logged in (handled by PhonePage) */}
-      <Route path="/auth/phone" element={<PhonePage />} />
-      <Route path="/auth/verify" element={<VerifyPage />} />
+      <Route path="/auth/phone" element={
+        <LazyRoute routePath="/auth/phone" fullScreen>
+          <PhonePage />
+        </LazyRoute>
+      } />
+      <Route path="/auth/verify" element={
+        <LazyRoute routePath="/auth/verify" fullScreen>
+          <VerifyPage />
+        </LazyRoute>
+      } />
 
-      {/* Legacy redirects */}
+      {/* Legacy redirect */}
       <Route path="/auth" element={<Navigate to="/auth/phone" replace />} />
       <Route path="/login" element={<Navigate to="/auth/phone" replace />} />
-      <Route path="/register" element={<Navigate to="/auth/phone" replace />} />
-      <Route path="/setup" element={<Navigate to="/auth/phone" replace />} />
 
-      {/* Onboarding routes - require session only + not already onboarded */}
+      {/* No subscription page - requires auth but no farm membership */}
       <Route element={<RequireAuth />}>
-        <Route element={<RequireNotOnboarded />}>
-          <Route path="/onboarding/profile" element={<ProfilePage />} />
-          <Route path="/onboarding/farm" element={<Navigate to="/onboarding/farm/create" replace />} />
-          <Route path="/onboarding/farm/create" element={<CreateFarmPage />} />
-        </Route>
+        <Route path="/no-subscription" element={
+          <LazyRoute routePath="/no-subscription" fullScreen>
+            <NoSubscriptionPage />
+          </LazyRoute>
+        } />
       </Route>
 
-      {/* Protected app routes - require session + completed onboarding */}
+      {/* Protected app routes - require session + farm membership */}
       <Route element={<RequireAuth />}>
         <Route element={<RequireOnboarded />}>
           {/* Wrap with layout that includes Header/SideMenu */}
           <Route element={<AppLayout />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/app/dashboard" element={<DashboardPage />} />
-            <Route path="/wells" element={<WellListPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/" element={
+              <LazyRoute routePath="/">
+                <DashboardPage />
+              </LazyRoute>
+            } />
+            <Route path="/app/dashboard" element={
+              <LazyRoute routePath="/app/dashboard">
+                <DashboardPage />
+              </LazyRoute>
+            } />
+            <Route path="/wells" element={
+              <LazyRoute routePath="/wells">
+                <WellListPage />
+              </LazyRoute>
+            } />
+            <Route path="/reports" element={
+              <LazyRoute routePath="/reports">
+                <ReportsPage />
+              </LazyRoute>
+            } />
             <Route element={<RequireRole action="manage_farm" />}>
-              <Route path="/subscription" element={<SubscriptionPage />} />
+              <Route path="/subscription" element={
+                <LazyRoute routePath="/subscription">
+                  <SubscriptionPage />
+                </LazyRoute>
+              } />
             </Route>
             <Route element={<RequireRole action="manage_users" />}>
-              <Route path="/users" element={<UsersPage />} />
+              <Route path="/users" element={
+                <LazyRoute routePath="/users">
+                  <UsersPage />
+                </LazyRoute>
+              } />
             </Route>
-            <Route path="/language" element={<LanguagePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/wells/:id" element={<WellDetailPage />} />
+            <Route path="/language" element={
+              <LazyRoute routePath="/language">
+                <LanguagePage />
+              </LazyRoute>
+            } />
+            <Route path="/settings" element={
+              <LazyRoute routePath="/settings">
+                <SettingsPage />
+              </LazyRoute>
+            } />
+            <Route path="/wells/:id" element={
+              <LazyRoute routePath="/wells/:id">
+                <WellDetailPage />
+              </LazyRoute>
+            } />
             <Route element={<RequireRole action="edit_well" fallbackPath={(params) => `/wells/${params.id}`} />}>
-              <Route path="/wells/:id/edit" element={<WellEditPage />} />
+              <Route path="/wells/:id/edit" element={
+                <LazyRoute routePath="/wells/:id/edit">
+                  <WellEditPage />
+                </LazyRoute>
+              } />
             </Route>
             <Route element={<RequireRole action="manage_allocations" fallbackPath={(params) => `/wells/${params.id}`} />}>
-              <Route path="/wells/:id/allocations" element={<WellAllocationsPage />} />
+              <Route path="/wells/:id/allocations" element={
+                <LazyRoute routePath="/wells/:id/allocations">
+                  <WellAllocationsPage />
+                </LazyRoute>
+              } />
             </Route>
           </Route>
         </Route>

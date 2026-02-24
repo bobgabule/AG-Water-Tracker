@@ -99,4 +99,30 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        chunkFileNames: 'assets/[name]-[hash].js',
+        manualChunks(id) {
+          if (id.includes('mapbox-gl') || id.includes('react-map-gl')) {
+            return 'mapbox';
+          }
+          if (id.includes('node_modules')) {
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/react-router') ||
+              id.includes('/scheduler/') ||
+              id.includes('/@supabase/') ||
+              id.includes('/@headlessui/') ||
+              id.includes('/@heroicons/') ||
+              id.includes('/zustand/')
+            ) {
+              return 'vendor';
+            }
+          }
+        },
+      },
+    },
+  },
 })
