@@ -6,7 +6,8 @@
 - v1.1 Dashboard & Map -- Phases 9-11 (shipped 2026-02-12)
 - v2.0 Meter Readings & Allocations -- Phases 12-16 (shipped 2026-02-21)
 - v3.0 Subscriptions & Permissions -- Phases 17-22 (shipped 2026-02-23)
-- v4.0 Performance & Perceived Speed -- Phases 23-27 (in progress)
+- v4.0 Performance & Perceived Speed -- Phases 23-27 (partial: 23-26 shipped, 27 deferred)
+- v4.1 Readings & Allocations Fixes -- Phases 28-29 (in progress)
 
 ## Phases
 
@@ -279,6 +280,27 @@ Plans:
   2. Page transitions show smooth cross-fade via View Transitions API on supported browsers (graceful fallback on others)
   3. New well marker appears on the map immediately after creation, before PowerSync sync completes
 
+### v4.1 Phase Details
+
+### Phase 28: Reading Creation & Validation Fixes
+**Goal**: Fix the reading creation/edit flow — threshold warning uses 50-gallon equivalent, validation rejects zero consistently, pump states are mutually exclusive, and GPS failure is surfaced to the user
+**Depends on**: Nothing (first v4.1 phase)
+**Requirements**: READ-F01, READ-F02, READ-F03, READ-F04
+**Success Criteria** (what must be TRUE):
+  1. Similar reading warning fires when difference is within 50 gallons (converted from well units via multiplier)
+  2. Editing a reading and entering 0 shows a validation error (matches create form)
+  3. Selecting Pump Off automatically deselects Dead Pump and vice versa
+  4. GPS capture failure shows a warning screen with Retry and Save Without GPS options
+
+### Phase 29: Well Detail & Allocation Corrections
+**Goal**: Fix allocation defaults, gauge unit labels, and calendar year filtering so the well detail page accurately reflects current-year usage in Acre Feet
+**Depends on**: Phase 28
+**Requirements**: ALLOC-F01, ALLOC-F02, ALLOC-F03
+**Success Criteria** (what must be TRUE):
+  1. New allocation form defaults end date to Dec 31 of the current year
+  2. Well detail gauge usage is calculated from current calendar year readings only (earliest-to-latest reading difference, converted to AF)
+  3. Well detail gauge shows "AF" labels for Allocated, Used, and Remaining regardless of well unit type
+
 ## Progress
 
 **Execution Order:**
@@ -286,7 +308,8 @@ Plans:
 - v1.1: Phases 9 -> 10 -> 11 (complete)
 - v2.0: Phases 12 -> 13 -> 14 + 15 (parallel after 13) -> 16 (complete)
 - v3.0: Phase 17 -> 18 + 19 (parallel) -> 20 -> 21 -> 22 (complete)
-- v4.0: Phase 23 -> 24 + 25 (parallel) -> 26 -> 27
+- v4.0: Phase 23 -> 24 + 25 (parallel) -> 26 -> 27 (deferred)
+- v4.1: Phase 28 -> 29
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -316,4 +339,6 @@ Plans:
 | 24. Loading States & Skeletons | 2/2 | Complete    | 2026-02-24 | — |
 | 25. Asset Optimization | 1/1 | Complete    | 2026-02-24 | — |
 | 26. Service Worker Intelligence | v4.0 | Complete    | 2026-02-25 | 2026-02-25 |
-| 27. Query & Navigation Fluidity | v4.0 | 0/? | Not Started | — |
+| 27. Query & Navigation Fluidity | v4.0 | 0/? | Deferred | — |
+| 28. Reading & Validation Fixes | v4.1 | 0/? | Not Started | — |
+| 29. Well Detail & Allocation Corrections | v4.1 | 0/? | Not Started | — |

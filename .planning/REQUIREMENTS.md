@@ -43,6 +43,23 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 - [ ] **NAV-02**: Page transitions use View Transitions API for smooth cross-fade (graceful fallback on unsupported browsers)
 - [ ] **NAV-03**: Well creation shows optimistically on the map immediately, before PowerSync sync completes
 
+## v4.1 Requirements
+
+Requirements for v4.1 Readings & Allocations Fixes. Each maps to roadmap phases.
+
+### Reading & Validation
+
+- [ ] **READ-F01**: Similar reading warning triggers when difference is within 50 gallons (converted from well units via multiplier)
+- [ ] **READ-F02**: Edit reading form rejects zero values (consistent with create form validation)
+- [ ] **READ-F03**: Pump Off and Dead Pump checkboxes are mutually exclusive (selecting one deselects the other)
+- [ ] **READ-F04**: GPS capture failure shows warning screen with retry option instead of silently saving without location
+
+### Well Detail & Allocations
+
+- [ ] **ALLOC-F01**: New allocation form defaults end date to December 31 of the current year
+- [ ] **ALLOC-F02**: Well detail gauge usage is calculated dynamically from current calendar year readings only (all readings still visible in list)
+- [ ] **ALLOC-F03**: Well detail gauge always displays Acre Feet labels regardless of well unit type
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -112,12 +129,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NAV-01 | Phase 27 | Pending |
 | NAV-02 | Phase 27 | Pending |
 | NAV-03 | Phase 27 | Pending |
+| READ-F01 | Phase 28 | Pending |
+| READ-F02 | Phase 28 | Pending |
+| READ-F03 | Phase 28 | Pending |
+| READ-F04 | Phase 28 | Pending |
+| ALLOC-F01 | Phase 29 | Pending |
+| ALLOC-F02 | Phase 29 | Pending |
+| ALLOC-F03 | Phase 29 | Pending |
 
 **Coverage:**
-- v4.0 requirements: 21 total
-- Mapped to phases: 21
+- v4.0 requirements: 21 total (18 complete, 3 deferred)
+- v4.1 requirements: 7 total
+- Mapped to phases: 28
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-25 after v4.1 requirements added*
