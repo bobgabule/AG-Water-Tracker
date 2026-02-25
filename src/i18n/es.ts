@@ -1,8 +1,14 @@
 const es: Record<string, string> = {
   // ---------------------------------------------------------------------------
+  // App
+  // ---------------------------------------------------------------------------
+  'app.waterTracker': 'Rastreador de Agua',
+
+  // ---------------------------------------------------------------------------
   // Navigation
   // ---------------------------------------------------------------------------
   'nav.map': 'Mapa',
+  'nav.openMenu': 'Abrir menu',
   'nav.wellList': 'Lista de Pozos',
   'nav.reports': 'Reportes',
   'nav.users': 'Usuarios',
@@ -355,6 +361,11 @@ const es: Record<string, string> = {
   'error.somethingWrong': 'Algo salio mal',
   'error.tapToRetry': 'Toca para intentar de nuevo.',
   'error.tryAgain': 'Intentar de Nuevo',
+  'error.pageLoadFailed': 'Algo salio mal al cargar esta pagina.',
+  'error.appUpdatedReloading': 'App actualizada \u2014 recargando...',
+  'error.offlineCheck': 'Parece que no tienes conexion. Revisa tu conexion e intenta de nuevo.',
+  'error.reload': 'Recargar',
+  'error.signOutFailed': 'Error al cerrar sesion. Intenta de nuevo.',
 
   // ---------------------------------------------------------------------------
   // Location

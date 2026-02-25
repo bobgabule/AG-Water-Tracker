@@ -1,8 +1,14 @@
 const en: Record<string, string> = {
   // ---------------------------------------------------------------------------
+  // App
+  // ---------------------------------------------------------------------------
+  'app.waterTracker': 'Water Tracker',
+
+  // ---------------------------------------------------------------------------
   // Navigation
   // ---------------------------------------------------------------------------
   'nav.map': 'Map',
+  'nav.openMenu': 'Open menu',
   'nav.wellList': 'Well List',
   'nav.reports': 'Reports',
   'nav.users': 'Users',
@@ -355,6 +361,11 @@ const en: Record<string, string> = {
   'error.somethingWrong': 'Something went wrong',
   'error.tapToRetry': 'Tap to try again.',
   'error.tryAgain': 'Try Again',
+  'error.pageLoadFailed': 'Something went wrong loading this page.',
+  'error.appUpdatedReloading': 'App updated \u2014 reloading...',
+  'error.offlineCheck': 'You appear to be offline. Check your connection and try again.',
+  'error.reload': 'Reload',
+  'error.signOutFailed': 'Failed to sign out. Please try again.',
 
   // ---------------------------------------------------------------------------
   // Location

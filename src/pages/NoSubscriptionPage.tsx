@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { NoSymbolIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from '../hooks/useTranslation';
 import AuthLayout from '../components/auth/AuthLayout';
 import { formatPhoneForDisplay } from '../lib/formatPhone';
 
@@ -13,6 +14,7 @@ import { formatPhoneForDisplay } from '../lib/formatPhone';
  */
 export default function NoSubscriptionPage() {
   const { user, authStatus, signOut, refreshAuthStatus } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [subscriptionUrl, setSubscriptionUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,16 +74,16 @@ export default function NoSubscriptionPage() {
         <NoSymbolIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
 
         <h1 className="text-2xl font-semibold text-white mb-2">
-          No Farm Access
+          {t('auth.noFarmAccess')}
         </h1>
 
         <p className="text-gray-300 text-sm mb-2">
-          Your phone number is not associated with any farm. Ask your farm administrator to add you, or subscribe to create your own farm.
+          {t('auth.noFarmDescription')}
         </p>
 
         {phone && (
           <p className="text-gray-400 text-sm mb-8">
-            Signed in as {formatPhoneForDisplay(phone)}
+            {t('auth.signedInAs', { phone: formatPhoneForDisplay(phone) })}
           </p>
         )}
 
@@ -92,7 +94,7 @@ export default function NoSubscriptionPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-medium text-white transition-colors mb-4"
           >
-            Visit subscription site
+            {t('auth.visitSubscription')}
             <ArrowTopRightOnSquareIcon className="h-4 w-4" />
           </a>
         )}
@@ -102,7 +104,7 @@ export default function NoSubscriptionPage() {
           onClick={handleSignOut}
           className="block w-full py-2 text-gray-400 hover:text-gray-300 text-sm font-medium transition-colors"
         >
-          Sign Out
+          {t('auth.signOut')}
         </button>
       </div>
     </AuthLayout>
