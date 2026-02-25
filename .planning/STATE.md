@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 27 — Query Optimization & Navigation Fluidity
+**Current focus:** Phase 30 — Drop Dead Invite Code
 
 ## Current Position
 
-Phase: 27
-Plan: 2 of 2 (27-02 complete)
-Status: Phase 27 complete
-Last activity: 2026-02-25 — Phase 27 Plan 02 complete
+Phase: 30
+Plan: 1 of 1 (30-01 complete)
+Status: Phase 30 complete
+Last activity: 2026-02-25 — Phase 30 Plan 01 complete
 
-Progress: Phase 27: ██████████ 100% (2/2 plans)
+Progress: Phase 30: ██████████ 100% (1/1 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 59 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27)
+- Total plans completed: 60 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -47,6 +47,7 @@ Progress: Phase 27: ██████████ 100% (2/2 plans)
 | Phase 29 P01 | 3min | 3 | 3 |
 | Phase 27 P01 | 6min | 2 | 12 |
 | Phase 27 P02 | 2min | 2 | 2 |
+| Phase 30 P01 | 2min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 27-02: Sync failure handling moved entirely to PowerSync connector -- DashboardPage only handles rare local INSERT errors
 - Phase 27-02: Removed saveError state and error banner in favor of unified toast notification system
 - Phase 27-02: wellFailureNotified flag ensures only one toast per transaction batch even with multiple well ops
+- Phase 30-01: Used DROP FUNCTION IF EXISTS for idempotent, safe-to-rerun migration
 
 ### Pending Todos (manual steps)
 
@@ -86,6 +88,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 
 - Phase 30 added: Drop dead invite code
 - Phase 31 added: Simplify invite user flow with seat limits
+- Phase 32 added: Unified design system and theme colors
 
 ### Blockers/Concerns
 
@@ -94,6 +97,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 27-02-PLAN.md
+Stopped at: Completed 30-01-PLAN.md
 Resume file: —
-Next action: Phase 27 complete — proceed to next phase
+Next action: Phase 30 complete — proceed to Phase 31
