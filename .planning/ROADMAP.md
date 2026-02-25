@@ -431,3 +431,32 @@ Plans:
 
 Plans:
 - [x] 36-01-PLAN.md — GPS fix, isSimilar flag fix, green body, readings restyling, gauge labels, Last Updated timestamp
+
+### Phase 37: Add multi-language support (English/Español) with persistent language preference
+
+**Goal:** Every piece of app chrome renders in the user's selected language (English or Spanish) with instant switching and persistent preference via localStorage -- all user-entered data stays untranslated
+**Depends on:** Phase 36
+**Requirements:** I18N-INFRA, I18N-AUTH-NAV, I18N-WELLS-PAGES
+**Plans:** 3 plans
+
+Plans:
+- [ ] 37-01-PLAN.md — Translation infrastructure: language store, en/es translation files, useTranslation hook, LanguagePage rewrite, getRoleDisplayName
+- [ ] 37-02-PLAN.md — Wire translations into auth pages, SideMenu, Header, modals, overlays, error components
+- [ ] 37-03-PLAN.md — Wire translations into well pages, well components, Users, Settings, Reports, Subscription
+
+**Success Criteria** (what must be TRUE):
+  1. Switching language on /language page instantly re-renders all app text in the selected locale
+  2. Language preference persists across page reloads and sessions via localStorage
+  3. All ~31 component files use t() calls instead of hardcoded English strings
+  4. Dates format locale-aware (Feb 26, 2026 vs 26 feb 2026); numbers always stay US format
+  5. Equipment states, roles, unit types, and well statuses show translated display labels
+  6. Relative times render in selected locale (Today/Hoy, Yesterday/Ayer, X days ago/hace X dias)
+
+### Phase 38: Rename role 'grower' to 'owner'
+
+**Goal:** Rename the 'grower' role to 'owner' across the entire stack — database migration (data, CHECK constraint, all SECURITY DEFINER functions), TypeScript source, and tests
+**Depends on:** Phase 37
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 38 to break down)
