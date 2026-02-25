@@ -103,7 +103,7 @@ export default function WellListPage() {
   const handleWellClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       const id = e.currentTarget.dataset.wellId;
-      if (id) navigate(`/wells/${id}`);
+      if (id) navigate(`/wells/${id}`, { viewTransition: true });
     },
     [navigate],
   );
@@ -113,13 +113,13 @@ export default function WellListPage() {
       setShowLimitModal(true);
       return;
     }
-    navigate('/wells/new');
+    navigate('/wells/new', { viewTransition: true });
   }, [tier, wellCount, navigate]);
 
   const handleLimitModalClose = useCallback(() => {
     setShowLimitModal(false);
   }, []);
-  const handleWellMap = useCallback(() => navigate('/'), [navigate]);
+  const handleWellMap = useCallback(() => navigate('/', { viewTransition: true }), [navigate]);
 
   const wellsWithDisplayData = useMemo(
     () => wells.map((well) =>

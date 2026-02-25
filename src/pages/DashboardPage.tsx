@@ -72,10 +72,10 @@ export default function DashboardPage() {
   const [pickedLocation, setPickedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const handleWellClick = useCallback(
-    (id: string) => navigate(`/wells/${id}`),
+    (id: string) => navigate(`/wells/${id}`, { viewTransition: true }),
     [navigate],
   );
-  const handleWellList = useCallback(() => navigate('/wells'), [navigate]);
+  const handleWellList = useCallback(() => navigate('/wells', { viewTransition: true }), [navigate]);
 
   // New Well flow handlers
   const handleNewWell = useCallback(() => {

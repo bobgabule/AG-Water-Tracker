@@ -49,7 +49,7 @@ export default function PhonePage() {
   // If already logged in, redirect to dashboard or no-subscription
   useEffect(() => {
     if (isAuthReady && session && authStatus) {
-      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
+      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
     }
   }, [isAuthReady, session, authStatus, navigate]);
 
@@ -84,7 +84,7 @@ export default function PhonePage() {
         setError('');
         await sendOtp(`+1${cleanPhone}`);
         // Navigate to verify page with phone in state
-        navigate('/auth/verify', { state: { phone: `+1${cleanPhone}` } });
+        navigate('/auth/verify', { state: { phone: `+1${cleanPhone}` }, viewTransition: true });
       } catch (err) {
         if (!navigator.onLine) {
           setError('No internet connection. Connect to the internet to sign in.');

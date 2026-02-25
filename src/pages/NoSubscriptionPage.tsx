@@ -54,13 +54,13 @@ export default function NoSubscriptionPage() {
   // If farm membership detected (e.g. from auth state change), redirect
   useEffect(() => {
     if (authStatus?.hasFarmMembership) {
-      navigate('/', { replace: true });
+      navigate('/', { replace: true, viewTransition: true });
     }
   }, [authStatus?.hasFarmMembership, navigate]);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
-    navigate('/auth/phone', { replace: true });
+    navigate('/auth/phone', { replace: true, viewTransition: true });
   }, [signOut, navigate]);
 
   const phone = user?.phone ?? '';

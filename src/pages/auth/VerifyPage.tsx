@@ -36,14 +36,14 @@ export default function VerifyPage() {
   // Redirect if already logged in (only when status is loaded to avoid flash)
   useEffect(() => {
     if (isAuthReady && user && authStatus) {
-      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
+      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
     }
   }, [isAuthReady, user, authStatus, navigate]);
 
   // Redirect if no phone in state (and not logged in)
   useEffect(() => {
     if (isAuthReady && !user && !phone) {
-      navigate('/auth/phone', { replace: true });
+      navigate('/auth/phone', { replace: true, viewTransition: true });
     }
   }, [phone, isAuthReady, user, navigate]);
 
@@ -99,7 +99,7 @@ export default function VerifyPage() {
         await verifyOtp(phone, fullCode);
         const status = await refreshAuthStatus();
         prefetchDashboard();
-        navigate(status?.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
+        navigate(status?.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
       } catch (err) {
         if (!navigator.onLine) {
           setError('No internet connection. Connect to the internet to verify your code.');
@@ -163,7 +163,7 @@ export default function VerifyPage() {
 
   // Navigate back to phone page
   const handleBack = useCallback(() => {
-    navigate('/auth/phone', { replace: true });
+    navigate('/auth/phone', { replace: true, viewTransition: true });
   }, [navigate]);
 
   // Show branded loading while waiting for redirect (logged-in user or missing phone state)
