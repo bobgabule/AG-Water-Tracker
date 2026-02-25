@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-24)
+See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v4.0 Performance & Perceived Speed — Phase 26 Plan 01 complete
+**Current focus:** v4.1 Readings & Allocations Fixes
 
 ## Current Position
 
-Phase: 26 of 27 (Service Worker Intelligence)
-Plan: 1 of 2 (in progress)
-Status: Phase 26 Plan 01 complete
-Last activity: 2026-02-25 — Phase 26 Plan 01 executed
+Phase: 28 of 29 (not started)
+Plan: 0 of ? (not started)
+Status: Milestone v4.1 started — executing
+Last activity: 2026-02-25 — Milestone v4.1 started
 
-Progress: #################################################-- 65% (v4.0)
+Progress: ░░░░░░░░░░ 0% (v4.1)
 
 ## Performance Metrics
 
@@ -32,6 +32,7 @@ Progress: #################################################-- 65% (v4.0)
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
 | v3.0 Subscriptions | 17-22 | 9 | 2026-02-22 to 2026-02-23 |
 | v4.0 Performance | 23-27 | 6 | 2026-02-24 to 2026-02-25 |
+| v4.1 Fixes | 28-29 | 0 | 2026-02-25 |
 
 **Recent Executions:**
 
@@ -79,6 +80,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 26-01-PLAN.md
-Resume file: .planning/phases/26-service-worker-intelligence/26-01-SUMMARY.md
-Next action: Execute 26-02-PLAN.md (if exists) or advance to next phase
+Stopped at: v4.1 milestone started, executing phases
+Resume file: —
+Next action: Execute Phase 28 (reading/validation fixes)

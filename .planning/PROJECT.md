@@ -8,16 +8,18 @@ An offline-first PWA for agricultural water management. Farm owners (growers) tr
 
 Field agents can reliably record water meter readings in areas with poor connectivity, and that data syncs automatically when they're back online. The app must never lose data and must never lock users out when they're offline.
 
-## Current Milestone: v4.0 Performance & Perceived Speed
+## Current Milestone: v4.1 Readings & Allocations Fixes
 
-**Goal:** Transform the app from "works correctly" to "feels native-fast" by addressing code splitting, loading state UX, asset optimization, service worker intelligence, and navigation fluidity.
+**Goal:** Fix behavioral issues in meter reading creation, well detail gauge, and allocation defaults to match business requirements.
 
-**Target features:**
-- Route-level code splitting with lazy-loaded pages and isolated Mapbox chunk
-- Loading state collapse (3 sequential spinners → skeleton screens)
-- Asset optimization (11MB auth background → <300KB modern formats)
-- Intelligent service worker caching for app code and offline auth
-- Navigation fluidity (query waterfalls, View Transitions, optimistic UI)
+**Target fixes:**
+- Similar reading threshold → 50 gallons (unit-aware conversion)
+- Edit form validation consistency (reject zero)
+- Pump Off / Dead Pump mutual exclusivity
+- GPS failure warning with retry option
+- Default allocation end date → Dec 31 of current year
+- Calendar year filtering for gauge usage calculations
+- Gauge always displays in Acre Feet
 
 ## Requirements
 
@@ -68,35 +70,18 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ### Active
 
-<!-- Current scope: v4.0 Performance & Perceived Speed -->
+<!-- Current scope: v4.1 Readings & Allocations Fixes -->
 
-**Code Splitting & Bundle:**
-- [ ] Route-level lazy loading for all page components
-- [ ] Mapbox GL JS isolated to its own chunk (not in vendor bundle)
-- [ ] Preconnect/preload resource hints in HTML
-- [ ] Navigation-intent prefetch on menu hover/touch
+**Reading & Validation:**
+- [ ] Similar reading threshold converted to 50-gallon equivalent
+- [ ] Edit form rejects zero (consistent with create form)
+- [ ] Pump Off / Dead Pump mutually exclusive
+- [ ] GPS failure shows warning with retry option
 
-**Loading States:**
-- [ ] PowerSync provider renders children immediately (non-blocking)
-- [ ] Sequential auth spinners collapsed into single loading state
-- [ ] Skeleton screens for Dashboard, Well List, Well Detail
-- [ ] RequireRole shows skeleton instead of blank during loading
-- [ ] Sign-out completes in <500ms (was 2s)
-
-**Asset Optimization:**
-- [ ] bg-farm.jpg compressed from 11MB to <300KB (AVIF/WebP)
-- [ ] Background image lazy-loaded (not fetched for authenticated users)
-- [ ] Preconnect hints for Supabase, Mapbox, PowerSync endpoints
-
-**Service Worker:**
-- [ ] Navigation preload enabled
-- [ ] App code cached intelligently (not just map tiles)
-- [ ] Auth pages cached for offline returnability
-
-**Navigation Fluidity:**
-- [ ] useSubscriptionTier query waterfall collapsed to single JOIN
-- [ ] View Transitions API for smooth page changes
-- [ ] Optimistic UI for well creation
+**Well Detail & Allocations:**
+- [ ] Default allocation end date → Dec 31 of current year
+- [ ] Gauge usage calculated from current calendar year readings only
+- [ ] Gauge always displays AF label (not well units)
 
 ### Out of Scope
 
@@ -114,9 +99,9 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ## Context
 
-**Shipped:** v1.0 MVP + v1.1 Dashboard & Map + v2.0 Meter Readings & Allocations + v3.0 Subscriptions & Permissions.
+**Shipped:** v1.0 MVP + v1.1 Dashboard & Map + v2.0 Meter Readings & Allocations + v3.0 Subscriptions & Permissions + v4.0 Performance (partial: phases 23-25 shipped, 26-27 deferred).
 
-**Current milestone:** v4.0 Performance & Perceived Speed — code splitting, loading state optimization, asset compression, service worker intelligence, navigation fluidity.
+**Current milestone:** v4.1 Readings & Allocations Fixes — reading threshold, validation, GPS warning, allocation defaults, calendar year gauge, AF labels.
 
 **Codebase:** ~10,439 LOC TypeScript/CSS. Stack is React 19 + Vite 6 + PowerSync + Supabase + Mapbox GL. The app has solid auth, role-based access, invite system, user management, subscription gating, polished map experience, and complete meter reading/allocation workflow.
 
@@ -196,4 +181,4 @@ Field agents can reliably record water meter readings in areas with poor connect
 | Stripe Customer Portal for upgrades | Zero payment UI to build. Webhook updates DB, PowerSync syncs in real-time | — Pending |
 
 ---
-*Last updated: 2026-02-24 after v4.0 milestone start*
+*Last updated: 2026-02-25 after v4.1 milestone start*
