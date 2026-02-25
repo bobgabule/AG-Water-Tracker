@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 import PendingInvitesList from '../components/PendingInvitesList';
 import AddUserBottomSheet from '../components/AddUserModal';
-import ConfirmDeleteMemberDialog from '../components/ConfirmDeleteMemberDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface FarmMemberRow {
   id: string;
@@ -119,10 +119,10 @@ export default function UsersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#c5cdb4] pt-14">
+    <div className="min-h-screen bg-surface-page pt-14">
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-4">USERS</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">USERS</h1>
 
         {/* Error banner */}
         {deleteError && !deleteTarget && (
@@ -135,18 +135,18 @@ export default function UsersPage() {
         <div className="space-y-2 mb-6">
           {members.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[#5f7248]/70">No members yet</p>
+              <p className="text-text-heading/70">No members yet</p>
             </div>
           ) : (
             members.map((member) => (
               <div
                 key={member.id}
-                className="rounded-lg px-4 py-3 flex items-center justify-between bg-[#dfe4d4]"
+                className="rounded-lg px-4 py-3 flex items-center justify-between bg-surface-card"
               >
-                <span className="font-medium truncate text-[#5f7248]">
+                <span className="font-medium truncate text-text-heading">
                   {member.full_name || 'Unknown'}
                   {member.user_id === user?.id && (
-                    <span className="text-[#5f7248]/50 text-sm ml-1">(You)</span>
+                    <span className="text-text-heading/50 text-sm ml-1">(You)</span>
                   )}
                 </span>
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -159,7 +159,7 @@ export default function UsersPage() {
                   {canDeleteMember(member) && (
                     <button
                       onClick={() => handleDeleteClick(member)}
-                      className="p-1 rounded text-[#5f7248]/40 hover:text-red-600 transition-colors"
+                      className="p-1 rounded text-text-heading/40 hover:text-red-600 transition-colors"
                       aria-label={`Remove ${member.full_name}`}
                     >
                       <TrashIcon className="h-4 w-4" />
@@ -181,11 +181,11 @@ export default function UsersPage() {
 
       {/* Fixed bottom "+ New User" button */}
       {canManageUsers && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-[#c5cdb4] via-[#c5cdb4] to-transparent">
+        <div className="fixed bottom-0 left-0 right-0 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-surface-page via-surface-page to-transparent">
           <div className="flex justify-center">
             <button
               onClick={handleOpenInviteSheet}
-              className="flex items-center gap-2 px-6 py-3 bg-[#5f7248] rounded-full text-white font-medium shadow-sm hover:bg-[#4e6339] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               New User
@@ -202,11 +202,14 @@ export default function UsersPage() {
       />
 
       {/* Confirm Delete Dialog */}
-      <ConfirmDeleteMemberDialog
+      <ConfirmDialog
         open={deleteTarget !== null}
         onClose={handleDeleteClose}
         onConfirm={handleDeleteConfirm}
-        memberName={deleteTarget?.full_name ?? 'this member'}
+        title="Remove User"
+        description={<>Remove <span className="text-white font-medium">{deleteTarget?.full_name ?? 'this member'}</span> from your farm? They will lose access and can be re-invited later.</>}
+        confirmText="Remove"
+        confirmLoadingText="Removing..."
         loading={deleteLoading}
       />
     </div>

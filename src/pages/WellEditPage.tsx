@@ -19,7 +19,7 @@ import {
 import { useToastStore } from '../stores/toastStore';
 import { useWellEditDraftStore } from '../stores/wellEditDraftStore';
 import { useActiveFarm } from '../hooks/useActiveFarm';
-import ConfirmDeleteWellDialog from '../components/ConfirmDeleteWellDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type Units = 'AF' | 'GAL' | 'CF';
 type Multiplier = '0.01' | '1' | '10' | '1000' | 'MG';
@@ -367,7 +367,7 @@ export default function WellEditPage() {
   if (!well && wells.length === 0) {
     // Loading state
     return (
-      <div className="h-full bg-[#5f7248] flex items-center justify-center">
+      <div className="h-full bg-surface-header flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -378,9 +378,9 @@ export default function WellEditPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#5f7248]">
+    <div className="h-full flex flex-col bg-surface-header">
       {/* Header */}
-      <div className="bg-[#5f7248] p-4 pt-6 flex-shrink-0 flex items-center gap-3">
+      <div className="bg-surface-header p-4 pt-6 flex-shrink-0 flex items-center gap-3">
         <button
           type="button"
           onClick={handleBack}
@@ -470,7 +470,7 @@ export default function WellEditPage() {
               type="button"
               onClick={handleGetLocation}
               disabled={gpsLoading}
-              className="p-2.5 bg-white rounded-lg text-[#6190d1] hover:bg-[#6190d1] transition-colors disabled:opacity-50"
+              className="p-2.5 bg-white rounded-lg text-accent-gps hover:bg-accent-gps transition-colors disabled:opacity-50"
               aria-label="Get current location"
             >
               {gpsLoading ? (
@@ -489,7 +489,7 @@ export default function WellEditPage() {
           <button
             type="button"
             onClick={handleAllocationsNav}
-            className="w-full bg-[#5f7248] border border-white/50 rounded-lg p-4 flex items-center justify-between"
+            className="w-full bg-surface-header border border-white/50 rounded-lg p-4 flex items-center justify-between"
           >
             <div>
               <h3 className="text-white font-medium text-sm">Allocations</h3>
@@ -524,7 +524,7 @@ export default function WellEditPage() {
               type="checkbox"
               checked={sendMonthlyReport}
               onChange={(e) => setSendMonthlyReport(e.target.checked)}
-              className="w-5 h-5 rounded border-white-300 text-[#506741] focus:ring-white"
+              className="w-5 h-5 rounded border-white-300 text-btn-confirm-text focus:ring-white"
             />
             <span className="text-sm text-white">Send monthly meter reading report</span>
           </label>
@@ -588,10 +588,10 @@ export default function WellEditPage() {
           type="button"
           onClick={handleSave}
           disabled={!isFormValid || saving}
-          className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? (
-            <div className="w-5 h-5 border-2 border-[#506741] border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-btn-confirm-text border-t-transparent rounded-full animate-spin" />
           ) : (
             <CheckIcon className="w-5 h-5" />
           )}
@@ -612,11 +612,14 @@ export default function WellEditPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <ConfirmDeleteWellDialog
+      <ConfirmDialog
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteWell}
-        wellName={well.name}
+        title="Delete Well"
+        description={<>Delete <span className="text-white font-medium">{well.name}</span> and all its readings and allocations? This cannot be undone.</>}
+        confirmText="Delete"
+        confirmLoadingText="Deleting..."
         loading={deleteLoading}
       />
     </div>
