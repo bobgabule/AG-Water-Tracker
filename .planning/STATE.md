@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 32 — Unified Design System and Theme Colors
+**Current focus:** Phase 36 — Fix Reading GPS and Well Detail Redesign
 
 ## Current Position
 
-Phase: 32
-Plan: 3 of 3 (32-03 complete)
-Status: Phase 32 Complete
-Last activity: 2026-02-25 — Phase 32 Plan 03 complete
+Phase: 36
+Plan: 1 of 1 (36-01 complete)
+Status: Phase 36 Complete
+Last activity: 2026-02-25 — Phase 36 Plan 01 complete
 
-Progress: Phase 32: ██████████ 100% (3/3 plans)
+Progress: Phase 36: ██████████ 100% (1/1 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 65 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32)
+- Total plans completed: 66 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -53,6 +53,7 @@ Progress: Phase 32: ██████████ 100% (3/3 plans)
 | Phase 31 P01 | 2min | 1 | 1 |
 | Phase 31 P02 | 2min | 2 | 5 |
 | Phase 32 P03 | 11min | 2 | 17 |
+| Phase 36 P01 | 6min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -92,6 +93,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 31-02: Display server seat limit error messages directly (already user-friendly from migration 039)
 - Phase 32-03: UserLocationCircle Mapbox paint properties kept as raw hex (JS runtime, not Tailwind)
 - Phase 32-03: Two documented one-offs preserved: LocationPicker text-[#759099], LanguagePage hover:bg-[#f5f5f0]
+- Phase 36-01: GPS timeout 10s + maximumAge 60s matches AddWellFormBottomSheet and LocationPickerBottomSheet patterns
+- Phase 36-01: pendingSimilar state preserves isSimilar through gps-failed and range-warning views including Retry
+- Phase 36-01: formatRelativeDate uses Today/Yesterday/MonthDay pattern for Last Updated display
 
 ### Pending Todos (manual steps)
 
@@ -105,6 +109,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 31 added: Simplify invite user flow with seat limits
 - Phase 32 added: Unified design system and theme colors
 - Phase 33 added: Fix wells page gauge consistency and add-well navigation
+- Phase 34 added: Update app-wide modal/dialog styling to dark green theme with consistent button colors
+- Phase 35 added: Fix dashboard map auto-zoom on location enable and improve page reload speed
+- Phase 36 added: Fix reading GPS and well detail redesign
 
 ### Blockers/Concerns
 
@@ -113,6 +120,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 32-03-PLAN.md (Phase 32 complete)
-Resume file: —
-Next action: Phase 32 complete — all design system plans executed
+Stopped at: Completed 36-01-PLAN.md (Phase 36 complete)
+Resume file: ---
+Next action: Phase 36 complete --- GPS fix and well detail redesign done

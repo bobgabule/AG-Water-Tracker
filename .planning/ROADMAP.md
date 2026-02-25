@@ -404,3 +404,30 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 33 to break down)
+
+### Phase 34: Update app-wide modal/dialog styling to dark green theme with consistent button colors
+
+**Goal:** [To be planned]
+**Depends on:** Phase 33
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 34 to break down)
+
+### Phase 35: Fix dashboard map auto-zoom on location enable and improve page reload speed
+
+**Goal:** [To be planned]
+**Depends on:** Phase 34
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 35 to break down)
+
+### Phase 36: Fix reading GPS bug and Well Detail page redesign
+
+**Goal:** Fix GPS capture in new reading flow (timeout too short, no cache reuse) and redesign the Well Detail page — green body everywhere, white text readings with alternating rows, unit-aware gauge labels, Last Updated timestamp, and yellow out-of-range flags
+**Depends on:** Phase 35
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 36-01-PLAN.md — GPS fix, isSimilar flag fix, green body, readings restyling, gauge labels, Last Updated timestamp
