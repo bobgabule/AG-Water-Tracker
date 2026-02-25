@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** v4.1 Readings & Allocations Fixes
+**Current focus:** Phase 27 — Query Optimization & Navigation Fluidity
 
 ## Current Position
 
-Phase: 29 of 29 (complete)
-Plan: 2 of 2 (complete)
-Status: Milestone v4.1 complete
-Last activity: 2026-02-25 — v4.1 shipped
+Phase: 27
+Plan: 1 of 2 (27-01 complete)
+Status: Executing phase 27
+Last activity: 2026-02-25 — Phase 27 Plan 01 complete
 
-Progress: ██████████ 100% (v4.1)
+Progress: Phase 27: █████░░░░░ 50% (1/2 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 57 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1)
+- Total plans completed: 58 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 1 P27)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -45,6 +45,7 @@ Progress: ██████████ 100% (v4.1)
 | Phase 26 P01 | 2min | 2 | 2 |
 | Phase 28 P01 | 3min | 4 | 2 |
 | Phase 29 P01 | 3min | 3 | 3 |
+| Phase 27 P01 | 6min | 2 | 12 |
 
 ## Accumulated Context
 
@@ -68,12 +69,19 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 25-01: Moved image from public/ to src/assets/ so Vite bundles it with AuthLayout chunk via ES module import
 - Phase 26-01: Fade-out banner uses delayed unmount (500ms) matching CSS transition duration for smooth animation
 - Phase 26-01: Phone input and submit button both disabled when offline -- prevents form interaction entirely
+- Phase 27-01: navigate(-1) cannot accept viewTransition option in React Router v7 numeric overload
+- Phase 27-01: PhonePage.tsx included in viewTransition updates for full codebase coverage
 
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
 - Custom Access Token Hook needs manual enablement in Supabase Dashboard
 - PowerSync Dashboard sync rules need verification for invited_first_name/invited_last_name
+
+### Roadmap Evolution
+
+- Phase 30 added: Drop dead invite code
+- Phase 31 added: Simplify invite user flow with seat limits
 
 ### Blockers/Concerns
 
@@ -82,6 +90,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: v4.1 milestone complete — all 7 fixes shipped
+Stopped at: Completed 27-01-PLAN.md
 Resume file: —
-Next action: —
+Next action: Execute 27-02-PLAN.md
