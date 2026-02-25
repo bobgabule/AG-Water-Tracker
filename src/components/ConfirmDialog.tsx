@@ -1,5 +1,6 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,6 +23,8 @@ export default function ConfirmDialog({
   confirmLoadingText,
   loading,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <DialogBackdrop
@@ -52,7 +55,7 @@ export default function ConfirmDialog({
                 disabled={loading}
                 className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={onConfirm}

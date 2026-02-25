@@ -1,5 +1,6 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LocationSoftAskModalProps {
   open: boolean;
@@ -14,6 +15,8 @@ export default function LocationSoftAskModal({
   onAllow,
   mode,
 }: LocationSoftAskModalProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <DialogBackdrop
@@ -37,13 +40,13 @@ export default function LocationSoftAskModal({
             )}
 
             <DialogTitle className="text-lg font-semibold text-white mb-2">
-              {mode === 'prompt' ? 'Use your location?' : 'Location access blocked'}
+              {mode === 'prompt' ? t('location.useLocation') : t('location.locationBlocked')}
             </DialogTitle>
 
             <p className="text-white/60 text-sm mb-6">
               {mode === 'prompt'
-                ? 'Your location helps center the map and find nearby wells. We only use it while the app is open.'
-                : 'Location permission was denied. To enable it, open your browser settings and allow location access for this site.'}
+                ? t('location.promptDescription')
+                : t('location.deniedDescription')}
             </p>
 
             <div className="flex gap-3 w-full">
@@ -54,7 +57,7 @@ export default function LocationSoftAskModal({
                     onClick={onClose}
                     className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
                   >
-                    No Thanks
+                    {t('location.noThanks')}
                   </button>
                   <button
                     type="button"
@@ -62,7 +65,7 @@ export default function LocationSoftAskModal({
                     autoFocus
                     className="flex-1 py-2.5 rounded-lg font-medium bg-btn-confirm text-btn-confirm-text hover:opacity-90 transition-colors"
                   >
-                    Allow
+                    {t('location.allow')}
                   </button>
                 </>
               ) : (
@@ -72,7 +75,7 @@ export default function LocationSoftAskModal({
                   autoFocus
                   className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
                 >
-                  Got It
+                  {t('location.gotIt')}
                 </button>
               )}
             </div>
