@@ -61,7 +61,7 @@
 - [x] **Phase 23: Route-Level Code Splitting & Bundle Optimization** - Lazy-load all pages, isolate Mapbox chunk, add resource hints, menu prefetch (completed 2026-02-24)
 - [x] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay (completed 2026-02-24)
 - [x] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users (completed 2026-02-24)
-- [ ] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience
+- [x] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience (completed 2026-02-25)
 - [ ] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation
 
 ## Phase Details
@@ -264,7 +264,7 @@ Plans:
 **Requirements**: SW-01, SW-02, SW-03
 **Plans**: 1 plan
 Plans:
-- [ ] 26-01-PLAN.md — Workbox navigation preload + WebP precaching, offline auth page banner with disabled form
+- [x] 26-01-PLAN.md — Workbox navigation preload + WebP precaching, offline auth page banner with disabled form
 **Success Criteria** (what must be TRUE):
   1. Navigation preload enabled so service worker boot and navigation fetch happen in parallel
   2. After visiting a page once, subsequent visits load from service worker cache with zero network requests for that chunk
@@ -315,5 +315,5 @@ Plans:
 | 23. Code Splitting & Bundle | 2/2 | Complete    | 2026-02-24 | — |
 | 24. Loading States & Skeletons | 2/2 | Complete    | 2026-02-24 | — |
 | 25. Asset Optimization | 1/1 | Complete    | 2026-02-24 | — |
-| 26. Service Worker Intelligence | v4.0 | 0/? | Not Started | — |
+| 26. Service Worker Intelligence | v4.0 | 1/1 | Complete | 2026-02-25 |
 | 27. Query & Navigation Fluidity | v4.0 | 0/? | Not Started | — |
