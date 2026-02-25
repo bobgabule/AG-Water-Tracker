@@ -68,7 +68,7 @@ export default function DashboardPage() {
   // Auto-show location modal once on mount when permission not granted
   useEffect(() => {
     if (modalAutoShownRef.current) return;
-    const dismissed = sessionStorage.getItem('location-modal-dismissed') === 'true';
+    const dismissed = localStorage.getItem('location-modal-dismissed') === 'true';
     if (permission !== 'granted' && !dismissed) {
       modalAutoShownRef.current = true;
       setShowLocationModal(true);
@@ -94,7 +94,7 @@ export default function DashboardPage() {
 
   const handleLocationModalClose = useCallback(() => {
     setShowLocationModal(false);
-    sessionStorage.setItem('location-modal-dismissed', 'true');
+    localStorage.setItem('location-modal-dismissed', 'true');
     setPendingAction(null);
   }, []);
 
