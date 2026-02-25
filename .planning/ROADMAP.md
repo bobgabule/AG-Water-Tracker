@@ -395,3 +395,12 @@ Plans:
   3. Button component with 5 variants (confirm/danger/ghost/dark/teal) available for use
   4. `npx tsc -b --noEmit` passes with zero errors
   5. App is visually pixel-identical before and after
+
+### Phase 33: Fix wells page gauge consistency and add-well navigation
+
+**Goal:** [To be planned]
+**Depends on:** Phase 32
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 33 to break down)
