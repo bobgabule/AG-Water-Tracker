@@ -437,7 +437,7 @@ Plans:
 **Goal:** Every piece of app chrome renders in the user's selected language (English or Spanish) with instant switching and persistent preference via localStorage -- all user-entered data stays untranslated
 **Depends on:** Phase 36
 **Requirements:** I18N-INFRA, I18N-AUTH-NAV, I18N-WELLS-PAGES
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 37-01-PLAN.md — Translation infrastructure: language store, en/es translation files, useTranslation hook, LanguagePage rewrite, getRoleDisplayName
