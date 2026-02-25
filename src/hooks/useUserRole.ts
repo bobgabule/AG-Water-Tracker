@@ -16,9 +16,9 @@ interface RoleRow {
  * the user/farm is unknown or no membership exists.
  */
 export function useUserRole(): Role | null {
-  const { user, onboardingStatus } = useAuth();
+  const { user, authStatus } = useAuth();
   const userId = user?.id ?? null;
-  const farmId = onboardingStatus?.farmId ?? null;
+  const farmId = authStatus?.farmId ?? null;
 
   // Guard against empty userId or farmId to avoid unnecessary database queries
   const query =

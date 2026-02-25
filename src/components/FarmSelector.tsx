@@ -26,13 +26,13 @@ interface FarmOption {
 // ---------------------------------------------------------------------------
 
 const FarmSelector = React.memo(function FarmSelector() {
-  const { onboardingStatus } = useAuth();
+  const { authStatus } = useAuth();
   const { farmId: activeFarmId, farmName: activeFarmName, isOverride } = useActiveFarm();
   const setActiveFarm = useActiveFarmStore((s) => s.setActiveFarm);
   const clearOverride = useActiveFarmStore((s) => s.clearOverride);
 
-  const ownFarmId = onboardingStatus?.farmId ?? null;
-  const ownFarmName = onboardingStatus?.farmName ?? 'My Farm';
+  const ownFarmId = authStatus?.farmId ?? null;
+  const ownFarmName = authStatus?.farmName ?? 'My Farm';
 
   // Query all farms for the dropdown
   const { data: rawFarms } = useQuery<FarmRow>(
