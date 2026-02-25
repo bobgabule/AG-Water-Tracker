@@ -12,7 +12,8 @@
   --color-surface-header: #5f7248;
   --color-surface-header-hover: #4e6339;
   --color-surface-modal: #526640;
-  --color-surface-dark: #3a4a2a;
+  --color-surface-modal-lighter: #637a4d;
+  --color-surface-dark: #607248;
   --color-surface-darkest: #2a3520;
   --color-surface-page: #c5cdb4;
   --color-surface-card: #dfe4d4;
@@ -20,8 +21,8 @@
   --color-surface-input: #e8ebe0;
 
   /* Buttons */
-  --color-btn-confirm: #bdefda;
-  --color-btn-confirm-text: #506741;
+  --color-btn-confirm: #b6e5d1;
+  --color-btn-confirm-text: #3b6454;
   --color-btn-action: #4a7c59;
   --color-btn-dark: #3d5030;
   --color-btn-dark-active: #334428;
@@ -74,6 +75,22 @@
   .input-dark {
     @apply w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/40;
   }
+}
+
+/* Custom scrollbar for readings list */
+.scrollbar-green::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-green::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-green::-webkit-scrollbar-thumb {
+  background: #acbc97;
+  border-radius: 3px;
+}
+.scrollbar-green {
+  scrollbar-width: thin;
+  scrollbar-color: #acbc97 transparent;
 }
 
 /* View Transitions API — 150ms cross-fade for page navigations */

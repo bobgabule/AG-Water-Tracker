@@ -23,12 +23,12 @@ export default function LocationSoftAskModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           transition
-          className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+          className="w-full max-w-sm bg-surface-modal rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
         >
           <div className="flex flex-col items-center text-center">
             {mode === 'prompt' ? (
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
-                <MapPinIcon className="h-6 w-6 text-blue-400" />
+              <div className="w-12 h-12 rounded-full bg-btn-confirm/30 flex items-center justify-center mb-4">
+                <MapPinIcon className="h-6 w-6 text-btn-confirm" />
               </div>
             ) : (
               <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
@@ -40,7 +40,7 @@ export default function LocationSoftAskModal({
               {mode === 'prompt' ? 'Use your location?' : 'Location access blocked'}
             </DialogTitle>
 
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-white/60 text-sm mb-6">
               {mode === 'prompt'
                 ? 'Your location helps center the map and find nearby wells. We only use it while the app is open.'
                 : 'Location permission was denied. To enable it, open your browser settings and allow location access for this site.'}
@@ -52,7 +52,7 @@ export default function LocationSoftAskModal({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-2.5 rounded-lg font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors"
+                    className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
                   >
                     No Thanks
                   </button>
@@ -60,7 +60,7 @@ export default function LocationSoftAskModal({
                     type="button"
                     onClick={onAllow}
                     autoFocus
-                    className="flex-1 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                    className="flex-1 py-2.5 rounded-lg font-medium bg-btn-confirm text-btn-confirm-text hover:opacity-90 transition-colors"
                   >
                     Allow
                   </button>
@@ -70,7 +70,7 @@ export default function LocationSoftAskModal({
                   type="button"
                   onClick={onClose}
                   autoFocus
-                  className="flex-1 py-2.5 rounded-lg font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors"
+                  className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
                 >
                   Got It
                 </button>

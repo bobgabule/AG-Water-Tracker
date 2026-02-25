@@ -9,6 +9,9 @@ import { preWarmPowerSync } from './lib/powersync'
 // Start WASM + SQLite init in parallel with auth (saves ~200-500ms)
 preWarmPowerSync()
 
+// Eager preload for the most common landing route (parallel with auth)
+import('./pages/DashboardPage').catch(() => {})
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>

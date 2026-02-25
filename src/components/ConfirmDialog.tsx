@@ -31,7 +31,7 @@ export default function ConfirmDialog({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           transition
-          className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+          className="w-full max-w-sm bg-surface-modal rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
         >
           <div className="flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
@@ -42,7 +42,7 @@ export default function ConfirmDialog({
               {title}
             </DialogTitle>
 
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-white/60 text-sm mb-6">
               {description}
             </p>
 
@@ -50,7 +50,7 @@ export default function ConfirmDialog({
               <button
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-lg font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

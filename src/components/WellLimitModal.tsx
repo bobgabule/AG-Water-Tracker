@@ -23,12 +23,12 @@ export default function WellLimitModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           transition
-          className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+          className="w-full max-w-sm bg-surface-modal rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+            className="absolute top-4 right-4 p-1 rounded-full text-white/60 hover:text-white hover:bg-surface-modal-lighter transition-colors"
             aria-label="Close"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -38,7 +38,7 @@ export default function WellLimitModal({
             Well Limit Reached
           </DialogTitle>
 
-          <p className="text-gray-400 text-sm mb-6">
+          <p className="text-white/60 text-sm mb-6">
             You've reached your well limit. Upgrade your plan for more wells.
           </p>
 
