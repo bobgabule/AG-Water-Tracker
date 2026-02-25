@@ -56,6 +56,16 @@ export function useSeatUsage(): SeatUsage {
   const { farmId } = useActiveFarm();
   const tier = useSubscriptionTier();
 
+  // --- Farm extra seats query ---
+  const farmQuery = farmId
+    ? 'SELECT extra_admin_seats, extra_meter_checker_seats FROM farms WHERE id = ?'
+    : 'SELECT NULL WHERE 0';
+  const farmParams = farmId ? [farmId] : [];
+  const { data: farmData } = useQuery<{ extra_admin_seats: number; extra_meter_checker_seats: number }>(
+    farmQuery,
+    farmParams
+  );
+
   // --- Active members query (seat-limited roles only) ---
   const membersQuery = farmId
     ? `SELECT role, COUNT(*) as count FROM farm_members WHERE farm_id = ? AND role IN (${ROLES_PLACEHOLDER}) GROUP BY role`
@@ -95,20 +105,24 @@ export function useSeatUsage(): SeatUsage {
       inviteCounts.set(row.role, row.count);
     }
 
+    // Extract per-farm extra seats (from migration 039)
+    const extraAdminSeats = farmData[0]?.extra_admin_seats ?? 0;
+    const extraMeterCheckerSeats = farmData[0]?.extra_meter_checker_seats ?? 0;
+
     // Calculate usage for each seat-limited role
-    function calcRole(role: string, tierLimit: number): RoleSeatUsage {
+    function calcRole(role: string, tierLimit: number, extraSeats: number): RoleSeatUsage {
       const members = memberCounts.get(role) ?? 0;
       const invites = inviteCounts.get(role) ?? 0;
       const used = members + invites;
-      const limit = tierLimit;
+      const limit = tierLimit + extraSeats;
       const available = Math.max(0, limit - used);
       const isFull = used >= limit;
       return { used, limit, available, isFull };
     }
 
     return {
-      admin: calcRole('admin', tier?.maxAdmins ?? 0),
-      meter_checker: calcRole('meter_checker', tier?.maxMeterCheckers ?? 0),
+      admin: calcRole('admin', tier?.maxAdmins ?? 0, extraAdminSeats),
+      meter_checker: calcRole('meter_checker', tier?.maxMeterCheckers ?? 0, extraMeterCheckerSeats),
     };
-  }, [membersData, invitesData, tier]);
+  }, [membersData, invitesData, tier, farmData]);
 }
