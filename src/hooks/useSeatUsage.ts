@@ -49,7 +49,7 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
  * Counts farm members AND pending (unused, non-expired) invites per
  * seat-limited role, then compares against the farm's subscription tier limits.
  *
- * Exempt roles (grower, super_admin) are excluded from counting.
+ * Exempt roles (owner, super_admin) are excluded from counting.
  * Used or expired invites are excluded.
  */
 export function useSeatUsage(): SeatUsage {

@@ -32,7 +32,7 @@ const SEAT_LIMITED_ROLES = new Set(['admin', 'meter_checker']);
 // ---------------------------------------------------------------------------
 
 /** Roles exempt from seat counting (not limited by plan) */
-export const EXEMPT_ROLES = ['grower', 'super_admin'] as const;
+export const EXEMPT_ROLES = ['owner', 'super_admin'] as const;
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -16,7 +16,6 @@ export interface WellWithReading {
   wmisNumber: string | null;
   units: string;
   multiplier: string;
-  sendMonthlyReport: boolean;
   batteryState: string;
   pumpState: string;
   meterStatus: string;
@@ -34,7 +33,6 @@ interface WellRow {
   wmis_number: string | null;
   units: string;
   multiplier: string;
-  send_monthly_report: number;
   battery_state: string;
   pump_state: string;
   meter_status: string;
@@ -48,7 +46,7 @@ export function useWells() {
   // Guard against empty farmId to avoid unnecessary database queries
   const query = farmId
     ? `SELECT id, name, status, latitude, longitude, meter_serial_number,
-       wmis_number, units, multiplier, send_monthly_report, battery_state,
+       wmis_number, units, multiplier, battery_state,
        pump_state, meter_status, created_at, updated_at
        FROM wells WHERE farm_id = ? ORDER BY name`
     : 'SELECT NULL WHERE 0';
@@ -69,7 +67,6 @@ export function useWells() {
         wmisNumber: row.wmis_number,
         units: row.units,
         multiplier: row.multiplier,
-        sendMonthlyReport: row.send_monthly_report === 1,
         batteryState: row.battery_state,
         pumpState: row.pump_state,
         meterStatus: row.meter_status,

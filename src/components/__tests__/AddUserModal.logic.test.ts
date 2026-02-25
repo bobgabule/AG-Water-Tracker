@@ -2,10 +2,10 @@
 // canSelectAdmin logic — extracted from AddUserModal.tsx line 155
 // ---------------------------------------------------------------------------
 // The AddUserModal only shows the role toggle (Meter Checker / Admin) when
-// the caller is a grower or super_admin. Admins see a fixed "Meter Checker".
+// the caller is an owner or super_admin. Admins see a fixed "Meter Checker".
 
 function canSelectAdmin(callerRole: string | null): boolean {
-  return callerRole === 'grower' || callerRole === 'super_admin';
+  return callerRole === 'owner' || callerRole === 'super_admin';
 }
 
 // ---------------------------------------------------------------------------
@@ -13,8 +13,8 @@ function canSelectAdmin(callerRole: string | null): boolean {
 // ---------------------------------------------------------------------------
 
 describe('Invite role selection: canSelectAdmin', () => {
-  it('grower can select admin role', () => {
-    expect(canSelectAdmin('grower')).toBe(true);
+  it('owner can select admin role', () => {
+    expect(canSelectAdmin('owner')).toBe(true);
   });
 
   it('super_admin can select admin role', () => {
@@ -45,8 +45,8 @@ describe('Invite role constraints', () => {
     expect(INVITABLE_ROLES).toEqual(['admin', 'meter_checker']);
   });
 
-  it('grower is NOT an invitable role', () => {
-    expect(INVITABLE_ROLES).not.toContain('grower');
+  it('owner is NOT an invitable role', () => {
+    expect(INVITABLE_ROLES).not.toContain('owner');
   });
 
   it('super_admin is NOT an invitable role', () => {

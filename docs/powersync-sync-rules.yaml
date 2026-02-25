@@ -87,7 +87,18 @@ bucket_definitions:
   farm_wells:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, send_monthly_report, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
+      - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Report Email Recipients (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs report_email_recipients for farms where the user has a membership.
+  # Same pattern as farm_wells.
+  # ---------------------------------------------------------------------------
+  farm_report_recipients:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at FROM report_email_recipients WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Readings (via denormalized farm_id)

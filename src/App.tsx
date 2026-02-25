@@ -89,11 +89,13 @@ export default function App() {
                 <WellListPage />
               </LazyRoute>
             } />
-            <Route path="/reports" element={
-              <LazyRoute routePath="/reports">
-                <ReportsPage />
-              </LazyRoute>
-            } />
+            <Route element={<RequireRole action="manage_reports" />}>
+              <Route path="/reports" element={
+                <LazyRoute routePath="/reports">
+                  <ReportsPage />
+                </LazyRoute>
+              } />
+            </Route>
             <Route element={<RequireRole action="manage_farm" />}>
               <Route path="/subscription" element={
                 <LazyRoute routePath="/subscription">
