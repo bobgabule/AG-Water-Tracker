@@ -59,11 +59,11 @@
 
 ### v4.0 -- Performance & Perceived Speed (In Progress)
 
-- [x] **Phase 23: Route-Level Code Splitting & Bundle Optimization** - Lazy-load all pages, isolate Mapbox chunk, add resource hints, menu prefetch (completed 2026-02-24)
-- [x] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay (completed 2026-02-24)
-- [x] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users (completed 2026-02-24)
+- [x] **Phase 23: Route-Level Code Splitting & Bundle Optimization** - Lazy-load all pages, isolate Mapbox chunk, add resource hints, menu prefetch (completed 2026-02-24)
+- [x] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay (completed 2026-02-24)
+- [x] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users (completed 2026-02-24)
 - [x] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience (completed 2026-02-25)
-- [x] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation (completed 2026-02-25)
+- [x] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation (completed 2026-02-25)
 
 ## Phase Details
 
@@ -347,14 +347,18 @@ Plans:
 | 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
 
-### Phase 30: Drop dead invite code
-
-**Goal:** [To be planned]
-**Depends on:** Phase 29
-**Plans:** 2/2 plans complete
-
+### Phase 30: Drop Dead Invite Code
+**Goal**: Remove unused generic invite code RPCs (create_invite_code, join_farm_with_code) from the database — no client code references them, and they add unnecessary API surface
+**Depends on**: Phase 29
+**Requirements**: None (cleanup phase)
+**Plans**: 1 plan
 Plans:
-- [ ] TBD (run /gsd:plan-phase 30 to break down)
+- [ ] 30-01-PLAN.md — Drop 4 dead invite code RPCs via migration + update docs
+**Success Criteria** (what must be TRUE):
+  1. `public.create_invite_code` and `private.create_invite_code_impl` functions no longer exist in the database
+  2. `public.join_farm_with_code` and `private.join_farm_with_code_impl` functions no longer exist in the database
+  3. Phone-based invite flow (invite_user_by_phone, get_onboarding_status, revoke_farm_invite) still works unchanged
+  4. Documentation no longer references the dead RPCs
 
 ### Phase 31: Simplify invite user flow with seat limits
 
