@@ -41,7 +41,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'],
+        navigationPreload: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,webp}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           // Mapbox API (raster/satellite tiles, styles)
