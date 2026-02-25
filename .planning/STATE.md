@@ -19,7 +19,7 @@ Progress: Phase 32: ██████░░░░ 67% (2/3 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 62 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P32)
+- Total plans completed: 64 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 2 P32)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -50,6 +50,8 @@ Progress: Phase 32: ██████░░░░ 67% (2/3 plans)
 | Phase 30 P01 | 2min | 2 | 2 |
 | Phase 32 P01 | 2min | 2 | 1 |
 | Phase 32 P02 | 5min | 2 | 10 |
+| Phase 31 P01 | 2min | 1 | 1 |
+| Phase 31 P02 | 2min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -83,6 +85,10 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 32-01: Input utility classes use @apply for Tailwind composition
 - Phase 32-02: ConfirmDialog accepts ReactNode description for inline span formatting
 - Phase 32-02: Button uses React.forwardRef for ref forwarding compatibility
+- Phase 31-01: Seat limit counts both active members AND pending invites to prevent over-allocation
+- Phase 31-01: Effective limit = tier max + farm extra seats (enables future add-on seat purchases)
+- Phase 31-01: COALESCE on tier_limit and extra_seats to handle NULL gracefully (defaults to 0)
+- Phase 31-02: Display server seat limit error messages directly (already user-friendly from migration 039)
 
 ### Pending Todos (manual steps)
 
@@ -103,6 +109,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 32-02-PLAN.md
+Stopped at: Completed 31-02-PLAN.md
 Resume file: —
-Next action: Continue Phase 32 — execute 32-03-PLAN.md
+Next action: Resume Phase 32 — execute 32-03-PLAN.md
