@@ -63,7 +63,7 @@
 - [x] **Phase 24: Loading State Collapse & Skeleton Screens** - Non-blocking PowerSync, collapse sequential spinners, skeleton screens, fix sign-out delay (completed 2026-02-24)
 - [x] **Phase 25: Asset Optimization** - Compress auth background image (11MB to <300KB), lazy-load for dashboard users (completed 2026-02-24)
 - [x] **Phase 26: Service Worker Intelligence** - Navigation preload, app code caching, offline auth page experience (completed 2026-02-25)
-- [ ] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation
+- [x] **Phase 27: Query Optimization & Navigation Fluidity** - Single-query tier lookup, View Transitions API, optimistic well creation (completed 2026-02-25)
 
 ## Phase Details
 
@@ -343,7 +343,7 @@ Plans:
 | 24. Loading States & Skeletons | 2/2 | Complete    | 2026-02-24 | — |
 | 25. Asset Optimization | 1/1 | Complete    | 2026-02-24 | — |
 | 26. Service Worker Intelligence | v4.0 | Complete    | 2026-02-25 | 2026-02-25 |
-| 27. Query & Navigation Fluidity | 1/2 | In Progress|  | — |
+| 27. Query & Navigation Fluidity | 2/2 | Complete   | 2026-02-25 | — |
 | 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
 
@@ -351,7 +351,7 @@ Plans:
 
 **Goal:** [To be planned]
 **Depends on:** Phase 29
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 30 to break down)
