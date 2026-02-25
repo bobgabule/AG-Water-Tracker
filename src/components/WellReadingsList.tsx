@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
-import { PlayIcon } from '@heroicons/react/24/solid';
+import { FlagIcon } from '@heroicons/react/24/solid';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 
 interface WellReadingsListProps {
@@ -31,7 +31,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
   const columnHeader = getColumnHeader(unitLabel);
 
   return (
-    <div className="px-4 pt-5 pb-24">
+    <div className="px-4 pt-5 pb-4">
       <h2 className="text-2xl font-bold text-white mb-4">READINGS</h2>
 
       {readings.length === 0 ? (
@@ -42,7 +42,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
       ) : (
         <>
           {/* Table header */}
-          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-white/50 font-semibold uppercase tracking-wide pb-2 border-b border-white/10">
+          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-1 bg-[#4b5b37] rounded">
             <span>Date</span>
             <span>{columnHeader}</span>
             <span>User / Time</span>
@@ -77,17 +77,25 @@ const WellReadingsList = React.memo(function WellReadingsList({
 
               return (
                 <Row key={reading.id} {...rowProps}>
-                  <span className="text-white text-sm">{dateStr}</span>
-                  <span className="text-white text-sm font-medium">
+                  <span className="text-[#d5e8bd] text-sm">{dateStr}</span>
+                  <span className="text-[#d5e8bd] text-sm font-medium">
                     {reading.value}
                   </span>
                   <div className="flex items-center justify-between">
-                    <span className="text-white/60 text-sm">
+                    <span className="text-[#d5e8bd]/70 text-sm">
                       {reading.recorderName} at {timeStr}
                     </span>
+                    {reading.isSimilarReading && (
+                      <FlagIcon
+                        className="w-4 h-4 text-orange-400 flex-shrink-0"
+                        role="img"
+                        aria-label="Similar reading flagged"
+                      />
+                    )}
                     {!reading.isInRange && (
-                      <PlayIcon
+                      <FlagIcon
                         className="w-4 h-4 text-yellow-400 flex-shrink-0"
+                        role="img"
                         aria-label="Reading taken out of range"
                       />
                     )}

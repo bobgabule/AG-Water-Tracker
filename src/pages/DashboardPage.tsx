@@ -102,7 +102,7 @@ export default function DashboardPage() {
   const [showContent, setShowContent] = useState(!loading);
   useEffect(() => {
     if (!loading && !showContent) {
-      requestAnimationFrame(() => setShowContent(true));
+      setShowContent(true);
     }
   }, [loading, showContent]);
 

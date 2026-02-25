@@ -3,26 +3,10 @@ import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import type { WellWithReading } from '../hooks/useWells';
 
-function formatRelativeDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  const now = new Date();
-  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return `Today at ${timeStr}`;
-  if (diffDays === 1) return `Yesterday at ${timeStr}`;
-  const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${monthDay} at ${timeStr}`;
-}
-
 interface WellDetailHeaderProps {
   well: WellWithReading | null;
   farmName: string;
   proximityInRange: boolean | null;
-  lastReadingDate?: string | null;
   onClose: () => void;
   onEdit?: () => void;
 }
@@ -31,7 +15,6 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
   well,
   farmName,
   proximityInRange,
-  lastReadingDate,
   onClose,
   onEdit,
 }: WellDetailHeaderProps) {
@@ -123,11 +106,6 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
               </span>
             )}
           </div>
-          {lastReadingDate && (
-            <p className="text-white/50 text-xs text-center mt-1">
-              Last Updated {formatRelativeDate(lastReadingDate)}
-            </p>
-          )}
         </div>
       </div>
     </div>

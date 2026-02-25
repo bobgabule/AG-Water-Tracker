@@ -26,7 +26,12 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:#111827" role="status" aria-label="Loading application">
+      <div style="height:3rem;width:3rem;border:4px solid #22c55e;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

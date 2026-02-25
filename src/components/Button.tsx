@@ -10,7 +10,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles: Record<ButtonProps['variant'], string> = {
   confirm: 'bg-btn-confirm text-btn-confirm-text',
   danger: 'bg-red-600 hover:bg-red-700 text-white',
-  ghost: 'bg-gray-700 hover:bg-gray-600 text-gray-300',
+  ghost: 'bg-surface-modal-lighter hover:bg-surface-header text-white/70',
   dark: 'bg-btn-dark active:bg-btn-dark-active text-white',
   teal: 'bg-teal text-white hover:bg-teal-hover',
 };

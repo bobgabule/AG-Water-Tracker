@@ -12,6 +12,19 @@ import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { calculateUsageAf } from '../lib/usage-calculation';
 import type { WellWithReading } from '../hooks/useWells';
 
+function formatRelativeDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return `Today at ${timeStr}`;
+  if (diffDays === 1) return `Yesterday at ${timeStr}`;
+  const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${monthDay} at ${timeStr}`;
+}
+
 interface WellDetailSheetProps {
   well: WellWithReading | null;
   farmName: string;
@@ -41,26 +54,34 @@ export default function WellDetailSheet({
     );
   }, [allocations]);
 
-  // Calculate usage from current calendar year readings only
+  // Calculate usage: latest reading minus starting reading, converted to AF
   const currentYearUsageAf = useMemo(() => {
     if (!well || readings.length === 0) return '0';
-    const currentYear = new Date().getFullYear();
-    const yearReadings = readings.filter(
-      (r) => new Date(r.recordedAt).getFullYear() === currentYear,
-    );
-    // Need 2+ readings to calculate usage delta (earliest as baseline, latest as current)
-    if (yearReadings.length < 2) return '0';
-    // readings are sorted DESC — last element is earliest, first is latest
-    const earliest = yearReadings[yearReadings.length - 1];
-    const latest = yearReadings[0];
+
+    // Latest reading (readings are sorted DESC by recorded_at)
+    const latest = readings[0];
+
+    // Baseline: prefer allocation's starting_reading, else earliest reading this year
+    let baseline: string;
+    if (currentAllocation?.startingReading) {
+      baseline = currentAllocation.startingReading;
+    } else {
+      const currentYear = new Date().getFullYear();
+      const yearReadings = readings.filter(
+        (r) => new Date(r.recordedAt).getFullYear() === currentYear,
+      );
+      if (yearReadings.length < 2) return '0';
+      baseline = yearReadings[yearReadings.length - 1].value;
+    }
+
     const usage = calculateUsageAf(
       latest.value,
-      earliest.value,
+      baseline,
       well.multiplier,
       well.units,
     );
     return usage.toFixed(2);
-  }, [readings, well]);
+  }, [readings, well, currentAllocation]);
 
   // GPS proximity
   const proximityInRange = useMemo(() => {
@@ -93,40 +114,48 @@ export default function WellDetailSheet({
   return (
     <>
       <div className="fixed inset-0 z-40 flex flex-col bg-surface-dark">
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Map header with satellite image */}
+        {/* Fixed header area — does not scroll */}
+        <div className="flex-shrink-0">
           <WellDetailHeader
             well={well}
             farmName={farmName}
             proximityInRange={proximityInRange}
-            lastReadingDate={lastReadingDate}
             onClose={onClose}
             onEdit={onEdit}
           />
 
           {well && (
             <>
+              {/* Last Updated — between header and gauge */}
+              {lastReadingDate && (
+                <p className="text-[#d5e8bd]/70 text-xs text-center py-2 bg-surface-dark">
+                  Last Updated {formatRelativeDate(lastReadingDate)}
+                </p>
+              )}
+
               {/* Usage gauge + serial/WMIS */}
               <WellUsageGauge
                 well={well}
                 allocatedAf={currentAllocation?.allocatedAf ?? '0'}
                 usedAf={currentYearUsageAf}
-                unitLabel={well.units}
-              />
-
-              {/* Readings list */}
-              <WellReadingsList
-                readings={readings}
-                unitLabel={well.units}
-                onReadingClick={handleReadingClick}
               />
             </>
           )}
         </div>
 
+        {/* Scrollable readings list — only this area scrolls */}
+        {well && (
+          <div className="flex-1 overflow-y-auto min-h-0 scrollbar-green">
+            <WellReadingsList
+              readings={readings}
+              unitLabel={well.units}
+              onReadingClick={handleReadingClick}
+            />
+          </div>
+        )}
+
         {/* Fixed bottom: New Reading button */}
-        <div className="flex-shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
+        <div className="flex-shrink-0 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
           <button
             type="button"
             onClick={onNewReading}

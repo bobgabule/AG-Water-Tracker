@@ -11,6 +11,7 @@ export interface ReadingWithName {
   gpsLatitude: number | null;
   gpsLongitude: number | null;
   isInRange: boolean;
+  isSimilarReading: boolean;
   notes: string | null;
 }
 
@@ -24,13 +25,14 @@ interface ReadingWithNameRow {
   gps_latitude: number | null;
   gps_longitude: number | null;
   is_in_range: number | null;
+  is_similar_reading: number | null;
   notes: string | null;
 }
 
 export function useWellReadingsWithNames(wellId: string | null) {
   const query = wellId
     ? `SELECT r.id, r.well_id, r.value, r.recorded_by, r.recorded_at,
-         r.gps_latitude, r.gps_longitude, r.is_in_range, r.notes,
+         r.gps_latitude, r.gps_longitude, r.is_in_range, r.is_similar_reading, r.notes,
          COALESCE(fm.full_name, 'Unknown') as recorder_name
        FROM readings r
        LEFT JOIN farm_members fm ON fm.user_id = r.recorded_by
@@ -55,6 +57,7 @@ export function useWellReadingsWithNames(wellId: string | null) {
         gpsLatitude: row.gps_latitude,
         gpsLongitude: row.gps_longitude,
         isInRange: row.is_in_range === 1,
+        isSimilarReading: row.is_similar_reading === 1,
         notes: row.notes,
       })),
     [data],

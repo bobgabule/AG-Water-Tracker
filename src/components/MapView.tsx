@@ -84,19 +84,29 @@ export default function MapView({
     mapRef.current?.resize();
   }, [setTileError]);
 
-  // Track if we've already flown to user location (to avoid flying on every re-render)
-  const hasFlyToUserLocation = useRef(false);
+  // Track which location we last flew to (avoids re-flying on re-render,
+  // but allows flying to a genuinely new position, e.g. fresh GPS after cache).
+  const lastFlyLocation = useRef<string | null>(
+    userLocation ? `${userLocation.lat},${userLocation.lng}` : null
+  );
 
-  // Fly to user location when it becomes available after the map is loaded
+  // Reset fly tracking when location is lost (permission revoked, etc.)
+  // so re-enabling location will fly to the user again.
   useEffect(() => {
-    if (userLocation && mapLoaded && mapRef.current && !hasFlyToUserLocation.current) {
-      hasFlyToUserLocation.current = true;
-      mapRef.current.flyTo({
-        center: [userLocation.lng, userLocation.lat],
-        zoom: WELL_ZOOM,
-        duration: 1500,
-      });
-    }
+    if (!userLocation) lastFlyLocation.current = null;
+  }, [userLocation]);
+
+  // Fly to user location when it becomes available (or changes) after the map is loaded
+  useEffect(() => {
+    if (!userLocation || !mapLoaded || !mapRef.current) return;
+    const key = `${userLocation.lat},${userLocation.lng}`;
+    if (lastFlyLocation.current === key) return;
+    lastFlyLocation.current = key;
+    mapRef.current.flyTo({
+      center: [userLocation.lng, userLocation.lat],
+      zoom: WELL_ZOOM,
+      duration: 1500,
+    });
   }, [userLocation, mapLoaded]);
 
   // Jump to farm state center if it arrives after Map already mounted with fallback
@@ -107,7 +117,7 @@ export default function MapView({
       mapLoaded &&
       mapRef.current &&
       !hasJumpedToFarmState.current &&
-      !userLocation
+      !lastFlyLocation.current
     ) {
       const stateView = US_STATE_COORDINATES[farmState.toUpperCase()];
       if (stateView) {
@@ -120,11 +130,13 @@ export default function MapView({
     }
   }, [farmState, userLocation, mapLoaded]);
 
-  // Compute initial view from farm state — user location handled via flyTo animation
-  const initialViewState = useMemo(
-    () => computeInitialViewState(farmState ?? null),
-    [farmState],
-  );
+  // Compute initial view: prefer cached user location (instant center), fall back to farm state
+  const initialViewState = useMemo(() => {
+    if (userLocation) {
+      return { latitude: userLocation.lat, longitude: userLocation.lng, zoom: WELL_ZOOM };
+    }
+    return computeInitialViewState(farmState ?? null);
+  }, [farmState, userLocation]);
 
   // Handle map click for location picking
   const handleMapClick = useCallback(

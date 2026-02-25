@@ -503,7 +503,7 @@ export default function NewReadingSheet({
                   <p className="text-white/70 text-sm">Submitting...</p>
                 </div>
               ) : (
-                <div className="space-y-3 p-4">
+                <div className="grid grid-cols-2 gap-3 p-4">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
