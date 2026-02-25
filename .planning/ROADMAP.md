@@ -346,6 +346,7 @@ Plans:
 | 27. Query & Navigation Fluidity | 2/2 | Complete    | 2026-02-25 | — |
 | 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
+| 30. Drop Dead Invite Code | — | 1/1 | Complete | 2026-02-25 |
 
 ### Phase 30: Drop Dead Invite Code
 **Goal**: Remove unused generic invite code RPCs (create_invite_code, join_farm_with_code) from the database — no client code references them, and they add unnecessary API surface
@@ -353,7 +354,7 @@ Plans:
 **Requirements**: None (cleanup phase)
 **Plans**: 1 plan
 Plans:
-- [ ] 30-01-PLAN.md — Drop 4 dead invite code RPCs via migration + update docs
+- [x] 30-01-PLAN.md — Drop 4 dead invite code RPCs via migration + update docs
 **Success Criteria** (what must be TRUE):
   1. `public.create_invite_code` and `private.create_invite_code_impl` functions no longer exist in the database
   2. `public.join_farm_with_code` and `private.join_farm_with_code_impl` functions no longer exist in the database
@@ -368,3 +369,12 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 31 to break down)
+
+### Phase 32: Unified design system and theme colors
+
+**Goal:** [To be planned]
+**Depends on:** Phase 31
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 32 to break down)
