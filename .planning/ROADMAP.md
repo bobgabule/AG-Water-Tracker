@@ -370,11 +370,18 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 31 to break down)
 
-### Phase 32: Unified design system and theme colors
-
-**Goal:** [To be planned]
+### Phase 32: Unified Design System and Theme Colors
+**Goal**: Every color in the app comes from a semantic @theme token and shared UI components replace copy-pasted button/dialog patterns -- the app looks pixel-identical but all styling is maintainable through a single source of truth
 **Depends on:** Phase 31
-**Plans:** 0 plans
-
+**Requirements**: None (refactoring phase)
+**Plans**: 3 plans
 Plans:
-- [ ] TBD (run /gsd:plan-phase 32 to break down)
+- [ ] 32-01-PLAN.md — Token foundation: expand @theme with 25+ semantic tokens + input utility classes
+- [ ] 32-02-PLAN.md — Shared ConfirmDialog + Button components, replace 4 callers, tokenize hex
+- [ ] 32-03-PLAN.md — Token migration: replace all hardcoded hex across 18 remaining files
+**Success Criteria** (what must be TRUE):
+  1. No hardcoded hex colors remain in component files (except auth gradient artistic choices)
+  2. All 4 confirm delete dialogs replaced by single ConfirmDialog component
+  3. Button component with 5 variants (confirm/danger/ghost/dark/teal) available for use
+  4. `npx tsc -b --noEmit` passes with zero errors
+  5. App is visually pixel-identical before and after
