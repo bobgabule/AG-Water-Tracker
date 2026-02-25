@@ -30,7 +30,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   ];
 
   return (
-    <div className="bg-[#3a4a2a] px-5 py-5">
+    <div className="bg-surface-dark px-5 py-5">
       <div className="flex items-start gap-4">
         {/* Left column: Serial Number + WMIS */}
         <div className="flex-1 space-y-4">
@@ -49,7 +49,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
         </div>
 
         {/* Center: Vertical pill gauge */}
-        <div className="flex-shrink-0 w-14 h-36 rounded-full bg-[#2a3520] overflow-hidden relative border border-white/10">
+        <div className="flex-shrink-0 w-14 h-36 rounded-full bg-surface-darkest overflow-hidden relative border border-white/10">
           {/* Fill from bottom */}
           <div
             className="absolute bottom-0 left-0 right-0 bg-green-500 transition-all duration-500"

@@ -23,7 +23,7 @@ const WellStatusIndicators = React.memo(function WellStatusIndicators({
   ];
 
   return (
-    <div className="bg-[#3a4a2a] px-5 pb-5">
+    <div className="bg-surface-dark px-5 pb-5">
       <div className="flex flex-col gap-2">
         {items.map(({ label, healthy }) => {
           const Icon = healthy ? CheckCircleIcon : XCircleIcon;

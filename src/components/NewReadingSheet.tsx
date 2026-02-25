@@ -300,7 +300,7 @@ export default function NewReadingSheet({
       <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full bg-[#5f7248] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col rounded-t-2xl"
+          className="w-full bg-surface-header shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col rounded-t-2xl"
         >
           {/* Header */}
           <div className="p-4 pt-6 flex-shrink-0">
@@ -409,7 +409,7 @@ export default function NewReadingSheet({
                       <button
                         type="button"
                         onClick={handleSimilarContinue}
-                        className="flex-1 py-3 bg-[#bdefda] text-[#506741] rounded-lg font-medium"
+                        className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                       >
                         Continue
                       </button>
@@ -438,7 +438,7 @@ export default function NewReadingSheet({
                       <button
                         type="button"
                         onClick={handleRangeContinue}
-                        className="flex-1 py-3 bg-[#bdefda] text-[#506741] rounded-lg font-medium"
+                        className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                       >
                         Continue
                       </button>
@@ -468,7 +468,7 @@ export default function NewReadingSheet({
                         <button
                           type="button"
                           onClick={handleSaveWithoutGps}
-                          className="flex-1 py-3 bg-[#bdefda] text-[#506741] rounded-lg font-medium"
+                          className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                         >
                           Save Without GPS
                         </button>
@@ -505,7 +505,7 @@ export default function NewReadingSheet({
                       type="checkbox"
                       checked={problems.notWorking}
                       onChange={() => handleProblemToggle('notWorking')}
-                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                      className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
                     <span className="text-white text-base">Not Working</span>
                   </label>
@@ -514,7 +514,7 @@ export default function NewReadingSheet({
                       type="checkbox"
                       checked={problems.batteryDead}
                       onChange={() => handleProblemToggle('batteryDead')}
-                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                      className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
                     <span className="text-white text-base">Battery Dead</span>
                   </label>
@@ -523,7 +523,7 @@ export default function NewReadingSheet({
                       type="checkbox"
                       checked={problems.pumpOff}
                       onChange={() => handleProblemToggle('pumpOff')}
-                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                      className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
                     <span className="text-white text-base">Pump Off</span>
                   </label>
@@ -532,7 +532,7 @@ export default function NewReadingSheet({
                       type="checkbox"
                       checked={problems.deadPump}
                       onChange={() => handleProblemToggle('deadPump')}
-                      className="w-5 h-5 rounded border-white/30 text-[#506741] focus:ring-white bg-white/10"
+                      className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
                     <span className="text-white text-base">Dead Pump</span>
                   </label>
@@ -554,7 +554,7 @@ export default function NewReadingSheet({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2"
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2"
               >
                 <CheckIcon className="w-5 h-5" />
                 Save
@@ -576,7 +576,7 @@ export default function NewReadingSheet({
                 type="button"
                 onClick={handleProblemSubmit}
                 disabled={!hasProblemsSelected}
-                className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
               >
                 <CheckIcon className="w-5 h-5" />
                 Submit

@@ -100,10 +100,10 @@ export default function LocationPickerBottomSheet({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
       <div
-        className="w-full bg-[#5f7248] shadow-xl pb-[env(safe-area-inset-bottom)]"
+        className="w-full bg-surface-header shadow-xl pb-[env(safe-area-inset-bottom)]"
       >
         {/* Header */}
-        <div className="bg-[#5f7248] p-4 pt-4 pb-0">
+        <div className="bg-surface-header p-4 pt-4 pb-0">
           <h2 className="text-white font-semibold text-lg tracking-wide">
             PICK WELL LOCATION
           </h2>
@@ -147,7 +147,7 @@ export default function LocationPickerBottomSheet({
               type="button"
               onClick={handleGetLocation}
               disabled={gpsLoading}
-              className="p-2.5 bg-white rounded-lg text-blue hover:bg-[#4a8484] transition-colors disabled:opacity-50"
+              className="p-2.5 bg-white rounded-lg text-blue hover:bg-teal-hover transition-colors disabled:opacity-50"
               aria-label="Get current location"
             >
               {gpsLoading ? (
@@ -180,7 +180,7 @@ export default function LocationPickerBottomSheet({
             type="button"
             onClick={handleNext}
             disabled={isNextDisabled}
-            className="px-6 py-2.5 bg-[#cdf2fb] text-[#5e8f94] rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-teal-btn text-teal-btn-text rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>
