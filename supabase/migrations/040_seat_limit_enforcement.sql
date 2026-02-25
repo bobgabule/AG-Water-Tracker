@@ -1,5 +1,5 @@
 -- =============================================================================
--- Migration 039: Seat limit enforcement in invite RPC
+-- Migration 040: Seat limit enforcement in invite RPC
 -- =============================================================================
 -- Adds per-farm extra seat columns (extra_admin_seats, extra_meter_checker_seats)
 -- and enforces tier-based seat limits in the invite_user_by_phone RPC.
