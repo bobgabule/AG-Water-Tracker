@@ -47,7 +47,7 @@ export default function WellLimitModal({
               href={upgradeUrl ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-[#5f7248] hover:bg-[#4e6139] transition-colors ${
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-surface-header hover:bg-surface-header-hover transition-colors ${
                 upgradeUrl === null ? 'opacity-50 pointer-events-none' : ''
               }`}
               aria-disabled={upgradeUrl === null}

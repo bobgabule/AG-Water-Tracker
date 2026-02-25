@@ -17,13 +17,13 @@ export default function LanguagePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#c5cdb4] pt-14">
+    <div className="min-h-screen bg-surface-page pt-14">
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-8">LANGUAGE</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-8">LANGUAGE</h1>
 
         {/* Subtitle */}
-        <p className="text-center text-[#5f7248]/70 mb-6">Set your preferred language</p>
+        <p className="text-center text-text-heading/70 mb-6">Set your preferred language</p>
 
         {/* Language Options */}
         <div className="space-y-3 max-w-xs mx-auto">
@@ -33,8 +33,8 @@ export default function LanguagePage() {
               onClick={() => handleLanguageSelect(code)}
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
                 selectedLanguage === code
-                  ? 'bg-[#5f7248] text-white'
-                  : 'bg-white text-[#5f7248] border border-[#5f7248]/30 hover:bg-[#f5f5f0]'
+                  ? 'bg-surface-header text-white'
+                  : 'bg-white text-text-heading border border-text-heading/30 hover:bg-[#f5f5f0]'
               }`}
             >
               {label}

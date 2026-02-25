@@ -17,21 +17,21 @@ export default function SubscriptionPage() {
   const subscriptionUrl = useAppSetting('subscription_website_url');
 
   return (
-    <div className="min-h-screen bg-[#c5cdb4] pt-14">
+    <div className="min-h-screen bg-surface-page pt-14">
       <div className="px-4 py-4">
-        <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-4">SUBSCRIPTION</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">SUBSCRIPTION</h1>
 
         {/* Seat and well usage summary */}
         {tier && seatUsage && (
-          <div className="bg-[#dfe4d4] rounded-lg p-3 mb-4">
-            <h2 className="text-xs font-semibold text-[#5f7248]/70 uppercase tracking-wider mb-2">
+          <div className="bg-surface-card rounded-lg p-3 mb-4">
+            <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider mb-2">
               {tier.displayName}
             </h2>
             <div className="space-y-1">
               {/* Admin seats */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#5f7248]">Admins</span>
-                <span className={`text-sm font-medium ${seatUsage.admin.isFull ? 'text-red-600' : 'text-[#5f7248]'}`}>
+                <span className="text-sm text-text-heading">Admins</span>
+                <span className={`text-sm font-medium ${seatUsage.admin.isFull ? 'text-red-600' : 'text-text-heading'}`}>
                   {seatUsage.admin.used} / {seatUsage.admin.limit}
                   {seatUsage.admin.isFull && (
                     <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Full</span>
@@ -40,8 +40,8 @@ export default function SubscriptionPage() {
               </div>
               {/* Meter Checker seats */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#5f7248]">Meter Checkers</span>
-                <span className={`text-sm font-medium ${seatUsage.meter_checker.isFull ? 'text-red-600' : 'text-[#5f7248]'}`}>
+                <span className="text-sm text-text-heading">Meter Checkers</span>
+                <span className={`text-sm font-medium ${seatUsage.meter_checker.isFull ? 'text-red-600' : 'text-text-heading'}`}>
                   {seatUsage.meter_checker.used} / {seatUsage.meter_checker.limit}
                   {seatUsage.meter_checker.isFull && (
                     <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Full</span>
@@ -50,8 +50,8 @@ export default function SubscriptionPage() {
               </div>
               {/* Wells */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#5f7248]">Wells</span>
-                <span className={`text-sm font-medium ${wellCount >= tier.maxWells ? 'text-red-600' : 'text-[#5f7248]'}`}>
+                <span className="text-sm text-text-heading">Wells</span>
+                <span className={`text-sm font-medium ${wellCount >= tier.maxWells ? 'text-red-600' : 'text-text-heading'}`}>
                   {wellCount} / {tier.maxWells}
                   {wellCount >= tier.maxWells && (
                     <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Full</span>
@@ -64,11 +64,11 @@ export default function SubscriptionPage() {
 
         {/* Loading state */}
         {!tier && (
-          <div className="bg-[#dfe4d4] rounded-lg p-3 mb-4 animate-pulse">
-            <div className="h-4 bg-[#c5cdb4] rounded w-24 mb-2" />
-            <div className="h-3 bg-[#c5cdb4] rounded w-full mb-1" />
-            <div className="h-3 bg-[#c5cdb4] rounded w-full mb-1" />
-            <div className="h-3 bg-[#c5cdb4] rounded w-full" />
+          <div className="bg-surface-card rounded-lg p-3 mb-4 animate-pulse">
+            <div className="h-4 bg-surface-page rounded w-24 mb-2" />
+            <div className="h-3 bg-surface-page rounded w-full mb-1" />
+            <div className="h-3 bg-surface-page rounded w-full mb-1" />
+            <div className="h-3 bg-surface-page rounded w-full" />
           </div>
         )}
 
@@ -78,7 +78,7 @@ export default function SubscriptionPage() {
             href={buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center justify-center gap-2 w-full bg-[#5f7248] text-white rounded-lg px-4 py-3 font-medium text-sm hover:bg-[#4e6339] transition-colors"
+            className="mt-4 inline-flex items-center justify-center gap-2 w-full bg-surface-header text-white rounded-lg px-4 py-3 font-medium text-sm hover:bg-surface-header-hover transition-colors"
           >
             Manage Plan
             <ArrowTopRightOnSquareIcon className="h-4 w-4" />

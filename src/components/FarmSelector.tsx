@@ -117,7 +117,7 @@ const FarmSelector = React.memo(function FarmSelector() {
             <ListboxOption
               key={option.id}
               value={option}
-              className="cursor-pointer select-none px-3 py-2 text-sm text-white data-[focus]:bg-gray-700 data-[selected]:bg-[#5f7248]/30"
+              className="cursor-pointer select-none px-3 py-2 text-sm text-white data-[focus]:bg-gray-700 data-[selected]:bg-surface-header/30"
             >
               <div className="flex items-center gap-2">
                 <span className="truncate font-medium">{option.name}</span>
