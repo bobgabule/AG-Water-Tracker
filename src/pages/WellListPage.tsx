@@ -63,8 +63,8 @@ function computeWellDisplayData(
   } else if (status === 'warning') {
     statusColor = 'bg-orange-400';
   } else if (diffDays !== null) {
-    if (diffDays <= RECENT_THRESHOLD) statusColor = 'bg-[#5a9494]';
-    else if (diffDays <= WEEK_THRESHOLD) statusColor = 'bg-[#7fb3b3]';
+    if (diffDays <= RECENT_THRESHOLD) statusColor = 'bg-teal';
+    else if (diffDays <= WEEK_THRESHOLD) statusColor = 'bg-teal-light';
     else if (diffDays <= TWO_WEEKS_THRESHOLD) statusColor = 'bg-yellow-400';
     else statusColor = 'bg-gray-400';
   }
@@ -151,10 +151,10 @@ export default function WellListPage() {
   if (loading) return <WellListSkeleton />;
 
   return (
-    <div className={`min-h-screen bg-[#c5cdb4] pt-14 transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen bg-surface-page pt-14 transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-[#5f7248] tracking-wide mb-4">WELLS</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">WELLS</h1>
 
         {/* Search Input */}
         <div className="relative mb-4">
@@ -164,7 +164,7 @@ export default function WellListPage() {
             placeholder="Find a well"
             value={searchQuery}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 bg-[#e8ebe0] rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+            className="w-full pl-10 pr-4 py-3 bg-surface-input rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-text-heading/30"
           />
         </div>
 
@@ -172,7 +172,7 @@ export default function WellListPage() {
         <div className="space-y-2 mb-24">
           {filteredWells.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[#5f7248]/70">
+              <p className="text-text-heading/70">
                 {searchQuery ? 'No wells match your search' : 'No wells found'}
               </p>
             </div>
@@ -182,20 +182,20 @@ export default function WellListPage() {
                 key={well.id}
                 data-well-id={well.id}
                 onClick={handleWellClick}
-                className="w-full bg-[#dfe4d4] rounded-lg px-4 py-3 text-left hover:bg-[#d5dbc8] transition-colors flex items-center gap-3"
+                className="w-full bg-surface-card rounded-lg px-4 py-3 text-left hover:bg-surface-card-hover transition-colors flex items-center gap-3"
               >
                 {/* Well Name */}
-                <span className="text-[#5f7248] font-medium min-w-[70px]">{well.name}</span>
+                <span className="text-text-heading font-medium min-w-[70px]">{well.name}</span>
 
                 {/* Status Bar */}
                 <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-[#c5cdb4] rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-surface-page rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${statusColor} ${statusWidth}`} />
                   </div>
                 </div>
 
                 {/* Last Reading Time */}
-                <span className="text-sm text-[#5f7248]/70 min-w-[80px] text-right">
+                <span className="text-sm text-text-heading/70 min-w-[80px] text-right">
                   {formattedTime}
                 </span>
 
@@ -210,11 +210,11 @@ export default function WellListPage() {
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-[#c5cdb4] via-[#c5cdb4] to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-surface-page via-surface-page to-transparent">
         <div className="flex justify-between gap-4">
           <button
             onClick={handleWellMap}
-            className="flex items-center gap-2 px-5 py-3 bg-[#e8ebe0] rounded-full text-[#5f7248] font-medium shadow-sm hover:bg-[#dfe4d4] transition-colors"
+            className="flex items-center gap-2 px-5 py-3 bg-surface-input rounded-full text-text-heading font-medium shadow-sm hover:bg-surface-card transition-colors"
           >
             <MapIcon className="w-5 h-5" />
             Well Map
@@ -222,7 +222,7 @@ export default function WellListPage() {
           {canCreateWell && (
             <button
               onClick={handleNewWell}
-              className="flex items-center gap-2 px-5 py-3 bg-[#5a9494] rounded-full text-white font-medium shadow-sm hover:bg-[#4a8484] transition-colors"
+              className="flex items-center gap-2 px-5 py-3 bg-teal rounded-full text-white font-medium shadow-sm hover:bg-teal-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               New Well

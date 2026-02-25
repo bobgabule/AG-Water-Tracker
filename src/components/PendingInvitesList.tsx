@@ -86,7 +86,7 @@ export default function PendingInvitesList() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#5f7248] mb-3">Pending Invites</h2>
+      <h2 className="text-lg font-semibold text-text-heading mb-3">Pending Invites</h2>
 
       {error && (
         <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
@@ -101,15 +101,15 @@ export default function PendingInvitesList() {
           return (
             <div
               key={invite.id}
-              className={`bg-[#dfe4d4] rounded-lg px-4 py-3 flex items-center justify-between ${
+              className={`bg-surface-card rounded-lg px-4 py-3 flex items-center justify-between ${
                 invite.status === 'Expired' ? 'opacity-60' : ''
               }`}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-[#5f7248] font-medium">
+                <span className="text-text-heading font-medium">
                   {invite.invited_first_name} {invite.invited_last_name}
                 </span>
-                <span className="text-[#5f7248]/50 text-xs ml-2">
+                <span className="text-text-heading/50 text-xs ml-2">
                   {formatPhone(invite.invited_phone)}
                 </span>
               </div>
@@ -121,7 +121,7 @@ export default function PendingInvitesList() {
                   <button
                     onClick={() => handleRevoke(invite.id)}
                     disabled={isRevoking}
-                    className="p-1 rounded text-[#5f7248]/40 hover:text-red-600 transition-colors disabled:opacity-50"
+                    className="p-1 rounded text-text-heading/40 hover:text-red-600 transition-colors disabled:opacity-50"
                     aria-label={`Revoke invite for ${invite.invited_first_name}`}
                   >
                     {isRevoking ? (
