@@ -1,29 +1,36 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useTranslation } from '../hooks/useTranslation';
+import { useLanguageStore } from '../stores/languageStore';
+import type { Locale } from '../i18n/index';
 
-type Language = 'en' | 'es';
-
-const languages: { code: Language; label: string }[] = [
+const languages: { code: Locale; label: string }[] = [
   { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
+  { code: 'es', label: 'Espanol' },
 ];
 
 export default function LanguagePage() {
-  // TODO: Get initial language from user preferences/storage
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
+  const { t, locale } = useTranslation();
+  const setLocale = useLanguageStore((s) => s.setLocale);
 
-  const handleLanguageSelect = useCallback((code: Language) => {
-    setSelectedLanguage(code);
-    // TODO: Save language preference and apply translations
-  }, []);
+  const handleLanguageSelect = useCallback(
+    (code: Locale) => {
+      setLocale(code);
+    },
+    [setLocale],
+  );
 
   return (
     <div className="min-h-screen bg-surface-page pt-14">
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-8">LANGUAGE</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-8">
+          {t('language.title')}
+        </h1>
 
         {/* Subtitle */}
-        <p className="text-center text-text-heading/70 mb-6">Set your preferred language</p>
+        <p className="text-center text-text-heading/70 mb-6">
+          {t('language.subtitle')}
+        </p>
 
         {/* Language Options */}
         <div className="space-y-3 max-w-xs mx-auto">
@@ -32,7 +39,7 @@ export default function LanguagePage() {
               key={code}
               onClick={() => handleLanguageSelect(code)}
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                selectedLanguage === code
+                locale === code
                   ? 'bg-surface-header text-white'
                   : 'bg-white text-text-heading border border-text-heading/30 hover:bg-[#f5f5f0]'
               }`}
