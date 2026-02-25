@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 37
-Plan: 1 of 3
+Plan: 2 of 3
 Status: Executing plans
-Last activity: 2026-02-26 — Completed 37-01-PLAN.md
+Last activity: 2026-02-26 — Completed 37-02-PLAN.md
 
-Progress: Phase 37: ███░░░░░░░ 33% (1/3 plans complete)
+Progress: Phase 37: ██████░░░░ 67% (2/3 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 67 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 1 P37)
+- Total plans completed: 68 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 2 P37)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -55,6 +55,7 @@ Progress: Phase 37: ███░░░░░░░ 33% (1/3 plans complete)
 | Phase 32 P03 | 11min | 2 | 17 |
 | Phase 36 P01 | 6min | 2 | 5 |
 | Phase 37 P01 | 5min | 2 | 7 |
+| Phase 37 P02 | 7min | 2 | 14 |
 
 ## Accumulated Context
 
@@ -101,6 +102,10 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 37-01: useTranslation hook uses useCallback with locale dependency for stable reference
 - Phase 37-01: Plural resolution: count===1 picks _one suffix, else _other; missing suffix falls back to base key
 - Phase 37-01: getRoleDisplayName added alongside existing ROLE_DISPLAY_NAMES for backward compatibility
+- Phase 37-02: LazyErrorBoundary uses imperative getTranslation() since class components cannot call hooks
+- Phase 37-02: SideMenu navItems moved inside component with useMemo([t]) for reactive translations
+- Phase 37-02: ConfirmDialog only translates its Cancel default; callers pass pre-translated title/description/confirmText
+- Phase 37-02: PageLoader unchanged -- no visible text to translate (spinner only)
 
 ### Pending Todos (manual steps)
 
@@ -126,6 +131,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 37-01-PLAN.md
-Resume file: .planning/phases/37-add-multi-language-support-english-espa-ol-with-persistent-language-preference/37-01-SUMMARY.md
-Next action: /gsd:execute-phase 37 (plan 02)
+Stopped at: Completed 37-02-PLAN.md
+Resume file: .planning/phases/37-add-multi-language-support-english-espa-ol-with-persistent-language-preference/37-02-SUMMARY.md
+Next action: /gsd:execute-phase 37 (plan 03)
