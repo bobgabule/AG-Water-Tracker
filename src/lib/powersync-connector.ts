@@ -4,6 +4,7 @@ import type { CrudEntry } from '@powersync/web';
 import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from './supabase.ts';
 import { debugError, debugWarn } from './debugLog';
+import { useToastStore } from '../stores/toastStore';
 
 /** Tables the connector is allowed to write to Supabase */
 const ALLOWED_TABLES = new Set(['farms', 'users', 'farm_members', 'farm_invites', 'wells', 'readings', 'allocations']);
@@ -81,6 +82,21 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       await transaction.complete();
     } catch (error: unknown) {
       if (isPermanentError(error)) {
+        // Rollback optimistic well entries and notify user
+        let wellFailureNotified = false;
+        for (const op of transaction.crud) {
+          if (op.table === 'wells' && op.op === UpdateType.PUT) {
+            try {
+              await database.execute('DELETE FROM wells WHERE id = ?', [op.id]);
+            } catch {
+              // Best-effort rollback — ignore if already deleted
+            }
+            if (!wellFailureNotified) {
+              useToastStore.getState().show('Well could not be saved. Please try again.', 'error');
+              wellFailureNotified = true;
+            }
+          }
+        }
         debugError('PowerSync', 'Permanent upload error, discarding transaction:', error);
         await transaction.complete();
       } else {
