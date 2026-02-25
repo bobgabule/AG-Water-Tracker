@@ -11,7 +11,7 @@ interface HeaderProps {
 export default function Header({ farmName, onMenuOpen }: HeaderProps) {
   const role = useUserRole();
   const canCrossFarm = hasPermission(role, 'cross_farm_access');
-  const headerBg = role === 'super_admin' ? 'bg-[#800000]' : 'bg-[#5f7248]';
+  const headerBg = role === 'super_admin' ? 'bg-super-admin' : 'bg-surface-header';
 
   return (
     <header className={`absolute top-0 inset-x-0 z-30 ${headerBg}`}>

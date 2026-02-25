@@ -163,10 +163,10 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
       <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full bg-[#526640] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
+          className="w-full bg-surface-modal shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="bg-[#526640] p-4 pt-6 flex-shrink-0">
+          <div className="bg-surface-modal p-4 pt-6 flex-shrink-0">
             <h2 className="text-white font-bold text-lg tracking-wide">
               {success ? 'INVITE SENT' : 'ADD NEW USER'}
             </h2>
@@ -202,13 +202,13 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     href={upgradeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-[#bdefda] font-medium mt-2 hover:text-white transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm text-btn-confirm font-medium mt-2 hover:text-white transition-colors"
                   >
                     Upgrade Plan
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </a>
                 ) : (callerRole === 'grower' || callerRole === 'super_admin') && !upgradeUrl ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-[#bdefda]/50 font-medium mt-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm text-btn-confirm/50 font-medium mt-2">
                     Upgrade Plan
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </span>
@@ -237,7 +237,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       onChange={handleFirstNameChange}
                       placeholder="First name"
                       autoComplete="given-name"
-                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
                   </div>
                   <div className="flex-1">
@@ -248,7 +248,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       onChange={handleLastNameChange}
                       placeholder="Last name"
                       autoComplete="family-name"
-                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     value={formatPhoneDisplay(phoneDigits)}
                     onChange={handlePhoneChange}
                     placeholder="(555) 123-4567"
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f7248]/30"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                   />
                   <p className="text-xs text-white mt-2">US phone number (10 digits)</p>
                 </div>
@@ -276,7 +276,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                         onClick={() => handleRoleChange('meter_checker')}
                         disabled={meterCheckerFull}
                         className={`flex-1 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${role === 'meter_checker'
-                          ? 'bg-[#8ca074] text-white'
+                          ? 'bg-control-active-alt text-white'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
@@ -287,7 +287,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                         onClick={() => handleRoleChange('admin')}
                         disabled={adminFull}
                         className={`flex-1 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${role === 'admin'
-                          ? 'bg-[#8ca074] text-white'
+                          ? 'bg-control-active-alt text-white'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
@@ -321,7 +321,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading || !farmId || !tier || (role === 'admin' ? adminFull : meterCheckerFull)}
-                className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4e6339] transition-colors"
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-header-hover transition-colors"
               >
                 {loading ? (
                   <>

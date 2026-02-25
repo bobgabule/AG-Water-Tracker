@@ -126,7 +126,7 @@ export default function WellDetailSheet({
           <button
             type="button"
             onClick={onNewReading}
-            className="w-full bg-[#4a7c59] text-white rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+            className="w-full bg-btn-action text-white rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
           >
             <PlusIcon className="w-5 h-5" />
             New Reading

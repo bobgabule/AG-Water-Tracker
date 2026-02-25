@@ -177,10 +177,10 @@ export default function AddWellFormBottomSheet({
       <div className="fixed inset-0 flex items-end">
         <DialogPanel
           transition
-          className="w-full bg-[#5f7248] shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
+          className="w-full bg-surface-header shadow-xl transition duration-300 ease-out data-[closed]:translate-y-full max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="bg-[#5f7248] p-4 pt-6 flex-shrink-0">
+          <div className="bg-surface-header p-4 pt-6 flex-shrink-0">
             <div>
               {farmName && (
                 <p className="text-white text-xs">{farmName}</p>
@@ -258,7 +258,7 @@ export default function AddWellFormBottomSheet({
                   type="button"
                   onClick={handleGetLocation}
                   disabled={gpsLoading || isSaving}
-                  className="p-2.5 bg-white rounded-lg text-[#6190d1] hover:bg-[#6190d1] transition-colors disabled:opacity-50"
+                  className="p-2.5 bg-white rounded-lg text-accent-gps hover:bg-accent-gps transition-colors disabled:opacity-50"
                   aria-label="Get current location"
                 >
                   {gpsLoading ? (
@@ -276,7 +276,7 @@ export default function AddWellFormBottomSheet({
               )}
 
               {/* Allocations disabled card */}
-              <div className="bg-[#5f7248] border border-white/50 rounded-lg p-4 opacity-80">
+              <div className="bg-surface-header border border-white/50 rounded-lg p-4 opacity-80">
                 <h3 className="text-white font-medium text-sm">Allocations</h3>
                 <p className="text-white/70 text-xs mt-1">
                   Save the well first to add allocations
@@ -305,7 +305,7 @@ export default function AddWellFormBottomSheet({
                   type="checkbox"
                   checked={sendMonthlyReport}
                   onChange={(e) => setSendMonthlyReport(e.target.checked)}
-                  className="w-5 h-5 rounded border-white-300 text-[#506741] focus:ring-white"
+                  className="w-5 h-5 rounded border-white-300 text-btn-confirm-text focus:ring-white"
                 />
                 <span className="text-sm text-white">Send monthly meter reading report</span>
               </label>
@@ -374,11 +374,11 @@ export default function AddWellFormBottomSheet({
               type="button"
               onClick={handleSave}
               disabled={!isFormValid || isSaving}
-              className="px-6 py-2.5 bg-[#bdefda] text-[#506741] rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-[#506741]/30 border-t-[#506741] rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-btn-confirm-text/30 border-t-btn-confirm-text rounded-full animate-spin" />
                   Saving…
                 </>
               ) : (
