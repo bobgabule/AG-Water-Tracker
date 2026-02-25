@@ -366,7 +366,7 @@ Plans:
 **Goal:** Simplify the invite user flow by adding server-side seat limit enforcement, supporting future per-farm add-on seats, fixing a phone format bug, and improving SMS/UX messaging
 **Depends on:** Phase 30
 **Requirements:** TIER-D1
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 31-01-PLAN.md — Server-side seat enforcement & schema (migration 039)
