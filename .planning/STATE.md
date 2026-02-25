@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 28 of 29 (not started)
-Plan: 0 of ? (not started)
-Status: Milestone v4.1 started — executing
-Last activity: 2026-02-25 — Milestone v4.1 started
+Phase: 29 of 29 (complete)
+Plan: 2 of 2 (complete)
+Status: Milestone v4.1 complete
+Last activity: 2026-02-25 — v4.1 shipped
 
-Progress: ░░░░░░░░░░ 0% (v4.1)
+Progress: ██████████ 100% (v4.1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 55 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0)
+- Total plans completed: 57 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -32,7 +32,7 @@ Progress: ░░░░░░░░░░ 0% (v4.1)
 | v2.0 Meter Readings | 12-16 | 12 | 2026-01-31 to 2026-02-19 |
 | v3.0 Subscriptions | 17-22 | 9 | 2026-02-22 to 2026-02-23 |
 | v4.0 Performance | 23-27 | 6 | 2026-02-24 to 2026-02-25 |
-| v4.1 Fixes | 28-29 | 0 | 2026-02-25 |
+| v4.1 Fixes | 28-29 | 2 | 2026-02-25 |
 
 **Recent Executions:**
 
@@ -43,6 +43,8 @@ Progress: ░░░░░░░░░░ 0% (v4.1)
 | Phase 24 P02 | 4min | 2 | 7 |
 | Phase 25 P01 | 3min | 2 | 3 |
 | Phase 26 P01 | 2min | 2 | 2 |
+| Phase 28 P01 | 3min | 4 | 2 |
+| Phase 29 P01 | 3min | 3 | 3 |
 
 ## Accumulated Context
 
@@ -80,6 +82,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: v4.1 milestone started, executing phases
+Stopped at: v4.1 milestone complete — all 7 fixes shipped
 Resume file: —
-Next action: Execute Phase 28 (reading/validation fixes)
+Next action: —

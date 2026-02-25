@@ -60,6 +60,13 @@ Field agents can reliably record water meter readings in areas with poor connect
 - ✓ Reading edit/delete for grower/admin roles -- v2.0
 - ✓ Real allocation percentage on map markers -- v2.0
 - ✓ Latest reading dates on well list page -- v2.0
+- ✓ Similar reading threshold converted to 50-gallon equivalent -- v4.1
+- ✓ Edit form rejects zero (consistent with create form) -- v4.1
+- ✓ Pump Off / Dead Pump mutually exclusive -- v4.1
+- ✓ GPS failure shows warning with retry option -- v4.1
+- ✓ Default allocation end date → Dec 31 of current year -- v4.1
+- ✓ Gauge usage calculated from current calendar year readings only -- v4.1
+- ✓ Gauge always displays AF label (not well units) -- v4.1
 - ✓ Subscription tier DB tables with offline sync -- v3.0
 - ✓ DB-driven tier hooks replacing hardcoded limits -- v3.0
 - ✓ Well count and seat limit enforcement from DB config -- v3.0
@@ -70,18 +77,7 @@ Field agents can reliably record water meter readings in areas with poor connect
 
 ### Active
 
-<!-- Current scope: v4.1 Readings & Allocations Fixes -->
-
-**Reading & Validation:**
-- [ ] Similar reading threshold converted to 50-gallon equivalent
-- [ ] Edit form rejects zero (consistent with create form)
-- [ ] Pump Off / Dead Pump mutually exclusive
-- [ ] GPS failure shows warning with retry option
-
-**Well Detail & Allocations:**
-- [ ] Default allocation end date → Dec 31 of current year
-- [ ] Gauge usage calculated from current calendar year readings only
-- [ ] Gauge always displays AF label (not well units)
+<!-- No active requirements — v4.1 complete -->
 
 ### Out of Scope
 
@@ -181,4 +177,4 @@ Field agents can reliably record water meter readings in areas with poor connect
 | Stripe Customer Portal for upgrades | Zero payment UI to build. Webhook updates DB, PowerSync syncs in real-time | — Pending |
 
 ---
-*Last updated: 2026-02-25 after v4.1 milestone start*
+*Last updated: 2026-02-25 after v4.1 milestone complete*

@@ -49,16 +49,16 @@ Requirements for v4.1 Readings & Allocations Fixes. Each maps to roadmap phases.
 
 ### Reading & Validation
 
-- [ ] **READ-F01**: Similar reading warning triggers when difference is within 50 gallons (converted from well units via multiplier)
-- [ ] **READ-F02**: Edit reading form rejects zero values (consistent with create form validation)
-- [ ] **READ-F03**: Pump Off and Dead Pump checkboxes are mutually exclusive (selecting one deselects the other)
-- [ ] **READ-F04**: GPS capture failure shows warning screen with retry option instead of silently saving without location
+- [x] **READ-F01**: Similar reading warning triggers when difference is within 50 gallons (converted from well units via multiplier)
+- [x] **READ-F02**: Edit reading form rejects zero values (consistent with create form validation)
+- [x] **READ-F03**: Pump Off and Dead Pump checkboxes are mutually exclusive (selecting one deselects the other)
+- [x] **READ-F04**: GPS capture failure shows warning screen with retry option instead of silently saving without location
 
 ### Well Detail & Allocations
 
-- [ ] **ALLOC-F01**: New allocation form defaults end date to December 31 of the current year
-- [ ] **ALLOC-F02**: Well detail gauge usage is calculated dynamically from current calendar year readings only (all readings still visible in list)
-- [ ] **ALLOC-F03**: Well detail gauge always displays Acre Feet labels regardless of well unit type
+- [x] **ALLOC-F01**: New allocation form defaults end date to December 31 of the current year
+- [x] **ALLOC-F02**: Well detail gauge usage is calculated dynamically from current calendar year readings only (all readings still visible in list)
+- [x] **ALLOC-F03**: Well detail gauge always displays Acre Feet labels regardless of well unit type
 
 ## Future Requirements
 
@@ -129,13 +129,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NAV-01 | Phase 27 | Pending |
 | NAV-02 | Phase 27 | Pending |
 | NAV-03 | Phase 27 | Pending |
-| READ-F01 | Phase 28 | Pending |
-| READ-F02 | Phase 28 | Pending |
-| READ-F03 | Phase 28 | Pending |
-| READ-F04 | Phase 28 | Pending |
-| ALLOC-F01 | Phase 29 | Pending |
-| ALLOC-F02 | Phase 29 | Pending |
-| ALLOC-F03 | Phase 29 | Pending |
+| READ-F01 | Phase 28 | Complete |
+| READ-F02 | Phase 28 | Complete |
+| READ-F03 | Phase 28 | Complete |
+| READ-F04 | Phase 28 | Complete |
+| ALLOC-F01 | Phase 29 | Complete |
+| ALLOC-F02 | Phase 29 | Complete |
+| ALLOC-F03 | Phase 29 | Complete |
 
 **Coverage:**
 - v4.0 requirements: 21 total (18 complete, 3 deferred)
@@ -145,4 +145,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-25 after v4.1 requirements added*
+*Last updated: 2026-02-25 after v4.1 complete*
