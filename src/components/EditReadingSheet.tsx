@@ -49,7 +49,7 @@ export default function EditReadingSheet({
 
   const handleSave = useCallback(async () => {
     const trimmed = editValue.trim();
-    if (!trimmed || isNaN(Number(trimmed)) || Number(trimmed) < 0) {
+    if (!trimmed || isNaN(Number(trimmed)) || Number(trimmed) <= 0) {
       setValidationError('Enter a valid meter reading');
       return;
     }
