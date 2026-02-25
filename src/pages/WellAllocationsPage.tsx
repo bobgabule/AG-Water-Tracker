@@ -11,22 +11,23 @@ import { useWellReadings } from '../hooks/useWellReadings';
 import { calculateUsageAf } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useActiveFarm } from '../hooks/useActiveFarm';
+import { useTranslation } from '../hooks/useTranslation';
 
-function formatPeriodDate(dateStr: string): string {
+function formatPeriodDate(dateStr: string, locale: string): string {
   const date = new Date(dateStr + 'T00:00:00');
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function formatRelativeUpdate(dateStr: string): string {
+function formatRelativeUpdate(dateStr: string, t: (key: string, params?: Record<string, string | number>) => string, locale: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Updated Today';
-  if (diffDays === 1) return 'Updated Yesterday';
-  if (diffDays < 7) return `Updated ${diffDays} days ago`;
-  return `Updated ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  if (diffDays === 0) return t('allocation.updatedToday');
+  if (diffDays === 1) return t('allocation.updatedYesterday');
+  if (diffDays < 7) return t('allocation.updatedDaysAgo', { count: diffDays });
+  return t('allocation.updatedDate', { date: date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) });
 }
 
 function formatValue(val: string): string {
@@ -35,6 +36,7 @@ function formatValue(val: string): string {
 }
 
 export default function WellAllocationsPage() {
+  const { t, locale } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const db = usePowerSync();
@@ -197,20 +199,20 @@ export default function WellAllocationsPage() {
 
     // Validate date order
     if (formStart > formEnd) {
-      setOverlapError('End date must be on or after start date');
+      setOverlapError(t('allocation.dateError'));
       return;
     }
 
     // Validate allocated AF
     const allocatedVal = parseFloat(formAllocatedAf);
     if (isNaN(allocatedVal) || allocatedVal <= 0) {
-      setOverlapError('Allocated AF must be greater than 0');
+      setOverlapError(t('allocation.amountError'));
       return;
     }
 
     // Check overlap
     if (checkOverlap(formStart, formEnd)) {
-      setOverlapError('This period overlaps with an existing allocation');
+      setOverlapError(t('allocation.overlapError'));
       return;
     }
 
@@ -240,7 +242,7 @@ export default function WellAllocationsPage() {
             nowIso,
           ],
         );
-        useToastStore.getState().show('Allocation saved');
+        useToastStore.getState().show(t('allocation.saved'));
         setSelectedId(allocationId);
       } else {
         // Update existing
@@ -257,10 +259,10 @@ export default function WellAllocationsPage() {
             selectedId,
           ],
         );
-        useToastStore.getState().show('Allocation saved');
+        useToastStore.getState().show(t('allocation.saved'));
       }
     } catch {
-      useToastStore.getState().show('Failed to save allocation', 'error');
+      useToastStore.getState().show(t('allocation.saveFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -284,11 +286,11 @@ export default function WellAllocationsPage() {
     setDeleteLoading(true);
     try {
       await db.execute('DELETE FROM allocations WHERE id = ?', [selectedId]);
-      useToastStore.getState().show('Allocation deleted');
+      useToastStore.getState().show(t('allocation.deleted'));
       setFormVisible(false);
       setSelectedId(null);
     } catch {
-      useToastStore.getState().show('Failed to delete allocation', 'error');
+      useToastStore.getState().show(t('allocation.deleteFailed'), 'error');
     } finally {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
@@ -315,14 +317,14 @@ export default function WellAllocationsPage() {
   // Loading state
   if (!well && wells.length === 0) {
     return (
-      <div className="h-full bg-surface-header flex items-center justify-center">
+      <div className="min-h-screen bg-surface-dark flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-surface-header">
+    <div className="min-h-screen flex flex-col bg-surface-dark">
       {/* Map preview with well info */}
       <div className="relative h-32 flex-shrink-0">
         {mapUrl ? (
@@ -343,7 +345,7 @@ export default function WellAllocationsPage() {
           {well && (
             <div>
               <h2 className="text-white font-bold text-xl leading-tight drop-shadow">{well.name}</h2>
-              <p className="text-white/70 text-xs drop-shadow">{formatRelativeUpdate(well.updatedAt)}</p>
+              <p className="text-white/70 text-xs drop-shadow">{formatRelativeUpdate(well.updatedAt, t, locale)}</p>
             </div>
           )}
         </div>
@@ -359,7 +361,7 @@ export default function WellAllocationsPage() {
       {/* Title section */}
       <div className="px-4 pt-4 pb-2 flex-shrink-0">
         {farmName && <p className="text-white/70 text-xs">{farmName}</p>}
-        <h2 className="text-white font-bold text-lg tracking-wide">EDIT WELL ALLOCATIONS</h2>
+        <h2 className="text-white font-bold text-lg tracking-wide">{t('allocation.title')}</h2>
       </div>
 
       {/* Scrollable content */}
@@ -367,10 +369,10 @@ export default function WellAllocationsPage() {
         {/* Form area OR instruction text */}
         {formVisible ? (
           <div className="px-4 pb-4">
-            <div className="bg-black/15 rounded-xl p-4 space-y-3">
+            <div className="bg-[#4c5c38] rounded-xl p-4 space-y-3">
               {/* Start Date */}
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Start Date</label>
+                <label className="text-xs text-white/60 mb-1 block">{t('allocation.startDate')}</label>
                 <button
                   type="button"
                   onClick={() => {
@@ -379,7 +381,7 @@ export default function WellAllocationsPage() {
                   }}
                   className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white text-left"
                 >
-                  {formatPeriodDate(formStart)}
+                  {formatPeriodDate(formStart, locale)}
                 </button>
                 {showStartPicker && (
                   <div className="mt-2">
@@ -397,7 +399,7 @@ export default function WellAllocationsPage() {
 
               {/* End Date */}
               <div>
-                <label className="text-xs text-white/60 mb-1 block">End Date</label>
+                <label className="text-xs text-white/60 mb-1 block">{t('allocation.endDate')}</label>
                 <button
                   type="button"
                   onClick={() => {
@@ -406,7 +408,7 @@ export default function WellAllocationsPage() {
                   }}
                   className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white text-left"
                 >
-                  {formatPeriodDate(formEnd)}
+                  {formatPeriodDate(formEnd, locale)}
                 </button>
                 {showEndPicker && (
                   <div className="mt-2">
@@ -424,7 +426,7 @@ export default function WellAllocationsPage() {
 
               {/* Allocated AF */}
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Allocated (AF)</label>
+                <label className="text-xs text-white/60 mb-1 block">{t('allocation.allocatedAf')}</label>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -437,13 +439,13 @@ export default function WellAllocationsPage() {
 
               {/* Starting Reading */}
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Starting Reading</label>
+                <label className="text-xs text-white/60 mb-1 block">{t('allocation.startingReading')}</label>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={formStartingReading}
                   onChange={(e) => setFormStartingReading(e.target.value)}
-                  placeholder="Baseline meter value"
+                  placeholder={t('allocation.startingReadingPlaceholder')}
                   className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/40"
                 />
               </div>
@@ -451,7 +453,7 @@ export default function WellAllocationsPage() {
               {/* Used AF */}
               <div>
                 <label className="text-xs text-white/60 mb-1 block">
-                  Used (AF){isManualOverride && <span className="ml-1 text-yellow-400">M</span>}
+                  {t('allocation.usedAf')}{isManualOverride && <span className="ml-1 text-yellow-400">M</span>}
                 </label>
                 <input
                   type="text"
@@ -475,7 +477,7 @@ export default function WellAllocationsPage() {
                   onClick={handleCloseForm}
                   className="flex-1 py-2.5 rounded-lg font-medium text-white/80 bg-white/10 active:bg-white/20 transition-colors"
                 >
-                  Close
+                  {t('common.close')}
                 </button>
                 {selectedId !== null && (
                   <button
@@ -483,7 +485,7 @@ export default function WellAllocationsPage() {
                     onClick={() => setShowDeleteConfirm(true)}
                     className="py-2.5 px-4 rounded-lg font-medium text-red-300 bg-white/10 active:bg-white/20 transition-colors"
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 )}
                 <button
@@ -495,7 +497,7 @@ export default function WellAllocationsPage() {
                   {saving ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    'Save'
+                    t('common.save')
                   )}
                 </button>
               </div>
@@ -503,21 +505,21 @@ export default function WellAllocationsPage() {
           </div>
         ) : (
           <div className="flex items-center justify-center py-20">
-            <p className="text-white/60 text-sm">Select or Add an Allocation Below</p>
+            <p className="text-white/60 text-sm">{t('allocation.selectOrAdd')}</p>
           </div>
         )}
 
         {/* Allocations table */}
         {allocations.length > 0 && (
           <div className="px-4 pb-4">
-            <h3 className="text-white text-center text-sm font-medium mb-3">Allocations</h3>
+            <h3 className="text-white text-center text-sm font-medium mb-3">{t('allocation.allocations')}</h3>
             <table className="w-full border-collapse border border-white/30 text-sm">
               <thead>
                 <tr>
-                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">Start</th>
-                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">End</th>
-                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">Used (AF)</th>
-                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">Allocated (AF)</th>
+                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">{t('allocation.start')}</th>
+                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">{t('allocation.end')}</th>
+                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">{t('allocation.usedAf')}</th>
+                  <th className="border border-white/30 px-2.5 py-2 text-left text-xs text-white/60 font-medium">{t('allocation.allocatedAf')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -531,19 +533,19 @@ export default function WellAllocationsPage() {
                         : 'active:bg-white/5'
                     }`}
                   >
-                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-white/80">
                       {allocation.isManualOverride && (
                         <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-white text-[10px] font-bold mr-1.5 align-middle">M</span>
                       )}
-                      {formatPeriodDate(allocation.periodStart)}
+                      {formatPeriodDate(allocation.periodStart, locale)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
-                      {formatPeriodDate(allocation.periodEnd)}
+                    <td className="border border-white/30 px-2.5 py-2.5 text-white/80">
+                      {formatPeriodDate(allocation.periodEnd, locale)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-white/80">
                       {formatValue(allocation.usedAf)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-white/80">
                       {formatValue(allocation.allocatedAf)}
                     </td>
                   </tr>
@@ -557,7 +559,7 @@ export default function WellAllocationsPage() {
         {allocations.length === 0 && !formVisible && (
           <div className="text-center px-4 pb-4">
             <p className="text-white/50 text-sm">
-              No allocations yet. Tap &apos;+ Add Allocation&apos; to create one.
+              {t('allocation.noAllocations')}
             </p>
           </div>
         )}
@@ -570,15 +572,15 @@ export default function WellAllocationsPage() {
           onClick={handleBack}
           className="text-white text-sm font-medium active:opacity-70 transition-opacity"
         >
-          Back to Well
+          {t('allocation.backToWell')}
         </button>
         <button
           type="button"
           onClick={handleAddAllocation}
-          className="text-white text-sm font-medium flex items-center gap-1 active:opacity-70 transition-opacity"
+          className="bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 px-6 flex items-center gap-2 active:opacity-80 transition-opacity"
         >
-          <PlusIcon className="w-4 h-4" />
-          Add Allocation
+          <PlusIcon className="w-5 h-5" />
+          {t('allocation.addAllocation')}
         </button>
       </div>
 
@@ -587,14 +589,14 @@ export default function WellAllocationsPage() {
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteAllocation}
-        title="Delete Allocation"
+        title={t('confirm.delete')}
         description={
           selectedAllocation ? (
-            <>Delete the allocation period <span className="text-white font-medium">{formatPeriodDate(selectedAllocation.periodStart)} - {formatPeriodDate(selectedAllocation.periodEnd)}</span>? This cannot be undone.</>
+            <>Delete the allocation period <span className="text-white font-medium">{formatPeriodDate(selectedAllocation.periodStart, locale)} - {formatPeriodDate(selectedAllocation.periodEnd, locale)}</span>? This cannot be undone.</>
           ) : ''
         }
-        confirmText="Delete"
-        confirmLoadingText="Deleting..."
+        confirmText={t('confirm.delete')}
+        confirmLoadingText={t('confirm.deleting')}
         loading={deleteLoading}
       />
     </div>

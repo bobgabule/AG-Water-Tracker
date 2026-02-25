@@ -15,6 +15,7 @@ import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useCurrentAllocations } from '../hooks/useCurrentAllocations';
 import { useWellSimilarFlags } from '../hooks/useWellFlags';
 import { getWellFlagColor } from '../lib/wellFlags';
+import { useTranslation } from '../hooks/useTranslation';
 import WellLimitModal from '../components/WellLimitModal';
 
 interface WellDisplayData {
@@ -24,24 +25,22 @@ interface WellDisplayData {
   flagColor: 'orange' | 'yellow' | null;
 }
 
-function formatRelativeTime(latestReadingDate: string | null): string {
-  if (!latestReadingDate) return 'No readings';
+function formatRelativeTime(latestReadingDate: string | null, t: (key: string, params?: Record<string, string | number>) => string): string {
+  if (!latestReadingDate) return t('time.noReadings');
 
   const date = new Date(latestReadingDate);
-  if (isNaN(date.getTime())) return 'No readings';
+  if (isNaN(date.getTime())) return t('time.noReadings');
 
   const diffDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return '1 day ago';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 14) return '1 week ago';
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 60) return '1 month ago';
-  return `${Math.floor(diffDays / 30)} months ago`;
+  if (diffDays === 0) return t('time.today');
+  if (diffDays < 7) return t('time.daysAgo', { count: diffDays });
+  if (diffDays < 30) return t('time.weeksAgo', { count: Math.floor(diffDays / 7) });
+  return t('time.monthsAgo', { count: Math.floor(diffDays / 30) });
 }
 
 export default function WellListPage() {
+  const { t } = useTranslation();
   const { wells, loading } = useWells();
   const navigate = useNavigate();
   const { farmId } = useActiveFarm();
@@ -53,7 +52,7 @@ export default function WellListPage() {
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
   const subscriptionUrl = useAppSetting('subscription_website_url');
-  const isGrower = role === 'grower' || role === 'super_admin';
+  const isOwner = role === 'owner' || role === 'super_admin';
   const upgradeUrl =
     subscriptionUrl && farmId && tier
       ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
@@ -87,12 +86,12 @@ export default function WellListPage() {
       const usagePercent = allocation?.usagePercent ?? 0;
       return {
         well,
-        formattedTime: formatRelativeTime(latestByWellId.get(well.id) ?? null),
+        formattedTime: formatRelativeTime(latestByWellId.get(well.id) ?? null, t),
         remainingPercent: allocation ? Math.max(0, 100 - usagePercent) : 0,
         flagColor: getWellFlagColor(well, similarWellIds.has(well.id)),
       };
     }),
-    [wells, latestByWellId, allocationsByWellId, similarWellIds],
+    [wells, latestByWellId, allocationsByWellId, similarWellIds, t],
   );
 
   const filteredWells = useMemo(() => {
@@ -121,14 +120,14 @@ export default function WellListPage() {
     <div className={`min-h-screen bg-surface-page pt-14 transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">WELLS</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">{t('well.title')}</h1>
 
         {/* Search Input */}
         <div className="relative mb-4">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Find a well"
+            placeholder={t('well.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-3 bg-surface-input rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-text-heading/30"
@@ -140,7 +139,7 @@ export default function WellListPage() {
           {filteredWells.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-text-heading/70">
-                {searchQuery ? 'No wells match your search' : 'No wells found'}
+                {searchQuery ? t('well.noSearchResults') : t('well.noWells')}
               </p>
             </div>
           ) : (
@@ -194,7 +193,7 @@ export default function WellListPage() {
             className="flex items-center gap-2 px-5 py-3 bg-surface-input rounded-full text-text-heading font-medium shadow-sm hover:bg-surface-card transition-colors"
           >
             <MapIcon className="w-5 h-5" />
-            Well Map
+            {t('well.wellMap')}
           </button>
           {canCreateWell && (
             <button
@@ -202,7 +201,7 @@ export default function WellListPage() {
               className="flex items-center gap-2 px-5 py-3 bg-teal rounded-full text-white font-medium shadow-sm hover:bg-teal-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
-              New Well
+              {t('well.newWell')}
             </button>
           )}
         </div>
@@ -213,7 +212,7 @@ export default function WellListPage() {
         open={showLimitModal}
         onClose={handleLimitModalClose}
         upgradeUrl={upgradeUrl}
-        isGrower={isGrower}
+        isOwner={isOwner}
       />
     </div>
   );

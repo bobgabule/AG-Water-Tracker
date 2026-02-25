@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellDetailHeaderProps {
@@ -18,6 +19,8 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
   onClose,
   onEdit,
 }: WellDetailHeaderProps) {
+  const { t } = useTranslation();
+
   if (!well) {
     return (
       <div className="relative h-56 bg-gray-800 flex items-center justify-center">
@@ -28,9 +31,9 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
           aria-label="Back to map"
         >
           <ArrowLeftIcon className="w-5 h-5" />
-          <span className="text-sm font-medium">Back</span>
+          <span className="text-sm font-medium">{t('wellDetail.back')}</span>
         </button>
-        <span className="text-white/60 text-sm">Well not found</span>
+        <span className="text-white/60 text-sm">{t('well.wellNotFound')}</span>
       </div>
     );
   }
@@ -69,7 +72,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
             aria-label="Back to map"
           >
             <ArrowLeftIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">Back</span>
+            <span className="text-sm font-medium">{t('wellDetail.back')}</span>
           </button>
           {onEdit && (
             <button
@@ -79,7 +82,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
               aria-label="Edit well"
             >
               <PencilSquareIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Edit</span>
+              <span className="text-sm font-medium">{t('wellDetail.edit')}</span>
             </button>
           )}
         </div>
@@ -102,7 +105,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
                   proximityInRange ? 'text-green-400' : 'text-red-400'
                 }`}
               >
-                {proximityInRange ? 'In Range of Well' : 'Out of Range'}
+                {proximityInRange ? t('wellDetail.inRangeOfWell') : t('wellDetail.outOfRange')}
               </span>
             )}
           </div>
