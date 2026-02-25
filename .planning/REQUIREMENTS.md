@@ -33,9 +33,9 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 ### Service Worker
 
-- [ ] **SW-01**: Navigation preload enabled so service worker boot and navigation fetch happen in parallel
-- [ ] **SW-02**: Lazy-loaded page chunks are cached after first visit and served from cache on subsequent visits
-- [ ] **SW-03**: Auth pages show app shell from cache when offline (not browser error page), with offline messaging
+- [x] **SW-01**: Navigation preload enabled so service worker boot and navigation fetch happen in parallel
+- [x] **SW-02**: Lazy-loaded page chunks are cached after first visit and served from cache on subsequent visits
+- [x] **SW-03**: Auth pages show app shell from cache when offline (not browser error page), with offline messaging
 
 ### Navigation Fluidity
 
@@ -106,9 +106,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-01 | Phase 25 | Complete |
 | ASSET-02 | Phase 25 | Complete |
 | ASSET-03 | Phase 23 | Complete |
-| SW-01 | Phase 26 | Pending |
-| SW-02 | Phase 26 | Pending |
-| SW-03 | Phase 26 | Pending |
+| SW-01 | Phase 26 | Complete |
+| SW-02 | Phase 26 | Complete |
+| SW-03 | Phase 26 | Complete |
 | NAV-01 | Phase 27 | Pending |
 | NAV-02 | Phase 27 | Pending |
 | NAV-03 | Phase 27 | Pending |
