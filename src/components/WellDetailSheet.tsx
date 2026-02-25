@@ -9,6 +9,7 @@ import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
+import { calculateUsageAf } from '../lib/usage-calculation';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellDetailSheetProps {
@@ -39,6 +40,27 @@ export default function WellDetailSheet({
       null
     );
   }, [allocations]);
+
+  // Calculate usage from current calendar year readings only
+  const currentYearUsageAf = useMemo(() => {
+    if (!well || readings.length === 0) return '0';
+    const currentYear = new Date().getFullYear();
+    const yearReadings = readings.filter(
+      (r) => new Date(r.recordedAt).getFullYear() === currentYear,
+    );
+    // Need 2+ readings to calculate usage delta (earliest as baseline, latest as current)
+    if (yearReadings.length < 2) return '0';
+    // readings are sorted DESC — last element is earliest, first is latest
+    const earliest = yearReadings[yearReadings.length - 1];
+    const latest = yearReadings[0];
+    const usage = calculateUsageAf(
+      latest.value,
+      earliest.value,
+      well.multiplier,
+      well.units,
+    );
+    return usage.toFixed(2);
+  }, [readings, well]);
 
   // GPS proximity
   const proximityInRange = useMemo(() => {
@@ -86,7 +108,7 @@ export default function WellDetailSheet({
               <WellUsageGauge
                 well={well}
                 allocatedAf={currentAllocation?.allocatedAf ?? '0'}
-                usedAf={currentAllocation?.usedAf ?? '0'}
+                usedAf={currentYearUsageAf}
               />
 
               {/* Readings table on white background */}

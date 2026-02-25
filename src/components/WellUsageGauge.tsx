@@ -8,19 +8,6 @@ interface WellUsageGaugeProps {
   usedAf: string | null;
 }
 
-/** Map well unit codes to display labels */
-function getUnitLabel(units: string): string {
-  switch (units) {
-    case 'GAL':
-      return 'Gallons';
-    case 'CF':
-      return 'Cubic Feet';
-    case 'AF':
-    default:
-      return 'AF';
-  }
-}
-
 function isHealthy(state: string): boolean {
   return state === 'Ok';
 }
@@ -35,7 +22,6 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   const remaining = Math.max(0, allocated - used);
   const remainingPercent =
     allocated > 0 ? Math.min((remaining / allocated) * 100, 100) : 0;
-  const unitLabel = getUnitLabel(well.units);
 
   const statusItems = [
     { label: 'Pump', healthy: isHealthy(well.pumpState) },
@@ -88,17 +74,17 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
               <span className="text-white font-semibold">
                 {Math.round(allocated)}
               </span>{' '}
-              Allocated
+              AF Allocated
             </p>
             <p className="text-white/80 text-sm">
               <span className="text-white font-semibold">
                 {Math.round(used)}
               </span>{' '}
-              Used
+              AF Used
             </p>
             <div className="inline-block bg-green-600/80 rounded px-2 py-0.5 mt-1">
               <span className="text-white text-sm font-semibold">
-                {Math.round(remaining)} {unitLabel} Left
+                {Math.round(remaining)} AF Left
               </span>
             </div>
           </div>
