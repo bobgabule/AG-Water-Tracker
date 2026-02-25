@@ -71,7 +71,7 @@ function captureGps(): Promise<GpsResult | null> {
       () => {
         resolve(null);
       },
-      { enableHighAccuracy: true, timeout: 5000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   });
 }
@@ -94,6 +94,7 @@ export default function NewReadingSheet({
   const [gpsResult, setGpsResult] = useState<GpsResult | null>(null);
   const [problems, setProblems] = useState<MeterProblems>(INITIAL_PROBLEMS);
   const [problemsSubmitting, setProblemsSubmitting] = useState(false);
+  const [pendingSimilar, setPendingSimilar] = useState(false);
 
   // Real-time proximity indicator from cached location
   const proximityInfo = useMemo(() => {
@@ -113,6 +114,7 @@ export default function NewReadingSheet({
     setGpsResult(null);
     setProblems(INITIAL_PROBLEMS);
     setProblemsSubmitting(false);
+    setPendingSimilar(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -174,6 +176,7 @@ export default function NewReadingSheet({
   );
 
   const handleGpsCaptureAndSave = useCallback(async (isSimilar = false) => {
+    setPendingSimilar(isSimilar);
     setView('submitting');
     const gps = await captureGps();
 
@@ -203,8 +206,8 @@ export default function NewReadingSheet({
   }, [well.location, saveReading]);
 
   const handleSaveWithoutGps = useCallback(() => {
-    saveReading(null);
-  }, [saveReading]);
+    saveReading(null, false, pendingSimilar);
+  }, [saveReading, pendingSimilar]);
 
   const handleSubmit = useCallback(() => {
     const error = validateReadingValue(readingValue);
@@ -239,8 +242,8 @@ export default function NewReadingSheet({
   }, [handleGpsCaptureAndSave]);
 
   const handleRangeContinue = useCallback(() => {
-    saveReading(gpsResult, true);
-  }, [saveReading, gpsResult]);
+    saveReading(gpsResult, true, pendingSimilar);
+  }, [saveReading, gpsResult, pendingSimilar]);
 
   const handleBackToForm = useCallback(() => {
     setView('form');
@@ -461,7 +464,7 @@ export default function NewReadingSheet({
                       <div className="flex gap-3">
                         <button
                           type="button"
-                          onClick={() => handleGpsCaptureAndSave()}
+                          onClick={() => handleGpsCaptureAndSave(pendingSimilar)}
                           className="flex-1 py-3 text-white font-medium rounded-lg"
                         >
                           Retry
