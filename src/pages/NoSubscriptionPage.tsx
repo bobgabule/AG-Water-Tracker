@@ -72,11 +72,11 @@ export default function NoSubscriptionPage() {
         <NoSymbolIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
 
         <h1 className="text-2xl font-semibold text-white mb-2">
-          No Active Subscription
+          No Farm Access
         </h1>
 
         <p className="text-gray-300 text-sm mb-2">
-          Your account has no active farm subscription.
+          Your phone number is not associated with any farm. Ask your farm administrator to add you, or subscribe to create your own farm.
         </p>
 
         {phone && (
