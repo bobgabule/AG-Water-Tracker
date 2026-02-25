@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { MapPinIcon, CheckIcon } from '@heroicons/react/24/outline';
 import SegmentedControl from './SegmentedControl';
+import { useTranslation } from '../hooks/useTranslation';
 import { getCoordinateValidationError } from '../lib/validation';
 
 export interface WellFormData {
@@ -12,7 +13,6 @@ export interface WellFormData {
   longitude: number;
   units: 'AF' | 'GAL' | 'CF';
   multiplier: '0.01' | '1' | '10' | '1000' | 'MG';
-  sendMonthlyReport: boolean;
   batteryState: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
   pumpState: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
   meterStatus: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
@@ -51,6 +51,7 @@ export default function AddWellFormBottomSheet({
   farmName,
   isSaving = false,
 }: AddWellFormBottomSheetProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [meterSerialNumber, setMeterSerialNumber] = useState('');
   const [wmisNumber, setWmisNumber] = useState('');
@@ -58,7 +59,6 @@ export default function AddWellFormBottomSheet({
   const [longitude, setLongitude] = useState(initialLocation.longitude);
   const [units, setUnits] = useState<'AF' | 'GAL' | 'CF'>('AF');
   const [multiplier, setMultiplier] = useState<'0.01' | '1' | '10' | '1000' | 'MG'>('1');
-  const [sendMonthlyReport, setSendMonthlyReport] = useState(true);
   const [batteryState, setBatteryState] = useState<WellFormData['batteryState']>('Unknown');
   const [pumpState, setPumpState] = useState<WellFormData['pumpState']>('Unknown');
   const [meterStatus, setMeterStatus] = useState<WellFormData['meterStatus']>('Unknown');
@@ -75,7 +75,6 @@ export default function AddWellFormBottomSheet({
       setLongitude(initialLocation.longitude);
       setUnits('AF');
       setMultiplier('1');
-      setSendMonthlyReport(true);
       setBatteryState('Unknown');
       setPumpState('Unknown');
       setMeterStatus('Unknown');
@@ -140,7 +139,6 @@ export default function AddWellFormBottomSheet({
       longitude,
       units,
       multiplier,
-      sendMonthlyReport,
       batteryState,
       pumpState,
       meterStatus,
@@ -154,7 +152,6 @@ export default function AddWellFormBottomSheet({
     longitude,
     units,
     multiplier,
-    sendMonthlyReport,
     batteryState,
     pumpState,
     meterStatus,
@@ -186,7 +183,7 @@ export default function AddWellFormBottomSheet({
                 <p className="text-white text-xs">{farmName}</p>
               )}
               <h2 className="text-white font-bold text-lg tracking-wide">
-                ADD NEW WELL
+                {t('well.addNewWell')}
               </h2>
             </div>
           </div>
@@ -196,12 +193,12 @@ export default function AddWellFormBottomSheet({
             <div className="space-y-4">
               {/* Well Name */}
               <div>
-                <label className="text-xs text-white mb-1 block">Well Name*</label>
+                <label className="text-xs text-white mb-1 block">{t('well.wellName')}*</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter well name"
+                  placeholder={t('well.wellNamePlaceholder')}
                   className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -209,22 +206,22 @@ export default function AddWellFormBottomSheet({
               {/* Meter Serial Number and WMIS Number */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-white mb-1 block">Meter Serial Number</label>
+                  <label className="text-xs text-white mb-1 block">{t('well.meterSerialNumber')}</label>
                   <input
                     type="text"
                     value={meterSerialNumber}
                     onChange={(e) => setMeterSerialNumber(e.target.value)}
-                    placeholder="Serial #"
+                    placeholder={t('well.serialPlaceholder')}
                     className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-white mb-1 block">WMIS Number*</label>
+                  <label className="text-xs text-white mb-1 block">{t('well.wmisNumber')}*</label>
                   <input
                     type="text"
                     value={wmisNumber}
                     onChange={(e) => setWmisNumber(e.target.value)}
-                    placeholder="WMIS #"
+                    placeholder={t('well.wmisPlaceholder')}
                     className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
@@ -233,7 +230,7 @@ export default function AddWellFormBottomSheet({
               {/* Latitude, Longitude, GPS */}
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <label className="text-xs text-white mb-1 block">Latitude*</label>
+                  <label className="text-xs text-white mb-1 block">{t('well.latitude')}*</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -244,7 +241,7 @@ export default function AddWellFormBottomSheet({
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-white mb-1 block">Longitude*</label>
+                  <label className="text-xs text-white mb-1 block">{t('well.longitude')}*</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -277,15 +274,15 @@ export default function AddWellFormBottomSheet({
 
               {/* Allocations disabled card */}
               <div className="bg-surface-header border border-white/50 rounded-lg p-4 opacity-80">
-                <h3 className="text-white font-medium text-sm">Allocations</h3>
+                <h3 className="text-white font-medium text-sm">{t('well.allocations')}</h3>
                 <p className="text-white/70 text-xs mt-1">
-                  Save the well first to add allocations
+                  {t('well.allocationsDisabledHint')}
                 </p>
               </div>
 
               {/* Units */}
               <SegmentedControl
-                label="Units*"
+                label={`${t('well.units')}*`}
                 options={unitOptions}
                 value={units}
                 onChange={handleUnitsChange}
@@ -293,26 +290,15 @@ export default function AddWellFormBottomSheet({
 
               {/* Multiplier */}
               <SegmentedControl
-                label="Multiplier*"
+                label={`${t('well.multiplier')}*`}
                 options={multiplierOptions}
                 value={multiplier}
                 onChange={handleMultiplierChange}
               />
 
-              {/* Send monthly report checkbox */}
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={sendMonthlyReport}
-                  onChange={(e) => setSendMonthlyReport(e.target.checked)}
-                  className="w-5 h-5 rounded border-white-300 text-btn-confirm-text focus:ring-white"
-                />
-                <span className="text-sm text-white">Send monthly meter reading report</span>
-              </label>
-
               {/* Battery State */}
               <div>
-                <label className="text-xs text-white mb-1 block">Battery State*</label>
+                <label className="text-xs text-white mb-1 block">{t('well.batteryState')}*</label>
                 <select
                   value={batteryState}
                   onChange={(e) => setBatteryState(e.target.value as WellFormData['batteryState'])}
@@ -328,7 +314,7 @@ export default function AddWellFormBottomSheet({
 
               {/* Pump State */}
               <div>
-                <label className="text-xs text-white mb-1 block">Pump State*</label>
+                <label className="text-xs text-white mb-1 block">{t('well.pumpState')}*</label>
                 <select
                   value={pumpState}
                   onChange={(e) => setPumpState(e.target.value as WellFormData['pumpState'])}
@@ -344,7 +330,7 @@ export default function AddWellFormBottomSheet({
 
               {/* Meter Status */}
               <div>
-                <label className="text-xs text-white mb-1 block">Meter Status*</label>
+                <label className="text-xs text-white mb-1 block">{t('well.meterStatus')}*</label>
                 <select
                   value={meterStatus}
                   onChange={(e) => setMeterStatus(e.target.value as WellFormData['meterStatus'])}
@@ -368,7 +354,7 @@ export default function AddWellFormBottomSheet({
               disabled={isSaving}
               className="px-6 py-2.5 text-white font-medium disabled:opacity-50"
             >
-              Cancel
+              {t('well.cancel')}
             </button>
             <button
               type="button"
@@ -379,12 +365,12 @@ export default function AddWellFormBottomSheet({
               {isSaving ? (
                 <>
                   <div className="w-5 h-5 border-2 border-btn-confirm-text/30 border-t-btn-confirm-text rounded-full animate-spin" />
-                  Saving…
+                  {t('reading.saving')}
                 </>
               ) : (
                 <>
                   <CheckIcon className="w-5 h-5" />
-                  Save
+                  {t('well.save')}
                 </>
               )}
             </button>

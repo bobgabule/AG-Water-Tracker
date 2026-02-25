@@ -11,6 +11,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { getMultiplierValue, CONVERSION_TO_AF } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
+import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface NewReadingSheetProps {
@@ -46,12 +47,12 @@ interface GpsResult {
 /** Threshold for similar reading warning, always in gallons */
 const SIMILAR_THRESHOLD_GALLONS = 50;
 
-function validateReadingValue(input: string): string | null {
+function validateReadingValue(input: string, t: (key: string) => string): string | null {
   const trimmed = input.trim();
-  if (trimmed === '') return 'Reading value is required';
+  if (trimmed === '') return t('reading.validationRequired');
   const num = Number(trimmed);
-  if (isNaN(num)) return 'Please enter a valid number';
-  if (num <= 0) return 'Reading must be a positive number';
+  if (isNaN(num)) return t('reading.validationNumber');
+  if (num <= 0) return t('reading.validationPositive');
   return null;
 }
 
@@ -83,6 +84,7 @@ export default function NewReadingSheet({
   farmId,
   userId,
 }: NewReadingSheetProps) {
+  const { t } = useTranslation();
   const db = usePowerSync();
   const { readings } = useWellReadings(well.id);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
@@ -164,11 +166,11 @@ export default function NewReadingSheet({
           ],
         );
 
-        useToastStore.getState().show('Reading saved');
+        useToastStore.getState().show(t('reading.saved'));
         resetForm();
         onClose();
       } catch {
-        useToastStore.getState().show('Failed to save reading', 'error');
+        useToastStore.getState().show(t('reading.saveFailed'), 'error');
         setView('form');
       }
     },
@@ -210,7 +212,7 @@ export default function NewReadingSheet({
   }, [saveReading, pendingSimilar]);
 
   const handleSubmit = useCallback(() => {
-    const error = validateReadingValue(readingValue);
+    const error = validateReadingValue(readingValue, t);
     if (error) {
       setValidationError(error);
       return;
@@ -286,11 +288,11 @@ export default function NewReadingSheet({
         values,
       );
 
-      useToastStore.getState().show('Problem reported');
+      useToastStore.getState().show(t('reading.problemReported'));
       resetForm();
       onClose();
     } catch {
-      useToastStore.getState().show('Failed to report problem', 'error');
+      useToastStore.getState().show(t('reading.problemFailed'), 'error');
       setProblemsSubmitting(false);
     }
   }, [db, problems, well.id, resetForm, onClose]);
@@ -312,7 +314,7 @@ export default function NewReadingSheet({
               <div>
                 <p className="text-white/70 text-xs">{well.name}</p>
                 <h2 className="text-white font-bold text-lg tracking-wide">
-                  NEW READING
+                  {t('reading.newReading').toUpperCase()}
                 </h2>
               </div>
               {/* Real-time proximity indicator */}
@@ -328,7 +330,7 @@ export default function NewReadingSheet({
                       proximityInfo.inRange ? 'text-green-400' : 'text-yellow-400'
                     }`}
                   >
-                    {proximityInfo.inRange ? 'In Range' : 'Out of Range'}
+                    {proximityInfo.inRange ? t('reading.inRange') : t('reading.outOfRange')}
                   </span>
                 </div>
               )}
@@ -346,7 +348,7 @@ export default function NewReadingSheet({
                   : 'text-white/60'
               }`}
             >
-              Reading
+              {t('reading.tab.reading')}
             </button>
             <button
               type="button"
@@ -357,7 +359,7 @@ export default function NewReadingSheet({
                   : 'text-white/60'
               }`}
             >
-              Meter Problem
+              {t('reading.tab.meterProblem')}
             </button>
           </div>
 
@@ -393,14 +395,11 @@ export default function NewReadingSheet({
                   <div className="flex flex-col items-center text-center space-y-4 py-6">
                     <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
                     <h3 className="text-white text-xl font-bold">
-                      Similar Reading
+                      {t('reading.similarTitle')}
                     </h3>
                     <ul className="space-y-2 text-white/70 text-sm">
-                      <li>
-                        This reading is within 50 gallons of the last
-                        recorded reading
-                      </li>
-                      <li>Double check the meter</li>
+                      <li>{t('reading.similarDescription')}</li>
+                      <li>{t('reading.similarCheck')}</li>
                     </ul>
                     <div className="flex gap-3 w-full pt-4">
                       <button
@@ -408,14 +407,14 @@ export default function NewReadingSheet({
                         onClick={handleBackToForm}
                         className="flex-1 py-3 text-white font-medium rounded-lg"
                       >
-                        Go Back
+                        {t('reading.goBack')}
                       </button>
                       <button
                         type="button"
                         onClick={handleSimilarContinue}
                         className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                       >
-                        Continue
+                        {t('reading.continue')}
                       </button>
                     </div>
                   </div>
@@ -425,11 +424,11 @@ export default function NewReadingSheet({
                   <div className="flex flex-col items-center text-center space-y-4 py-6">
                     <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
                     <h3 className="text-white text-xl font-bold">
-                      GPS Coordinates Incorrect
+                      {t('reading.rangeTitle')}
                     </h3>
                     <ul className="space-y-2 text-white/70 text-sm">
-                      <li>Are you at the right well?</li>
-                      <li>Check your device GPS</li>
+                      <li>{t('reading.rangeCheck1')}</li>
+                      <li>{t('reading.rangeCheck2')}</li>
                     </ul>
                     <div className="flex gap-3 w-full pt-4">
                       <button
@@ -437,14 +436,14 @@ export default function NewReadingSheet({
                         onClick={handleBackToForm}
                         className="flex-1 py-3 text-white font-medium rounded-lg"
                       >
-                        Go Back
+                        {t('reading.goBack')}
                       </button>
                       <button
                         type="button"
                         onClick={handleRangeContinue}
                         className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                       >
-                        Continue
+                        {t('reading.continue')}
                       </button>
                     </div>
                   </div>
@@ -454,11 +453,11 @@ export default function NewReadingSheet({
                   <div className="flex flex-col items-center text-center space-y-4 py-6">
                     <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
                     <h3 className="text-white text-xl font-bold">
-                      GPS Unavailable
+                      {t('reading.gpsUnavailable')}
                     </h3>
                     <ul className="space-y-2 text-white/70 text-sm">
-                      <li>Could not capture your location</li>
-                      <li>The reading will be saved without GPS data</li>
+                      <li>{t('reading.gpsFailedDesc1')}</li>
+                      <li>{t('reading.gpsFailedDesc2')}</li>
                     </ul>
                     <div className="flex flex-col gap-2 w-full pt-4">
                       <div className="flex gap-3">
@@ -467,14 +466,14 @@ export default function NewReadingSheet({
                           onClick={() => handleGpsCaptureAndSave(pendingSimilar)}
                           className="flex-1 py-3 text-white font-medium rounded-lg"
                         >
-                          Retry
+                          {t('reading.retry')}
                         </button>
                         <button
                           type="button"
                           onClick={handleSaveWithoutGps}
                           className="flex-1 py-3 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium"
                         >
-                          Save Without GPS
+                          {t('reading.saveWithoutGps')}
                         </button>
                       </div>
                       <button
@@ -482,7 +481,7 @@ export default function NewReadingSheet({
                         onClick={handleBackToForm}
                         className="py-2 text-white/60 text-sm font-medium"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -491,7 +490,7 @@ export default function NewReadingSheet({
                 {view === 'submitting' && (
                   <div className="flex flex-col items-center justify-center py-12 space-y-3">
                     <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <p className="text-white/70 text-sm">Saving...</p>
+                    <p className="text-white/70 text-sm">{t('reading.saving')}</p>
                   </div>
                 )}
               </>
@@ -500,7 +499,7 @@ export default function NewReadingSheet({
               problemsSubmitting ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-3">
                   <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <p className="text-white/70 text-sm">Submitting...</p>
+                  <p className="text-white/70 text-sm">{t('reading.submitting')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 p-4">
@@ -511,7 +510,7 @@ export default function NewReadingSheet({
                       onChange={() => handleProblemToggle('notWorking')}
                       className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
-                    <span className="text-white text-base">Not Working</span>
+                    <span className="text-white text-base">{t('reading.problem.notWorking')}</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -520,7 +519,7 @@ export default function NewReadingSheet({
                       onChange={() => handleProblemToggle('batteryDead')}
                       className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
-                    <span className="text-white text-base">Battery Dead</span>
+                    <span className="text-white text-base">{t('reading.problem.batteryDead')}</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -529,7 +528,7 @@ export default function NewReadingSheet({
                       onChange={() => handleProblemToggle('pumpOff')}
                       className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
-                    <span className="text-white text-base">Pump Off</span>
+                    <span className="text-white text-base">{t('reading.problem.pumpOff')}</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -538,7 +537,7 @@ export default function NewReadingSheet({
                       onChange={() => handleProblemToggle('deadPump')}
                       className="w-5 h-5 rounded border-white/30 text-btn-confirm-text focus:ring-white bg-white/10"
                     />
-                    <span className="text-white text-base">Dead Pump</span>
+                    <span className="text-white text-base">{t('reading.problem.deadPump')}</span>
                   </label>
                 </div>
               )
@@ -553,7 +552,7 @@ export default function NewReadingSheet({
                 onClick={handleClose}
                 className="text-white font-medium"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -561,7 +560,7 @@ export default function NewReadingSheet({
                 className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2"
               >
                 <CheckIcon className="w-5 h-5" />
-                Save
+                {t('reading.save')}
               </button>
             </div>
           )}
@@ -574,7 +573,7 @@ export default function NewReadingSheet({
                 onClick={handleClose}
                 className="text-white font-medium"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -583,7 +582,7 @@ export default function NewReadingSheet({
                 className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
               >
                 <CheckIcon className="w-5 h-5" />
-                Submit
+                {t('reading.submit')}
               </button>
             </div>
           )}

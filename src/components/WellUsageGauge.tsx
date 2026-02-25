@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellUsageGaugeProps {
@@ -32,6 +33,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   allocatedAf,
   usedAf,
 }: WellUsageGaugeProps) {
+  const { t } = useTranslation();
   const allocated = parseFloat(allocatedAf ?? '') || 0;
   const used = parseFloat(usedAf ?? '') || 0;
   const remaining = Math.max(0, allocated - used);
@@ -40,9 +42,9 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   const gaugeColor = getGaugeColor(remainingPercent);
 
   const statusItems = [
-    { label: 'Pump', healthy: isHealthy(well.pumpState) },
-    { label: 'Battery', healthy: isHealthy(well.batteryState) },
-    { label: 'Meter Status', healthy: isHealthy(well.meterStatus) },
+    { label: t('wellDetail.pump'), healthy: isHealthy(well.pumpState) },
+    { label: t('wellDetail.battery'), healthy: isHealthy(well.batteryState) },
+    { label: t('well.meterStatus'), healthy: isHealthy(well.meterStatus) },
   ];
 
   return (
@@ -51,13 +53,13 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
         {/* Left column: Serial Number + WMIS */}
         <div className="flex-1 flex flex-col items-end">
           <div className="inline-block text-right pb-3 border-b border-[#d5e8bd]">
-            <p className="text-[#d5e8bd] text-sm font-semibold">Serial Number</p>
+            <p className="text-[#d5e8bd] text-sm font-semibold">{t('wellDetail.serialNumber')}</p>
             <p className="text-[#d5e8bd] text-sm font-semibold">
               {well.meterSerialNumber || '—'}
             </p>
           </div>
           <div className="inline-block text-right pt-3">
-            <p className="text-[#d5e8bd] text-sm font-semibold">WMIS #</p>
+            <p className="text-[#d5e8bd] text-sm font-semibold">{t('wellDetail.wmis')}</p>
             <p className="text-[#d5e8bd] text-sm font-semibold">
               {well.wmisNumber || '—'}
             </p>
@@ -89,24 +91,24 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
         {/* Right column: Usage stats + Status indicators */}
         <div className="flex-1">
           <h3 className="inline-block text-white text-2xl font-semibold uppercase tracking-wide border-b border-[#d5e8bd] pb-2 mb-2">
-            Usage
+            {t('wellDetail.usage')}
           </h3>
           <div className="space-y-1 mt-1">
             <p className="text-[#d5e8bd] text-sm">
               <span className="text-white font-semibold">
                 {formatAf(allocated)}
               </span>{' '}
-              Allocated (AF)
+              {t('wellDetail.allocatedAf')}
             </p>
             <p className="text-[#d5e8bd] text-sm">
               <span className="text-white font-semibold">
                 {formatAf(used)}
               </span>{' '}
-              Used (AF)
+              {t('wellDetail.usedAf')}
             </p>
             <div className="inline-block rounded px-2 py-0.5 mt-1 bg-[#586a40]">
               <span className="text-white text-sm font-semibold">
-                {formatAf(remaining)} Remaining (AF)
+                {t('wellDetail.remainingAf', { value: formatAf(remaining) })}
               </span>
             </div>
           </div>

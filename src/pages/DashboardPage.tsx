@@ -17,6 +17,7 @@ import { useAppSetting } from '../hooks/useAppSetting';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useTranslation } from '../hooks/useTranslation';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
@@ -27,6 +28,7 @@ import LocationSoftAskModal from '../components/LocationSoftAskModal';
 import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { wells, loading } = useWells();
   const navigate = useNavigate();
   const db = usePowerSync();
@@ -38,7 +40,7 @@ export default function DashboardPage() {
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
   const subscriptionUrl = useAppSetting('subscription_website_url');
-  const isGrower = role === 'grower' || role === 'super_admin';
+  const isOwner = role === 'owner' || role === 'super_admin';
   const upgradeUrl =
     subscriptionUrl && farmId && tier
       ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
@@ -206,10 +208,10 @@ export default function DashboardPage() {
       await db.execute(
         `INSERT INTO wells (
           id, farm_id, name, meter_serial_number, wmis_number,
-          latitude, longitude, units, multiplier, send_monthly_report,
+          latitude, longitude, units, multiplier,
           battery_state, pump_state, meter_status, status, created_by,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           wellId,
           farmId,
@@ -220,7 +222,6 @@ export default function DashboardPage() {
           wellData.longitude,
           wellData.units,
           wellData.multiplier,
-          wellData.sendMonthlyReport ? 1 : 0,
           wellData.batteryState,
           wellData.pumpState,
           wellData.meterStatus,
@@ -233,10 +234,10 @@ export default function DashboardPage() {
 
       setCurrentStep('closed');
       setPickedLocation(null);
-      showToast(`"${wellData.name}" added successfully`);
+      showToast(t('well.wellAdded', { name: wellData.name }));
     } catch (error) {
       debugError('Dashboard', 'Failed to save well:', error);
-      showToast('Failed to save well. Please try again.', 'error');
+      showToast(t('well.wellAddFailed'), 'error');
     } finally {
       isSavingRef.current = false;
       setIsSaving(false);
@@ -285,7 +286,7 @@ export default function DashboardPage() {
           active:scale-95 transition"
         >
           <ListBulletIcon className="w-5 h-5" />
-          Well List
+          {t('dashboard.wellList')}
         </button>
         {canCreateWell && (
           <button
@@ -296,7 +297,7 @@ export default function DashboardPage() {
            active:scale-95 transition"
           >
             <PlusIcon className="w-5 h-5" />
-            New Well
+            {t('dashboard.newWell')}
           </button>
         )}
       </div>
@@ -327,7 +328,7 @@ export default function DashboardPage() {
         open={showLimitModal}
         onClose={handleLimitModalClose}
         upgradeUrl={upgradeUrl}
-        isGrower={isGrower}
+        isOwner={isOwner}
       />
 
       {/* Location Permission Modal */}

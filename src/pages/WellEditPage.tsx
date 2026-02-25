@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { usePowerSync } from '@powersync/react';
+import { usePowerSync, useQuery } from '@powersync/react';
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -9,6 +9,7 @@ import {
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import SegmentedControl from '../components/SegmentedControl';
+import { useTranslation } from '../hooks/useTranslation';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations } from '../hooks/useWellAllocations';
 import {
@@ -42,11 +43,17 @@ const multiplierOptions = [
 const stateOptions = ['Ok', 'Low', 'Critical', 'Dead', 'Unknown'] as const;
 
 export default function WellEditPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const db = usePowerSync();
   const { wells } = useWells();
   const { allocations } = useWellAllocations(id ?? null);
+  const readingsCheck = useQuery<{ n: number }>(
+    id ? 'SELECT 1 AS n FROM readings WHERE well_id = ? LIMIT 1' : 'SELECT NULL WHERE 0',
+    id ? [id] : [],
+  );
+  const hasReadings = (readingsCheck.data?.length ?? 0) > 0;
   const { farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
 
@@ -62,7 +69,6 @@ export default function WellEditPage() {
   const [longitude, setLongitude] = useState(0);
   const [units, setUnits] = useState<Units>('AF');
   const [multiplier, setMultiplier] = useState<Multiplier>('1');
-  const [sendMonthlyReport, setSendMonthlyReport] = useState(true);
   const [batteryState, setBatteryState] = useState<EquipmentState>('Unknown');
   const [pumpState, setPumpState] = useState<EquipmentState>('Unknown');
   const [meterStatus, setMeterStatus] = useState<EquipmentState>('Unknown');
@@ -90,7 +96,6 @@ export default function WellEditPage() {
       setLongitude(draft.longitude);
       setUnits(draft.units);
       setMultiplier(draft.multiplier);
-      setSendMonthlyReport(draft.sendMonthlyReport);
       setBatteryState(draft.batteryState as EquipmentState);
       setPumpState(draft.pumpState as EquipmentState);
       setMeterStatus(draft.meterStatus as EquipmentState);
@@ -107,7 +112,6 @@ export default function WellEditPage() {
       setLongitude(well.location?.longitude ?? 0);
       setUnits((well.units as Units) || 'AF');
       setMultiplier((well.multiplier as Multiplier) || '1');
-      setSendMonthlyReport(well.sendMonthlyReport);
       setBatteryState((well.batteryState as EquipmentState) || 'Unknown');
       setPumpState((well.pumpState as EquipmentState) || 'Unknown');
       setMeterStatus((well.meterStatus as EquipmentState) || 'Unknown');
@@ -133,7 +137,6 @@ export default function WellEditPage() {
       longitude !== (well.location?.longitude ?? 0) ||
       units !== ((well.units as Units) || 'AF') ||
       multiplier !== ((well.multiplier as Multiplier) || '1') ||
-      sendMonthlyReport !== well.sendMonthlyReport ||
       batteryState !== ((well.batteryState as EquipmentState) || 'Unknown') ||
       pumpState !== ((well.pumpState as EquipmentState) || 'Unknown') ||
       meterStatus !== ((well.meterStatus as EquipmentState) || 'Unknown')
@@ -147,7 +150,6 @@ export default function WellEditPage() {
     longitude,
     units,
     multiplier,
-    sendMonthlyReport,
     batteryState,
     pumpState,
     meterStatus,
@@ -225,7 +227,6 @@ export default function WellEditPage() {
       longitude,
       units,
       multiplier,
-      sendMonthlyReport,
       batteryState,
       pumpState,
       meterStatus,
@@ -240,7 +241,6 @@ export default function WellEditPage() {
     longitude,
     units,
     multiplier,
-    sendMonthlyReport,
     batteryState,
     pumpState,
     meterStatus,
@@ -255,11 +255,11 @@ export default function WellEditPage() {
 
     // Validate required fields
     if (name.trim() === '') {
-      setNameError('Well name is required');
+      setNameError(t('well.wellNameRequired'));
       return;
     }
     if (wmisNumber.trim() === '') {
-      setWmisError('WMIS number is required');
+      setWmisError(t('well.wmisRequired'));
       return;
     }
 
@@ -271,11 +271,11 @@ export default function WellEditPage() {
 
     // Uniqueness validation
     if (!isWellNameUnique(name, wells, id)) {
-      setNameError('A well with this name already exists');
+      setNameError(t('well.wellNameDuplicate'));
       return;
     }
     if (!isWmisUnique(wmisNumber, wells, id)) {
-      setWmisError('A well with this WMIS number already exists');
+      setWmisError(t('well.wmisDuplicate'));
       return;
     }
 
@@ -285,7 +285,7 @@ export default function WellEditPage() {
       await db.execute(
         `UPDATE wells SET name = ?, meter_serial_number = ?, wmis_number = ?,
          latitude = ?, longitude = ?, units = ?, multiplier = ?,
-         send_monthly_report = ?, battery_state = ?, pump_state = ?,
+         battery_state = ?, pump_state = ?,
          meter_status = ?, updated_at = ? WHERE id = ?`,
         [
           name.trim(),
@@ -295,7 +295,6 @@ export default function WellEditPage() {
           longitude,
           units,
           multiplier,
-          sendMonthlyReport ? 1 : 0,
           batteryState,
           pumpState,
           meterStatus,
@@ -304,10 +303,10 @@ export default function WellEditPage() {
         ],
       );
       useWellEditDraftStore.getState().clearDraft();
-      useToastStore.getState().show('Well updated');
+      useToastStore.getState().show(t('well.wellUpdated'));
       navigate(`/wells/${id}`, { viewTransition: true });
     } catch {
-      useToastStore.getState().show('Failed to update well', 'error');
+      useToastStore.getState().show(t('well.wellUpdateFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -319,7 +318,6 @@ export default function WellEditPage() {
     longitude,
     units,
     multiplier,
-    sendMonthlyReport,
     batteryState,
     pumpState,
     meterStatus,
@@ -339,10 +337,10 @@ export default function WellEditPage() {
         await tx.execute('DELETE FROM wells WHERE id = ?', [id]);
       });
       useWellEditDraftStore.getState().clearDraft();
-      useToastStore.getState().show('Well deleted');
+      useToastStore.getState().show(t('well.wellDeleted'));
       navigate('/', { viewTransition: true });
     } catch {
-      useToastStore.getState().show('Failed to delete well', 'error');
+      useToastStore.getState().show(t('well.wellDeleteFailed'), 'error');
     } finally {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
@@ -391,7 +389,7 @@ export default function WellEditPage() {
         </button>
         <div>
           {farmName && <p className="text-white text-xs">{farmName}</p>}
-          <h2 className="text-white font-bold text-lg tracking-wide">EDIT WELL</h2>
+          <h2 className="text-white font-bold text-lg tracking-wide">{t('well.editWell')}</h2>
         </div>
       </div>
 
@@ -400,7 +398,7 @@ export default function WellEditPage() {
         <div className="space-y-4">
           {/* Well Name */}
           <div>
-            <label className="text-xs text-white mb-1 block">Well Name*</label>
+            <label className="text-xs text-white mb-1 block">{t('well.wellName')}*</label>
             <input
               type="text"
               value={name}
@@ -408,7 +406,7 @@ export default function WellEditPage() {
                 setName(e.target.value);
                 setNameError(null);
               }}
-              placeholder="Enter well name"
+              placeholder={t('well.wellNamePlaceholder')}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {nameError && <p className="text-red-300 text-xs mt-1">{nameError}</p>}
@@ -417,17 +415,17 @@ export default function WellEditPage() {
           {/* Meter Serial Number and WMIS Number */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs text-white mb-1 block">Meter Serial Number</label>
+              <label className="text-xs text-white mb-1 block">{t('well.meterSerialNumber')}</label>
               <input
                 type="text"
                 value={meterSerialNumber}
                 onChange={(e) => setMeterSerialNumber(e.target.value)}
-                placeholder="Serial #"
+                placeholder={t('well.serialPlaceholder')}
                 className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-white mb-1 block">WMIS Number*</label>
+              <label className="text-xs text-white mb-1 block">{t('well.wmisNumber')}*</label>
               <input
                 type="text"
                 value={wmisNumber}
@@ -435,7 +433,7 @@ export default function WellEditPage() {
                   setWmisNumber(e.target.value);
                   setWmisError(null);
                 }}
-                placeholder="WMIS #"
+                placeholder={t('well.wmisPlaceholder')}
                 className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
               {wmisError && <p className="text-red-300 text-xs mt-1">{wmisError}</p>}
@@ -445,7 +443,7 @@ export default function WellEditPage() {
           {/* Latitude, Longitude, GPS */}
           <div className="flex gap-3 items-end">
             <div className="flex-1">
-              <label className="text-xs text-white mb-1 block">Latitude*</label>
+              <label className="text-xs text-white mb-1 block">{t('well.latitude')}*</label>
               <input
                 type="text"
                 inputMode="decimal"
@@ -456,7 +454,7 @@ export default function WellEditPage() {
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-white mb-1 block">Longitude*</label>
+              <label className="text-xs text-white mb-1 block">{t('well.longitude')}*</label>
               <input
                 type="text"
                 inputMode="decimal"
@@ -492,9 +490,9 @@ export default function WellEditPage() {
             className="w-full bg-surface-header border border-white/50 rounded-lg p-4 flex items-center justify-between"
           >
             <div>
-              <h3 className="text-white font-medium text-sm">Allocations</h3>
+              <h3 className="text-white font-medium text-sm">{t('well.allocations')}</h3>
               <p className="text-white/70 text-xs mt-0.5">
-                {allocations.length} {allocations.length === 1 ? 'Period' : 'Periods'}
+                {t('allocation.period', { count: allocations.length })}
               </p>
             </div>
             <div className="p-1.5 bg-white/15 rounded-md">
@@ -504,34 +502,28 @@ export default function WellEditPage() {
 
           {/* Units */}
           <SegmentedControl
-            label="Units*"
+            label={`${t('well.units')}*`}
             options={unitOptions}
             value={units}
             onChange={handleUnitsChange}
+            disabled={hasReadings}
           />
 
           {/* Multiplier */}
           <SegmentedControl
-            label="Multiplier*"
+            label={`${t('well.multiplier')}*`}
             options={multiplierOptions}
             value={multiplier}
             onChange={handleMultiplierChange}
+            disabled={hasReadings}
           />
-
-          {/* Send monthly report checkbox */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={sendMonthlyReport}
-              onChange={(e) => setSendMonthlyReport(e.target.checked)}
-              className="w-5 h-5 rounded border-white-300 text-btn-confirm-text focus:ring-white"
-            />
-            <span className="text-sm text-white">Send monthly meter reading report</span>
-          </label>
+          {hasReadings && (
+            <p className="text-white/60 text-xs -mt-1">{t('well.unitsLockedHint')}</p>
+          )}
 
           {/* Battery State */}
           <div>
-            <label className="text-xs text-white mb-1 block">Battery State*</label>
+            <label className="text-xs text-white mb-1 block">{t('well.batteryState')}*</label>
             <select
               value={batteryState}
               onChange={(e) => setBatteryState(e.target.value as EquipmentState)}
@@ -547,7 +539,7 @@ export default function WellEditPage() {
 
           {/* Pump State */}
           <div>
-            <label className="text-xs text-white mb-1 block">Pump State*</label>
+            <label className="text-xs text-white mb-1 block">{t('well.pumpState')}*</label>
             <select
               value={pumpState}
               onChange={(e) => setPumpState(e.target.value as EquipmentState)}
@@ -563,7 +555,7 @@ export default function WellEditPage() {
 
           {/* Meter Status */}
           <div>
-            <label className="text-xs text-white mb-1 block">Meter Status*</label>
+            <label className="text-xs text-white mb-1 block">{t('well.meterStatus')}*</label>
             <select
               value={meterStatus}
               onChange={(e) => setMeterStatus(e.target.value as EquipmentState)}
@@ -582,7 +574,7 @@ export default function WellEditPage() {
       {/* Footer buttons */}
       <div className="flex justify-between items-center px-4 py-4 border-0 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <button type="button" onClick={handleCancel} className="px-6 py-2.5 text-white font-medium">
-          Cancel
+          {t('well.cancel')}
         </button>
         <button
           type="button"
@@ -595,7 +587,7 @@ export default function WellEditPage() {
           ) : (
             <CheckIcon className="w-5 h-5" />
           )}
-          Save
+          {t('well.save')}
         </button>
       </div>
 
@@ -607,7 +599,7 @@ export default function WellEditPage() {
           className="w-full py-3 text-red-400 font-medium flex items-center justify-center gap-2"
         >
           <TrashIcon className="w-5 h-5" />
-          Delete Well
+          {t('well.deleteWell')}
         </button>
       </div>
 
@@ -616,10 +608,10 @@ export default function WellEditPage() {
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteWell}
-        title="Delete Well"
+        title={t('well.deleteWell')}
         description={<>Delete <span className="text-white font-medium">{well.name}</span> and all its readings and allocations? This cannot be undone.</>}
-        confirmText="Delete"
-        confirmLoadingText="Deleting..."
+        confirmText={t('confirm.delete')}
+        confirmLoadingText={t('confirm.deleting')}
         loading={deleteLoading}
       />
     </div>

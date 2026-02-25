@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { PlusIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../hooks/useTranslation';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 import WellDetailHeader from './WellDetailHeader';
 import WellUsageGauge from './WellUsageGauge';
@@ -12,17 +13,17 @@ import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { calculateUsageAf } from '../lib/usage-calculation';
 import type { WellWithReading } from '../hooks/useWells';
 
-function formatRelativeDate(isoDate: string): string {
+function formatRelativeDate(isoDate: string, t: (key: string, params?: Record<string, string | number>) => string, locale: string): string {
   const date = new Date(isoDate);
   const now = new Date();
-  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const timeStr = date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return `Today at ${timeStr}`;
-  if (diffDays === 1) return `Yesterday at ${timeStr}`;
-  const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${monthDay} at ${timeStr}`;
+  if (diffDays === 0) return t('time.todayAt', { time: timeStr });
+  if (diffDays === 1) return t('time.yesterdayAt', { time: timeStr });
+  const monthDay = date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+  return t('time.dateAt', { date: monthDay, time: timeStr });
 }
 
 interface WellDetailSheetProps {
@@ -40,6 +41,7 @@ export default function WellDetailSheet({
   onEdit,
   onNewReading,
 }: WellDetailSheetProps) {
+  const { t, locale } = useTranslation();
   const { allocations } = useWellAllocations(well?.id ?? null);
   const { readings } = useWellReadingsWithNames(well?.id ?? null);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
@@ -129,7 +131,7 @@ export default function WellDetailSheet({
               {/* Last Updated — between header and gauge */}
               {lastReadingDate && (
                 <p className="text-[#d5e8bd]/70 text-xs text-center py-2 bg-surface-dark">
-                  Last Updated {formatRelativeDate(lastReadingDate)}
+                  {t('wellDetail.lastUpdated', { date: formatRelativeDate(lastReadingDate, t, locale) })}
                 </p>
               )}
 
@@ -162,7 +164,7 @@ export default function WellDetailSheet({
             className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
           >
             <PlusIcon className="w-5 h-5" />
-            New Reading
+            {t('reading.newReading')}
           </button>
         </div>
       </div>

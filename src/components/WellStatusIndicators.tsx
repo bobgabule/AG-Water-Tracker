@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface WellStatusIndicatorsProps {
   pumpState: string;
@@ -16,10 +17,11 @@ const WellStatusIndicators = React.memo(function WellStatusIndicators({
   batteryState,
   meterStatus,
 }: WellStatusIndicatorsProps) {
+  const { t } = useTranslation();
   const items = [
-    { label: 'Pump', healthy: isHealthy(pumpState) },
-    { label: 'Battery', healthy: isHealthy(batteryState) },
-    { label: 'Meter Status', healthy: isHealthy(meterStatus) },
+    { label: t('wellDetail.pump'), healthy: isHealthy(pumpState) },
+    { label: t('wellDetail.battery'), healthy: isHealthy(batteryState) },
+    { label: t('well.meterStatus'), healthy: isHealthy(meterStatus) },
   ];
 
   return (

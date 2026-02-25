@@ -1,6 +1,7 @@
 import React from 'react';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import { FlagIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../hooks/useTranslation';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 
 interface WellReadingsListProps {
@@ -9,15 +10,15 @@ interface WellReadingsListProps {
   onReadingClick?: (reading: ReadingWithName) => void;
 }
 
-/** Map unit code to column header label */
-function getColumnHeader(unitLabel: string): string {
+/** Map unit code to translated column header label */
+function getColumnHeader(unitLabel: string, t: (key: string) => string): string {
   switch (unitLabel) {
     case 'GAL':
-      return 'GALLONS';
+      return t('well.unitType.galHeader');
     case 'CF':
-      return 'CUBIC FEET';
+      return t('well.unitType.cfHeader');
     case 'AF':
-      return 'ACRE-FEET';
+      return t('well.unitType.afHeader');
     default:
       return unitLabel.toUpperCase();
   }
@@ -28,35 +29,36 @@ const WellReadingsList = React.memo(function WellReadingsList({
   unitLabel,
   onReadingClick,
 }: WellReadingsListProps) {
-  const columnHeader = getColumnHeader(unitLabel);
+  const { t, locale } = useTranslation();
+  const columnHeader = getColumnHeader(unitLabel, t);
 
   return (
     <div className="px-4 pt-5 pb-4">
-      <h2 className="text-2xl font-bold text-white mb-4">READINGS</h2>
+      <h2 className="text-2xl font-bold text-white mb-4">{t('reading.title')}</h2>
 
       {readings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
           <ClipboardDocumentListIcon className="w-10 h-10 text-white/30 mb-2" />
-          <p className="text-sm text-white/60">No available readings</p>
+          <p className="text-sm text-white/60">{t('reading.noReadings')}</p>
         </div>
       ) : (
         <>
           {/* Table header */}
           <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-1 bg-[#4b5b37] rounded">
-            <span>Date</span>
+            <span>{t('reading.dateHeader')}</span>
             <span>{columnHeader}</span>
-            <span>User / Time</span>
+            <span>{t('reading.userTimeHeader')}</span>
           </div>
 
           {/* Table rows */}
           <div>
             {readings.map((reading, index) => {
               const date = new Date(reading.recordedAt);
-              const dateStr = date.toLocaleDateString('en-US', {
+              const dateStr = date.toLocaleDateString(locale, {
                 month: 'long',
                 day: 'numeric',
               });
-              const timeStr = date.toLocaleTimeString('en-US', {
+              const timeStr = date.toLocaleTimeString(locale, {
                 hour: 'numeric',
                 minute: '2-digit',
               });
