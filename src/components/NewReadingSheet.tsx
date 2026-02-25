@@ -9,6 +9,7 @@ import { usePowerSync } from '@powersync/react';
 import { useWellReadings } from '../hooks/useWellReadings';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
+import { getMultiplierValue, CONVERSION_TO_AF } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import type { WellWithReading } from '../hooks/useWells';
 
@@ -21,7 +22,7 @@ interface NewReadingSheetProps {
 }
 
 type ActiveTab = 'reading' | 'problem';
-type ReadingView = 'form' | 'similar-warning' | 'range-warning' | 'submitting';
+type ReadingView = 'form' | 'similar-warning' | 'range-warning' | 'gps-failed' | 'submitting';
 
 interface MeterProblems {
   notWorking: boolean;
@@ -41,6 +42,9 @@ interface GpsResult {
   lat: number;
   lng: number;
 }
+
+/** Threshold for similar reading warning, always in gallons */
+const SIMILAR_THRESHOLD_GALLONS = 50;
 
 function validateReadingValue(input: string): string | null {
   const trimmed = input.trim();
@@ -172,8 +176,14 @@ export default function NewReadingSheet({
     setView('submitting');
     const gps = await captureGps();
 
+    // GPS capture failed — show warning with retry option
+    if (!gps) {
+      setView('gps-failed');
+      return;
+    }
+
     // Check if out of range
-    if (gps && well.location) {
+    if (well.location) {
       const dist = getDistanceToWell(
         { lat: gps.lat, lng: gps.lng },
         {
@@ -191,6 +201,10 @@ export default function NewReadingSheet({
     await saveReading(gps);
   }, [well.location, saveReading]);
 
+  const handleSaveWithoutGps = useCallback(() => {
+    saveReading(null);
+  }, [saveReading]);
+
   const handleSubmit = useCallback(() => {
     const error = validateReadingValue(readingValue);
     if (error) {
@@ -199,12 +213,16 @@ export default function NewReadingSheet({
     }
     setValidationError(null);
 
-    // Check for similar reading
+    // Check for similar reading (threshold: 50 gallons equivalent)
     if (readings.length > 0) {
       const lastValue = parseFloat(readings[0].value);
       const currentValue = parseFloat(readingValue.trim());
       if (!isNaN(lastValue) && !isNaN(currentValue)) {
-        if (Math.abs(currentValue - lastValue) <= 5) {
+        const diff = Math.abs(currentValue - lastValue);
+        const multiplier = getMultiplierValue(well.multiplier);
+        const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
+        const diffGallons = diff * multiplier * afPerUnit * 325851;
+        if (diffGallons <= SIMILAR_THRESHOLD_GALLONS) {
           setView('similar-warning');
           return;
         }
@@ -236,7 +254,13 @@ export default function NewReadingSheet({
   );
 
   const handleProblemToggle = useCallback((key: keyof MeterProblems) => {
-    setProblems((prev) => ({ ...prev, [key]: !prev[key] }));
+    setProblems((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      // Pump Off and Dead Pump are mutually exclusive
+      if (key === 'pumpOff' && next.pumpOff) next.deadPump = false;
+      if (key === 'deadPump' && next.deadPump) next.pumpOff = false;
+      return next;
+    });
   }, []);
 
   const hasProblemsSelected = problems.notWorking || problems.batteryDead || problems.pumpOff || problems.deadPump;
@@ -369,7 +393,7 @@ export default function NewReadingSheet({
                     </h3>
                     <ul className="space-y-2 text-white/70 text-sm">
                       <li>
-                        This reading is within 5 {well.units} of the last
+                        This reading is within 50 gallons of the last
                         recorded reading
                       </li>
                       <li>Double check the meter</li>
@@ -417,6 +441,44 @@ export default function NewReadingSheet({
                         className="flex-1 py-3 bg-[#bdefda] text-[#506741] rounded-lg font-medium"
                       >
                         Continue
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {view === 'gps-failed' && (
+                  <div className="flex flex-col items-center text-center space-y-4 py-6">
+                    <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
+                    <h3 className="text-white text-xl font-bold">
+                      GPS Unavailable
+                    </h3>
+                    <ul className="space-y-2 text-white/70 text-sm">
+                      <li>Could not capture your location</li>
+                      <li>The reading will be saved without GPS data</li>
+                    </ul>
+                    <div className="flex flex-col gap-2 w-full pt-4">
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={handleGpsCaptureAndSave}
+                          className="flex-1 py-3 text-white font-medium rounded-lg"
+                        >
+                          Retry
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveWithoutGps}
+                          className="flex-1 py-3 bg-[#bdefda] text-[#506741] rounded-lg font-medium"
+                        >
+                          Save Without GPS
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleBackToForm}
+                        className="py-2 text-white/60 text-sm font-medium"
+                      >
+                        Cancel
                       </button>
                     </div>
                   </div>
