@@ -130,6 +130,8 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
           message = 'This person is already a member of your farm';
         } else if (msg.includes('already exists')) {
           message = 'An invite for this phone number already exists';
+        } else if (msg.includes('no available')) {
+          message = err.message;
         } else {
           message = err.message;
         }

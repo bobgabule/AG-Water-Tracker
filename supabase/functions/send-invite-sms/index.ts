@@ -35,8 +35,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const message = farmName
-      ? `You've been invited to join "${farmName}" on AG Water Tracker. Tap here to get started: ${APP_URL}`
-      : `You've been invited to AG Water Tracker. Tap here to get started: ${APP_URL}`;
+      ? `You've been invited to join "${farmName}" on AG Water Tracker. Sign in with this phone number at: ${APP_URL}`
+      : `You've been invited to AG Water Tracker. Sign in with this phone number at: ${APP_URL}`;
 
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
     const credentials = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
