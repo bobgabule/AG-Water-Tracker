@@ -65,7 +65,7 @@ export default function WellAllocationsPage() {
   // Form state
   const [formStartMonth, setFormStartMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, '0'));
   const [formStartYear, setFormStartYear] = useState(() => String(new Date().getFullYear()));
-  const [formEndMonth, setFormEndMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, '0'));
+  const [formEndMonth, setFormEndMonth] = useState('12');
   const [formEndYear, setFormEndYear] = useState(() => String(new Date().getFullYear()));
   const [formAllocatedAf, setFormAllocatedAf] = useState('');
   const [formStartingReading, setFormStartingReading] = useState('');
@@ -127,7 +127,7 @@ export default function WellAllocationsPage() {
     const n = new Date();
     setFormStartMonth(String(n.getMonth() + 1).padStart(2, '0'));
     setFormStartYear(String(n.getFullYear()));
-    setFormEndMonth(String(n.getMonth() + 1).padStart(2, '0'));
+    setFormEndMonth('12');
     setFormEndYear(String(n.getFullYear()));
     setFormAllocatedAf('');
     setFormStartingReading('');
