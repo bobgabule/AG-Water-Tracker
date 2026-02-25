@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 27
-Plan: 1 of 2 (27-01 complete)
-Status: Executing phase 27
-Last activity: 2026-02-25 — Phase 27 Plan 01 complete
+Plan: 2 of 2 (27-02 complete)
+Status: Phase 27 complete
+Last activity: 2026-02-25 — Phase 27 Plan 02 complete
 
-Progress: Phase 27: █████░░░░░ 50% (1/2 plans)
+Progress: Phase 27: ██████████ 100% (2/2 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 58 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 1 P27)
+- Total plans completed: 59 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -46,6 +46,7 @@ Progress: Phase 27: █████░░░░░ 50% (1/2 plans)
 | Phase 28 P01 | 3min | 4 | 2 |
 | Phase 29 P01 | 3min | 3 | 3 |
 | Phase 27 P01 | 6min | 2 | 12 |
+| Phase 27 P02 | 2min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 26-01: Phone input and submit button both disabled when offline -- prevents form interaction entirely
 - Phase 27-01: navigate(-1) cannot accept viewTransition option in React Router v7 numeric overload
 - Phase 27-01: PhonePage.tsx included in viewTransition updates for full codebase coverage
+- Phase 27-02: Sync failure handling moved entirely to PowerSync connector -- DashboardPage only handles rare local INSERT errors
+- Phase 27-02: Removed saveError state and error banner in favor of unified toast notification system
+- Phase 27-02: wellFailureNotified flag ensures only one toast per transaction batch even with multiple well ops
 
 ### Pending Todos (manual steps)
 
@@ -90,6 +94,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 27-01-PLAN.md
+Stopped at: Completed 27-02-PLAN.md
 Resume file: —
-Next action: Execute 27-02-PLAN.md
+Next action: Phase 27 complete — proceed to next phase

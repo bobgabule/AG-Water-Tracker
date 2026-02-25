@@ -41,7 +41,7 @@ Requirements for v4.0 Performance & Perceived Speed. Each maps to roadmap phases
 
 - [x] **NAV-01**: useSubscriptionTier performs a single JOIN query instead of two sequential queries
 - [x] **NAV-02**: Page transitions use View Transitions API for smooth cross-fade (graceful fallback on unsupported browsers)
-- [ ] **NAV-03**: Well creation shows optimistically on the map immediately, before PowerSync sync completes
+- [x] **NAV-03**: Well creation shows optimistically on the map immediately, before PowerSync sync completes
 
 ## v4.1 Requirements
 
@@ -128,7 +128,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SW-03 | Phase 26 | Complete |
 | NAV-01 | Phase 27 | Complete |
 | NAV-02 | Phase 27 | Complete |
-| NAV-03 | Phase 27 | Pending |
+| NAV-03 | Phase 27 | Complete |
 | READ-F01 | Phase 28 | Complete |
 | READ-F02 | Phase 28 | Complete |
 | READ-F03 | Phase 28 | Complete |
