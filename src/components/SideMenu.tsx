@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import {
   XMarkIcon,
@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../lib/AuthProvider';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserRole } from '../hooks/useUserRole';
+import { useTranslation } from '../hooks/useTranslation';
 import { hasPermission, type Action } from '../lib/permissions';
 import { prefetchRoute, prefetchRouteDebounced, prefetchOnMenuOpen } from '../lib/routePrefetch';
 
@@ -30,21 +31,22 @@ interface NavItem {
   requiredAction?: Action;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Map', icon: MapIcon, path: '/' },
-  { label: 'Well List', icon: ListBulletIcon, path: '/wells' },
-  { label: 'Reports', icon: ChartBarIcon, path: '/reports' },
-  { label: 'Users', icon: UsersIcon, path: '/users', requiredAction: 'manage_users' },
-  { label: 'Subscription', icon: CreditCardIcon, path: '/subscription', requiredAction: 'manage_farm' },
-  { label: 'Language', icon: GlobeAltIcon, path: '/language' },
-  { label: 'Settings', icon: Cog6ToothIcon, path: '/settings' },
-];
-
 export default function SideMenu({ open, onClose }: SideMenuProps) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const userProfile = useUserProfile();
   const role = useUserRole();
+  const { t } = useTranslation();
+
+  const navItems: NavItem[] = useMemo(() => [
+    { label: t('nav.map'), icon: MapIcon, path: '/' },
+    { label: t('nav.wellList'), icon: ListBulletIcon, path: '/wells' },
+    { label: t('nav.reports'), icon: ChartBarIcon, path: '/reports', requiredAction: 'manage_reports' as Action },
+    { label: t('nav.users'), icon: UsersIcon, path: '/users', requiredAction: 'manage_users' as Action },
+    { label: t('nav.subscription'), icon: CreditCardIcon, path: '/subscription', requiredAction: 'manage_farm' as Action },
+    { label: t('nav.language'), icon: GlobeAltIcon, path: '/language' },
+    { label: t('nav.settings'), icon: Cog6ToothIcon, path: '/settings' },
+  ], [t]);
 
   const visibleItems = navItems.filter(
     (item) => !item.requiredAction || hasPermission(role, item.requiredAction)
@@ -69,7 +71,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
       onClose();
       navigate('/auth/phone', { viewTransition: true });
     } catch {
-      setSignOutError('Failed to sign out. Please try again.');
+      setSignOutError(t('error.signOutFailed'));
     }
   };
 
@@ -87,11 +89,11 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
           {/* Header */}
           <div className="bg-primary p-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-bold text-lg">Menu</h2>
+              <h2 className="text-white font-bold text-lg">{t('nav.menu')}</h2>
               <button
                 onClick={onClose}
                 className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Close menu"
+                aria-label={t('nav.closeMenu')}
               >
                 <XMarkIcon className="h-6 w-6 text-white" />
               </button>
@@ -134,7 +136,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
               className="w-full flex items-center gap-3 px-5 py-3 text-status-danger hover:bg-red-50 rounded-lg transition-colors text-left"
             >
               <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
-              <span>Logout</span>
+              <span>{t('nav.logout')}</span>
             </button>
           </div>
         </DialogPanel>

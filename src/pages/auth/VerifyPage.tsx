@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { useTranslation } from '../../hooks/useTranslation';
 import AuthLayout from '../../components/auth/AuthLayout';
 import OtpInput from '../../components/auth/OtpInput';
 import { formatPhoneForDisplay } from '../../lib/formatPhone';
@@ -19,6 +20,7 @@ const RESEND_COOLDOWN = 30;
 export default function VerifyPage() {
   const { verifyOtp, sendOtp, refreshAuthStatus, user, isAuthReady, authStatus } = useAuth();
   const isOnline = useOnlineStatus();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -88,7 +90,7 @@ export default function VerifyPage() {
 
       // Connectivity guard -- verification requires internet
       if (!isOnline) {
-        setError('No internet connection. Connect to the internet to verify your code.');
+        setError(t('auth.noInternetVerify'));
         return;
       }
 
@@ -102,10 +104,10 @@ export default function VerifyPage() {
         navigate(status?.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
       } catch (err) {
         if (!navigator.onLine) {
-          setError('No internet connection. Connect to the internet to verify your code.');
+          setError(t('auth.noInternetVerify'));
         } else {
           const message =
-            err instanceof Error ? err.message : 'Invalid verification code';
+            err instanceof Error ? err.message : t('auth.invalidCode');
           setError(message);
         }
         // Clear code and focus first input on error
@@ -115,7 +117,7 @@ export default function VerifyPage() {
         verifyingRef.current = false;
       }
     },
-    [phone, isOnline, verifyOtp, refreshAuthStatus, navigate]
+    [phone, isOnline, verifyOtp, refreshAuthStatus, navigate, t]
   );
 
   // Auto-submit when all 4 digits are entered
@@ -132,7 +134,7 @@ export default function VerifyPage() {
 
     // Connectivity guard -- resend requires internet
     if (!isOnline) {
-      setError('No internet connection. Connect to the internet to resend the code.');
+      setError(t('auth.noInternetResend'));
       return;
     }
 
@@ -144,14 +146,14 @@ export default function VerifyPage() {
       setCode(['', '', '', '']);
     } catch (err) {
       if (!navigator.onLine) {
-        setError('No internet connection. Connect to the internet to resend the code.');
+        setError(t('auth.noInternetResend'));
       } else {
         const message =
-          err instanceof Error ? err.message : 'Failed to resend code';
+          err instanceof Error ? err.message : t('auth.failedResend');
         setError(message);
       }
     }
-  }, [phone, isOnline, resendCooldown, sendOtp]);
+  }, [phone, isOnline, resendCooldown, sendOtp, t]);
 
   // Handle manual submit (for accessibility / button click)
   const handleSubmit = useCallback(() => {
@@ -182,13 +184,10 @@ export default function VerifyPage() {
   return (
     <AuthLayout>
       <h1 className="text-white text-2xl text-center font-semibold block mb-2 mt-5">
-        Verify your phone
+        {t('auth.verifyPhone')}
       </h1>
       <p className="text-gray-300 text-sm text-center mb-8">
-        We sent a code to{' '}
-        <span className="text-white font-medium">
-          {formatPhoneForDisplay(phone)}
-        </span>
+        {t('auth.codeSentTo', { phone: formatPhoneForDisplay(phone) })}
       </p>
 
       {/* Error message */}
@@ -220,24 +219,24 @@ export default function VerifyPage() {
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-            Verifying...
+            {t('auth.verifying')}
           </span>
         ) : (
-          'Verify'
+          t('auth.verify')
         )}
       </button>
 
       {/* Resend and back links */}
       <div className="text-center space-y-3">
         <p className="text-gray-400 text-sm">
-          {"Didn't receive the code? "}
+          {t('auth.didntReceive')}{' '}
           <button
             type="button"
             onClick={handleResend}
             disabled={resendCooldown > 0}
             className="text-green-400 hover:text-green-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+            {resendCooldown > 0 ? t('auth.resendIn', { count: resendCooldown }) : t('auth.resendCode')}
           </button>
         </p>
 
@@ -246,7 +245,7 @@ export default function VerifyPage() {
           onClick={handleBack}
           className="text-green-400 hover:text-green-300 text-sm font-medium transition-colors"
         >
-          Change phone number
+          {t('auth.changePhone')}
         </button>
       </div>
     </AuthLayout>

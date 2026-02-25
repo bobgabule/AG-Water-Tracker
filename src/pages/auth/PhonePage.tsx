@@ -3,6 +3,7 @@ import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { useTranslation } from '../../hooks/useTranslation';
 import AuthLayout from '../../components/auth/AuthLayout';
 
 /**
@@ -23,6 +24,7 @@ function formatPhoneDisplay(value: string): string {
 export default function PhonePage() {
   const { session, authStatus, sendOtp, isAuthReady } = useAuth();
   const isOnline = useOnlineStatus();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [phone, setPhone] = useState('');
@@ -69,13 +71,13 @@ export default function PhonePage() {
       // Validate 10 digits
       const cleanPhone = phone.replace(/\D/g, '');
       if (cleanPhone.length !== 10) {
-        setError('Please enter a valid 10-digit phone number');
+        setError(t('auth.invalidPhone'));
         return;
       }
 
       // Connectivity guard -- OTP requires internet
       if (!isOnline) {
-        setError('No internet connection. Connect to the internet to sign in.');
+        setError(t('auth.noInternet'));
         return;
       }
 
@@ -87,17 +89,17 @@ export default function PhonePage() {
         navigate('/auth/verify', { state: { phone: `+1${cleanPhone}` }, viewTransition: true });
       } catch (err) {
         if (!navigator.onLine) {
-          setError('No internet connection. Connect to the internet to sign in.');
+          setError(t('auth.noInternet'));
         } else {
           const message =
-            err instanceof Error ? err.message : 'Failed to send verification code';
+            err instanceof Error ? err.message : t('auth.failedSendCode');
           setError(message);
         }
       } finally {
         setLoading(false);
       }
     },
-    [phone, isOnline, sendOtp, navigate]
+    [phone, isOnline, sendOtp, navigate, t]
   );
 
   // Show loading spinner while auth is initializing
@@ -114,7 +116,7 @@ export default function PhonePage() {
   return (
     <AuthLayout>
       <h1 className="text-white text-2xl text-center font-semibold block py-4 mb-4">
-        Sign In
+        {t('auth.signIn')}
       </h1>
 
       {showBanner && (
@@ -124,7 +126,7 @@ export default function PhonePage() {
           }`}
           role="alert"
         >
-          You're offline — connect to sign in
+          {t('auth.offlineBanner')}
         </div>
       )}
 
@@ -138,7 +140,7 @@ export default function PhonePage() {
 
         {/* Phone input label */}
         <label htmlFor="phone" className="block text-white text-sm mb-2">
-          Phone Number
+          {t('auth.phoneNumber')}
         </label>
 
         {/* Phone input with +1 prefix */}
@@ -167,10 +169,10 @@ export default function PhonePage() {
           {loading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-              Sending...
+              {t('auth.sending')}
             </span>
           ) : (
-            'Send Code'
+            t('auth.sendCode')
           )}
         </button>
       </form>
