@@ -147,8 +147,6 @@ created_by UUID
 
 **Atomic RPCs**:
 - `create_farm_and_membership(farm_name, whim_number)` → UUID
-- `join_farm_with_code(code)` → UUID
-- `create_invite_code(farm_id, role, expires_days, max_uses)` → TEXT
 - `get_onboarding_status()` → JSON
 
 ### 3. Components
