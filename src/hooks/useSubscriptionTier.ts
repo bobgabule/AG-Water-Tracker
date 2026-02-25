@@ -6,10 +6,6 @@ import { useActiveFarm } from './useActiveFarm';
 // Types
 // ---------------------------------------------------------------------------
 
-interface FarmTierRow {
-  subscription_tier: string;
-}
-
 interface TierRow {
   id: string;
   display_name: string;
@@ -38,38 +34,24 @@ export interface SubscriptionTierInfo {
 /**
  * Returns the current farm's subscription tier limits from PowerSync.
  *
- * Two-step query:
- * 1. Read the farm's `subscription_tier` slug from the synced farms table
- * 2. Look up that slug in the synced `subscription_tiers` table
+ * Single JOIN query: reads the farm's tier slug and looks up the tier details
+ * in one round-trip to the local SQLite database.
  *
  * Returns `null` while loading or if no farm is available.
  */
 export function useSubscriptionTier(): SubscriptionTierInfo | null {
   const { farmId } = useActiveFarm();
 
-  // Step 1: Get farm's tier slug
-  const farmQuery = farmId
-    ? `SELECT subscription_tier FROM farms WHERE id = ?`
-    : 'SELECT NULL WHERE 0';
-
-  const { data: farmData } = useQuery<FarmTierRow>(
-    farmQuery,
-    farmId ? [farmId] : []
-  );
-
-  const tierSlug = useMemo(
-    () => farmData?.[0]?.subscription_tier ?? null,
-    [farmData]
-  );
-
-  // Step 2: Look up tier limits (id = slug via sync rules)
-  const tierQuery = tierSlug
-    ? `SELECT id, display_name, max_admins, max_meter_checkers, max_wells FROM subscription_tiers WHERE id = ?`
+  const query = farmId
+    ? `SELECT st.id, st.display_name, st.max_admins, st.max_meter_checkers, st.max_wells
+       FROM farms f
+       JOIN subscription_tiers st ON f.subscription_tier = st.id
+       WHERE f.id = ?`
     : 'SELECT NULL WHERE 0';
 
   const { data: tierData } = useQuery<TierRow>(
-    tierQuery,
-    tierSlug ? [tierSlug] : []
+    query,
+    farmId ? [farmId] : []
   );
 
   return useMemo(() => {
