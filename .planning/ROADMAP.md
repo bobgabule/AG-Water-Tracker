@@ -363,12 +363,22 @@ Plans:
 
 ### Phase 31: Simplify invite user flow with seat limits
 
-**Goal:** [To be planned]
+**Goal:** Simplify the invite user flow by adding server-side seat limit enforcement, supporting future per-farm add-on seats, fixing a phone format bug, and improving SMS/UX messaging
 **Depends on:** Phase 30
-**Plans:** 1/1 plans complete
+**Requirements:** TIER-D1
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 31 to break down)
+- [ ] 31-01-PLAN.md — Server-side seat enforcement & schema (migration 039)
+- [ ] 31-02-PLAN.md — Frontend & edge function updates (PowerSync schema, seat usage hook, SMS, UX)
+
+**Success Criteria** (what must be TRUE):
+  1. Inviting a user when the role's seat limit is reached returns a descriptive server error
+  2. Phone format mismatch no longer causes duplicate member check to miss existing members
+  3. Farms have extra_admin_seats and extra_meter_checker_seats columns for future add-on seats
+  4. SMS invite message instructs user to sign in with their phone number
+  5. No-subscription page shows helpful "No Farm Access" heading with guidance text
+  6. `npx tsc -b --noEmit` passes with zero errors
 
 ### Phase 32: Unified Design System and Theme Colors
 **Goal**: Every color in the app comes from a semantic @theme token and shared UI components replace copy-pasted button/dialog patterns -- the app looks pixel-identical but all styling is maintainable through a single source of truth
