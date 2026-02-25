@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 30 — Drop Dead Invite Code
+**Current focus:** Phase 32 — Unified Design System and Theme Colors
 
 ## Current Position
 
-Phase: 30
-Plan: 1 of 1 (30-01 complete)
-Status: Phase 30 complete
-Last activity: 2026-02-25 — Phase 30 Plan 01 complete
+Phase: 32
+Plan: 1 of 3 (32-01 complete)
+Status: Executing Phase 32
+Last activity: 2026-02-25 — Phase 32 Plan 01 complete
 
-Progress: Phase 30: ██████████ 100% (1/1 plans)
+Progress: Phase 32: ███░░░░░░░ 33% (1/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 60 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30)
+- Total plans completed: 61 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 1 P32)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -48,6 +48,7 @@ Progress: Phase 30: ██████████ 100% (1/1 plans)
 | Phase 27 P01 | 6min | 2 | 12 |
 | Phase 27 P02 | 2min | 2 | 2 |
 | Phase 30 P01 | 2min | 2 | 2 |
+| Phase 32 P01 | 2min | 2 | 1 |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 27-02: Removed saveError state and error banner in favor of unified toast notification system
 - Phase 27-02: wellFailureNotified flag ensures only one toast per transaction batch even with multiple well ops
 - Phase 30-01: Used DROP FUNCTION IF EXISTS for idempotent, safe-to-rerun migration
+- Phase 32-01: All color tokens are additive -- no existing tokens renamed or removed
+- Phase 32-01: Input utility classes use @apply for Tailwind composition
 
 ### Pending Todos (manual steps)
 
@@ -97,6 +100,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 30-01-PLAN.md
+Stopped at: Completed 32-01-PLAN.md
 Resume file: —
-Next action: Phase 30 complete — proceed to Phase 31
+Next action: Continue Phase 32 — execute 32-02-PLAN.md
