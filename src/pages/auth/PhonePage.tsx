@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../lib/AuthProvider';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
-import { resolveNextRoute } from '../../lib/resolveNextRoute';
 import AuthLayout from '../../components/auth/AuthLayout';
 
 /**
@@ -22,20 +21,37 @@ function formatPhoneDisplay(value: string): string {
  * If already logged in, redirects to the appropriate route.
  */
 export default function PhonePage() {
-  const { session, onboardingStatus, sendOtp, isAuthReady } = useAuth();
+  const { session, authStatus, sendOtp, isAuthReady } = useAuth();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
 
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showBanner, setShowBanner] = useState(!isOnline);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // If already logged in, redirect to the appropriate route
+  // Track offline state with delayed hide for fade-out animation
   useEffect(() => {
-    if (isAuthReady && session && onboardingStatus) {
-      navigate(resolveNextRoute(onboardingStatus), { replace: true });
+    if (!isOnline) {
+      // Show immediately when going offline
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      setShowBanner(true);
+    } else if (showBanner) {
+      // Delay hiding so CSS fade-out can complete
+      fadeTimerRef.current = setTimeout(() => setShowBanner(false), 500);
     }
-  }, [isAuthReady, session, onboardingStatus, navigate]);
+    return () => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    };
+  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps -- showBanner intentionally excluded to avoid re-triggering
+
+  // If already logged in, redirect to dashboard or no-subscription
+  useEffect(() => {
+    if (isAuthReady && session && authStatus) {
+      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true });
+    }
+  }, [isAuthReady, session, authStatus, navigate]);
 
   // Handle phone input change - extract only digits
   const handlePhoneChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +117,17 @@ export default function PhonePage() {
         Sign In
       </h1>
 
+      {showBanner && (
+        <div
+          className={`bg-amber-600/80 border border-amber-400/50 text-amber-50 text-sm rounded-lg p-3 mb-4 text-center transition-all duration-500 ${
+            isOnline ? 'opacity-0 max-h-0 mb-0 p-0 border-0 overflow-hidden' : 'opacity-100 max-h-20'
+          }`}
+          role="alert"
+        >
+          You're offline — connect to sign in
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         {/* Error message */}
         {error && (
@@ -127,14 +154,14 @@ export default function PhonePage() {
             inputMode="numeric"
             autoComplete="tel-national"
             autoFocus
-            disabled={loading}
+            disabled={loading || !isOnline}
           />
         </div>
 
         {/* Submit button */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !isOnline}
           className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? (
