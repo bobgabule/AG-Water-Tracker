@@ -7,14 +7,14 @@ import { useActiveFarmStore } from '../stores/activeFarmStore';
  *
  * For super_admin users with an active farm override, returns the override
  * farm. For all other users (or super_admin without override), returns the
- * user's own farm from onboarding status.
+ * user's own farm from auth status.
  */
 export function useActiveFarm(): {
   farmId: string | null;
   farmName: string | null;
   isOverride: boolean;
 } {
-  const { onboardingStatus } = useAuth();
+  const { authStatus } = useAuth();
   const role = useUserRole();
   const overrideFarmId = useActiveFarmStore((s) => s.overrideFarmId);
   const overrideFarmName = useActiveFarmStore((s) => s.overrideFarmName);
@@ -24,8 +24,8 @@ export function useActiveFarm(): {
   }
 
   return {
-    farmId: onboardingStatus?.farmId ?? null,
-    farmName: onboardingStatus?.farmName ?? null,
+    farmId: authStatus?.farmId ?? null,
+    farmName: authStatus?.farmName ?? null,
     isOverride: false,
   };
 }
