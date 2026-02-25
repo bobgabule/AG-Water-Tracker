@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { ListBulletIcon, PlusIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useWells } from '../hooks/useWells';
 import { useAuth } from '../lib/AuthProvider';
 import { useActiveFarm } from '../hooks/useActiveFarm';
@@ -54,15 +54,9 @@ export default function DashboardPage() {
   const handleMapReset = useCallback(() => setMapKey(k => k + 1), []);
 
   // Save state
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
-  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const showToast = useToastStore((s) => s.show);
-
-  useEffect(() => {
-    return () => clearTimeout(errorTimeoutRef.current);
-  }, []);
 
   // Well limit modal state
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -156,15 +150,12 @@ export default function DashboardPage() {
         ]
       );
 
-      setSaveError(null);
       setCurrentStep('closed');
       setPickedLocation(null);
       showToast(`"${wellData.name}" added successfully`);
     } catch (error) {
       debugError('Dashboard', 'Failed to save well:', error);
-      clearTimeout(errorTimeoutRef.current);
-      setSaveError('Failed to save well. Please try again.');
-      errorTimeoutRef.current = setTimeout(() => setSaveError(null), 5000);
+      showToast('Failed to save well. Please try again.', 'error');
     } finally {
       isSavingRef.current = false;
       setIsSaving(false);
@@ -197,23 +188,6 @@ export default function DashboardPage() {
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pt-[env(safe-area-inset-top)]">
         <SyncStatusBanner />
       </div>
-
-      {/* Save error notification */}
-      {saveError && (
-        <div className="absolute bottom-24 left-4 right-4 z-30 flex justify-center pb-[env(safe-area-inset-bottom)]">
-          <div role="alert" className="px-4 py-2.5 rounded-xl bg-red-500/90 backdrop-blur-sm text-white text-sm font-medium shadow-lg flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
-            {saveError}
-            <button
-              onClick={() => setSaveError(null)}
-              className="ml-2 p-0.5 rounded-full hover:bg-white/20 transition-colors"
-              aria-label="Dismiss error"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Floating action buttons */}
       <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-between pb-[env(safe-area-inset-bottom)]">
