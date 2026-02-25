@@ -7,7 +7,7 @@
 - v2.0 Meter Readings & Allocations -- Phases 12-16 (shipped 2026-02-21)
 - v3.0 Subscriptions & Permissions -- Phases 17-22 (shipped 2026-02-23)
 - v4.0 Performance & Perceived Speed -- Phases 23-27 (partial: 23-26 shipped, 27 deferred)
-- v4.1 Readings & Allocations Fixes -- Phases 28-29 (in progress)
+- v4.1 Readings & Allocations Fixes -- Phases 28-29 (shipped 2026-02-25)
 
 ## Phases
 
@@ -340,5 +340,5 @@ Plans:
 | 25. Asset Optimization | 1/1 | Complete    | 2026-02-24 | — |
 | 26. Service Worker Intelligence | v4.0 | Complete    | 2026-02-25 | 2026-02-25 |
 | 27. Query & Navigation Fluidity | v4.0 | 0/? | Deferred | — |
-| 28. Reading & Validation Fixes | v4.1 | 0/? | Not Started | — |
-| 29. Well Detail & Allocation Corrections | v4.1 | 0/? | Not Started | — |
+| 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
+| 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
