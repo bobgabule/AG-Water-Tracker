@@ -297,7 +297,7 @@ export default function WellAllocationsPage() {
 
   // Back navigation
   const handleBack = useCallback(() => {
-    navigate(`/wells/${id}/edit`);
+    navigate(`/wells/${id}/edit`, { viewTransition: true });
   }, [navigate, id]);
 
   // Find selected allocation for delete dialog label

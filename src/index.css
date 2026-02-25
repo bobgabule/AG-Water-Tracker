@@ -30,3 +30,9 @@
     animation: shimmer 1.5s infinite;
   }
 }
+
+/* View Transitions API — 150ms cross-fade for page navigations */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+}

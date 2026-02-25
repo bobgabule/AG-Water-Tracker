@@ -118,7 +118,7 @@ export default function WellEditPage() {
   // Redirect to home if well not found after data loads
   useEffect(() => {
     if (wells.length > 0 && !well && initializedRef.current === false) {
-      navigate('/', { replace: true });
+      navigate('/', { replace: true, viewTransition: true });
     }
   }, [wells, well, navigate]);
 
@@ -230,7 +230,7 @@ export default function WellEditPage() {
       pumpState,
       meterStatus,
     });
-    navigate(`/wells/${id}/allocations`);
+    navigate(`/wells/${id}/allocations`, { viewTransition: true });
   }, [
     id,
     name,
@@ -305,7 +305,7 @@ export default function WellEditPage() {
       );
       useWellEditDraftStore.getState().clearDraft();
       useToastStore.getState().show('Well updated');
-      navigate(`/wells/${id}`);
+      navigate(`/wells/${id}`, { viewTransition: true });
     } catch {
       useToastStore.getState().show('Failed to update well', 'error');
     } finally {
@@ -340,7 +340,7 @@ export default function WellEditPage() {
       });
       useWellEditDraftStore.getState().clearDraft();
       useToastStore.getState().show('Well deleted');
-      navigate('/');
+      navigate('/', { viewTransition: true });
     } catch {
       useToastStore.getState().show('Failed to delete well', 'error');
     } finally {
@@ -351,12 +351,12 @@ export default function WellEditPage() {
 
   // Back navigation handler
   const handleBack = useCallback(() => {
-    navigate(`/wells/${id}`);
+    navigate(`/wells/${id}`, { viewTransition: true });
   }, [navigate, id]);
 
   // Cancel handler
   const handleCancel = useCallback(() => {
-    navigate(`/wells/${id}`);
+    navigate(`/wells/${id}`, { viewTransition: true });
   }, [navigate, id]);
 
   const coordinateError = getCoordinateValidationError(latitude, longitude);

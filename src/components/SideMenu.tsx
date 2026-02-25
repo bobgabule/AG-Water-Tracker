@@ -57,7 +57,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
 
   const handleNav = (path: string) => {
     onClose();
-    navigate(path);
+    navigate(path, { viewTransition: true });
   };
 
   const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
       setSignOutError(null);
       await signOut();
       onClose();
-      navigate('/auth/phone');
+      navigate('/auth/phone', { viewTransition: true });
     } catch {
       setSignOutError('Failed to sign out. Please try again.');
     }

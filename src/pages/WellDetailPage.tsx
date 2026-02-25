@@ -36,9 +36,9 @@ export default function WellDetailPage() {
     [wells, id],
   );
 
-  const handleClose = useCallback(() => navigate('/'), [navigate]);
+  const handleClose = useCallback(() => navigate('/', { viewTransition: true }), [navigate]);
   const handleEdit = useCallback(
-    () => id && navigate(`/wells/${id}/edit`),
+    () => id && navigate(`/wells/${id}/edit`, { viewTransition: true }),
     [navigate, id],
   );
   const handleNewReading = useCallback(() => setReadingSheetOpen(true), []);
