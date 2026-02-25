@@ -8,6 +8,7 @@ import { useAppSetting } from '../hooks/useAppSetting';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface AddUserBottomSheetProps {
   open: boolean;
@@ -24,6 +25,7 @@ function formatPhoneDisplay(digits: string): string {
 }
 
 export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
+  const { t } = useTranslation();
   const { farmId, farmName } = useActiveFarm();
 
   const [firstName, setFirstName] = useState('');
@@ -76,15 +78,15 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     if (!farmId) return;
 
     if (!firstName.trim()) {
-      setError('First name is required');
+      setError(t('user.firstNameRequired'));
       return;
     }
     if (!lastName.trim()) {
-      setError('Last name is required');
+      setError(t('user.lastNameRequired'));
       return;
     }
     if (phoneDigits.length !== 10) {
-      setError('Please enter a valid 10-digit phone number');
+      setError(t('user.invalidPhone'));
       return;
     }
 
@@ -123,13 +125,13 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
 
       setSuccess(true);
     } catch (err: unknown) {
-      let message = 'Failed to send invite';
+      let message = t('user.failedInvite');
       if (err instanceof Error) {
         const msg = err.message.toLowerCase();
         if (msg.includes('already a member')) {
-          message = 'This person is already a member of your farm';
+          message = t('user.alreadyMember');
         } else if (msg.includes('already exists')) {
-          message = 'An invite for this phone number already exists';
+          message = t('user.alreadyInvited');
         } else if (msg.includes('no available')) {
           message = err.message;
         } else {
@@ -154,7 +156,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     onClose();
   }, [onClose]);
 
-  const canSelectAdmin = callerRole === 'grower' || callerRole === 'super_admin';
+  const canSelectAdmin = callerRole === 'owner' || callerRole === 'super_admin';
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
@@ -170,7 +172,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
           {/* Header */}
           <div className="bg-surface-modal p-4 pt-6 flex-shrink-0">
             <h2 className="text-white font-bold text-lg tracking-wide">
-              {success ? 'INVITE SENT' : 'ADD NEW USER'}
+              {success ? t('user.inviteSent') : t('user.addNewUser')}
             </h2>
           </div>
 
@@ -180,43 +182,43 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <div className="py-6 text-center">
                 <CheckIcon className="h-12 w-12 text-green-600 mx-auto mb-3" />
                 <p className="text-white font-medium">
-                  {smsWarning ? 'User added' : 'Invite sent to'} {formatPhoneDisplay(phoneDigits)}
+                  {t('user.inviteSentTo', { type: smsWarning ? t('user.userAdded') : t('user.inviteSentLabel'), phone: formatPhoneDisplay(phoneDigits) })}
                 </p>
                 {smsWarning && (
                   <p className="text-yellow-600 text-sm mt-2">
-                    SMS could not be sent. Please notify the user manually.
+                    {t('user.smsWarning')}
                   </p>
                 )}
               </div>
             ) : !tier ? (
               <div className="py-8 text-center flex flex-col items-center justify-center">
                 <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-white font-medium">Loading plan limits...</p>
+                <p className="text-white font-medium">{t('user.loadingLimits')}</p>
               </div>
             ) : allSeatsFull ? (
               <div className="py-8 text-center">
-                <p className="text-white font-medium mb-2">All seats are filled</p>
+                <p className="text-white font-medium mb-2">{t('user.allSeatsFull')}</p>
                 <p className="text-white/70 text-sm mb-4">
-                  Your plan allows {seatUsage?.admin.limit ?? 0} admin and {seatUsage?.meter_checker.limit ?? 0} meter checkers.
+                  {t('user.seatLimitDesc', { adminLimit: String(seatUsage?.admin.limit ?? 0), mcLimit: String(seatUsage?.meter_checker.limit ?? 0) })}
                 </p>
-                {(callerRole === 'grower' || callerRole === 'super_admin') && upgradeUrl ? (
+                {(callerRole === 'owner' || callerRole === 'super_admin') && upgradeUrl ? (
                   <a
                     href={upgradeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-sm text-btn-confirm font-medium mt-2 hover:text-white transition-colors"
                   >
-                    Upgrade Plan
+                    {t('limit.upgradePlan')}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </a>
-                ) : (callerRole === 'grower' || callerRole === 'super_admin') && !upgradeUrl ? (
+                ) : (callerRole === 'owner' || callerRole === 'super_admin') && !upgradeUrl ? (
                   <span className="inline-flex items-center gap-1.5 text-sm text-btn-confirm/50 font-medium mt-2">
-                    Upgrade Plan
+                    {t('limit.upgradePlan')}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </span>
                 ) : (
                   <p className="text-yellow-300 text-sm font-medium">
-                    Contact your farm owner to upgrade
+                    {t('user.contactOwner')}
                   </p>
                 )}
               </div>
@@ -232,23 +234,23 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 {/* Name inputs */}
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-xs text-white mb-2 block">First Name*</label>
+                    <label className="text-xs text-white mb-2 block">{t('user.firstName')}*</label>
                     <input
                       type="text"
                       value={firstName}
                       onChange={handleFirstNameChange}
-                      placeholder="First name"
+                      placeholder={t('user.firstNamePlaceholder')}
                       autoComplete="given-name"
                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-white mb-2 block">Last Name*</label>
+                    <label className="text-xs text-white mb-2 block">{t('user.lastName')}*</label>
                     <input
                       type="text"
                       value={lastName}
                       onChange={handleLastNameChange}
-                      placeholder="Last name"
+                      placeholder={t('user.lastNamePlaceholder')}
                       autoComplete="family-name"
                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
@@ -257,7 +259,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
 
                 {/* Phone input */}
                 <div>
-                  <label className="text-xs text-white mb-2 block">Phone Number*</label>
+                  <label className="text-xs text-white mb-2 block">{t('user.phoneNumber')}*</label>
                   <input
                     type="tel"
                     value={formatPhoneDisplay(phoneDigits)}
@@ -265,13 +267,13 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     placeholder="(555) 123-4567"
                     className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                   />
-                  <p className="text-xs text-white mt-2">US phone number (10 digits)</p>
+                  <p className="text-xs text-white mt-2">{t('auth.usPhoneHint')}</p>
                 </div>
 
                 {/* Role selection */}
                 {canSelectAdmin ? (
                   <div>
-                    <label className="text-xs text-white mb-2 block">Role*</label>
+                    <label className="text-xs text-white mb-2 block">{t('user.role')}*</label>
                     <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                       <button
                         type="button"
@@ -282,7 +284,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
-                        Meter Checker{meterCheckerFull ? ' (Full)' : ''}
+                        {t('user.meterCheckerLabel')}{meterCheckerFull ? ` ${t('user.full')}` : ''}
                       </button>
                       <button
                         type="button"
@@ -293,15 +295,15 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
-                        Admin{adminFull ? ' (Full)' : ''}
+                        {t('user.adminLabel')}{adminFull ? ` ${t('user.full')}` : ''}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Role</label>
+                    <label className="text-xs text-gray-500 mb-1 block">{t('user.role')}</label>
                     <div className="py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
-                      Meter Checker{meterCheckerFull ? ' (Full)' : ''}
+                      {t('user.meterCheckerLabel')}{meterCheckerFull ? ` ${t('user.full')}` : ''}
                     </div>
                   </div>
                 )}
@@ -316,7 +318,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               onClick={handleClose}
               className="px-6 py-2.5 text-white font-medium"
             >
-              {success ? 'Done' : 'Cancel'}
+              {success ? t('user.done') : t('common.cancel')}
             </button>
             {!success && (
               <button
@@ -328,10 +330,10 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 {loading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending...
+                    {t('user.sending')}
                   </>
                 ) : (
-                  'Send Invite'
+                  t('user.sendInvite')
                 )}
               </button>
             )}

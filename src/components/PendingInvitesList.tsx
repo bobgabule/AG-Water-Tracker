@@ -3,6 +3,7 @@ import { useQuery } from '@powersync/react';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface FarmInviteRow {
   id: string;           // actually the invite code (mapped via sync rules: SELECT code AS id)
@@ -29,6 +30,7 @@ function formatPhone(phone: string): string {
 }
 
 export default function PendingInvitesList() {
+  const { t } = useTranslation();
   const { farmId } = useActiveFarm();
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -69,7 +71,7 @@ export default function PendingInvitesList() {
 
       if (revokeError) throw revokeError;
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to revoke invite';
+      const message = err instanceof Error ? err.message : t('invite.failedRevoke');
       setError(message);
     } finally {
       setRevokingId(null);
@@ -86,7 +88,7 @@ export default function PendingInvitesList() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-text-heading mb-3">Pending Invites</h2>
+      <h2 className="text-lg font-semibold text-text-heading mb-3">{t('invite.title')}</h2>
 
       {error && (
         <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
@@ -115,7 +117,7 @@ export default function PendingInvitesList() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className={`text-sm ${STATUS_CLASSES[invite.status]}`}>
-                  {invite.status}
+                  {invite.status === 'Joined' ? t('invite.statusJoined') : invite.status === 'Expired' ? t('invite.statusExpired') : t('invite.statusPending')}
                 </span>
                 {invite.status === 'Pending' && (
                   <button

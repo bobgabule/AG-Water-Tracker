@@ -4,8 +4,9 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
-import { hasPermission, ROLE_DISPLAY_NAMES, ROLE_BADGE_STYLES } from '../lib/permissions';
+import { hasPermission, ROLE_BADGE_STYLES, getRoleDisplayName } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
+import { useTranslation } from '../hooks/useTranslation';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 import PendingInvitesList from '../components/PendingInvitesList';
@@ -21,6 +22,7 @@ interface FarmMemberRow {
 }
 
 export default function UsersPage() {
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const { farmId } = useActiveFarm();
   const userRole = useUserRole();
@@ -80,15 +82,15 @@ export default function UsersPage() {
 
       setDeleteTarget(null);
     } catch (err: unknown) {
-      let message = 'Failed to remove member';
+      let message = t('user.failedRemove');
       if (err instanceof Error) {
         const msg = err.message.toLowerCase();
         if (msg.includes('cannot remove yourself')) {
-          message = 'You cannot remove yourself from the farm';
+          message = t('user.cannotRemoveSelf');
         } else if (msg.includes('farm owner')) {
-          message = 'Cannot remove the farm owner';
+          message = t('user.cannotRemoveOwner');
         } else if (msg.includes('not a member')) {
-          message = 'This user is no longer a member';
+          message = t('user.noLongerMember');
         } else {
           message = err.message;
         }
@@ -107,8 +109,8 @@ export default function UsersPage() {
       if (member.user_id === user?.id) return false;
       // super_admin can delete any other user
       if (userRole === 'super_admin') return true;
-      // grower can delete admin and meter_checker
-      if (userRole === 'grower') {
+      // owner can delete admin and meter_checker
+      if (userRole === 'owner') {
         return member.role === 'admin' || member.role === 'meter_checker';
       }
       // admin can only delete meter_checker
@@ -122,7 +124,7 @@ export default function UsersPage() {
     <div className="min-h-screen bg-surface-page pt-14">
       <div className="px-4 py-4">
         {/* Title */}
-        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">USERS</h1>
+        <h1 className="text-2xl font-bold text-text-heading tracking-wide mb-4">{t('user.title')}</h1>
 
         {/* Error banner */}
         {deleteError && !deleteTarget && (
@@ -135,7 +137,7 @@ export default function UsersPage() {
         <div className="space-y-2 mb-6">
           {members.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-text-heading/70">No members yet</p>
+              <p className="text-text-heading/70">{t('user.noMembers')}</p>
             </div>
           ) : (
             members.map((member) => (
@@ -144,15 +146,15 @@ export default function UsersPage() {
                 className="rounded-lg px-4 py-3 flex items-center justify-between bg-surface-card"
               >
                 <span className="font-medium truncate text-text-heading">
-                  {member.full_name || 'Unknown'}
+                  {member.full_name || t('user.unknown')}
                   {member.user_id === user?.id && (
-                    <span className="text-text-heading/50 text-sm ml-1">(You)</span>
+                    <span className="text-text-heading/50 text-sm ml-1">{t('user.you')}</span>
                   )}
                 </span>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {/* Role badge */}
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_BADGE_STYLES[member.role as Role] ?? 'bg-gray-100 text-gray-700'}`}>
-                    {ROLE_DISPLAY_NAMES[member.role as Role] ?? member.role}
+                    {getRoleDisplayName(member.role as Role, locale)}
                   </span>
 
                   {/* Delete button */}
@@ -188,7 +190,7 @@ export default function UsersPage() {
               className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
-              New User
+              {t('user.newUser')}
             </button>
           </div>
         </div>
@@ -206,10 +208,10 @@ export default function UsersPage() {
         open={deleteTarget !== null}
         onClose={handleDeleteClose}
         onConfirm={handleDeleteConfirm}
-        title="Remove User"
+        title={t('user.removeUser')}
         description={<>Remove <span className="text-white font-medium">{deleteTarget?.full_name ?? 'this member'}</span> from your farm? They will lose access and can be re-invited later.</>}
-        confirmText="Remove"
-        confirmLoadingText="Removing..."
+        confirmText={t('user.removeButton')}
+        confirmLoadingText={t('user.removing')}
         loading={deleteLoading}
       />
     </div>
