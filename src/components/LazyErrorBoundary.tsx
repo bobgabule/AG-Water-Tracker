@@ -1,4 +1,6 @@
 import { Component, type ReactNode } from 'react';
+import { useLanguageStore } from '../stores/languageStore';
+import { translations } from '../i18n/index';
 
 interface Props {
   children: ReactNode;
@@ -11,6 +13,12 @@ interface State {
 }
 
 const RELOAD_COUNT_KEY = 'chunk-reload-count';
+
+/** Imperative translation lookup for class components (no hooks available). */
+function getTranslation(key: string): string {
+  const locale = useLanguageStore.getState().locale;
+  return translations[locale][key] ?? translations['en'][key] ?? key;
+}
 
 function isChunkLoadError(error: Error): boolean {
   return (
@@ -85,7 +93,7 @@ export default class LazyErrorBoundary extends Component<Props, State> {
           <div className="min-h-screen bg-gray-900 flex items-center justify-center">
             <div className="bg-gray-800 rounded-xl p-6 text-center max-w-sm mx-4">
               <p className="text-white text-lg font-medium">
-                App updated — reloading...
+                {getTranslation('error.appUpdatedReloading')}
               </p>
             </div>
           </div>
@@ -99,13 +107,13 @@ export default class LazyErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="bg-gray-800 rounded-xl p-6 text-center max-w-sm mx-4">
             <p className="text-white text-lg font-medium mb-4">
-              You appear to be offline. Check your connection and try again.
+              {getTranslation('error.offlineCheck')}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
-              Reload
+              {getTranslation('error.reload')}
             </button>
           </div>
         </div>
@@ -117,13 +125,13 @@ export default class LazyErrorBoundary extends Component<Props, State> {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="bg-gray-800 rounded-xl p-6 text-center max-w-sm mx-4">
           <p className="text-white text-lg font-medium mb-4">
-            Something went wrong loading this page.
+            {getTranslation('error.pageLoadFailed')}
           </p>
           <button
             onClick={() => window.location.reload()}
             className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           >
-            Reload
+            {getTranslation('error.reload')}
           </button>
         </div>
       </div>

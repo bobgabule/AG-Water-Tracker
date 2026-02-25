@@ -1,6 +1,7 @@
 import React from 'react';
 import type { FallbackProps } from 'react-error-boundary';
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 /**
  * Full-page error fallback for route-level ErrorBoundary.
@@ -10,6 +11,8 @@ import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outl
 export const ErrorFallback = React.memo(function ErrorFallback({
   resetErrorBoundary,
 }: FallbackProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       role="alert"
@@ -17,15 +20,15 @@ export const ErrorFallback = React.memo(function ErrorFallback({
     >
       <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 mb-4" />
       <h2 className="text-lg font-medium text-white mb-2">
-        Something went wrong
+        {t('error.somethingWrong')}
       </h2>
-      <p className="text-gray-400 text-sm mb-6">Tap to try again.</p>
+      <p className="text-gray-400 text-sm mb-6">{t('error.tapToRetry')}</p>
       <button
         onClick={resetErrorBoundary}
         className="flex items-center gap-2 px-5 py-3 bg-primary rounded-lg text-white font-medium"
       >
         <ArrowPathIcon className="w-5 h-5" />
-        Try Again
+        {t('error.tryAgain')}
       </button>
     </div>
   );
@@ -39,6 +42,8 @@ export const ErrorFallback = React.memo(function ErrorFallback({
 export const MapErrorFallback = React.memo(function MapErrorFallback({
   resetErrorBoundary,
 }: FallbackProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       role="alert"
@@ -46,15 +51,15 @@ export const MapErrorFallback = React.memo(function MapErrorFallback({
     >
       <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 mb-4" />
       <h2 className="text-lg font-medium text-white mb-2">
-        Something went wrong
+        {t('error.somethingWrong')}
       </h2>
-      <p className="text-gray-400 text-sm mb-6">Tap to try again.</p>
+      <p className="text-gray-400 text-sm mb-6">{t('error.tapToRetry')}</p>
       <button
         onClick={resetErrorBoundary}
         className="flex items-center gap-2 px-5 py-3 bg-primary rounded-lg text-white font-medium"
       >
         <ArrowPathIcon className="w-5 h-5" />
-        Try Again
+        {t('error.tryAgain')}
       </button>
     </div>
   );
