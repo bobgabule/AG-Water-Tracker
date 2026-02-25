@@ -75,6 +75,7 @@ const readings = new TableV2({
   gps_latitude: column.real,
   gps_longitude: column.real,
   is_in_range: column.integer, // 0/1 boolean (PowerSync has no BOOLEAN)
+  is_similar_reading: column.integer, // 0/1 boolean — reading within 50gal of prior
   notes: column.text,
   created_at: column.text,
   updated_at: column.text,

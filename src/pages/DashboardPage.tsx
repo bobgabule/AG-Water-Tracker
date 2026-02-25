@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -15,12 +15,15 @@ import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { useWellCount } from '../hooks/useWellCount';
 import { useAppSetting } from '../hooks/useAppSetting';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
+import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
+import { useGeolocation } from '../hooks/useGeolocation';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
 import LocationPickerBottomSheet from '../components/LocationPickerBottomSheet';
 import AddWellFormBottomSheet, { type WellFormData } from '../components/AddWellFormBottomSheet';
 import WellLimitModal from '../components/WellLimitModal';
+import LocationSoftAskModal from '../components/LocationSoftAskModal';
 import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
 export default function DashboardPage() {
@@ -40,6 +43,60 @@ export default function DashboardPage() {
     subscriptionUrl && farmId && tier
       ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
       : null;
+
+  // Geolocation permission + location
+  const permission = useGeolocationPermission();
+  const { location: userLocation, requestLocation } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 10000,
+    enableCache: true,
+    autoRequest: false,
+  });
+
+  // Auto-request location when permission is already granted
+  useEffect(() => {
+    if (permission === 'granted' && !userLocation) {
+      requestLocation();
+    }
+  }, [permission, userLocation, requestLocation]);
+
+  // Location permission modal state
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'new-well' | null>(null);
+  const modalAutoShownRef = useRef(false);
+
+  // Auto-show location modal once on mount when permission not granted
+  useEffect(() => {
+    if (modalAutoShownRef.current) return;
+    const dismissed = sessionStorage.getItem('location-modal-dismissed') === 'true';
+    if (permission !== 'granted' && !dismissed) {
+      modalAutoShownRef.current = true;
+      setShowLocationModal(true);
+    }
+  }, [permission]);
+
+  // Execute pending action after permission is granted
+  useEffect(() => {
+    if (permission === 'granted' && pendingAction === 'new-well') {
+      setPendingAction(null);
+      if (tier && wellCount >= tier.maxWells) {
+        setShowLimitModal(true);
+      } else {
+        setCurrentStep('location');
+      }
+    }
+  }, [permission, pendingAction, tier, wellCount]);
+
+  const handleLocationAllow = useCallback(() => {
+    setShowLocationModal(false);
+    requestLocation();
+  }, [requestLocation]);
+
+  const handleLocationModalClose = useCallback(() => {
+    setShowLocationModal(false);
+    sessionStorage.setItem('location-modal-dismissed', 'true');
+    setPendingAction(null);
+  }, []);
 
   // Fade transition from skeleton to real content
   const [showContent, setShowContent] = useState(!loading);
@@ -65,6 +122,25 @@ export default function DashboardPage() {
   const [currentStep, setCurrentStep] = useState<'closed' | 'location' | 'form'>('closed');
   const [pickedLocation, setPickedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
+  // Handle ?action=new-well from WellListPage navigation
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('action') === 'new-well') {
+      setSearchParams({}, { replace: true });
+      // Defer to next tick so component is fully mounted
+      queueMicrotask(() => {
+        if (tier && wellCount >= tier.maxWells) {
+          setShowLimitModal(true);
+        } else if (permission !== 'granted') {
+          setPendingAction('new-well');
+          setShowLocationModal(true);
+        } else {
+          setCurrentStep('location');
+        }
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- run once on mount only
+
   const handleWellClick = useCallback(
     (id: string) => navigate(`/wells/${id}`, { viewTransition: true }),
     [navigate],
@@ -78,8 +154,13 @@ export default function DashboardPage() {
       setShowLimitModal(true);
       return;
     }
+    if (permission !== 'granted') {
+      setPendingAction('new-well');
+      setShowLocationModal(true);
+      return;
+    }
     setCurrentStep('location');
-  }, [tier, wellCount]);
+  }, [tier, wellCount, permission]);
 
   const handleLimitModalClose = useCallback(() => {
     setShowLimitModal(false);
@@ -181,6 +262,7 @@ export default function DashboardPage() {
           onMapClick={handleMapClick}
           pickedLocation={pickedLocation}
           isPickingLocation={currentStep === 'location'}
+          userLocation={userLocation}
         />
       </ErrorBoundary>
 
@@ -246,6 +328,14 @@ export default function DashboardPage() {
         onClose={handleLimitModalClose}
         upgradeUrl={upgradeUrl}
         isGrower={isGrower}
+      />
+
+      {/* Location Permission Modal */}
+      <LocationSoftAskModal
+        open={showLocationModal}
+        onClose={handleLocationModalClose}
+        onAllow={handleLocationAllow}
+        mode={permission === 'denied' ? 'denied' : 'prompt'}
       />
     </div>
   );

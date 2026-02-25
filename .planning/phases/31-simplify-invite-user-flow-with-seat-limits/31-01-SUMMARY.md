@@ -64,7 +64,7 @@ Each task was committed atomically:
 
 1. **Task 1: Add extra seat columns and enforce seat limits in invite RPC** - `a68ab05` (feat)
 
-**Plan metadata:** _pending_ (docs: complete plan)
+**Plan metadata:** `b60098b` (docs: complete plan)
 
 ## Files Created/Modified
 - `supabase/migrations/039_seat_limit_enforcement.sql` - Migration with schema changes, updated RPC, public wrapper, grants

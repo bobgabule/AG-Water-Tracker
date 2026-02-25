@@ -59,12 +59,35 @@ The app uses passwordless phone OTP authentication. You must enable the Phone pr
 
 1. In your Supabase project, go to **Authentication** → **Providers**
 2. Find **Phone** and click to enable it
-3. Choose your SMS provider:
-   - **Twilio** (recommended for production): Enter your Twilio Account SID, Auth Token, and Messaging Service SID
-   - **Test mode** (for development): Enable "Enable test OTP" and add test phone numbers with static OTP codes
+3. Select **Twilio** as the SMS provider and enter:
+   - **Account SID** — from your Twilio Dashboard
+   - **Auth Token** — from your Twilio Dashboard
+   - **Messaging Service SID** — or leave blank if using a From number directly
 4. Click **Save**
 
-**Development Tip:** Use Supabase's test OTP feature to avoid needing real SMS during development. Add a test phone number (e.g., `+15555550100`) with a static code (e.g., `123456`).
+**Twilio Setup:** You need a paid Twilio account with a US phone number. See the invite SMS setup below (Section 2.4).
+
+**Development Tip:** Use Supabase's test OTP feature during local development to avoid consuming SMS credits. Go to Authentication → Providers → Phone → enable "Enable test OTP" and add a test number (e.g., `+15555550100`) with a static code (e.g., `123456`).
+
+### 2.4 Twilio (SMS Invites)
+
+The app sends SMS invites via a Supabase Edge Function that calls the Twilio API.
+
+1. Go to [twilio.com](https://www.twilio.com/) and create a paid account (or upgrade from trial)
+2. **Buy a phone number**: Phone Numbers → Manage → Buy a Number → search US with SMS capability (~$1.15/month)
+3. **Enable geo permissions**: Messaging → Settings → Geo permissions → check **United States**
+4. Copy your **Account SID**, **Auth Token**, and the purchased **phone number** (`+1XXXXXXXXXX`)
+5. Set these as Supabase Edge Function secrets:
+   ```bash
+   npx supabase secrets set TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   npx supabase secrets set TWILIO_AUTH_TOKEN=your_auth_token
+   npx supabase secrets set TWILIO_FROM_NUMBER=+1XXXXXXXXXX
+   npx supabase secrets set APP_URL=https://your-app-url.com
+   ```
+6. Deploy the edge function:
+   ```bash
+   npx supabase functions deploy send-invite-sms --no-verify-jwt
+   ```
 
 ### 2.2 Mapbox (Maps & Geolocation)
 

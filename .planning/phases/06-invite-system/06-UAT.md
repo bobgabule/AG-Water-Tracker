@@ -47,18 +47,12 @@ skipped: 0
 ## Gaps
 
 - truth: "SMS invite is sent to the invited phone number"
-  status: failed
-  reason: "User reported: SMS could not be sent. Please notify the user manually. Invite is in the DB though."
+  status: resolved
+  reason: "Twilio upgraded to paid account — SMS now sends to any US number without verified-number restriction."
   severity: major
   test: 2
-  root_cause: "Edge function send-invite-sms was not deployed. Now deployed but Twilio trial account can only send to verified numbers. Need Twilio account upgrade or verified test numbers."
-  artifacts:
-    - path: "supabase/functions/send-invite-sms/index.ts"
-      issue: "Uses Twilio Messages API — trial accounts restricted to verified numbers"
-  missing:
-    - "Verify Twilio phone number in trial console or upgrade to paid account"
-    - "Confirm APP_URL secret is set to correct value"
-  debug_session: ""
+  root_cause: "Edge function send-invite-sms was not deployed. Now deployed. Twilio trial account restricted to verified numbers — resolved by upgrading to paid account."
+  resolution: "Upgraded Twilio to paid account, purchased US phone number, enabled US geo permissions, updated Supabase secrets."
 
 ## Fixes Applied
 

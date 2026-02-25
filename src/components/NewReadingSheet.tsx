@@ -124,7 +124,7 @@ export default function NewReadingSheet({
   const handleTabProblem = useCallback(() => setActiveTab('problem'), []);
 
   const saveReading = useCallback(
-    async (gps: GpsResult | null, forceOutOfRange?: boolean) => {
+    async (gps: GpsResult | null, forceOutOfRange?: boolean, isSimilar = false) => {
       try {
         const readingId = crypto.randomUUID();
         const now = new Date().toISOString();
@@ -143,8 +143,8 @@ export default function NewReadingSheet({
 
         await db.execute(
           `INSERT INTO readings (id, well_id, farm_id, value, recorded_by, recorded_at,
-            gps_latitude, gps_longitude, is_in_range, notes, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            gps_latitude, gps_longitude, is_in_range, is_similar_reading, notes, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             readingId,
             well.id,
@@ -155,6 +155,7 @@ export default function NewReadingSheet({
             gps?.lat ?? null,
             gps?.lng ?? null,
             inRange,
+            isSimilar ? 1 : 0,
             null,
             now,
             now,
@@ -172,7 +173,7 @@ export default function NewReadingSheet({
     [db, well.id, well.location, farmId, userId, readingValue, resetForm, onClose],
   );
 
-  const handleGpsCaptureAndSave = useCallback(async () => {
+  const handleGpsCaptureAndSave = useCallback(async (isSimilar = false) => {
     setView('submitting');
     const gps = await captureGps();
 
@@ -198,7 +199,7 @@ export default function NewReadingSheet({
       }
     }
 
-    await saveReading(gps);
+    await saveReading(gps, false, isSimilar);
   }, [well.location, saveReading]);
 
   const handleSaveWithoutGps = useCallback(() => {
@@ -234,7 +235,7 @@ export default function NewReadingSheet({
   }, [readingValue, readings, handleGpsCaptureAndSave]);
 
   const handleSimilarContinue = useCallback(() => {
-    handleGpsCaptureAndSave();
+    handleGpsCaptureAndSave(true);
   }, [handleGpsCaptureAndSave]);
 
   const handleRangeContinue = useCallback(() => {
@@ -460,7 +461,7 @@ export default function NewReadingSheet({
                       <div className="flex gap-3">
                         <button
                           type="button"
-                          onClick={handleGpsCaptureAndSave}
+                          onClick={() => handleGpsCaptureAndSave()}
                           className="flex-1 py-3 text-white font-medium rounded-lg"
                         >
                           Retry

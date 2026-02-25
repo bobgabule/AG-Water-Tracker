@@ -22,6 +22,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   const remaining = Math.max(0, allocated - used);
   const remainingPercent =
     allocated > 0 ? Math.min((remaining / allocated) * 100, 100) : 0;
+  const GAUGE_COLOR = '#82c8ac';
 
   const statusItems = [
     { label: 'Pump', healthy: isHealthy(well.pumpState) },
@@ -48,19 +49,23 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
           </div>
         </div>
 
-        {/* Center: Vertical pill gauge */}
+        {/* Center: Vertical pill gauge — gas gauge style, full = all remaining */}
         <div className="flex-shrink-0 w-14 h-36 rounded-full bg-surface-darkest overflow-hidden relative border border-white/10">
-          {/* Fill from bottom */}
-          <div
-            className="absolute bottom-0 left-0 right-0 bg-green-500 transition-all duration-500"
-            style={{ height: `${remainingPercent}%` }}
-          />
-          {/* Rounded cap at top of fill */}
-          {remainingPercent > 8 && remainingPercent < 100 && (
-            <div
-              className="absolute left-0 right-0 h-4 bg-green-500 rounded-t-full"
-              style={{ bottom: `calc(${remainingPercent}% - 0.5rem)` }}
-            />
+          {remainingPercent > 0 && (
+            <>
+              {/* Fill from bottom */}
+              <div
+                className="absolute bottom-0 left-0 right-0 transition-all duration-500"
+                style={{ height: `${remainingPercent}%`, backgroundColor: GAUGE_COLOR }}
+              />
+              {/* Rounded cap at top of fill */}
+              {remainingPercent > 8 && remainingPercent < 100 && (
+                <div
+                  className="absolute left-0 right-0 h-4 rounded-t-full"
+                  style={{ bottom: `calc(${remainingPercent}% - 0.5rem)`, backgroundColor: GAUGE_COLOR }}
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -82,7 +87,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
               </span>{' '}
               AF Used
             </p>
-            <div className="inline-block bg-green-600/80 rounded px-2 py-0.5 mt-1">
+            <div className="inline-block rounded px-2 py-0.5 mt-1" style={{ backgroundColor: GAUGE_COLOR + 'CC' }}>
               <span className="text-white text-sm font-semibold">
                 {Math.round(remaining)} AF Left
               </span>

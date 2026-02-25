@@ -53,7 +53,7 @@ bucket_definitions:
   user_farms:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT id, name, subscription_tier, street_address, city, state, zip_code, created_at, updated_at FROM farms WHERE id = bucket.farm_id
+      - SELECT id, name, subscription_tier, street_address, city, state, zip_code, extra_admin_seats, extra_meter_checker_seats, created_at, updated_at FROM farms WHERE id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Farm Members (via farm_members join table)
@@ -99,7 +99,7 @@ bucket_definitions:
   farm_readings:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT id, well_id, farm_id, value, recorded_by, recorded_at, gps_latitude, gps_longitude, is_in_range, notes, created_at, updated_at FROM readings WHERE farm_id = bucket.farm_id
+      - SELECT id, well_id, farm_id, value, recorded_by, recorded_at, gps_latitude, gps_longitude, is_in_range, is_similar_reading, notes, created_at, updated_at FROM readings WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Allocations (via denormalized farm_id)

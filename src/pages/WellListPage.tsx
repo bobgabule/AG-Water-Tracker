@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { MapIcon, PlusIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { MapIcon, PlusIcon, FlagIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
 import WellListSkeleton from '../components/skeletons/WellListSkeleton';
@@ -12,74 +12,33 @@ import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { useWellCount } from '../hooks/useWellCount';
 import { useAppSetting } from '../hooks/useAppSetting';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
+import { useCurrentAllocations } from '../hooks/useCurrentAllocations';
+import { useWellSimilarFlags } from '../hooks/useWellFlags';
+import { getWellFlagColor } from '../lib/wellFlags';
 import WellLimitModal from '../components/WellLimitModal';
-
-// Date threshold constants (in days)
-const RECENT_THRESHOLD = 3;
-const WEEK_THRESHOLD = 7;
-const TWO_WEEKS_THRESHOLD = 14;
-const MONTH_THRESHOLD = 30;
 
 interface WellDisplayData {
   well: WellWithReading;
-  diffDays: number | null;
   formattedTime: string;
-  statusColor: string;
-  statusWidth: string;
+  remainingPercent: number;
+  flagColor: 'orange' | 'yellow' | null;
 }
 
-function computeWellDisplayData(
-  well: WellWithReading,
-  latestReadingDate: string | null,
-): WellDisplayData {
-  const { status } = well;
+function formatRelativeTime(latestReadingDate: string | null): string {
+  if (!latestReadingDate) return 'No readings';
 
-  // Parse date and compute diff using actual reading date
-  let diffDays: number | null = null;
-  if (latestReadingDate) {
-    const date = new Date(latestReadingDate);
-    if (!isNaN(date.getTime())) {
-      const now = new Date();
-      diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    }
-  }
+  const date = new Date(latestReadingDate);
+  if (isNaN(date.getTime())) return 'No readings';
 
-  // Format relative time
-  let formattedTime = 'No readings';
-  if (diffDays !== null) {
-    if (diffDays === 0) formattedTime = 'Today';
-    else if (diffDays === 1) formattedTime = '1 day ago';
-    else if (diffDays < WEEK_THRESHOLD) formattedTime = `${diffDays} days ago`;
-    else if (diffDays < TWO_WEEKS_THRESHOLD) formattedTime = '1 week ago';
-    else if (diffDays < MONTH_THRESHOLD) formattedTime = `${Math.floor(diffDays / 7)} weeks ago`;
-    else if (diffDays < 60) formattedTime = '1 month ago';
-    else formattedTime = `${Math.floor(diffDays / 30)} months ago`;
-  }
+  const diffDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Determine status color
-  let statusColor = 'bg-gray-300';
-  if (status === 'critical' || status === 'alert') {
-    statusColor = 'bg-red-500';
-  } else if (status === 'warning') {
-    statusColor = 'bg-orange-400';
-  } else if (diffDays !== null) {
-    if (diffDays <= RECENT_THRESHOLD) statusColor = 'bg-teal';
-    else if (diffDays <= WEEK_THRESHOLD) statusColor = 'bg-teal-light';
-    else if (diffDays <= TWO_WEEKS_THRESHOLD) statusColor = 'bg-yellow-400';
-    else statusColor = 'bg-gray-400';
-  }
-
-  // Determine status bar width
-  let statusWidth = 'w-1/4';
-  if (diffDays !== null) {
-    if (diffDays === 0) statusWidth = 'w-full';
-    else if (diffDays <= 1) statusWidth = 'w-3/4';
-    else if (diffDays <= RECENT_THRESHOLD) statusWidth = 'w-2/3';
-    else if (diffDays <= WEEK_THRESHOLD) statusWidth = 'w-1/2';
-    else if (diffDays <= TWO_WEEKS_THRESHOLD) statusWidth = 'w-1/3';
-  }
-
-  return { well, diffDays, formattedTime, statusColor, statusWidth };
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return '1 day ago';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 14) return '1 week ago';
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 60) return '1 month ago';
+  return `${Math.floor(diffDays / 30)} months ago`;
 }
 
 export default function WellListPage() {
@@ -87,6 +46,8 @@ export default function WellListPage() {
   const navigate = useNavigate();
   const { farmId } = useActiveFarm();
   const { latestByWellId } = useLatestReadings(farmId);
+  const { allocationsByWellId } = useCurrentAllocations(farmId);
+  const similarWellIds = useWellSimilarFlags(farmId);
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
   const tier = useSubscriptionTier();
@@ -108,12 +69,11 @@ export default function WellListPage() {
     [navigate],
   );
   const handleNewWell = useCallback(() => {
-    // Allow creation if tier data hasn't loaded (offline edge case)
     if (tier && wellCount >= tier.maxWells) {
       setShowLimitModal(true);
       return;
     }
-    navigate('/wells/new', { viewTransition: true });
+    navigate('/?action=new-well', { viewTransition: true });
   }, [tier, wellCount, navigate]);
 
   const handleLimitModalClose = useCallback(() => {
@@ -121,11 +81,18 @@ export default function WellListPage() {
   }, []);
   const handleWellMap = useCallback(() => navigate('/', { viewTransition: true }), [navigate]);
 
-  const wellsWithDisplayData = useMemo(
-    () => wells.map((well) =>
-      computeWellDisplayData(well, latestByWellId.get(well.id) ?? null)
-    ),
-    [wells, latestByWellId],
+  const wellsWithDisplayData = useMemo<WellDisplayData[]>(
+    () => wells.map((well) => {
+      const allocation = allocationsByWellId.get(well.id);
+      const usagePercent = allocation?.usagePercent ?? 0;
+      return {
+        well,
+        formattedTime: formatRelativeTime(latestByWellId.get(well.id) ?? null),
+        remainingPercent: allocation ? Math.max(0, 100 - usagePercent) : 0,
+        flagColor: getWellFlagColor(well, similarWellIds.has(well.id)),
+      };
+    }),
+    [wells, latestByWellId, allocationsByWellId, similarWellIds],
   );
 
   const filteredWells = useMemo(() => {
@@ -177,7 +144,7 @@ export default function WellListPage() {
               </p>
             </div>
           ) : (
-            filteredWells.map(({ well, formattedTime, statusColor, statusWidth }) => (
+            filteredWells.map(({ well, formattedTime, remainingPercent, flagColor }) => (
               <button
                 key={well.id}
                 data-well-id={well.id}
@@ -187,10 +154,18 @@ export default function WellListPage() {
                 {/* Well Name */}
                 <span className="text-text-heading font-medium min-w-[70px]">{well.name}</span>
 
-                {/* Status Bar */}
+                {/* Allocation Gauge — gas gauge style */}
                 <div className="flex-1 flex items-center gap-2">
                   <div className="flex-1 h-2 bg-surface-page rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${statusColor} ${statusWidth}`} />
+                    {remainingPercent > 0 && (
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.max(remainingPercent, 4)}%`,
+                          backgroundColor: '#5ac2c5',
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -199,9 +174,11 @@ export default function WellListPage() {
                   {formattedTime}
                 </span>
 
-                {/* Alert indicator for wells needing attention */}
-                {well.status === 'alert' && (
-                  <PlayIcon className="w-4 h-4 text-orange-500 rotate-90" />
+                {/* Flag indicator */}
+                {flagColor && (
+                  <FlagIcon
+                    className={`w-4 h-4 ${flagColor === 'orange' ? 'text-orange-500' : 'text-yellow-400'}`}
+                  />
                 )}
               </button>
             ))

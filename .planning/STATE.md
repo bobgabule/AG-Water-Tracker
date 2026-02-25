@@ -104,6 +104,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 30 added: Drop dead invite code
 - Phase 31 added: Simplify invite user flow with seat limits
 - Phase 32 added: Unified design system and theme colors
+- Phase 33 added: Fix wells page gauge consistency and add-well navigation
 
 ### Blockers/Concerns
 

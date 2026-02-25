@@ -1,11 +1,12 @@
 import { memo, useCallback } from 'react';
 import { Marker } from 'react-map-gl/mapbox';
-import { MapPinIcon } from '@heroicons/react/24/solid';
+import { MapPinIcon, FlagIcon } from '@heroicons/react/24/solid';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellMarkerProps {
   well: WellWithReading;
   allocationPercentage?: number;
+  flagColor?: 'orange' | 'yellow' | null;
   onClick?: (wellId: string) => void;
 }
 
@@ -58,12 +59,15 @@ function getStatusText(createdAt: string, updatedAt: string): string {
   return `Updated ${weeks} week${weeks > 1 ? 's' : ''} ago`;
 }
 
-export default memo(function WellMarker({ well, allocationPercentage, onClick }: WellMarkerProps) {
+export default memo(function WellMarker({ well, allocationPercentage, flagColor, onClick }: WellMarkerProps) {
   const handleClick = useCallback(() => {
     onClick?.(well.id);
   }, [onClick, well.id]);
 
-  const fillPercent = allocationPercentage ?? 0;
+  // Gas gauge: full when no usage, empty when fully used, empty when no allocation
+  const hasAllocation = allocationPercentage != null;
+  const fillPercent = hasAllocation ? Math.max(0, 100 - allocationPercentage) : 0;
+  const GAUGE_COLOR = '#2d72e6';
 
   // Get status text based on timestamps
   const statusText = getStatusText(well.createdAt, well.updatedAt);
@@ -95,14 +99,24 @@ export default memo(function WellMarker({ well, allocationPercentage, onClick }:
           {/* Water Gauge - cylinder/tube shape with grey border */}
           <div className="w-2.5 h-10 bg-gray-700 rounded-full overflow-hidden flex flex-col justify-end border border-white/50">
             <div
-              className="w-full bg-blue-500 rounded-b-full transition-all duration-300"
-              style={{ height: `${fillPercent}%` }}
+              className="w-full rounded-b-full transition-all duration-300"
+              style={{
+                height: `${fillPercent}%`,
+                backgroundColor: GAUGE_COLOR,
+              }}
             />
           </div>
 
           {/* Info Overlay - attached to gauge */}
           <div className="bg-gray-900/80 rounded-r-lg px-2.5 py-1 flex flex-col justify-center whitespace-nowrap backdrop-blur-sm shadow-lg">
-            <p className="text-white text-xs font-bold leading-tight text-left">{well.name}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-white text-xs font-bold leading-tight text-left">{well.name}</p>
+              {flagColor && (
+                <FlagIcon
+                  className={`w-3 h-3 ${flagColor === 'orange' ? 'text-orange-500' : 'text-yellow-400'}`}
+                />
+              )}
+            </div>
             <p className="text-white/60 text-[10px] leading-tight text-left">{statusText}</p>
           </div>
         </div>
