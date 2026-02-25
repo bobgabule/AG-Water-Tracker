@@ -4,7 +4,7 @@ import { usePowerSync } from '@powersync/react';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import { PlusIcon, CalendarDaysIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import MonthYearPicker from '../components/MonthYearPicker';
-import ConfirmDeleteAllocationDialog from '../components/ConfirmDeleteAllocationDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations, type Allocation } from '../hooks/useWellAllocations';
 import { useWellReadings } from '../hooks/useWellReadings';
@@ -315,14 +315,14 @@ export default function WellAllocationsPage() {
   // Loading state
   if (!well && wells.length === 0) {
     return (
-      <div className="h-full bg-[#5f7248] flex items-center justify-center">
+      <div className="h-full bg-surface-header flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#5f7248]">
+    <div className="h-full flex flex-col bg-surface-header">
       {/* Map preview with well info */}
       <div className="relative h-32 flex-shrink-0">
         {mapUrl ? (
@@ -349,7 +349,7 @@ export default function WellAllocationsPage() {
         </div>
 
         {/* 30D chip top-right */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5f7248]/90 border border-white/20 rounded px-2 py-1">
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-surface-header/90 border border-white/20 rounded px-2 py-1">
           <CalendarDaysIcon className="w-3.5 h-3.5 text-white/80" />
           <span className="text-white text-xs font-medium">30D</span>
           <ChevronDownIcon className="w-3 h-3 text-white/60" />
@@ -490,7 +490,7 @@ export default function WellAllocationsPage() {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 py-2.5 rounded-lg font-medium text-white bg-[#3d5030] active:bg-[#334428] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-lg font-medium text-white bg-btn-dark active:bg-btn-dark-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -531,19 +531,19 @@ export default function WellAllocationsPage() {
                         : 'active:bg-white/5'
                     }`}
                   >
-                    <td className="border border-white/30 px-2.5 py-2.5 text-[#e8937c]">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
                       {allocation.isManualOverride && (
                         <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-white text-[10px] font-bold mr-1.5 align-middle">M</span>
                       )}
                       {formatPeriodDate(allocation.periodStart)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-[#e8937c]">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
                       {formatPeriodDate(allocation.periodEnd)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-[#e8937c]">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
                       {formatValue(allocation.usedAf)}
                     </td>
-                    <td className="border border-white/30 px-2.5 py-2.5 text-[#e8937c]">
+                    <td className="border border-white/30 px-2.5 py-2.5 text-text-coral">
                       {formatValue(allocation.allocatedAf)}
                     </td>
                   </tr>
@@ -583,15 +583,18 @@ export default function WellAllocationsPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <ConfirmDeleteAllocationDialog
+      <ConfirmDialog
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteAllocation}
-        periodLabel={
-          selectedAllocation
-            ? `${formatPeriodDate(selectedAllocation.periodStart)} - ${formatPeriodDate(selectedAllocation.periodEnd)}`
-            : ''
+        title="Delete Allocation"
+        description={
+          selectedAllocation ? (
+            <>Delete the allocation period <span className="text-white font-medium">{formatPeriodDate(selectedAllocation.periodStart)} - {formatPeriodDate(selectedAllocation.periodEnd)}</span>? This cannot be undone.</>
+          ) : ''
         }
+        confirmText="Delete"
+        confirmLoadingText="Deleting..."
         loading={deleteLoading}
       />
     </div>
