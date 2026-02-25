@@ -66,7 +66,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ### Server-Side Enforcement
 
-- **TIER-D1**: Server-side seat/well limit enforcement in RPCs (invite_user_by_phone_impl, well creation)
+- [x] **TIER-D1**: Server-side seat/well limit enforcement in RPCs (invite_user_by_phone_impl, well creation)
 - **TIER-D2**: Super admin tier management UI for changing farm tiers without direct DB access
 - **TIER-D3**: Tier upgrade/downgrade handling for farms exceeding new limits after downgrade
 

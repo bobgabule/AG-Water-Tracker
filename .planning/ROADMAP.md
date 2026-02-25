@@ -369,7 +369,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 31-01-PLAN.md — Server-side seat enforcement & schema (migration 039)
+- [x] 31-01-PLAN.md — Server-side seat enforcement & schema (migration 039)
 - [ ] 31-02-PLAN.md — Frontend & edge function updates (PowerSync schema, seat usage hook, SMS, UX)
 
 **Success Criteria** (what must be TRUE):
