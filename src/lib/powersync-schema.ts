@@ -7,6 +7,8 @@ const farms = new TableV2({
   city: column.text,
   state: column.text,
   zip_code: column.text,
+  extra_admin_seats: column.integer,
+  extra_meter_checker_seats: column.integer,
   created_at: column.text,
   updated_at: column.text,
 });
