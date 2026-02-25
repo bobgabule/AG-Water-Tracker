@@ -22,7 +22,7 @@ function canDeleteMember(
   if (!canManageUsers) return false;
   if (member.user_id === currentUserId) return false;
   if (userRole === 'super_admin') return true;
-  if (userRole === 'grower') {
+  if (userRole === 'owner') {
     return member.role === 'admin' || member.role === 'meter_checker';
   }
   if (userRole === 'admin') return member.role === 'meter_checker';
@@ -30,7 +30,7 @@ function canDeleteMember(
 }
 
 // Helpers to create test members
-const ME = 'user-grower-001';
+const ME = 'user-owner-001';
 function member(role: string, userId = 'user-other'): FarmMemberRow {
   return { id: `m-${role}`, user_id: userId, role, full_name: role, created_at: '' };
 }
@@ -39,31 +39,31 @@ function member(role: string, userId = 'user-other'): FarmMemberRow {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('Grower: canDeleteMember', () => {
+describe('Owner: canDeleteMember', () => {
   it('can delete an admin', () => {
-    expect(canDeleteMember('grower', ME, member('admin'))).toBe(true);
+    expect(canDeleteMember('owner', ME, member('admin'))).toBe(true);
   });
 
   it('can delete a meter_checker', () => {
-    expect(canDeleteMember('grower', ME, member('meter_checker'))).toBe(true);
+    expect(canDeleteMember('owner', ME, member('meter_checker'))).toBe(true);
   });
 
-  it('cannot delete another grower', () => {
-    expect(canDeleteMember('grower', ME, member('grower'))).toBe(false);
+  it('cannot delete another owner', () => {
+    expect(canDeleteMember('owner', ME, member('owner'))).toBe(false);
   });
 
   it('cannot delete a super_admin', () => {
-    expect(canDeleteMember('grower', ME, member('super_admin'))).toBe(false);
+    expect(canDeleteMember('owner', ME, member('super_admin'))).toBe(false);
   });
 
   it('cannot delete themselves', () => {
-    expect(canDeleteMember('grower', ME, member('grower', ME))).toBe(false);
+    expect(canDeleteMember('owner', ME, member('owner', ME))).toBe(false);
   });
 });
 
 describe('Super admin: canDeleteMember', () => {
-  it('can delete a grower', () => {
-    expect(canDeleteMember('super_admin', ME, member('grower'))).toBe(true);
+  it('can delete an owner', () => {
+    expect(canDeleteMember('super_admin', ME, member('owner'))).toBe(true);
   });
 
   it('can delete an admin', () => {
@@ -92,8 +92,8 @@ describe('Admin: canDeleteMember', () => {
     expect(canDeleteMember('admin', ME, member('admin'))).toBe(false);
   });
 
-  it('cannot delete a grower', () => {
-    expect(canDeleteMember('admin', ME, member('grower'))).toBe(false);
+  it('cannot delete an owner', () => {
+    expect(canDeleteMember('admin', ME, member('owner'))).toBe(false);
   });
 });
 

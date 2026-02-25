@@ -7,11 +7,11 @@ import {
 } from '../permissions';
 
 // ---------------------------------------------------------------------------
-// Grower role — permission checks
+// Owner role — permission checks
 // ---------------------------------------------------------------------------
 
-describe('Grower permissions', () => {
-  const growerActions: Action[] = [
+describe('Owner permissions', () => {
+  const ownerActions: Action[] = [
     'create_well',
     'edit_well',
     'delete_well',
@@ -23,47 +23,48 @@ describe('Grower permissions', () => {
     'manage_users',
     'manage_farm',
     'manage_invites',
+    'manage_reports',
   ];
 
-  it.each(growerActions)('grower has "%s" permission', (action) => {
-    expect(hasPermission('grower', action)).toBe(true);
+  it.each(ownerActions)('owner has "%s" permission', (action) => {
+    expect(hasPermission('owner', action)).toBe(true);
   });
 
-  it('grower does NOT have cross_farm_access', () => {
-    expect(hasPermission('grower', 'cross_farm_access')).toBe(false);
+  it('owner does NOT have cross_farm_access', () => {
+    expect(hasPermission('owner', 'cross_farm_access')).toBe(false);
   });
 
-  it('grower has every action except cross_farm_access', () => {
+  it('owner has every action except cross_farm_access', () => {
     const expected = ACTIONS.filter((a) => a !== 'cross_farm_access');
-    const actual = ACTIONS.filter((a) => hasPermission('grower', a));
+    const actual = ACTIONS.filter((a) => hasPermission('owner', a));
     expect(actual).toEqual(expected);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Grower vs other roles — comparison
+// Owner vs other roles — comparison
 // ---------------------------------------------------------------------------
 
-describe('Grower vs other roles', () => {
-  it('grower has manage_farm but admin does not', () => {
-    expect(hasPermission('grower', 'manage_farm')).toBe(true);
+describe('Owner vs other roles', () => {
+  it('owner has manage_farm but admin does not', () => {
+    expect(hasPermission('owner', 'manage_farm')).toBe(true);
     expect(hasPermission('admin', 'manage_farm')).toBe(false);
   });
 
-  it('grower has manage_users but meter_checker does not', () => {
-    expect(hasPermission('grower', 'manage_users')).toBe(true);
+  it('owner has manage_users but meter_checker does not', () => {
+    expect(hasPermission('owner', 'manage_users')).toBe(true);
     expect(hasPermission('meter_checker', 'manage_users')).toBe(false);
   });
 
-  it('super_admin has cross_farm_access but grower does not', () => {
+  it('super_admin has cross_farm_access but owner does not', () => {
     expect(hasPermission('super_admin', 'cross_farm_access')).toBe(true);
-    expect(hasPermission('grower', 'cross_farm_access')).toBe(false);
+    expect(hasPermission('owner', 'cross_farm_access')).toBe(false);
   });
 
-  it('grower and super_admin share all actions except cross_farm_access', () => {
-    const growerSet = PERMISSION_MATRIX['grower'];
+  it('owner and super_admin share all actions except cross_farm_access', () => {
+    const ownerSet = PERMISSION_MATRIX['owner'];
     const superSet = PERMISSION_MATRIX['super_admin'];
-    const diff = [...superSet].filter((a) => !growerSet.has(a));
+    const diff = [...superSet].filter((a) => !ownerSet.has(a));
     expect(diff).toEqual(['cross_farm_access']);
   });
 });

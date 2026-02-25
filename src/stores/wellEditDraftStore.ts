@@ -9,7 +9,6 @@ export interface WellEditDraft {
   longitude: number;
   units: 'AF' | 'GAL' | 'CF';
   multiplier: '0.01' | '1' | '10' | '1000' | 'MG';
-  sendMonthlyReport: boolean;
   batteryState: string;
   pumpState: string;
   meterStatus: string;

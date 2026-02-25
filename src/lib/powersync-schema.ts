@@ -56,7 +56,6 @@ const wells = new TableV2({
   longitude: column.real,
   units: column.text,
   multiplier: column.text,
-  send_monthly_report: column.integer, // boolean as 0/1
   battery_state: column.text,
   pump_state: column.text,
   meter_status: column.text,
@@ -111,6 +110,15 @@ const app_settings = new TableV2({
   updated_at: column.text,
 });
 
+const report_email_recipients = new TableV2({
+  farm_id: column.text,
+  email: column.text,
+  is_auto_added: column.integer, // 0/1 boolean (PowerSync has no BOOLEAN)
+  source_user_id: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 export const AppSchema = new Schema({
   farms,
   users,
@@ -121,6 +129,7 @@ export const AppSchema = new Schema({
   allocations,
   subscription_tiers,
   app_settings,
+  report_email_recipients,
 });
 
 export type Database = (typeof AppSchema)['types'];
@@ -133,3 +142,4 @@ export type ReadingRow = Database['readings'];
 export type AllocationRow = Database['allocations'];
 export type SubscriptionTier = Database['subscription_tiers'];
 export type AppSetting = Database['app_settings'];
+export type ReportEmailRecipient = Database['report_email_recipients'];

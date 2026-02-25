@@ -7,7 +7,7 @@ import { debugError, debugWarn } from './debugLog';
 import { useToastStore } from '../stores/toastStore';
 
 /** Tables the connector is allowed to write to Supabase */
-const ALLOWED_TABLES = new Set(['farms', 'users', 'farm_members', 'farm_invites', 'wells', 'readings', 'allocations']);
+const ALLOWED_TABLES = new Set(['farms', 'users', 'farm_members', 'farm_invites', 'wells', 'readings', 'allocations', 'report_email_recipients']);
 
 /**
  * Returns true if the error is permanent (non-retryable).
@@ -114,14 +114,14 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     table: string,
     data: Record<string, unknown>,
   ): Record<string, unknown> {
-    if (table === 'wells' && 'send_monthly_report' in data) {
-      return { ...data, send_monthly_report: Boolean(data.send_monthly_report) };
-    }
     if (table === 'readings' && 'is_in_range' in data) {
       return { ...data, is_in_range: Boolean(data.is_in_range) };
     }
     if (table === 'allocations' && 'is_manual_override' in data) {
       return { ...data, is_manual_override: Boolean(data.is_manual_override) };
+    }
+    if (table === 'report_email_recipients' && 'is_auto_added' in data) {
+      return { ...data, is_auto_added: Boolean(data.is_auto_added) };
     }
     return data;
   }
