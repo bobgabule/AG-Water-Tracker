@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 32
-Plan: 2 of 3 (32-02 complete)
-Status: Executing Phase 32
-Last activity: 2026-02-25 — Phase 32 Plan 02 complete
+Plan: 3 of 3 (32-03 complete)
+Status: Phase 32 Complete
+Last activity: 2026-02-25 — Phase 32 Plan 03 complete
 
-Progress: Phase 32: ██████░░░░ 67% (2/3 plans)
+Progress: Phase 32: ██████████ 100% (3/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 2 P32)
+- Total plans completed: 65 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -52,6 +52,7 @@ Progress: Phase 32: ██████░░░░ 67% (2/3 plans)
 | Phase 32 P02 | 5min | 2 | 10 |
 | Phase 31 P01 | 2min | 1 | 1 |
 | Phase 31 P02 | 2min | 2 | 5 |
+| Phase 32 P03 | 11min | 2 | 17 |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 31-01: Effective limit = tier max + farm extra seats (enables future add-on seat purchases)
 - Phase 31-01: COALESCE on tier_limit and extra_seats to handle NULL gracefully (defaults to 0)
 - Phase 31-02: Display server seat limit error messages directly (already user-friendly from migration 039)
+- Phase 32-03: UserLocationCircle Mapbox paint properties kept as raw hex (JS runtime, not Tailwind)
+- Phase 32-03: Two documented one-offs preserved: LocationPicker text-[#759099], LanguagePage hover:bg-[#f5f5f0]
 
 ### Pending Todos (manual steps)
 
@@ -109,6 +112,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 31-02-PLAN.md
+Stopped at: Completed 32-03-PLAN.md (Phase 32 complete)
 Resume file: —
-Next action: Resume Phase 32 — execute 32-03-PLAN.md
+Next action: Phase 32 complete — all design system plans executed
