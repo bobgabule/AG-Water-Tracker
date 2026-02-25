@@ -75,6 +75,8 @@ export default function WellDetailSheet({
     return isInRange(dist);
   }, [userLocation, well?.location]);
 
+  const lastReadingDate = readings.length > 0 ? readings[0].recordedAt : null;
+
   const [selectedReading, setSelectedReading] = useState<ReadingWithName | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
 
@@ -90,7 +92,7 @@ export default function WellDetailSheet({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex flex-col bg-white">
+      <div className="fixed inset-0 z-40 flex flex-col bg-surface-dark">
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
           {/* Map header with satellite image */}
@@ -98,6 +100,7 @@ export default function WellDetailSheet({
             well={well}
             farmName={farmName}
             proximityInRange={proximityInRange}
+            lastReadingDate={lastReadingDate}
             onClose={onClose}
             onEdit={onEdit}
           />
@@ -109,9 +112,10 @@ export default function WellDetailSheet({
                 well={well}
                 allocatedAf={currentAllocation?.allocatedAf ?? '0'}
                 usedAf={currentYearUsageAf}
+                unitLabel={well.units}
               />
 
-              {/* Readings table on white background */}
+              {/* Readings list */}
               <WellReadingsList
                 readings={readings}
                 unitLabel={well.units}
@@ -122,11 +126,11 @@ export default function WellDetailSheet({
         </div>
 
         {/* Fixed bottom: New Reading button */}
-        <div className="flex-shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 bg-white border-t border-gray-100">
+        <div className="flex-shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
           <button
             type="button"
             onClick={onNewReading}
-            className="w-full bg-btn-action text-white rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+            className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
           >
             <PlusIcon className="w-5 h-5" />
             New Reading
