@@ -6,6 +6,16 @@ interface WellUsageGaugeProps {
   well: WellWithReading;
   allocatedAf: string | null;
   usedAf: string | null;
+  unitLabel: string;
+}
+
+function getUnitDisplayName(unit: string): string {
+  switch (unit) {
+    case 'GAL': return 'Gallons';
+    case 'CF': return 'Cubic Feet';
+    case 'AF': return 'AF';
+    default: return unit;
+  }
 }
 
 function isHealthy(state: string): boolean {
@@ -16,7 +26,9 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   well,
   allocatedAf,
   usedAf,
+  unitLabel,
 }: WellUsageGaugeProps) {
+  const unitDisplayName = getUnitDisplayName(unitLabel);
   const allocated = parseFloat(allocatedAf ?? '') || 0;
   const used = parseFloat(usedAf ?? '') || 0;
   const remaining = Math.max(0, allocated - used);
@@ -79,17 +91,17 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
               <span className="text-white font-semibold">
                 {Math.round(allocated)}
               </span>{' '}
-              AF Allocated
+              {unitDisplayName} Allocated
             </p>
             <p className="text-white/80 text-sm">
               <span className="text-white font-semibold">
                 {Math.round(used)}
               </span>{' '}
-              AF Used
+              {unitDisplayName} Used
             </p>
             <div className="inline-block rounded px-2 py-0.5 mt-1" style={{ backgroundColor: GAUGE_COLOR + 'CC' }}>
               <span className="text-white text-sm font-semibold">
-                {Math.round(remaining)} AF Left
+                {Math.round(remaining)} {unitDisplayName} Left
               </span>
             </div>
           </div>
