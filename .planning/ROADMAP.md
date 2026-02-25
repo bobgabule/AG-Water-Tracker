@@ -275,6 +275,10 @@ Plans:
 **Goal**: Data queries are optimized, page transitions are smooth, and well creation feels instant
 **Depends on**: Phase 24 (skeleton screens must exist for deferred loading)
 **Requirements**: NAV-01, NAV-02, NAV-03
+**Plans**: 2 plans
+Plans:
+- [ ] 27-01-PLAN.md — Single JOIN query for useSubscriptionTier + View Transitions API cross-fade
+- [ ] 27-02-PLAN.md — Optimistic well creation with sync failure rollback
 **Success Criteria** (what must be TRUE):
   1. useSubscriptionTier fires a single SQL JOIN query instead of two sequential queries
   2. Page transitions show smooth cross-fade via View Transitions API on supported browsers (graceful fallback on others)
@@ -342,3 +346,21 @@ Plans:
 | 27. Query & Navigation Fluidity | v4.0 | 0/? | Deferred | — |
 | 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
+
+### Phase 30: Drop dead invite code
+
+**Goal:** [To be planned]
+**Depends on:** Phase 29
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 30 to break down)
+
+### Phase 31: Simplify invite user flow with seat limits
+
+**Goal:** [To be planned]
+**Depends on:** Phase 30
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 31 to break down)
