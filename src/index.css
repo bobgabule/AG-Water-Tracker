@@ -7,6 +7,43 @@
   --color-status-ok: #22C55E;
   --color-status-danger: #EF4444;
   --color-status-warning: #EAB308;
+
+  /* Surfaces */
+  --color-surface-header: #5f7248;
+  --color-surface-header-hover: #4e6339;
+  --color-surface-modal: #526640;
+  --color-surface-dark: #3a4a2a;
+  --color-surface-darkest: #2a3520;
+  --color-surface-page: #c5cdb4;
+  --color-surface-card: #dfe4d4;
+  --color-surface-card-hover: #d5dbc8;
+  --color-surface-input: #e8ebe0;
+
+  /* Buttons */
+  --color-btn-confirm: #bdefda;
+  --color-btn-confirm-text: #506741;
+  --color-btn-action: #4a7c59;
+  --color-btn-dark: #3d5030;
+  --color-btn-dark-active: #334428;
+
+  /* Controls */
+  --color-control-active: #89a267;
+  --color-control-active-alt: #8ca074;
+
+  /* Teal palette */
+  --color-teal: #5a9494;
+  --color-teal-light: #7fb3b3;
+  --color-teal-hover: #4a8484;
+  --color-teal-btn: #cdf2fb;
+  --color-teal-btn-text: #5e8f94;
+
+  /* Text */
+  --color-text-heading: #5f7248;
+
+  /* Accent/Misc */
+  --color-super-admin: #800000;
+  --color-accent-gps: #6190d1;
+  --color-text-coral: #e8937c;
 }
 
 @layer utilities {
