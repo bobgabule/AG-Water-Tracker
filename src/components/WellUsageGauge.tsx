@@ -70,20 +70,10 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
         <div className="flex-shrink-0 w-14 h-36 rounded-full bg-[#39432a] overflow-hidden relative border border-white/10 p-[3px]">
           <div className="w-full h-full rounded-full overflow-hidden relative">
             {remainingPercent > 0 && (
-              <>
-                {/* Fill from bottom */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 transition-all duration-500"
-                  style={{ height: `${remainingPercent}%`, backgroundColor: gaugeColor }}
-                />
-                {/* Rounded cap at top of fill */}
-                {remainingPercent > 8 && remainingPercent < 100 && (
-                  <div
-                    className="absolute left-0 right-0 h-4 rounded-t-full"
-                    style={{ bottom: `calc(${remainingPercent}% - 0.5rem)`, backgroundColor: gaugeColor }}
-                  />
-                )}
-              </>
+              <div
+                className="absolute bottom-0 left-0 right-0 rounded-t-full transition-all duration-500"
+                style={{ height: `${remainingPercent}%`, backgroundColor: gaugeColor }}
+              />
             )}
           </div>
         </div>
