@@ -31,6 +31,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
+  const [email, setEmail] = useState('');
   const [role, setRole] = useState<Role>('meter_checker');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -70,6 +71,10 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     setPhoneDigits(stripped);
   }, []);
 
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }, []);
+
   const handleRoleChange = useCallback((newRole: Role) => {
     setRole(newRole);
   }, []);
@@ -89,6 +94,10 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
       setError(t('user.invalidPhone'));
       return;
     }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError(t('user.invalidEmail'));
+      return;
+    }
 
     const fullPhone = `+1${phoneDigits}`;
 
@@ -102,6 +111,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
         p_first_name: firstName.trim(),
         p_last_name: lastName.trim(),
         p_role: role,
+        p_email: email.trim() || null,
       });
 
       if (rpcError) throw rpcError;
@@ -142,12 +152,13 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     } finally {
       setLoading(false);
     }
-  }, [farmId, farmName, firstName, lastName, phoneDigits, role]);
+  }, [farmId, farmName, firstName, lastName, phoneDigits, email, role, t]);
 
   const handleClose = useCallback(() => {
     setFirstName('');
     setLastName('');
     setPhoneDigits('');
+    setEmail('');
     setRole('meter_checker');
     setError('');
     setSuccess(false);
@@ -268,6 +279,19 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                   />
                   <p className="text-xs text-white mt-2">{t('auth.usPhoneHint')}</p>
+                </div>
+
+                {/* Email input */}
+                <div>
+                  <label className="text-xs text-white mb-2 block">{t('user.email')}</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={handleEmailChange}
+                    placeholder={t('user.emailPlaceholder')}
+                    autoComplete="email"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
+                  />
                 </div>
 
                 {/* Role selection */}

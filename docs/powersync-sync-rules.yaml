@@ -76,7 +76,7 @@ bucket_definitions:
   farm_invites:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
     data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, invited_email, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
   # Wells (via farm_members join table)

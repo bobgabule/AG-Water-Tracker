@@ -8,7 +8,7 @@ interface OtpInputProps {
   onChange: (index: number, value: string) => void;
   /** Callback for keyboard events (backspace handling) */
   onKeyDown: (index: number, e: KeyboardEvent<HTMLInputElement>) => void;
-  /** Number of OTP digits (default: 4) */
+  /** Number of OTP digits (default: 6) */
   length?: number;
   /** Disable all inputs */
   disabled?: boolean;
@@ -31,7 +31,7 @@ export default function OtpInput({
   value,
   onChange,
   onKeyDown,
-  length = 4,
+  length = 6,
   disabled = false,
   error = false,
   autoFocus = true,
@@ -118,7 +118,7 @@ export default function OtpInput({
 }
 
 // Export a hook for managing OTP state
-export function useOtpState(length: number = 4) {
+export function useOtpState(length: number = 6) {
   const initialState = Array(length).fill('');
 
   return {
