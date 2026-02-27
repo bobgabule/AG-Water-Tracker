@@ -40,6 +40,7 @@ const farm_invites = new TableV2({
   invited_phone: column.text,
   invited_first_name: column.text,
   invited_last_name: column.text,
+  invited_email: column.text,
   expires_at: column.text,
   max_uses: column.integer,
   uses_count: column.integer,

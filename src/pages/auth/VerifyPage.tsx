@@ -14,7 +14,7 @@ const RESEND_COOLDOWN = 30;
 
 /**
  * OTP verification page.
- * Allows users to enter the 4-digit code sent to their phone.
+ * Allows users to enter the 6-digit code sent to their phone.
  * Features auto-advance, auto-submit, and resend with cooldown.
  */
 export default function VerifyPage() {
@@ -27,7 +27,7 @@ export default function VerifyPage() {
   // Get phone from navigation state
   const phone = (location.state as { phone?: string } | null)?.phone;
 
-  const [code, setCode] = useState<string[]>(['', '', '', '']);
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -75,7 +75,7 @@ export default function VerifyPage() {
       if (e.key === 'Backspace' && !code[index] && index > 0) {
         // Move focus to previous input on backspace when current is empty
         const prevInput = document.querySelector<HTMLInputElement>(
-          `input[aria-label="Digit ${index} of 4"]`
+          `input[aria-label="Digit ${index} of 6"]`
         );
         prevInput?.focus();
       }
@@ -111,7 +111,7 @@ export default function VerifyPage() {
           setError(message);
         }
         // Clear code and focus first input on error
-        setCode(['', '', '', '']);
+        setCode(['', '', '', '', '', '']);
       } finally {
         setLoading(false);
         verifyingRef.current = false;
@@ -122,7 +122,7 @@ export default function VerifyPage() {
 
   // Auto-submit when all 4 digits are entered
   useEffect(() => {
-    const isComplete = code.every((d) => d !== '') && code.join('').length === 4;
+    const isComplete = code.every((d) => d !== '') && code.join('').length === 6;
     if (isComplete && !loading && !verifyingRef.current) {
       handleVerify(code.join(''));
     }
@@ -143,7 +143,7 @@ export default function VerifyPage() {
       await sendOtp(phone);
       setResendCooldown(RESEND_COOLDOWN);
       // Clear existing code
-      setCode(['', '', '', '']);
+      setCode(['', '', '', '', '', '']);
     } catch (err) {
       if (!navigator.onLine) {
         setError(t('auth.noInternetResend'));
@@ -158,7 +158,7 @@ export default function VerifyPage() {
   // Handle manual submit (for accessibility / button click)
   const handleSubmit = useCallback(() => {
     const fullCode = code.join('');
-    if (fullCode.length === 4 && !loading) {
+    if (fullCode.length === 6 && !loading) {
       handleVerify(fullCode);
     }
   }, [code, loading, handleVerify]);
@@ -179,7 +179,7 @@ export default function VerifyPage() {
     );
   }
 
-  const isCodeComplete = code.every((d) => d !== '') && code.join('').length === 4;
+  const isCodeComplete = code.every((d) => d !== '') && code.join('').length === 6;
 
   return (
     <AuthLayout>

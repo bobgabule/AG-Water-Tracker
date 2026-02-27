@@ -347,6 +347,10 @@ Plans:
 | 28. Reading & Validation Fixes | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 29. Well Detail & Allocation Corrections | v4.1 | 1/1 | Complete | 2026-02-25 |
 | 30. Drop Dead Invite Code | — | Complete    | 2026-02-25 | 2026-02-25 |
+| 31. Simplify Invite Flow | — | 2/2 | Complete | 2026-02-25 |
+| 32. Unified Design System | — | 3/3 | Complete | 2026-02-25 |
+| 33. Wells Page Gauge Fixes | — | — | Pending | — |
+| 34. Modal Dark Green Theme | — | 1/1 | Complete | 2026-02-27 |
 
 ### Phase 30: Drop Dead Invite Code
 **Goal**: Remove unused generic invite code RPCs (create_invite_code, join_farm_with_code) from the database — no client code references them, and they add unnecessary API surface
@@ -407,12 +411,12 @@ Plans:
 
 ### Phase 34: Update app-wide modal/dialog styling to dark green theme with consistent button colors
 
-**Goal:** [To be planned]
+**Goal:** Update all centered dialog modals (ConfirmDialog, LocationSoftAskModal, WellLimitModal) and MapOfflineOverlay to dark green backgrounds with consistent button colors (#b6e5d1 bg, #3b6454 text)
 **Depends on:** Phase 33
-**Plans:** 0 plans
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 34 to break down)
+- [x] 34-01-PLAN.md — Dark green modal backgrounds, consistent button token colors, MapOfflineOverlay theming
 
 ### Phase 35: Fix dashboard map auto-zoom on location enable and improve page reload speed
 
