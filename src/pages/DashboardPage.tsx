@@ -232,6 +232,27 @@ export default function DashboardPage() {
         ]
       );
 
+      // Add water district email to report recipients if checkbox is checked and email provided
+      if (wellData.sendMonthlyReport && wellData.waterDistrictEmail) {
+        try {
+          const email = wellData.waterDistrictEmail.toLowerCase();
+          const existing = await db.getAll<{ id: string }>(
+            'SELECT id FROM report_email_recipients WHERE farm_id = ? AND LOWER(email) = ?',
+            [farmId, email],
+          );
+          if (existing.length === 0) {
+            const recipientId = crypto.randomUUID();
+            await db.execute(
+              `INSERT INTO report_email_recipients (id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at)
+               VALUES (?, ?, ?, 0, NULL, ?, ?)`,
+              [recipientId, farmId, email, now, now],
+            );
+          }
+        } catch (emailErr) {
+          debugError('Dashboard', 'Failed to add water district email:', emailErr);
+        }
+      }
+
       setCurrentStep('closed');
       setPickedLocation(null);
       showToast(t('well.wellAdded', { name: wellData.name }));
