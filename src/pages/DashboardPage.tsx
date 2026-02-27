@@ -47,7 +47,7 @@ export default function DashboardPage() {
       : null;
 
   // Geolocation permission + location
-  const permission = useGeolocationPermission();
+  const { permission, isResolved } = useGeolocationPermission();
   const { location: userLocation, requestLocation } = useGeolocation({
     enableHighAccuracy: true,
     timeout: 10000,
@@ -57,10 +57,10 @@ export default function DashboardPage() {
 
   // Auto-request location when permission is already granted
   useEffect(() => {
-    if (permission === 'granted' && !userLocation) {
+    if (isResolved && permission === 'granted' && !userLocation) {
       requestLocation();
     }
-  }, [permission, userLocation, requestLocation]);
+  }, [isResolved, permission, userLocation, requestLocation]);
 
   // Location permission modal state
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -69,13 +69,15 @@ export default function DashboardPage() {
 
   // Auto-show location modal once on mount when permission not granted
   useEffect(() => {
-    if (modalAutoShownRef.current) return;
+    console.log('[LocationModal] effect fired:', { isResolved, permission, alreadyShown: modalAutoShownRef.current, dismissed: localStorage.getItem('location-modal-dismissed') });
+    if (!isResolved || modalAutoShownRef.current) return;
     const dismissed = localStorage.getItem('location-modal-dismissed') === 'true';
     if (permission !== 'granted' && !dismissed) {
+      console.log('[LocationModal] SHOWING modal — permission:', permission);
       modalAutoShownRef.current = true;
       setShowLocationModal(true);
     }
-  }, [permission]);
+  }, [isResolved, permission]);
 
   // Execute pending action after permission is granted
   useEffect(() => {
@@ -91,6 +93,7 @@ export default function DashboardPage() {
 
   const handleLocationAllow = useCallback(() => {
     setShowLocationModal(false);
+    localStorage.setItem('location-modal-dismissed', 'true');
     requestLocation();
   }, [requestLocation]);
 
