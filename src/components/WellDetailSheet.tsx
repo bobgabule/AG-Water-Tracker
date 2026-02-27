@@ -57,8 +57,11 @@ export default function WellDetailSheet({
   }, [allocations]);
 
   // Calculate usage: latest reading minus starting reading, converted to AF
+  // Falls back to stored used_af from allocation when readings can't produce a value
   const currentYearUsageAf = useMemo(() => {
-    if (!well || readings.length === 0) return '0';
+    const storedUsedAf = currentAllocation?.usedAf ?? '0';
+
+    if (!well || readings.length === 0) return storedUsedAf;
 
     // Latest reading (readings are sorted DESC by recorded_at)
     const latest = readings[0];
@@ -72,7 +75,7 @@ export default function WellDetailSheet({
       const yearReadings = readings.filter(
         (r) => new Date(r.recordedAt).getFullYear() === currentYear,
       );
-      if (yearReadings.length < 2) return '0';
+      if (yearReadings.length < 2) return storedUsedAf;
       baseline = yearReadings[yearReadings.length - 1].value;
     }
 
