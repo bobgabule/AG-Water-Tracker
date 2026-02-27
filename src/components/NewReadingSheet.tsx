@@ -9,7 +9,7 @@ import { usePowerSync } from '@powersync/react';
 import { useWellReadings } from '../hooks/useWellReadings';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
-import { getMultiplierValue, CONVERSION_TO_AF } from '../lib/usage-calculation';
+import { getMultiplierValue, CONVERSION_TO_AF, calculateUsageAf } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
@@ -169,12 +169,63 @@ export default function NewReadingSheet({
         useToastStore.getState().show(t('reading.saved'));
         resetForm();
         onClose();
+
+        // Auto-update used_af on the current allocation (fire-and-forget)
+        try {
+          const today = now.split('T')[0];
+          const allocRows = await db.getAll<{
+            id: string;
+            starting_reading: string | null;
+            period_start: string;
+          }>(
+            `SELECT id, starting_reading, period_start
+             FROM allocations
+             WHERE well_id = ? AND period_start <= ? AND period_end >= ?
+             ORDER BY period_start DESC LIMIT 1`,
+            [well.id, today, today],
+          );
+
+          if (allocRows.length > 0) {
+            const alloc = allocRows[0];
+            let baseline: string | null = alloc.starting_reading;
+
+            // Fallback: earliest reading in the allocation period (exclude just-inserted)
+            if (!baseline) {
+              const earliestRows = await db.getAll<{ value: string }>(
+                `SELECT value FROM readings
+                 WHERE well_id = ? AND recorded_at >= ? AND id != ?
+                 ORDER BY recorded_at ASC LIMIT 1`,
+                [well.id, alloc.period_start, readingId],
+              );
+              if (earliestRows.length > 0) {
+                baseline = earliestRows[0].value;
+              }
+            }
+
+            if (baseline) {
+              const usedAf = calculateUsageAf(
+                readingValue.trim(),
+                baseline,
+                well.multiplier,
+                well.units,
+              );
+              if (isFinite(usedAf)) {
+                await db.execute(
+                  `UPDATE allocations SET used_af = ?, updated_at = ? WHERE id = ?`,
+                  [usedAf.toFixed(2), now, alloc.id],
+                );
+              }
+            }
+          }
+        } catch {
+          // Allocation update is non-critical; reading was already saved
+        }
       } catch {
         useToastStore.getState().show(t('reading.saveFailed'), 'error');
         setView('form');
       }
     },
-    [db, well.id, well.location, farmId, userId, readingValue, resetForm, onClose],
+    [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose],
   );
 
   const handleGpsCaptureAndSave = useCallback(async (isSimilar = false) => {
