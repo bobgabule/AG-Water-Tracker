@@ -150,8 +150,8 @@ export default function SettingsPage() {
           )}
 
           {saveError && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-              <p className="text-red-400 text-sm">{saveError}</p>
+            <div className="bg-red-800/10 border border-red-800/30 rounded-lg p-3 mb-4">
+              <p className="text-red-800 text-sm">{saveError}</p>
             </div>
           )}
 
@@ -294,15 +294,15 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-text-heading mb-4">{t('settings.signOut')}</h2>
 
           {signOutError && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-              <p className="text-red-400 text-sm">{signOutError}</p>
+            <div className="bg-red-800/10 border border-red-800/30 rounded-lg p-3 mb-4">
+              <p className="text-red-800 text-sm">{signOutError}</p>
             </div>
           )}
 
           <button
             onClick={handleSignOut}
             disabled={signOutLoading}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold text-white transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-red-800 hover:bg-red-800 rounded-lg font-semibold text-white transition-colors disabled:opacity-50"
           >
             {signOutLoading ? (
               <>

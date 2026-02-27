@@ -409,7 +409,7 @@ export default function WellEditPage() {
               placeholder={t('well.wellNamePlaceholder')}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            {nameError && <p className="text-red-300 text-xs mt-1">{nameError}</p>}
+            {nameError && <p className="text-red-800 text-xs mt-1">{nameError}</p>}
           </div>
 
           {/* Meter Serial Number and WMIS Number */}
@@ -436,7 +436,7 @@ export default function WellEditPage() {
                 placeholder={t('well.wmisPlaceholder')}
                 className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              {wmisError && <p className="text-red-300 text-xs mt-1">{wmisError}</p>}
+              {wmisError && <p className="text-red-800 text-xs mt-1">{wmisError}</p>}
             </div>
           </div>
 
@@ -478,9 +478,9 @@ export default function WellEditPage() {
               )}
             </button>
           </div>
-          {gpsError && <p className="text-red-500 text-xs mt-1">{gpsError}</p>}
+          {gpsError && <p className="text-red-800 text-xs mt-1">{gpsError}</p>}
           {coordinateError && !gpsError && (
-            <p className="text-red-500 text-xs mt-1">{coordinateError}</p>
+            <p className="text-red-800 text-xs mt-1">{coordinateError}</p>
           )}
 
           {/* Allocations link */}
@@ -596,7 +596,7 @@ export default function WellEditPage() {
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="w-full py-3 text-red-400 font-medium flex items-center justify-center gap-2"
+          className="w-full py-3 text-red-800 font-medium flex items-center justify-center gap-2"
         >
           <TrashIcon className="w-5 h-5" />
           {t('well.deleteWell')}

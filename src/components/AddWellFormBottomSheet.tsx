@@ -289,10 +289,10 @@ export default function AddWellFormBottomSheet({
                 </button>
               </div>
               {gpsError && (
-                <p className="text-red-500 text-xs mt-1">{gpsError}</p>
+                <p className="text-red-800 text-xs mt-1">{gpsError}</p>
               )}
               {coordinateError && !gpsError && (
-                <p className="text-red-500 text-xs mt-1">{coordinateError}</p>
+                <p className="text-red-800 text-xs mt-1">{coordinateError}</p>
               )}
 
               {/* Allocations disabled card */}
@@ -344,7 +344,7 @@ export default function AddWellFormBottomSheet({
                   className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {emailError && (
-                  <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                  <p className="text-red-800 text-xs mt-1">{emailError}</p>
                 )}
               </div>
 

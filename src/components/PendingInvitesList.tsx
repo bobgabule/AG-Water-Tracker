@@ -91,8 +91,8 @@ export default function PendingInvitesList() {
       <h2 className="text-lg font-semibold text-text-heading mb-3">{t('invite.title')}</h2>
 
       {error && (
-        <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
-          <p className="text-red-700 text-sm">{error}</p>
+        <div className="bg-red-800 border border-red-800 rounded-lg p-3 mb-3">
+          <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
 
@@ -123,7 +123,7 @@ export default function PendingInvitesList() {
                   <button
                     onClick={() => handleRevoke(invite.id)}
                     disabled={isRevoking}
-                    className="p-1 rounded text-text-heading/40 hover:text-red-600 transition-colors disabled:opacity-50"
+                    className="p-1 rounded text-text-heading/40 hover:text-red-800 transition-colors disabled:opacity-50"
                     aria-label={`Revoke invite for ${invite.invited_first_name}`}
                   >
                     {isRevoking ? (

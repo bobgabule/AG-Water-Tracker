@@ -102,7 +102,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
             {proximityInRange !== null && (
               <span
                 className={`text-sm font-semibold ${
-                  proximityInRange ? 'text-green-400' : 'text-red-400'
+                  proximityInRange ? 'text-green-400' : 'text-red-800'
                 }`}
               >
                 {proximityInRange ? t('wellDetail.inRangeOfWell') : t('wellDetail.outOfRange')}

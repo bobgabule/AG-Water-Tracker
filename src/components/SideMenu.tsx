@@ -133,7 +133,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
             )}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-5 py-3 text-status-danger hover:bg-red-50 rounded-lg transition-colors text-left"
+              className="w-full flex items-center gap-3 px-5 py-3 text-status-danger hover:bg-red-800 rounded-lg transition-colors text-left"
             >
               <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
               <span>{t('nav.logout')}</span>

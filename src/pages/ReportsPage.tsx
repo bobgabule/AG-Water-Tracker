@@ -244,14 +244,14 @@ export default function ReportsPage() {
             className={`rounded-lg p-3 mb-4 ${
               sendResult.type === 'success'
                 ? 'bg-green-500/10 border border-green-500/30'
-                : 'bg-red-500/10 border border-red-500/30'
+                : 'bg-red-800/10 border border-red-800/30'
             }`}
           >
             <p
               className={`text-sm ${
                 sendResult.type === 'success'
                   ? 'text-green-600'
-                  : 'text-red-600'
+                  : 'text-red-800'
               }`}
             >
               {sendResult.message}
@@ -310,7 +310,7 @@ export default function ReportsPage() {
                 </span>
                 <button
                   onClick={() => handleRemoveEmail(recipient.id)}
-                  className="text-text-heading/40 hover:text-red-500 transition-colors flex-shrink-0"
+                  className="text-text-heading/40 hover:text-red-800 transition-colors flex-shrink-0"
                   aria-label={`Remove ${recipient.email}`}
                 >
                   <XMarkIcon className="w-5 h-5" />
@@ -334,7 +334,7 @@ export default function ReportsPage() {
                 autoFocus
                 onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
               />
-              {addError && <p className="text-red-500 text-xs">{addError}</p>}
+              {addError && <p className="text-red-800 text-xs">{addError}</p>}
               <div className="flex gap-2">
                 <button
                   onClick={() => {

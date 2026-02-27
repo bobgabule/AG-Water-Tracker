@@ -21,7 +21,6 @@ export const ACTIONS = [
   'delete_well',
   'manage_allocations',
   'record_reading',
-  'edit_reading',
   'delete_reading',
   'view_wells',
   'manage_users',
@@ -51,7 +50,6 @@ export const PERMISSION_MATRIX: Record<Role, Set<Action>> = {
     'delete_well',
     'manage_allocations',
     'record_reading',
-    'edit_reading',
     'delete_reading',
     'view_wells',
     'manage_users',
@@ -60,8 +58,6 @@ export const PERMISSION_MATRIX: Record<Role, Set<Action>> = {
   ]),
   meter_checker: new Set<Action>([
     'record_reading',
-    'edit_reading',
-    'delete_reading',
     'view_wells',
   ]),
 };

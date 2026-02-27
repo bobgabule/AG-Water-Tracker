@@ -37,8 +37,8 @@ export default function ConfirmDialog({
           className="w-full max-w-sm bg-surface-modal rounded-2xl p-6 shadow-xl transition duration-300 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
         >
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-              <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />
+            <div className="w-12 h-12 rounded-full bg-red-800/20 flex items-center justify-center mb-4">
+              <ExclamationTriangleIcon className="h-6 w-6 text-red-800" />
             </div>
 
             <DialogTitle className="text-lg font-semibold text-white mb-2">
@@ -60,7 +60,7 @@ export default function ConfirmDialog({
               <button
                 onClick={onConfirm}
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-lg font-medium text-white bg-red-800 hover:bg-red-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

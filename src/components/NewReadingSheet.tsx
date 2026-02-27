@@ -386,7 +386,7 @@ export default function NewReadingSheet({
                     </div>
                     {/* Validation error */}
                     {validationError && (
-                      <p className="text-red-400 text-sm">{validationError}</p>
+                      <p className="text-red-800 text-sm">{validationError}</p>
                     )}
                   </div>
                 )}

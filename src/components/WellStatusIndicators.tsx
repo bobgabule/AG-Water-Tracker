@@ -29,7 +29,7 @@ const WellStatusIndicators = React.memo(function WellStatusIndicators({
       <div className="flex flex-col gap-2">
         {items.map(({ label, healthy }) => {
           const Icon = healthy ? CheckCircleIcon : XCircleIcon;
-          const color = healthy ? 'text-green-400' : 'text-red-400';
+          const color = healthy ? 'text-green-400' : 'text-red-800';
           return (
             <div
               key={label}
