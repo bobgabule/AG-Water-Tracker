@@ -33,30 +33,30 @@ export default function SubscriptionPage() {
               {/* Admin seats */}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-heading">{t('subscription.admins')}</span>
-                <span className={`text-sm font-medium ${seatUsage.admin.isFull ? 'text-red-600' : 'text-text-heading'}`}>
+                <span className={`text-sm font-medium ${seatUsage.admin.isFull ? 'text-red-800' : 'text-text-heading'}`}>
                   {seatUsage.admin.used} / {seatUsage.admin.limit}
                   {seatUsage.admin.isFull && (
-                    <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
+                    <span className="ml-1.5 text-xs bg-red-800 text-red-800 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
                   )}
                 </span>
               </div>
               {/* Meter Checker seats */}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-heading">{t('subscription.meterCheckers')}</span>
-                <span className={`text-sm font-medium ${seatUsage.meter_checker.isFull ? 'text-red-600' : 'text-text-heading'}`}>
+                <span className={`text-sm font-medium ${seatUsage.meter_checker.isFull ? 'text-red-800' : 'text-text-heading'}`}>
                   {seatUsage.meter_checker.used} / {seatUsage.meter_checker.limit}
                   {seatUsage.meter_checker.isFull && (
-                    <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
+                    <span className="ml-1.5 text-xs bg-red-800 text-red-800 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
                   )}
                 </span>
               </div>
               {/* Wells */}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-heading">{t('subscription.wells')}</span>
-                <span className={`text-sm font-medium ${wellCount >= tier.maxWells ? 'text-red-600' : 'text-text-heading'}`}>
+                <span className={`text-sm font-medium ${wellCount >= tier.maxWells ? 'text-red-800' : 'text-text-heading'}`}>
                   {wellCount} / {tier.maxWells}
                   {wellCount >= tier.maxWells && (
-                    <span className="ml-1.5 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
+                    <span className="ml-1.5 text-xs bg-red-800 text-red-800 px-1.5 py-0.5 rounded-full">{t('subscription.full')}</span>
                   )}
                 </span>
               </div>

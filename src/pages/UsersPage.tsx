@@ -128,8 +128,8 @@ export default function UsersPage() {
 
         {/* Error banner */}
         {deleteError && !deleteTarget && (
-          <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-4">
-            <p className="text-red-700 text-sm">{deleteError}</p>
+          <div className="bg-red-800 border border-red-800 rounded-lg p-3 mb-4">
+            <p className="text-red-800 text-sm">{deleteError}</p>
           </div>
         )}
 
@@ -161,7 +161,7 @@ export default function UsersPage() {
                   {canDeleteMember(member) && (
                     <button
                       onClick={() => handleDeleteClick(member)}
-                      className="p-1 rounded text-text-heading/40 hover:text-red-600 transition-colors"
+                      className="p-1 rounded text-text-heading/40 hover:text-red-800 transition-colors"
                       aria-label={`Remove ${member.full_name}`}
                     >
                       <TrashIcon className="h-4 w-4" />

@@ -151,7 +151,7 @@ const es: Record<string, string> = {
   // ---------------------------------------------------------------------------
   'reading.title': 'LECTURAS',
   'reading.newReading': 'Nueva Lectura',
-  'reading.editReading': 'Editar Lectura',
+  'reading.readingDetails': 'Detalles de Lectura',
   'reading.noReadings': 'No hay lecturas disponibles',
   'reading.dateHeader': 'Fecha',
   'reading.userTimeHeader': 'Usuario / Hora',
@@ -159,11 +159,8 @@ const es: Record<string, string> = {
   'reading.validationRequired': 'El valor de lectura es requerido',
   'reading.validationNumber': 'Ingresa un numero valido',
   'reading.validationPositive': 'La lectura debe ser un numero positivo',
-  'reading.validationEdit': 'Ingresa una lectura de medidor valida',
   'reading.saved': 'Lectura guardada',
   'reading.saveFailed': 'Error al guardar la lectura',
-  'reading.updated': 'Lectura actualizada',
-  'reading.updateFailed': 'Error al actualizar la lectura',
   'reading.deleted': 'Lectura eliminada',
   'reading.deleteFailed': 'Error al eliminar la lectura',
   'reading.deleteConfirm': 'Eliminar la lectura {{value}} del {{date}}? Esto no se puede deshacer.',
@@ -202,6 +199,15 @@ const es: Record<string, string> = {
   'reading.problemFailed': 'Error al reportar el problema',
   'reading.submit': 'Enviar',
   'reading.submitting': 'Enviando...',
+
+  // Reading Detail Page
+  'readingDetail.back': 'Volver',
+  'readingDetail.gpsOffBy': 'La lectura GPS estuvo fuera por {{feet}} pies',
+  'readingDetail.similarReading': 'La lectura esta dentro de 50 galones de la lectura anterior',
+  'readingDetail.dateLabel': 'FECHA',
+  'readingDetail.meterReading': 'Lectura del Medidor',
+  'readingDetail.submittedBy': 'ENVIADO POR',
+  'readingDetail.deleteReading': 'Eliminar',
 
   // ---------------------------------------------------------------------------
   // Allocations

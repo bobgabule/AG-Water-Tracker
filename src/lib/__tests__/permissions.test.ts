@@ -17,7 +17,6 @@ describe('Owner permissions', () => {
     'delete_well',
     'manage_allocations',
     'record_reading',
-    'edit_reading',
     'delete_reading',
     'view_wells',
     'manage_users',
@@ -96,20 +95,23 @@ describe('Permission matrix integrity', () => {
     expect(hasPermission('admin', 'manage_farm')).toBe(false);
   });
 
-  it('meter_checker can only record/edit/delete readings and view wells', () => {
+  it('meter_checker can only record readings and view wells', () => {
     const allowed: Action[] = [
       'record_reading',
-      'edit_reading',
-      'delete_reading',
       'view_wells',
     ];
     const denied = ACTIONS.filter((a) => !allowed.includes(a));
 
+    expect(PERMISSION_MATRIX['meter_checker'].size).toBe(2);
     for (const action of allowed) {
       expect(hasPermission('meter_checker', action)).toBe(true);
     }
     for (const action of denied) {
       expect(hasPermission('meter_checker', action)).toBe(false);
     }
+  });
+
+  it('meter_checker cannot delete readings', () => {
+    expect(hasPermission('meter_checker', 'delete_reading')).toBe(false);
   });
 });

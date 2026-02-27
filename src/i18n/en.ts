@@ -151,7 +151,7 @@ const en: Record<string, string> = {
   // ---------------------------------------------------------------------------
   'reading.title': 'READINGS',
   'reading.newReading': 'New Reading',
-  'reading.editReading': 'Edit Reading',
+  'reading.readingDetails': 'Reading Details',
   'reading.noReadings': 'No available readings',
   'reading.dateHeader': 'Date',
   'reading.userTimeHeader': 'User / Time',
@@ -159,11 +159,8 @@ const en: Record<string, string> = {
   'reading.validationRequired': 'Reading value is required',
   'reading.validationNumber': 'Please enter a valid number',
   'reading.validationPositive': 'Reading must be a positive number',
-  'reading.validationEdit': 'Enter a valid meter reading',
   'reading.saved': 'Reading saved',
   'reading.saveFailed': 'Failed to save reading',
-  'reading.updated': 'Reading updated',
-  'reading.updateFailed': 'Failed to update reading',
   'reading.deleted': 'Reading deleted',
   'reading.deleteFailed': 'Failed to delete reading',
   'reading.deleteConfirm': 'Delete the reading {{value}} from {{date}}? This cannot be undone.',
@@ -202,6 +199,15 @@ const en: Record<string, string> = {
   'reading.problemFailed': 'Failed to report problem',
   'reading.submit': 'Submit',
   'reading.submitting': 'Submitting...',
+
+  // Reading Detail Page
+  'readingDetail.back': 'Back',
+  'readingDetail.gpsOffBy': 'GPS reading was off by {{feet}} feet',
+  'readingDetail.similarReading': 'Reading is within 50 gallons of the previous reading',
+  'readingDetail.dateLabel': 'DATE',
+  'readingDetail.meterReading': 'Meter Reading',
+  'readingDetail.submittedBy': 'SUBMITTED BY',
+  'readingDetail.deleteReading': 'Delete',
 
   // ---------------------------------------------------------------------------
   // Allocations

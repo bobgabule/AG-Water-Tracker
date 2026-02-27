@@ -107,7 +107,7 @@ export default function OtpInput({
             bg-white/10 backdrop-blur-sm border rounded-lg
             focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400
             transition-colors
-            ${error ? 'border-red-500/70' : 'border-white/20'}
+            ${error ? 'border-red-800/70' : 'border-white/20'}
             ${disabled ? 'opacity-50 cursor-not-allowed' : 'text-white'}
             placeholder-white/30
           `}

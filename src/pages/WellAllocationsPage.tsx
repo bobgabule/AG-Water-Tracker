@@ -467,7 +467,7 @@ export default function WellAllocationsPage() {
 
               {/* Overlap error */}
               {overlapError && (
-                <p className="text-red-300 text-xs">{overlapError}</p>
+                <p className="text-red-800 text-xs">{overlapError}</p>
               )}
 
               {/* Form actions */}
@@ -483,7 +483,7 @@ export default function WellAllocationsPage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="py-2.5 px-4 rounded-lg font-medium text-red-300 bg-white/10 active:bg-white/20 transition-colors"
+                    className="py-2.5 px-4 rounded-lg font-medium text-red-800 bg-white/10 active:bg-white/20 transition-colors"
                   >
                     {t('common.delete')}
                   </button>

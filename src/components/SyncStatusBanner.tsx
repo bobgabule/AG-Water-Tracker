@@ -19,7 +19,7 @@ export default memo(function SyncStatusBanner() {
 
   if (uploadError) {
     return (
-      <div className="px-3 py-1.5 rounded-full bg-red-500/80 backdrop-blur-sm text-white text-xs font-medium">
+      <div className="px-3 py-1.5 rounded-full bg-red-800/80 backdrop-blur-sm text-white text-xs font-medium">
         {t('sync.error')}
       </div>
     );

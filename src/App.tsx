@@ -13,6 +13,7 @@ const VerifyPage = lazy(() => import('./pages/auth/VerifyPage'));
 const NoSubscriptionPage = lazy(() => import('./pages/NoSubscriptionPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const WellDetailPage = lazy(() => import('./pages/WellDetailPage'));
+const ReadingDetailPage = lazy(() => import('./pages/ReadingDetailPage'));
 const WellEditPage = lazy(() => import('./pages/WellEditPage'));
 const WellAllocationsPage = lazy(() => import('./pages/WellAllocationsPage'));
 const WellListPage = lazy(() => import('./pages/WellListPage'));
@@ -123,6 +124,11 @@ export default function App() {
             <Route path="/wells/:id" element={
               <LazyRoute routePath="/wells/:id">
                 <WellDetailPage />
+              </LazyRoute>
+            } />
+            <Route path="/wells/:id/readings/:readingId" element={
+              <LazyRoute routePath="/wells/:id/readings/:readingId">
+                <ReadingDetailPage />
               </LazyRoute>
             } />
             <Route element={<RequireRole action="edit_well" fallbackPath={(params) => `/wells/${params.id}`} />}>

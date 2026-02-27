@@ -237,8 +237,8 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <div className="space-y-6">
                 {/* Error */}
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-red-600 text-sm">{error}</p>
+                  <div className="bg-red-800 border border-red-800 rounded-lg p-3">
+                    <p className="text-red-800 text-sm">{error}</p>
                   </div>
                 )}
 

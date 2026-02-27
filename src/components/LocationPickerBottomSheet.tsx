@@ -160,10 +160,10 @@ export default function LocationPickerBottomSheet({
 
           {/* GPS Error message */}
           {gpsError && (
-            <p className="text-red-500 text-xs mt-2">{gpsError}</p>
+            <p className="text-red-800 text-xs mt-2">{gpsError}</p>
           )}
           {coordinateError && !gpsError && (
-            <p className="text-red-500 text-xs mt-2">{coordinateError}</p>
+            <p className="text-red-800 text-xs mt-2">{coordinateError}</p>
           )}
         </div>
 

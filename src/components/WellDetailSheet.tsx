@@ -1,11 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router';
 import { PlusIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../hooks/useTranslation';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 import WellDetailHeader from './WellDetailHeader';
 import WellUsageGauge from './WellUsageGauge';
 import WellReadingsList from './WellReadingsList';
-import EditReadingSheet from './EditReadingSheet';
 import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -98,23 +98,16 @@ export default function WellDetailSheet({
     return isInRange(dist);
   }, [userLocation, well?.location]);
 
+  const navigate = useNavigate();
+
   const lastReadingDate = readings.length > 0 ? readings[0].recordedAt : null;
 
-  const [selectedReading, setSelectedReading] = useState<ReadingWithName | null>(null);
-  const [editSheetOpen, setEditSheetOpen] = useState(false);
-
   const handleReadingClick = useCallback((reading: ReadingWithName) => {
-    setSelectedReading(reading);
-    setEditSheetOpen(true);
-  }, []);
-
-  const handleEditClose = useCallback(() => {
-    setEditSheetOpen(false);
-    setSelectedReading(null);
-  }, []);
+    if (!well) return;
+    navigate(`/wells/${well.id}/readings/${reading.id}`, { viewTransition: true });
+  }, [navigate, well]);
 
   return (
-    <>
       <div className="fixed inset-0 z-40 flex flex-col bg-surface-dark">
         {/* Fixed header area — does not scroll */}
         <div className="flex-shrink-0">
@@ -168,17 +161,5 @@ export default function WellDetailSheet({
           </button>
         </div>
       </div>
-
-      {/* Edit reading modal */}
-      {editSheetOpen && selectedReading && well && (
-        <EditReadingSheet
-          open={editSheetOpen}
-          onClose={handleEditClose}
-          reading={selectedReading}
-          wellUnits={well.units}
-          wellMultiplier={well.multiplier}
-        />
-      )}
-    </>
   );
 }

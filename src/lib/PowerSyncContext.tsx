@@ -29,7 +29,7 @@ function PowerSyncErrorBanner({
   isRetrying: boolean;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 p-4 bg-red-900/95 text-white flex items-center justify-between gap-3 shadow-lg">
+    <div className="fixed inset-x-0 bottom-0 z-50 p-4 bg-red-800/95 text-white flex items-center justify-between gap-3 shadow-lg">
       <div className="flex items-center gap-3 min-w-0">
         <ArrowPathIcon className="h-5 w-5 shrink-0" />
         <p className="text-sm truncate">
