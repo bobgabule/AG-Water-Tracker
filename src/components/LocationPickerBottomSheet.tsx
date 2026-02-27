@@ -20,7 +20,7 @@ export default function LocationPickerBottomSheet({
 }: LocationPickerBottomSheetProps) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
-  const permission = useGeolocationPermission();
+  const { permission } = useGeolocationPermission();
 
   const handleGetLocation = useCallback(() => {
     // If permission is denied, show error immediately without calling API

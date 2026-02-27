@@ -1,19 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 
+interface GeolocationPermissionResult {
+  permission: PermissionState;
+  isResolved: boolean;
+}
+
 /**
  * Hook to track geolocation permission state using the Permissions API.
- * Returns 'prompt' | 'granted' | 'denied'
+ * Returns { permission, isResolved } where isResolved is true once the
+ * async Permissions API query has completed.
  * Falls back to 'prompt' if Permissions API is not supported.
  */
-export function useGeolocationPermission(): PermissionState {
+export function useGeolocationPermission(): GeolocationPermissionResult {
   const [permission, setPermission] = useState<PermissionState>('prompt');
+  const [isResolved, setIsResolved] = useState(false);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
     isMountedRef.current = true;
 
-    // Permissions API not supported - fall back to prompt
+    // Permissions API not supported - fall back to prompt, mark as resolved
     if (!navigator.permissions) {
+      setIsResolved(true);
       return;
     }
 
@@ -26,6 +34,7 @@ export function useGeolocationPermission(): PermissionState {
 
         permissionStatus = status;
         setPermission(status.state);
+        setIsResolved(true);
 
         // Listen for permission changes
         status.onchange = () => {
@@ -36,6 +45,9 @@ export function useGeolocationPermission(): PermissionState {
       })
       .catch(() => {
         // Permissions API query failed - keep default 'prompt' state
+        if (isMountedRef.current) {
+          setIsResolved(true);
+        }
       });
 
     // Cleanup listener on unmount
@@ -47,5 +59,5 @@ export function useGeolocationPermission(): PermissionState {
     };
   }, []);
 
-  return permission;
+  return { permission, isResolved };
 }
