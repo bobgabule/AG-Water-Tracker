@@ -1,12 +1,6 @@
-import { useMemo } from 'react';
-import { useQuery } from '@powersync/react';
+import { useState, useEffect } from 'react';
 import { useActiveFarm } from './useActiveFarm';
-
-interface EmailRow {
-  user_id: string;
-  email: string;
-  role: string;
-}
+import { supabase } from '../lib/supabase';
 
 export interface FarmAdminEmail {
   userId: string;
@@ -16,27 +10,29 @@ export interface FarmAdminEmail {
 
 export function useFarmAdminEmails() {
   const { farmId } = useActiveFarm();
+  const [adminEmails, setAdminEmails] = useState<FarmAdminEmail[]>([]);
 
-  const query = farmId
-    ? `SELECT fm.user_id, u.email, fm.role
-       FROM farm_members fm
-       JOIN users u ON u.id = fm.user_id
-       WHERE fm.farm_id = ?
-         AND fm.role IN ('owner', 'admin', 'super_admin')
-         AND u.email IS NOT NULL
-         AND u.email != ''
-       ORDER BY fm.created_at ASC`
-    : 'SELECT NULL WHERE 0';
+  useEffect(() => {
+    if (!farmId) return;
 
-  const { data } = useQuery<EmailRow>(query, farmId ? [farmId] : []);
+    supabase
+      .rpc('get_farm_admin_emails', { p_farm_id: farmId })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to fetch admin emails:', error);
+          return;
+        }
+        if (data) {
+          setAdminEmails(
+            data.map((row: { user_id: string; email: string; role: string }) => ({
+              userId: row.user_id,
+              email: row.email,
+              role: row.role,
+            })),
+          );
+        }
+      });
+  }, [farmId]);
 
-  return useMemo<FarmAdminEmail[]>(
-    () =>
-      (data ?? []).map((row) => ({
-        userId: row.user_id,
-        email: row.email,
-        role: row.role,
-      })),
-    [data],
-  );
+  return adminEmails;
 }

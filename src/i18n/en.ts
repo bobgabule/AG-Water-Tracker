@@ -329,8 +329,10 @@ const en: Record<string, string> = {
   // Reports
   // ---------------------------------------------------------------------------
   'reports.title': 'AUTOMATED REPORTING',
-  'reports.subtitle': 'Owner and admin users, plus any users included in the table below, will receive a monthly reading report for each well that is included.',
+  'reports.subtitle': 'Owner and admin users, plus the users listed below, will receive a monthly well reading report on the <strong>15th</strong> of each month, including the most recent reading available as of that date.',
   'reports.emailList': 'Email List',
+  'reports.roleOwner': 'Owner',
+  'reports.roleAdmin': 'Admin',
   'reports.addEmail': 'Add Email',
   'reports.emailPlaceholder': 'email@example.com',
   'reports.invalidEmail': 'Please enter a valid email address',

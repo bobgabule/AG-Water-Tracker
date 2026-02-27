@@ -236,9 +236,7 @@ export default function ReportsPage() {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-sm text-text-heading/60 mb-6">
-          {t('reports.subtitle')}
-        </p>
+        <p className="text-sm text-text-heading/60 mb-6" dangerouslySetInnerHTML={{ __html: t('reports.subtitle') }} />
 
         {/* Success/Error feedback */}
         {sendResult && (
@@ -268,7 +266,41 @@ export default function ReportsPage() {
           </h2>
 
           <div className="space-y-2">
-            {recipients.map((recipient) => (
+            {/* Owner emails first, then admin, then manually added */}
+            {adminEmails
+              .filter((a) => a.role === 'owner')
+              .map((admin) => (
+              <div
+                key={admin.userId}
+                className="flex items-center gap-2 bg-surface-input border border-text-heading/15 rounded-lg px-3 py-2.5"
+              >
+                <span className="flex-1 text-text-heading text-sm truncate">
+                  {admin.email}
+                </span>
+                <span className="text-xs text-text-heading/40 capitalize flex-shrink-0">
+                  {t('reports.roleOwner')}
+                </span>
+              </div>
+            ))}
+            {adminEmails
+              .filter((a) => a.role === 'admin' || a.role === 'super_admin')
+              .map((admin) => (
+              <div
+                key={admin.userId}
+                className="flex items-center gap-2 bg-surface-input border border-text-heading/15 rounded-lg px-3 py-2.5"
+              >
+                <span className="flex-1 text-text-heading text-sm truncate">
+                  {admin.email}
+                </span>
+                <span className="text-xs text-text-heading/40 capitalize flex-shrink-0">
+                  {t('reports.roleAdmin')}
+                </span>
+              </div>
+            ))}
+            {/* Manually added emails (removable) */}
+            {recipients
+              .filter((r) => !adminEmails.some((a) => a.email.toLowerCase() === r.email.toLowerCase()))
+              .map((recipient) => (
               <div
                 key={recipient.id}
                 className="flex items-center gap-2 bg-surface-input border border-text-heading/15 rounded-lg px-3 py-2.5"

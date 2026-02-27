@@ -329,8 +329,10 @@ const es: Record<string, string> = {
   // Reports
   // ---------------------------------------------------------------------------
   'reports.title': 'REPORTES AUTOMATIZADOS',
-  'reports.subtitle': 'Los usuarios propietarios y administradores, junto con los usuarios incluidos en la tabla a continuacion, recibiran un reporte mensual de lecturas para cada pozo incluido.',
+  'reports.subtitle': 'Los usuarios propietarios y administradores, junto con los usuarios listados a continuacion, recibiran un reporte mensual de lecturas de pozos el <strong>15</strong> de cada mes, incluyendo la lectura mas reciente disponible a esa fecha.',
   'reports.emailList': 'Lista de Correos',
+  'reports.roleOwner': 'Propietario',
+  'reports.roleAdmin': 'Admin',
   'reports.addEmail': 'Agregar Correo',
   'reports.emailPlaceholder': 'correo@ejemplo.com',
   'reports.invalidEmail': 'Ingresa una direccion de correo valida',
