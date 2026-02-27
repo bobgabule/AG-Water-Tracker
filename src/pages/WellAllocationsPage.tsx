@@ -72,7 +72,6 @@ export default function WellAllocationsPage() {
   const [formAllocatedAf, setFormAllocatedAf] = useState('');
   const [formStartingReading, setFormStartingReading] = useState('');
   const [formUsedAf, setFormUsedAf] = useState('');
-  const [isManualOverride, setIsManualOverride] = useState(false);
 
   // Validation + save state
   const [overlapError, setOverlapError] = useState<string | null>(null);
@@ -95,9 +94,9 @@ export default function WellAllocationsPage() {
     return `${formEndYear}-${formEndMonth}-${String(lastDay).padStart(2, '0')}`;
   }, [formEndYear, formEndMonth]);
 
-  // Auto-calculate usage when not manually overridden
+  // Auto-calculate usage from readings within the period
   useEffect(() => {
-    if (isManualOverride || !well) return;
+    if (!well) return;
 
     const startingVal = parseFloat(formStartingReading);
     if (isNaN(startingVal)) {
@@ -122,7 +121,7 @@ export default function WellAllocationsPage() {
     } else {
       setFormUsedAf('0.00');
     }
-  }, [readings, formStartingReading, formStart, formEnd, well, isManualOverride]);
+  }, [readings, formStartingReading, formStart, formEnd, well]);
 
   // Reset form to defaults
   const resetForm = useCallback(() => {
@@ -134,7 +133,6 @@ export default function WellAllocationsPage() {
     setFormAllocatedAf('');
     setFormStartingReading('');
     setFormUsedAf('');
-    setIsManualOverride(false);
     setOverlapError(null);
     setShowStartPicker(false);
     setShowEndPicker(false);
@@ -159,7 +157,6 @@ export default function WellAllocationsPage() {
       setFormAllocatedAf(allocation.allocatedAf);
       setFormStartingReading(allocation.startingReading);
       setFormUsedAf(allocation.usedAf);
-      setIsManualOverride(allocation.isManualOverride);
       setOverlapError(null);
       setShowStartPicker(false);
       setShowEndPicker(false);
@@ -225,8 +222,8 @@ export default function WellAllocationsPage() {
         // Create new
         const allocationId = crypto.randomUUID();
         await db.execute(
-          `INSERT INTO allocations (id, well_id, farm_id, period_start, period_end, allocated_af, used_af, is_manual_override, starting_reading, notes, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO allocations (id, well_id, farm_id, period_start, period_end, allocated_af, used_af, starting_reading, notes, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             allocationId,
             id,
@@ -235,7 +232,6 @@ export default function WellAllocationsPage() {
             formEnd,
             formAllocatedAf,
             usedVal,
-            isManualOverride ? 1 : 0,
             formStartingReading || null,
             null,
             nowIso,
@@ -247,13 +243,12 @@ export default function WellAllocationsPage() {
       } else {
         // Update existing
         await db.execute(
-          `UPDATE allocations SET period_start = ?, period_end = ?, allocated_af = ?, used_af = ?, is_manual_override = ?, starting_reading = ?, updated_at = ? WHERE id = ?`,
+          `UPDATE allocations SET period_start = ?, period_end = ?, allocated_af = ?, used_af = ?, starting_reading = ?, updated_at = ? WHERE id = ?`,
           [
             formStart,
             formEnd,
             formAllocatedAf,
             usedVal,
-            isManualOverride ? 1 : 0,
             formStartingReading || null,
             nowIso,
             selectedId,
@@ -272,7 +267,6 @@ export default function WellAllocationsPage() {
     formEnd,
     formUsedAf,
     formStartingReading,
-    isManualOverride,
     selectedId,
     id,
     farmId,
@@ -307,12 +301,6 @@ export default function WellAllocationsPage() {
     () => allocations.find((a) => a.id === selectedId) ?? null,
     [allocations, selectedId],
   );
-
-  // Handle Used AF field change (manual override)
-  const handleUsedAfChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormUsedAf(e.target.value);
-    setIsManualOverride(true);
-  }, []);
 
   // Loading state
   if (!well && wells.length === 0) {
@@ -453,13 +441,13 @@ export default function WellAllocationsPage() {
               {/* Used AF */}
               <div>
                 <label className="text-xs text-white/60 mb-1 block">
-                  {t('allocation.usedAf')}{isManualOverride && <span className="ml-1 text-yellow-400">M</span>}
+                  {t('allocation.usedAf')}
                 </label>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={formUsedAf}
-                  onChange={handleUsedAfChange}
+                  onChange={(e) => setFormUsedAf(e.target.value)}
                   placeholder="0.00"
                   className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/40"
                 />
@@ -534,9 +522,6 @@ export default function WellAllocationsPage() {
                     }`}
                   >
                     <td className="border border-white/30 px-2.5 py-2.5 text-white/80">
-                      {allocation.isManualOverride && (
-                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-white text-[10px] font-bold mr-1.5 align-middle">M</span>
-                      )}
                       {formatPeriodDate(allocation.periodStart, locale)}
                     </td>
                     <td className="border border-white/30 px-2.5 py-2.5 text-white/80">

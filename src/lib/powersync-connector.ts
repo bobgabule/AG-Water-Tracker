@@ -117,9 +117,6 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     if (table === 'readings' && 'is_in_range' in data) {
       return { ...data, is_in_range: Boolean(data.is_in_range) };
     }
-    if (table === 'allocations' && 'is_manual_override' in data) {
-      return { ...data, is_manual_override: Boolean(data.is_manual_override) };
-    }
     if (table === 'report_email_recipients' && 'is_auto_added' in data) {
       return { ...data, is_auto_added: Boolean(data.is_auto_added) };
     }
