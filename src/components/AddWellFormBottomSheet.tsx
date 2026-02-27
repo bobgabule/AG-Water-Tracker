@@ -13,6 +13,8 @@ export interface WellFormData {
   longitude: number;
   units: 'AF' | 'GAL' | 'CF';
   multiplier: '0.01' | '1' | '10' | '1000' | 'MG';
+  sendMonthlyReport: boolean;
+  waterDistrictEmail: string;
   batteryState: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
   pumpState: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
   meterStatus: 'Ok' | 'Low' | 'Critical' | 'Dead' | 'Unknown';
@@ -59,6 +61,9 @@ export default function AddWellFormBottomSheet({
   const [longitude, setLongitude] = useState(initialLocation.longitude);
   const [units, setUnits] = useState<'AF' | 'GAL' | 'CF'>('AF');
   const [multiplier, setMultiplier] = useState<'0.01' | '1' | '10' | '1000' | 'MG'>('1');
+  const [sendMonthlyReport, setSendMonthlyReport] = useState(true);
+  const [waterDistrictEmail, setWaterDistrictEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [batteryState, setBatteryState] = useState<WellFormData['batteryState']>('Unknown');
   const [pumpState, setPumpState] = useState<WellFormData['pumpState']>('Unknown');
   const [meterStatus, setMeterStatus] = useState<WellFormData['meterStatus']>('Unknown');
@@ -75,6 +80,9 @@ export default function AddWellFormBottomSheet({
       setLongitude(initialLocation.longitude);
       setUnits('AF');
       setMultiplier('1');
+      setSendMonthlyReport(true);
+      setWaterDistrictEmail('');
+      setEmailError(null);
       setBatteryState('Unknown');
       setPumpState('Unknown');
       setMeterStatus('Unknown');
@@ -131,6 +139,16 @@ export default function AddWellFormBottomSheet({
   }, []);
 
   const handleSave = useCallback(() => {
+    // Validate email if provided
+    if (waterDistrictEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(waterDistrictEmail.trim())) {
+        setEmailError(t('well.invalidEmail'));
+        return;
+      }
+    }
+    setEmailError(null);
+
     const wellData: WellFormData = {
       name,
       meterSerialNumber,
@@ -139,6 +157,8 @@ export default function AddWellFormBottomSheet({
       longitude,
       units,
       multiplier,
+      sendMonthlyReport,
+      waterDistrictEmail: waterDistrictEmail.trim(),
       batteryState,
       pumpState,
       meterStatus,
@@ -152,6 +172,8 @@ export default function AddWellFormBottomSheet({
     longitude,
     units,
     multiplier,
+    sendMonthlyReport,
+    waterDistrictEmail,
     batteryState,
     pumpState,
     meterStatus,
@@ -163,7 +185,8 @@ export default function AddWellFormBottomSheet({
   const isFormValid =
     name.trim() !== '' &&
     wmisNumber.trim() !== '' &&
-    coordinateError === null;
+    coordinateError === null &&
+    emailError === null;
 
   return (
     <Dialog open={open} onClose={isSaving ? () => {} : onClose} className="relative z-50">
@@ -295,6 +318,35 @@ export default function AddWellFormBottomSheet({
                 value={multiplier}
                 onChange={handleMultiplierChange}
               />
+
+              {/* Send Monthly Report Checkbox */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sendMonthlyReport}
+                  onChange={(e) => setSendMonthlyReport(e.target.checked)}
+                  className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm text-white">{t('well.sendMonthlyReport')}</span>
+              </label>
+
+              {/* Water District Email */}
+              <div>
+                <label className="text-xs text-white mb-1 block">{t('well.waterDistrictEmail')}</label>
+                <input
+                  type="email"
+                  value={waterDistrictEmail}
+                  onChange={(e) => {
+                    setWaterDistrictEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  placeholder={t('well.waterDistrictEmailPlaceholder')}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                {emailError && (
+                  <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                )}
+              </div>
 
               {/* Battery State */}
               <div>
