@@ -283,7 +283,7 @@ export default function ReportsPage() {
               </div>
             ))}
             {adminEmails
-              .filter((a) => a.role === 'admin' || a.role === 'super_admin')
+              .filter((a) => a.role === 'admin')
               .map((admin) => (
               <div
                 key={admin.userId}

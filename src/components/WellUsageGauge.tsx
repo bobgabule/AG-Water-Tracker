@@ -71,7 +71,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
           <div className="w-full h-full rounded-full overflow-hidden relative">
             {remainingPercent > 0 && (
               <div
-                className="absolute bottom-0 left-0 right-0 rounded-t-full transition-all duration-500"
+                className="absolute bottom-0 left-0 right-0 transition-all duration-500"
                 style={{ height: `${remainingPercent}%`, backgroundColor: gaugeColor }}
               />
             )}
