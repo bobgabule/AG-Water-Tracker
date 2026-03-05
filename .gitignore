@@ -38,3 +38,14 @@ supabase/.temp/
 
 # Windows artifacts
 nul
+
+# AI/agent tool directories
+.agent
+.agents
+.claude
+.cursor
+.planning
+
+# Project docs and instructions
+CLAUDE.md
+docs
