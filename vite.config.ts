@@ -41,34 +41,38 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigationPreload: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,webp}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
-          // Mapbox API (raster/satellite tiles, styles)
+          // Mapbox API (styles, sprites — not raw tile requests)
           {
-            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
+            urlPattern: /^https:\/\/api\.mapbox\.com\/(styles|fonts|sprites)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mapbox-api-v1',
               expiration: {
-                maxEntries: 2000,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                purgeOnQuotaError: true,
               },
               cacheableResponse: {
                 statuses: [200],
               },
             },
           },
-          // Mapbox vector tiles (separate subdomain)
+          // Mapbox vector tiles (separate subdomain) — limited for iOS ~50MB quota
           {
             urlPattern: /^https:\/\/.*\.tiles\.mapbox\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mapbox-tiles-v1',
               expiration: {
-                maxEntries: 3000,
+                maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                purgeOnQuotaError: true,
               },
               cacheableResponse: {
                 statuses: [200],
@@ -84,6 +88,7 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                purgeOnQuotaError: true,
               },
               cacheableResponse: {
                 statuses: [200],
