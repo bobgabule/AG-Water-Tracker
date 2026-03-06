@@ -86,6 +86,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if ((permission === 'granted' || userLocation) && pendingAction === 'new-well') {
       setPendingAction(null);
+      setShowLocationModal(false);
       if (tier && wellCount >= tier.maxWells) {
         setShowLimitModal(true);
       } else {
@@ -139,7 +140,7 @@ export default function DashboardPage() {
       queueMicrotask(() => {
         if (tier && wellCount >= tier.maxWells) {
           setShowLimitModal(true);
-        } else if (permission !== 'granted') {
+        } else if (permission !== 'granted' && !userLocation) {
           setPendingAction('new-well');
           setShowLocationModal(true);
         } else {
@@ -162,13 +163,13 @@ export default function DashboardPage() {
       setShowLimitModal(true);
       return;
     }
-    if (permission !== 'granted') {
+    if (permission !== 'granted' && !userLocation) {
       setPendingAction('new-well');
       setShowLocationModal(true);
       return;
     }
     setCurrentStep('location');
-  }, [tier, wellCount, permission]);
+  }, [tier, wellCount, permission, userLocation]);
 
   const handleLimitModalClose = useCallback(() => {
     setShowLimitModal(false);
