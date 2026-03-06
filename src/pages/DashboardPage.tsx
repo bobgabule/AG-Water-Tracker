@@ -80,8 +80,11 @@ export default function DashboardPage() {
   }, [isResolved, permission]);
 
   // Execute pending action after permission is granted
+  // Check both permission state AND userLocation — Safari doesn't fire
+  // PermissionStatus.onchange, so permission may stay 'prompt' even after
+  // the user grants access. A successful geolocation result is proof enough.
   useEffect(() => {
-    if (permission === 'granted' && pendingAction === 'new-well') {
+    if ((permission === 'granted' || userLocation) && pendingAction === 'new-well') {
       setPendingAction(null);
       if (tier && wellCount >= tier.maxWells) {
         setShowLimitModal(true);
@@ -89,7 +92,7 @@ export default function DashboardPage() {
         setCurrentStep('location');
       }
     }
-  }, [permission, pendingAction, tier, wellCount]);
+  }, [permission, pendingAction, tier, wellCount, userLocation]);
 
   const handleLocationAllow = useCallback(() => {
     setShowLocationModal(false);
