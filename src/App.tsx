@@ -6,7 +6,7 @@ import RequireRole from './components/RequireRole';
 import AppLayout from './components/AppLayout';
 import PageLoader from './components/PageLoader';
 import LazyErrorBoundary from './components/LazyErrorBoundary';
-import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
+import { UpdateToast } from './components/UpdateToast';
 
 // Lazy-loaded page components — each becomes its own chunk
 const PhonePage = lazy(() => import('./pages/auth/PhonePage'));
@@ -44,9 +44,9 @@ function LazyRoute({
 }
 
 export default function App() {
-  useServiceWorkerUpdate();
-
   return (
+    <>
+    <UpdateToast />
     <Routes>
       {/* Auth routes - redirect if already logged in (handled by PhonePage) */}
       <Route path="/auth/phone" element={
@@ -155,5 +155,6 @@ export default function App() {
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

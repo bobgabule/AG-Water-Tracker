@@ -1,44 +1,56 @@
 import { useEffect, useRef } from 'react'
+import { useRegisterSW } from 'virtual:pwa-register/react'
+
+const UPDATE_CHECK_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
 
 /**
- * iOS PWA workaround: force service worker update checks on visibility change
- * and periodic polling. iOS freezes backgrounded PWAs instead of terminating
- * the old SW, so the browser's 24-hour update check rarely fires.
+ * Registers the service worker and checks for updates on visibility change
+ * (debounced to avoid excessive checks on iOS where system overlays
+ * trigger frequent visibilitychange events).
+ *
+ * Returns `needRefresh` and `updateServiceWorker` for the update toast UI.
  */
 export function useServiceWorkerUpdate() {
+  const lastCheckRef = useRef(0)
   const wasHidden = useRef(false)
+  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined)
 
+  const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
+    onRegisteredSW(_swUrl, registration) {
+      registrationRef.current = registration
+
+      // Request persistent storage (iOS always returns false)
+      navigator.storage?.persist?.().catch(() => {})
+    },
+  })
+
+  // Visibility-change listener with proper cleanup
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return
-
-    const checkForUpdate = () => {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        reg?.update().catch(() => {
-          // Network error during update check — ignore silently
-        })
-      })
-    }
-
-    // Only trigger update check when returning from background, not on initial load
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         wasHidden.current = true
-      } else if (document.visibilityState === 'visible' && wasHidden.current) {
-        checkForUpdate()
+        return
       }
+      if (!wasHidden.current || !registrationRef.current) return
+      wasHidden.current = false
+
+      const now = Date.now()
+      if (now - lastCheckRef.current < UPDATE_CHECK_COOLDOWN_MS) return
+      lastCheckRef.current = now
+      registrationRef.current.update().catch(() => {})
     }
+
     document.addEventListener('visibilitychange', onVisibilityChange)
-
-    // Poll every 30 minutes as fallback
-    const interval = setInterval(checkForUpdate, 30 * 60 * 1000)
-
-    // Request persistent storage to reduce cache eviction.
-    // Note: iOS always returns false — it does not honour the Persistent Storage API.
-    navigator.storage?.persist?.().catch(() => {})
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-      clearInterval(interval)
-    }
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [])
+
+  // Auto-dismiss offlineReady after 3s (not actionable for the user)
+  const [offlineReadyFlag, setOfflineReady] = offlineReady
+  useEffect(() => {
+    if (!offlineReadyFlag) return
+    const t = setTimeout(() => setOfflineReady(false), 3000)
+    return () => clearTimeout(t)
+  }, [offlineReadyFlag, setOfflineReady])
+
+  return { needRefresh, updateServiceWorker }
 }
