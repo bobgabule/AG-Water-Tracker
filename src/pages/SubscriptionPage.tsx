@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
@@ -8,7 +7,6 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useUserRole } from '../hooks/useUserRole';
 import { useWellCount } from '../hooks/useWellCount';
 import { supabase } from '../lib/supabase';
-import PlanChangeModal from '../components/PlanChangeModal';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -95,20 +93,16 @@ function SkeletonCard({ lines }: { lines: number }) {
 
 export default function SubscriptionPage() {
   const { t, locale } = useTranslation();
-  const { farmId } = useActiveFarm();
   const role = useUserRole();
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const wellCount = useWellCount();
-  const { data: stripeData, loading: stripeLoading, refetch } = useStripeSubscription();
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalProcessing, setModalProcessing] = useState(false);
-  const [modalError, setModalError] = useState<string | null>(null);
+  const { data: stripeData, loading: stripeLoading } = useStripeSubscription();
 
   const isOwner = role === 'owner' || role === 'super_admin';
-  const currentTierSlug = (tier?.slug ?? 'starter') as 'starter' | 'pro';
-  const targetTier: 'starter' | 'pro' = currentTierSlug === 'starter' ? 'pro' : 'starter';
+  const planBadge = stripeData
+    ? getStatusBadge(stripeData.status, t)
+    : getStatusBadge('active', t);
 
   // ------ Portal helper ------
   const openPortal = useCallback(async (flowType?: string) => {
@@ -133,31 +127,6 @@ export default function SubscriptionPage() {
       console.error('Failed to open portal:', err);
     }
   }, []);
-
-  // ------ Plan change handler ------
-  const handleConfirmPlanChange = useCallback(async () => {
-    setModalProcessing(true);
-    setModalError(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        'update-subscription',
-        { body: { target_tier: targetTier } }
-      );
-
-      if (error || data?.error) {
-        setModalError(error?.message || data?.error || 'Failed to update plan');
-        return;
-      }
-
-      setModalOpen(false);
-      refetch();
-    } catch (err) {
-      setModalError(err instanceof Error ? err.message : 'Unexpected error');
-    } finally {
-      setModalProcessing(false);
-    }
-  }, [targetTier, refetch]);
 
   const hasFailedPayment =
     stripeData?.status === 'past_due' || stripeData?.status === 'unpaid';
@@ -189,31 +158,24 @@ export default function SubscriptionPage() {
         {/* ----------------------------------------------------------------
             2. Current Plan Section
         ---------------------------------------------------------------- */}
-        {stripeLoading ? (
-          <SkeletonCard lines={4} />
-        ) : stripeData ? (
+        {tier ? (
           <div className="bg-surface-card rounded-lg p-4 mb-4">
-            {(() => {
-              const badge = getStatusBadge(stripeData.status, t);
-              return (
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider">
-                    {t('subscription.currentPlan')}
-                  </h2>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.className}`}
-                  >
-                    {badge.label}
-                  </span>
-                </div>
-              );
-            })()}
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider">
+                {t('subscription.currentPlan')}
+              </h2>
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${planBadge.className}`}
+              >
+                {planBadge.label}
+              </span>
+            </div>
 
             <p className="text-lg font-bold text-text-heading mb-1">
-              {tier?.displayName ?? stripeData.planName}
+              {tier.displayName}
             </p>
 
-            {stripeData.currentPeriodEnd && (
+            {stripeData?.currentPeriodEnd && (
               <p className="text-sm text-text-body mb-1">
                 {t('subscription.renewsOn', {
                   date: formatDate(stripeData.currentPeriodEnd, locale),
@@ -221,7 +183,7 @@ export default function SubscriptionPage() {
               </p>
             )}
 
-            {stripeData.unitAmount > 0 && (
+            {stripeData && stripeData.unitAmount > 0 && (
               <p className="text-sm text-text-body mb-3">
                 {t('subscription.perMonth', {
                   amount: formatCurrency(stripeData.unitAmount, stripeData.currency),
@@ -229,28 +191,19 @@ export default function SubscriptionPage() {
               </p>
             )}
 
-            {/* Plan change button -- owners only */}
-            {isOwner && farmId && (
+            {/* Cancel subscription -- owners only, Stripe only, not already canceled */}
+            {isOwner && stripeData && stripeData.status !== 'canceled' && (
               <button
-                onClick={() => setModalOpen(true)}
-                className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                  currentTierSlug === 'starter'
-                    ? 'bg-btn-action text-white hover:bg-btn-action/80'
-                    : 'bg-gray-400 text-gray-800 hover:bg-gray-500'
-                }`}
+                onClick={() => openPortal('subscription_cancel')}
+                className="w-full py-2.5 rounded-lg font-medium text-sm transition-colors border border-red-700 text-red-700 hover:bg-red-700/10"
               >
-                {currentTierSlug === 'starter'
-                  ? t('subscription.upgradeToPro')
-                  : t('subscription.downgradeToStarter')}
+                {t('subscription.cancelSubscription')}
               </button>
             )}
-
-            {/* Modal error */}
-            {modalError && (
-              <p className="text-red-700 text-sm mt-2">{modalError}</p>
-            )}
           </div>
-        ) : null}
+        ) : (
+          <SkeletonCard lines={4} />
+        )}
 
         {/* ----------------------------------------------------------------
             3. Seats & Wells Section (PowerSync -- instant)
@@ -339,7 +292,42 @@ export default function SubscriptionPage() {
         )}
 
         {/* ----------------------------------------------------------------
-            4. Payment Method Section
+            4. Add-Ons Pricing
+        ---------------------------------------------------------------- */}
+        <div className="bg-surface-card rounded-lg p-4 mb-4">
+          <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider mb-3">
+            {t('subscription.addOns')}
+          </h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-text-heading">
+                {t('subscription.additionalAdmins')}
+              </span>
+              <span className="text-sm font-medium text-text-heading">
+                {t('subscription.perEach', { amount: '100' })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-text-heading">
+                {t('subscription.additionalWells')}
+              </span>
+              <span className="text-sm font-medium text-text-heading">
+                {t('subscription.perEach', { amount: '100' })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-text-heading">
+                {t('subscription.additionalMeterCheckers')}
+              </span>
+              <span className="text-sm font-medium text-text-heading">
+                {t('subscription.perEach', { amount: '50' })}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ----------------------------------------------------------------
+            5. Payment Method Section
         ---------------------------------------------------------------- */}
         {stripeLoading ? (
           <SkeletonCard lines={2} />
@@ -381,7 +369,7 @@ export default function SubscriptionPage() {
         ) : null}
 
         {/* ----------------------------------------------------------------
-            5. Recent Transactions Section
+            6. Recent Transactions Section
         ---------------------------------------------------------------- */}
         {stripeLoading ? (
           <SkeletonCard lines={4} />
@@ -435,18 +423,6 @@ export default function SubscriptionPage() {
         ) : null}
       </div>
 
-      {/* Plan Change Modal */}
-      <PlanChangeModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setModalError(null);
-        }}
-        onConfirm={handleConfirmPlanChange}
-        targetTier={targetTier}
-        currentTier={currentTierSlug}
-        isProcessing={modalProcessing}
-      />
     </div>
   );
 }

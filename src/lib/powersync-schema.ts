@@ -9,6 +9,7 @@ const farms = new TableV2({
   zip_code: column.text,
   extra_admin_seats: column.integer,
   extra_meter_checker_seats: column.integer,
+  extra_wells: column.integer,
   stripe_customer_id: column.text,
   stripe_subscription_id: column.text,
   subscription_status: column.text,
