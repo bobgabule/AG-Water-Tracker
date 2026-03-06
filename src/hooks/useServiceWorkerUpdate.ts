@@ -18,13 +18,21 @@ export function useServiceWorkerUpdate() {
   const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
       registrationRef.current = registration
+      console.log('[SW] registered, waiting SW:', registration?.waiting?.state ?? 'none')
 
       // Request persistent storage (iOS always returns false)
       navigator.storage?.persist?.().catch(() => {})
 
-      // Periodically check for new SW versions (handles long-open tabs/PWA)
       if (registration) {
+        // Early check shortly after load to catch recent deploys
+        setTimeout(() => {
+          console.log('[SW] early update check')
+          registration.update().catch(() => {})
+        }, 10_000) // 10 seconds after registration
+
+        // Periodically check for new SW versions (handles long-open tabs/PWA)
         setInterval(() => {
+          console.log('[SW] periodic update check')
           registration.update().catch(() => {})
         }, 60 * 60 * 1000) // every 1 hour
       }

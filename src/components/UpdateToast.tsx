@@ -6,6 +6,8 @@ export const UpdateToast = React.memo(function UpdateToast() {
   const { needRefresh, updateServiceWorker } = useServiceWorkerUpdate()
   const [show] = needRefresh
 
+  console.log('[UpdateToast] needRefresh:', show)
+
   if (!show) return null
 
   return (
