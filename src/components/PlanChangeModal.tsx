@@ -67,6 +67,8 @@ export default function PlanChangeModal({
       return;
     }
 
+    let ignore = false;
+
     async function fetchPreview() {
       setPreviewLoading(true);
       setPreviewError(null);
@@ -76,6 +78,8 @@ export default function PlanChangeModal({
           'update-subscription',
           { body: { target_tier: targetTier, preview: true } }
         );
+
+        if (ignore) return;
 
         if (error) {
           setPreviewError(error.message || 'Failed to load preview');
@@ -96,13 +100,16 @@ export default function PlanChangeModal({
           })),
         });
       } catch (err) {
+        if (ignore) return;
         setPreviewError(err instanceof Error ? err.message : 'Unexpected error');
       } finally {
-        setPreviewLoading(false);
+        if (!ignore) setPreviewLoading(false);
       }
     }
 
     fetchPreview();
+
+    return () => { ignore = true; };
   }, [isOpen, targetTier]);
 
   const title = isUpgrade
