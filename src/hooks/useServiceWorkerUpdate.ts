@@ -21,6 +21,13 @@ export function useServiceWorkerUpdate() {
 
       // Request persistent storage (iOS always returns false)
       navigator.storage?.persist?.().catch(() => {})
+
+      // Periodically check for new SW versions (handles long-open tabs/PWA)
+      if (registration) {
+        setInterval(() => {
+          registration.update().catch(() => {})
+        }, 60 * 60 * 1000) // every 1 hour
+      }
     },
   })
 
