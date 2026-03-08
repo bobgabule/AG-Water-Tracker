@@ -485,3 +485,13 @@ Plans:
 Plans:
 - [x] 40-01-PLAN.md — Database migration for Stripe columns, PowerSync schema update, 3 edge functions (portal session, update subscription, get subscription details)
 - [ ] 40-02-PLAN.md — useStripeSubscription hook, PlanChangeModal component, SubscriptionPage rewrite with all sections, translations
+
+### Phase 41: Robust farm account data structure — unified schema for registration, invites, Stripe billing, add-on wells/seats, cancellation, and login flow
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 40
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 41 to break down)

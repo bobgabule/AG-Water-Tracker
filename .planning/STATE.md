@@ -155,6 +155,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 37 added: Add multi-language support (English/Español) with persistent language preference
 - Phase 39 added: Stripe-based first login flow for farm owners with separate owner and invite user onboarding
 - Phase 40 added: Update subscription page with hybrid approach for upgrading, downgrading, seat limits, payment method, transactions, and plan status
+- Phase 41 added: Robust farm account data structure — unified schema for registration, invites, Stripe billing, add-on wells/seats, cancellation, and login flow
 
 ### Blockers/Concerns
 
