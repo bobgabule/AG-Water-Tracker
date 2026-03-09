@@ -1,5 +1,5 @@
-// get-subscription-details: Fetches subscription data, payment method, and
-// recent invoices from Stripe for the authenticated user's farm.
+// get-subscription-details: Fetches subscription status, plan name, and
+// pricing from Stripe for the authenticated user's farm.
 // Deployed under the cancel-subscription directory (repurposed).
 
 import Stripe from "https://esm.sh/stripe@17?target=deno";
@@ -87,44 +87,12 @@ Deno.serve(async (req: Request) => {
       apiVersion: "2024-12-18.acacia",
     });
 
-    // Fetch subscription details (with latest invoice expanded)
+    // Fetch subscription details
     let subscription: Stripe.Subscription | null = null;
     if (farm.stripe_subscription_id) {
       subscription = await stripe.subscriptions.retrieve(
-        farm.stripe_subscription_id,
-        { expand: ["latest_invoice"] }
+        farm.stripe_subscription_id
       );
-    }
-
-    // Fetch recent invoices
-    const invoices = await stripe.invoices.list({
-      customer: farm.stripe_customer_id,
-      limit: 5,
-    });
-
-    // Fetch customer to get default payment method
-    const customer = await stripe.customers.retrieve(
-      farm.stripe_customer_id,
-      { expand: ["default_source"] }
-    );
-
-    // Extract payment method info
-    let paymentMethod: { brand: string; last4: string } | null = null;
-    if (!customer.deleted) {
-      const pmId =
-        typeof customer.invoice_settings?.default_payment_method === "string"
-          ? customer.invoice_settings.default_payment_method
-          : customer.invoice_settings?.default_payment_method?.id;
-
-      if (pmId) {
-        const pm = await stripe.paymentMethods.retrieve(pmId);
-        if (pm.card) {
-          paymentMethod = {
-            brand: pm.card.brand,
-            last4: pm.card.last4,
-          };
-        }
-      }
     }
 
     // Extract subscription plan details
@@ -141,15 +109,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Format invoices for response
-    const recentInvoices = invoices.data.map((inv) => ({
-      date: inv.created,
-      amount: inv.amount_paid,
-      currency: inv.currency,
-      status: inv.status,
-      invoice_pdf: inv.invoice_pdf,
-    }));
-
     return jsonResponse(
       {
         subscription_status: subscription?.status ?? farm.subscription_status,
@@ -157,8 +116,6 @@ Deno.serve(async (req: Request) => {
         plan_name: planName,
         unit_amount: unitAmount,
         currency: currency,
-        payment_method: paymentMethod,
-        recent_invoices: recentInvoices,
       },
       200
     );
