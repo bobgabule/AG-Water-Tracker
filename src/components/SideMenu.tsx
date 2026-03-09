@@ -43,7 +43,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
     { label: t('nav.wellList'), icon: ListBulletIcon, path: '/wells' },
     { label: t('nav.reports'), icon: ChartBarIcon, path: '/reports', requiredAction: 'manage_reports' as Action },
     { label: t('nav.users'), icon: UsersIcon, path: '/users', requiredAction: 'manage_users' as Action },
-    { label: t('nav.subscription'), icon: CreditCardIcon, path: '/subscription', requiredAction: 'manage_farm' as Action },
+    { label: t('nav.subscription'), icon: CreditCardIcon, path: '/subscription', requiredAction: 'view_subscription' as Action },
     { label: t('nav.language'), icon: GlobeAltIcon, path: '/language' },
     { label: t('nav.settings'), icon: Cog6ToothIcon, path: '/settings' },
   ], [t]);

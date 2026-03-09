@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: -- Performance & Perceived Speed
 status: unknown
-last_updated: "2026-03-06T14:00:10.401Z"
+last_updated: "2026-03-09T10:39:03Z"
 progress:
   total_phases: 37
   completed_phases: 33
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 40 complete — Subscription page with Stripe integration
+**Current focus:** Phase 42 in progress — Redesign subscription page with add-on purchasing
 
 ## Current Position
 
-Phase: 40
-Plan: 2 of 2
-Status: Complete
-Last activity: 2026-03-06 — Completed 40-02-PLAN.md
+Phase: 42
+Plan: 1 of 3
+Status: In Progress
+Last activity: 2026-03-09 — Completed 42-01-PLAN.md
 
-Progress: Phase 40: ██████████ 100% (2/2 plans complete)
+Progress: Phase 42: ███░░░░░░░ 33% (1/3 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40)
+- Total plans completed: 72 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 1 P42)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -72,6 +72,7 @@ Progress: Phase 40: ██████████ 100% (2/2 plans complete)
 | Phase 37 P03 | 8min | 2 | 18 |
 | Phase 40 P01 | 3min | 2 | 5 |
 | Phase 40 P02 | 5min | 2 | 5 |
+| Phase 42 P01 | 4min | 3 | 6 |
 
 ## Accumulated Context
 
@@ -133,6 +134,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 40-02: PlanChangeModal useEffect includes ignore flag cleanup to prevent stale state on unmount
 - Phase 40-02: Plan change button restricted to owner and super_admin roles
 - Phase 40-02: Hybrid loading pattern: PowerSync data instant, Stripe data shows skeletons
+- Phase 42-01: purchase-addons increments existing Stripe subscription items by price ID rather than creating duplicates
+- Phase 42-01: Replaced inline payment method and transaction sections with single Stripe Portal button
+- Phase 42-01: Removed obsolete translation keys for payment method and invoices sections
 
 ### Pending Todos (manual steps)
 
@@ -142,6 +146,8 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - PowerSync Dashboard sync rules need updating with 4 new farms Stripe columns (stripe_customer_id, stripe_subscription_id, subscription_status, current_period_end)
 - Stripe products/prices need creating and secrets need setting as Supabase Edge Function secrets
 - Stripe Customer Portal needs enabling in Stripe Dashboard
+- Stripe add-on prices need creating and STRIPE_ADDON_WELL_PRICE_ID, STRIPE_ADDON_ADMIN_PRICE_ID, STRIPE_ADDON_METER_CHECKER_PRICE_ID need setting as Supabase Edge Function secrets
+- Deploy purchase-addons edge function: `npx supabase functions deploy purchase-addons --no-verify-jwt`
 
 ### Roadmap Evolution
 
@@ -156,6 +162,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 39 added: Stripe-based first login flow for farm owners with separate owner and invite user onboarding
 - Phase 40 added: Update subscription page with hybrid approach for upgrading, downgrading, seat limits, payment method, transactions, and plan status
 - Phase 41 added: Robust farm account data structure — unified schema for registration, invites, Stripe billing, add-on wells/seats, cancellation, and login flow
+- Phase 42 added: Redesign subscription page with add-on purchasing, upgrade flow, and payment failure handling
 
 ### Blockers/Concerns
 
@@ -163,7 +170,7 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Completed 40-02-PLAN.md (Phase 40 complete)
+Last session: 2026-03-09
+Stopped at: Completed 42-01-PLAN.md
 Resume file: N/A
-Next action: Start next phase planning or user-requested work
+Next action: Execute 42-02-PLAN.md

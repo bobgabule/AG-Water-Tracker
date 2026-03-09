@@ -100,7 +100,7 @@ export default function App() {
                 </LazyRoute>
               } />
             </Route>
-            <Route element={<RequireRole action="manage_farm" />}>
+            <Route element={<RequireRole action="view_subscription" />}>
               <Route path="/subscription" element={
                 <LazyRoute routePath="/subscription">
                   <SubscriptionPage />

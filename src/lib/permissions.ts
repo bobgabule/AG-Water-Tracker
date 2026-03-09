@@ -27,6 +27,7 @@ export const ACTIONS = [
   'manage_farm',
   'manage_invites',
   'manage_reports',
+  'view_subscription',
   'cross_farm_access',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
@@ -55,6 +56,7 @@ export const PERMISSION_MATRIX: Record<Role, Set<Action>> = {
     'manage_users',
     'manage_invites',
     'manage_reports',
+    'view_subscription',
   ]),
   meter_checker: new Set<Action>([
     'record_reading',
