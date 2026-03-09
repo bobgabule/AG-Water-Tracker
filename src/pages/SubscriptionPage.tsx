@@ -97,7 +97,7 @@ export default function SubscriptionPage() {
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const wellCount = useWellCount();
-  const { data: stripeData, loading: stripeLoading } = useStripeSubscription();
+  const { data: stripeData } = useStripeSubscription();
 
   const isOwner = role === 'owner' || role === 'super_admin';
   const planBadge = stripeData
@@ -327,100 +327,25 @@ export default function SubscriptionPage() {
         </div>
 
         {/* ----------------------------------------------------------------
-            5. Payment Method Section
+            5. Manage in Stripe Portal
         ---------------------------------------------------------------- */}
-        {stripeLoading ? (
-          <SkeletonCard lines={2} />
-        ) : stripeData ? (
+        {isOwner && stripeData && (
           <div className="bg-surface-card rounded-lg p-4 mb-4">
             <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider mb-2">
-              {t('subscription.paymentMethod')}
+              {t('subscription.manageSubscription')}
             </h2>
-            {stripeData.paymentMethod ? (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-heading">
-                  {t('subscription.cardEnding', {
-                    brand: stripeData.paymentMethod.brand.charAt(0).toUpperCase() +
-                      stripeData.paymentMethod.brand.slice(1),
-                    last4: stripeData.paymentMethod.last4,
-                  })}
-                </span>
-                <button
-                  onClick={() => openPortal('payment_method_update')}
-                  className="text-sm font-medium text-teal hover:text-teal-hover transition-colors"
-                >
-                  {t('subscription.manage')}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-heading/60">
-                  {t('subscription.noPaymentMethod')}
-                </span>
-                <button
-                  onClick={() => openPortal('payment_method_update')}
-                  className="text-sm font-medium text-teal hover:text-teal-hover transition-colors"
-                >
-                  {t('subscription.addPaymentMethod')}
-                </button>
-              </div>
-            )}
-          </div>
-        ) : null}
-
-        {/* ----------------------------------------------------------------
-            6. Recent Transactions Section
-        ---------------------------------------------------------------- */}
-        {stripeLoading ? (
-          <SkeletonCard lines={4} />
-        ) : stripeData ? (
-          <div className="bg-surface-card rounded-lg p-4 mb-4">
-            <h2 className="text-xs font-semibold text-text-heading/70 uppercase tracking-wider mb-3">
-              {t('subscription.recentTransactions')}
-            </h2>
-
-            {stripeData.invoices.length === 0 ? (
-              <p className="text-sm text-text-heading/60">
-                {t('subscription.noTransactions')}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {stripeData.invoices.slice(0, 5).map((inv, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="text-text-heading/70">
-                      {formatDate(inv.date, locale)}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-text-heading font-medium">
-                        {formatCurrency(inv.amount, stripeData.currency)}
-                      </span>
-                      {inv.invoicePdf && (
-                        <a
-                          href={inv.invoicePdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-teal hover:text-teal-hover transition-colors"
-                          title={t('subscription.receipt')}
-                        >
-                          <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* View All in Stripe Portal */}
+            <p className="text-sm text-text-body mb-3">
+              {t('subscription.portalDescription')}
+            </p>
             <button
               onClick={() => openPortal()}
-              className="mt-3 w-full text-center text-sm font-medium text-teal hover:text-teal-hover transition-colors flex items-center justify-center gap-1"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-medium text-sm transition-colors bg-surface-header text-white hover:bg-surface-header/90"
             >
-              {t('subscription.viewAll')}
-              <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+              {t('subscription.openPortal')}
+              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
             </button>
           </div>
-        ) : null}
+        )}
       </div>
 
     </div>

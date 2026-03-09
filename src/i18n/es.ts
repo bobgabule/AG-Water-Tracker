@@ -348,17 +348,11 @@ const es: Record<string, string> = {
   'subscription.additionalWells': 'Pozos Adicionales',
   'subscription.additionalMeterCheckers': 'Lectores Adicionales',
   'subscription.usage': 'Uso',
-  'subscription.paymentMethod': 'Metodo de Pago',
-  'subscription.cardEnding': '{{brand}} terminada en {{last4}}',
-  'subscription.noPaymentMethod': 'Sin metodo de pago registrado',
-  'subscription.addPaymentMethod': 'Agregar Metodo de Pago',
-  'subscription.manage': 'Administrar',
-  'subscription.recentTransactions': 'Transacciones Recientes',
-  'subscription.noTransactions': 'Sin transacciones aun',
-  'subscription.viewAll': 'Ver Todas las Transacciones',
+  'subscription.manageSubscription': 'Administrar Suscripcion',
+  'subscription.portalDescription': 'Ver facturas, actualizar metodo de pago y administrar facturacion en el portal de Stripe.',
+  'subscription.openPortal': 'Abrir Portal de Facturacion',
   'subscription.paymentFailed': 'Tu pago fallo. Actualiza tu metodo de pago para continuar el servicio.',
   'subscription.updatePayment': 'Actualizar Metodo de Pago',
-  'subscription.receipt': 'Recibo',
 
   // ---------------------------------------------------------------------------
   // Reports

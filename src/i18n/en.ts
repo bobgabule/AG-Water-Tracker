@@ -348,17 +348,11 @@ const en: Record<string, string> = {
   'subscription.additionalWells': 'Additional Wells',
   'subscription.additionalMeterCheckers': 'Additional Meter Checkers',
   'subscription.usage': 'Usage',
-  'subscription.paymentMethod': 'Payment Method',
-  'subscription.cardEnding': '{{brand}} ending in {{last4}}',
-  'subscription.noPaymentMethod': 'No payment method on file',
-  'subscription.addPaymentMethod': 'Add Payment Method',
-  'subscription.manage': 'Manage',
-  'subscription.recentTransactions': 'Recent Transactions',
-  'subscription.noTransactions': 'No transactions yet',
-  'subscription.viewAll': 'View All Transactions',
+  'subscription.manageSubscription': 'Manage Subscription',
+  'subscription.portalDescription': 'View invoices, update payment method, and manage billing in the Stripe portal.',
+  'subscription.openPortal': 'Open Billing Portal',
   'subscription.paymentFailed': 'Your payment failed. Update your payment method to continue service.',
   'subscription.updatePayment': 'Update Payment Method',
-  'subscription.receipt': 'Receipt',
 
   // ---------------------------------------------------------------------------
   // Reports

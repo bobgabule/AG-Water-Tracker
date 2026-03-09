@@ -11,13 +11,6 @@ export interface StripeSubscriptionData {
   planName: string;
   unitAmount: number; // cents
   currency: string;
-  paymentMethod: { brand: string; last4: string } | null;
-  invoices: Array<{
-    date: string;
-    amount: number;
-    status: string;
-    invoicePdf: string | null;
-  }>;
 }
 
 export interface UseStripeSubscriptionResult {
@@ -35,7 +28,7 @@ export interface UseStripeSubscriptionResult {
  * Fetches live Stripe subscription data via the cancel-subscription
  * (get-subscription-details) edge function.
  *
- * Returns subscription status, payment method, and recent invoices.
+ * Returns subscription status, plan name, and pricing.
  * NOT from PowerSync -- this is live Stripe data fetched over the network.
  */
 export function useStripeSubscription(): UseStripeSubscriptionResult {
@@ -76,17 +69,6 @@ export function useStripeSubscription(): UseStripeSubscriptionResult {
         planName: response.plan_name ?? '',
         unitAmount: response.unit_amount ?? 0,
         currency: response.currency ?? 'usd',
-        paymentMethod: response.payment_method ?? null,
-        invoices: (response.recent_invoices ?? []).map(
-          (inv: { date: number | string; amount: number; status: string; invoice_pdf: string | null }) => ({
-            date: typeof inv.date === 'number'
-              ? new Date(inv.date * 1000).toISOString()
-              : inv.date,
-            amount: inv.amount,
-            status: inv.status,
-            invoicePdf: inv.invoice_pdf ?? null,
-          })
-        ),
       };
 
       setData(mapped);
