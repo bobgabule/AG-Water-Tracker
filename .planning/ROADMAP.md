@@ -506,5 +506,5 @@ Plans:
 
 Plans:
 - [x] 42-01-PLAN.md -- Purchase-addons edge function, simplified cancel-subscription, simplified useStripeSubscription hook
-- [ ] 42-02-PLAN.md
-- [ ] 42-03-PLAN.md
+- [x] 42-02-PLAN.md -- Subscription page rewrite with 2-col layout, add-on purchasing, upgrade dialog, view_subscription permission
+- [x] 42-03-PLAN.md -- Translation keys and sync rules for subscription features
