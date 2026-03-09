@@ -351,7 +351,7 @@ Plans:
 | 32. Unified Design System | — | 3/3 | Complete | 2026-02-25 |
 | 33. Wells Page Gauge Fixes | — | — | Pending | — |
 | 34. Modal Dark Green Theme | — | 1/1 | Complete | 2026-02-27 |
-| 42. Subscription Redesign & Add-Ons | — | 1/3 | In Progress | — |
+| 42. Subscription Redesign & Add-Ons | 3/3 | Complete   | 2026-03-09 | — |
 
 ### Phase 30: Drop Dead Invite Code
 **Goal**: Remove unused generic invite code RPCs (create_invite_code, join_farm_with_code) from the database — no client code references them, and they add unnecessary API surface
@@ -502,7 +502,7 @@ Plans:
 **Goal:** Create purchase-addons edge function, simplify subscription data endpoints, and redesign subscription page with add-on purchasing UI
 **Requirements**: TBD
 **Depends on:** Phase 40
-**Plans:** 1/3 plans complete
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 42-01-PLAN.md -- Purchase-addons edge function, simplified cancel-subscription, simplified useStripeSubscription hook

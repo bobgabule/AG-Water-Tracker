@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
-status: unknown
-last_updated: "2026-03-09T10:39:03Z"
+status: in-progress
+last_updated: "2026-03-09T10:46:27Z"
 progress:
-  total_phases: 37
+  total_phases: 42
   completed_phases: 33
-  total_plans: 71
-  completed_plans: 72
+  total_plans: 74
+  completed_plans: 74
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 42
-Plan: 1 of 3
-Status: In Progress
-Last activity: 2026-03-09 — Completed 42-01-PLAN.md
+Plan: 3 of 3
+Status: Complete
+Last activity: 2026-03-09 — Completed 42-03-PLAN.md
 
-Progress: Phase 42: ███░░░░░░░ 33% (1/3 plans complete)
+Progress: Phase 42: ██████████ 100% (3/3 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 72 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 1 P42)
+- Total plans completed: 73 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 2 P42)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -73,6 +73,7 @@ Progress: Phase 42: ███░░░░░░░ 33% (1/3 plans complete)
 | Phase 40 P01 | 3min | 2 | 5 |
 | Phase 40 P02 | 5min | 2 | 5 |
 | Phase 42 P01 | 4min | 3 | 6 |
+| Phase 42 P03 | 3min | 3 | 3 |
 
 ## Accumulated Context
 
@@ -137,6 +138,8 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 42-01: purchase-addons increments existing Stripe subscription items by price ID rather than creating duplicates
 - Phase 42-01: Replaced inline payment method and transaction sections with single Stripe Portal button
 - Phase 42-01: Removed obsolete translation keys for payment method and invoices sections
+- Phase 42-03: Used 'finca' instead of 'granja' in Spanish subtitle for consistency with existing translations
+- Phase 42-03: Removed 4 unused keys and added 22 new subscription keys for add-on purchasing and upgrade flow
 
 ### Pending Todos (manual steps)
 
@@ -148,6 +151,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Stripe Customer Portal needs enabling in Stripe Dashboard
 - Stripe add-on prices need creating and STRIPE_ADDON_WELL_PRICE_ID, STRIPE_ADDON_ADMIN_PRICE_ID, STRIPE_ADDON_METER_CHECKER_PRICE_ID need setting as Supabase Edge Function secrets
 - Deploy purchase-addons edge function: `npx supabase functions deploy purchase-addons --no-verify-jwt`
+- PowerSync Dashboard sync rules need updating with extra_wells, subscription_status, current_period_end columns in user_farms bucket
 
 ### Roadmap Evolution
 
@@ -171,6 +175,6 @@ None currently.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 42-01-PLAN.md
+Stopped at: Completed 42-03-PLAN.md
 Resume file: N/A
 Next action: Execute 42-02-PLAN.md
