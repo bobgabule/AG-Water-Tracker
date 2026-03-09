@@ -1,0 +1,184 @@
+# =============================================================================
+# PowerSync Sync Rules Configuration
+# =============================================================================
+# AG Water Tracker - Sync Rules for PowerSync Dashboard
+#
+# These rules control which data is synced to each client based on the
+# authenticated user's identity and farm memberships.
+#
+# IMPORTANT: These rules must be configured in the PowerSync dashboard.
+# This file is for documentation purposes only.
+#
+# Syntax: Modern PowerSync format using request.user_id()
+#
+# Super Admin Note:
+#   Super admin users have farm_members rows in ALL farms (via auto-add
+#   triggers from migration 025). This means all farm-scoped buckets
+#   naturally include all farms for super_admin users -- no special
+#   sync rule logic is needed.
+# =============================================================================
+
+bucket_definitions:
+
+  # ---------------------------------------------------------------------------
+  # Subscription Tiers (Global)
+  # ---------------------------------------------------------------------------
+  # All authenticated users receive all tier definitions.
+  # Small dataset (2-3 rows) — no farm filtering needed.
+  # PK mapping: slug → id (same pattern as farm_invites.code)
+  # ---------------------------------------------------------------------------
+  subscription_tiers_global:
+    parameters: SELECT 'global' as scope
+    data:
+      - SELECT slug AS id, display_name, max_admins, max_meter_checkers, max_wells, sort_order, created_at, updated_at FROM subscription_tiers WHERE 'global' = bucket.scope
+
+  # ---------------------------------------------------------------------------
+  # App Settings (Global)
+  # ---------------------------------------------------------------------------
+  # All authenticated users receive all app settings.
+  # Small dataset — global key-value config.
+  # PK mapping: key → id
+  # ---------------------------------------------------------------------------
+  app_settings_global:
+    parameters: SELECT 'global' as scope
+    data:
+      - SELECT key AS id, value, created_at, updated_at FROM app_settings WHERE 'global' = bucket.scope
+
+  # ---------------------------------------------------------------------------
+  # Farms (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs farms where the user has a membership.
+  # Uses farm_id from farm_members as the parameter.
+  # ---------------------------------------------------------------------------
+  user_farms:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, name, subscription_tier, street_address, city, state, zip_code, extra_admin_seats, extra_meter_checker_seats, extra_wells, subscription_status, current_period_end, created_at, updated_at FROM farms WHERE id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Members (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs all farm_members rows for farms the user belongs to.
+  # Includes full_name (denormalized from users.display_name) for display.
+  # ---------------------------------------------------------------------------
+  farm_members:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Farm Invites (all farm members)
+  # ---------------------------------------------------------------------------
+  # Syncs farm_invites for all farms the user belongs to.
+  # UI handles permission checks for who can view/manage invites.
+  # PK mapping: code → id
+  # ---------------------------------------------------------------------------
+  farm_invites:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, invited_email, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Wells (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs wells for farms where the user has a membership.
+  # Uses farm_id from farm_members as the parameter.
+  # ---------------------------------------------------------------------------
+  farm_wells:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Report Email Recipients (via farm_members join table)
+  # ---------------------------------------------------------------------------
+  # Syncs report_email_recipients for farms where the user has a membership.
+  # Same pattern as farm_wells.
+  # ---------------------------------------------------------------------------
+  farm_report_recipients:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at FROM report_email_recipients WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Readings (via denormalized farm_id)
+  # ---------------------------------------------------------------------------
+  # Syncs readings for farms where the user has a membership.
+  # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
+  # Same pattern as farm_wells.
+  # ---------------------------------------------------------------------------
+  farm_readings:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, well_id, farm_id, value, recorded_by, recorded_at, gps_latitude, gps_longitude, is_in_range, is_similar_reading, notes, created_at, updated_at FROM readings WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # Allocations (via denormalized farm_id)
+  # ---------------------------------------------------------------------------
+  # Syncs allocations for farms where the user has a membership.
+  # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
+  # Same pattern as farm_wells and farm_readings.
+  # ---------------------------------------------------------------------------
+  farm_allocations:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT id, well_id, farm_id, period_start, period_end, allocated_af, used_af, is_manual_override, starting_reading, notes, created_at, updated_at FROM allocations WHERE farm_id = bucket.farm_id
+
+  # ---------------------------------------------------------------------------
+  # User Profile (Own)
+  # ---------------------------------------------------------------------------
+  # Syncs the user's own profile. This ensures users always have their
+  # profile synced even before joining any farm (e.g., during onboarding).
+  # ---------------------------------------------------------------------------
+  user_profile:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT id, phone, display_name, first_name, last_name, email, created_at, updated_at FROM users WHERE id = bucket.user_id
+
+# =============================================================================
+# Implementation Notes
+# =============================================================================
+#
+# 1. Token Configuration:
+#    PowerSync uses request.user_id() to get the JWT subject ('sub' claim).
+#    Ensure your Supabase JWT is properly configured in the PowerSync dashboard.
+#
+# 2. Parameter Query Pattern:
+#    Farm-scoped buckets: SELECT farm_id FROM farm_members
+#    Global buckets: SELECT 'global' as scope (creates one shared bucket for all users)
+#    Global data queries use WHERE 'global' = bucket.scope (always-true equality)
+#    This avoids subqueries which are not supported by PowerSync.
+#
+# 3. Denormalized Columns:
+#    - farm_members.full_name: Copied from users.display_name via trigger
+#    - readings.farm_id: Auto-populated from wells.farm_id via BEFORE INSERT trigger
+#    - allocations.farm_id: Auto-populated from wells.farm_id via BEFORE INSERT trigger
+#
+# 4. Data Query Requirements:
+#    - Must SELECT from a single table (no joins)
+#    - Must include the table's primary key column (usually 'id')
+#    - PK mapping: farm_invites uses code AS id, subscription_tiers uses slug AS id,
+#      app_settings uses key AS id
+#    - Use bucket.<param> to filter
+#
+# 5. Bucket Granularity:
+#    - user_profile: 1 bucket per user
+#    - subscription_tiers_global, app_settings_global: 1 shared bucket (global data)
+#    - All other buckets: 1 bucket per farm membership
+#
+# 6. Security:
+#    - These sync rules work in conjunction with Supabase RLS policies
+#    - subscription_tiers and app_settings are read-only (no INSERT/UPDATE/DELETE RLS)
+#
+# =============================================================================
+# Dashboard Configuration Steps
+# =============================================================================
+#
+# 1. Log in to the PowerSync dashboard
+# 2. Navigate to your project's Sync Rules section
+# 3. Copy the bucket_definitions section from this file
+# 4. Verify request.user_id() maps correctly to your JWT subject claim
+# 5. Test the sync rules using the dashboard's testing tools
+# 6. Deploy the sync rules
+#
+# =============================================================================
