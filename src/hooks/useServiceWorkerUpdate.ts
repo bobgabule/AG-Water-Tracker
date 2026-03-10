@@ -1,46 +1,35 @@
 import { useEffect, useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
-const UPDATE_CHECK_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
+const UPDATE_CHECK_COOLDOWN_MS = 15 * 60 * 1000 // 15 minutes
+const PERIODIC_CHECK_MS = 60 * 60 * 1000 // 1 hour
 
 /**
- * Registers the service worker and checks for updates on visibility change
- * (debounced to avoid excessive checks on iOS where system overlays
- * trigger frequent visibilitychange events).
+ * Registers the service worker and periodically checks for updates.
+ * Uses autoUpdate mode — new SW activates silently, no user prompt needed.
  *
- * Returns `needRefresh` and `updateServiceWorker` for the update toast UI.
+ * Visibility-change checks are debounced with a 15-min cooldown to
+ * avoid excessive checks on iOS where system overlays trigger frequent
+ * visibilitychange events.
  */
 export function useServiceWorkerUpdate() {
   const lastCheckRef = useRef(0)
   const wasHidden = useRef(false)
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined)
 
-  const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
+  useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
       registrationRef.current = registration
-      console.log('[SW] registered, waiting SW:', registration?.waiting?.state ?? 'none')
-
-      // Request persistent storage (iOS always returns false)
-      navigator.storage?.persist?.().catch(() => {})
-
-      if (registration) {
-        // Early check shortly after load to catch recent deploys
-        setTimeout(() => {
-          console.log('[SW] early update check')
-          registration.update().catch(() => {})
-        }, 10_000) // 10 seconds after registration
-
-        // Periodically check for new SW versions (handles long-open tabs/PWA)
-        setInterval(() => {
-          console.log('[SW] periodic update check')
-          registration.update().catch(() => {})
-        }, 60 * 60 * 1000) // every 1 hour
-      }
+      navigator.storage?.persist()
     },
   })
 
-  // Visibility-change listener with proper cleanup
+  // Periodic update check + visibility-change listener with cleanup
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      registrationRef.current?.update().catch(() => {})
+    }, PERIODIC_CHECK_MS)
+
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         wasHidden.current = true
@@ -56,16 +45,9 @@ export function useServiceWorkerUpdate() {
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+    return () => {
+      clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }, [])
-
-  // Auto-dismiss offlineReady after 3s (not actionable for the user)
-  const [offlineReadyFlag, setOfflineReady] = offlineReady
-  useEffect(() => {
-    if (!offlineReadyFlag) return
-    const t = setTimeout(() => setOfflineReady(false), 3000)
-    return () => clearTimeout(t)
-  }, [offlineReadyFlag, setOfflineReady])
-
-  return { needRefresh, updateServiceWorker }
 }
