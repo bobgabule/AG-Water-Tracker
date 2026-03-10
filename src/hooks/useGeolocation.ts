@@ -103,6 +103,9 @@ export function useGeolocation(
   // Track request ID to handle StrictMode double-mount
   // Only the latest request should update state
   const requestIdRef = useRef(0);
+  // Prevent overlapping getCurrentPosition() calls — on iOS Safari each call
+  // can trigger a native permission dialog, so we must deduplicate.
+  const inFlightRef = useRef(false);
 
   const fetchLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -111,14 +114,20 @@ export function useGeolocation(
       return;
     }
 
+    // Skip if a getCurrentPosition() call is already in-flight
+    if (inFlightRef.current) return;
+
     // Increment request ID - stale requests will be ignored
     const currentRequestId = ++requestIdRef.current;
+    inFlightRef.current = true;
 
     setLoading(true);
     setError(null);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        inFlightRef.current = false;
+
         // Ignore if a newer request has been made (handles StrictMode double-mount)
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -137,6 +146,8 @@ export function useGeolocation(
         }
       },
       (err) => {
+        inFlightRef.current = false;
+
         // Ignore if a newer request has been made
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -160,9 +171,11 @@ export function useGeolocation(
       fetchLocation();
     }
 
-    // Cleanup: invalidate any pending requests when unmounting
+    // Cleanup: invalidate any pending requests and reset in-flight guard
+    // (StrictMode unmounts then remounts — without resetting, the second mount is blocked)
     return () => {
       requestIdRef.current++;
+      inFlightRef.current = false;
     };
   }, [fetchLocation, autoRequest]);
 

@@ -48,25 +48,28 @@ export default function DashboardPage() {
     autoRequest: false,
   });
 
-  // Auto-request location when permission is already granted
-  useEffect(() => {
-    if (isResolved && permission === 'granted' && !userLocation) {
-      requestLocation();
-    }
-  }, [isResolved, permission, userLocation, requestLocation]);
-
   // Location permission modal state
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<'new-well' | null>(null);
   const modalAutoShownRef = useRef(false);
 
+  // Auto-request location when permission is already granted.
+  // Also check localStorage fallback for Safari, which may report 'prompt'
+  // even after the user previously granted access (Permissions API unsupported).
+  // Skip if the soft-ask modal is visible to avoid racing with the Allow button.
+  useEffect(() => {
+    if (!isResolved || userLocation || showLocationModal) return;
+    const previouslyAllowed = localStorage.getItem('location-previously-allowed') === 'true';
+    if (permission === 'granted' || (previouslyAllowed && permission !== 'denied')) {
+      requestLocation();
+    }
+  }, [isResolved, permission, userLocation, requestLocation, showLocationModal]);
+
   // Auto-show location modal once on mount when permission not granted
   useEffect(() => {
-    console.log('[LocationModal] effect fired:', { isResolved, permission, alreadyShown: modalAutoShownRef.current, dismissed: localStorage.getItem('location-modal-dismissed') });
     if (!isResolved || modalAutoShownRef.current) return;
     const dismissed = localStorage.getItem('location-modal-dismissed') === 'true';
     if (permission !== 'granted' && !dismissed) {
-      console.log('[LocationModal] SHOWING modal — permission:', permission);
       modalAutoShownRef.current = true;
       setShowLocationModal(true);
     }
@@ -91,6 +94,7 @@ export default function DashboardPage() {
   const handleLocationAllow = useCallback(() => {
     setShowLocationModal(false);
     localStorage.setItem('location-modal-dismissed', 'true');
+    localStorage.setItem('location-previously-allowed', 'true');
     requestLocation();
   }, [requestLocation]);
 
@@ -133,6 +137,8 @@ export default function DashboardPage() {
       queueMicrotask(() => {
         if (tier && wellCount >= tier.maxWells) {
           setShowLimitModal(true);
+        } else if (permission === 'denied') {
+          setShowLocationModal(true);
         } else if (permission !== 'granted' && !userLocation) {
           setPendingAction('new-well');
           setShowLocationModal(true);
@@ -154,6 +160,10 @@ export default function DashboardPage() {
     // Allow creation if tier data hasn't loaded (offline edge case per user decision)
     if (tier && wellCount >= tier.maxWells) {
       setShowLimitModal(true);
+      return;
+    }
+    if (permission === 'denied') {
+      setShowLocationModal(true);
       return;
     }
     if (permission !== 'granted' && !userLocation) {
