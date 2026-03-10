@@ -33,24 +33,24 @@ const WellReadingsList = React.memo(function WellReadingsList({
   const columnHeader = getColumnHeader(unitLabel, t);
 
   return (
-    <div className="px-5 pt-3 pb-4 -mt-5">
-      <h2 className="text-lg font-bold text-white mb-3">{t('reading.title')}</h2>
+    <div className="pt-3 pb-4 -mt-5">
+      <h2 className="text-lg font-bold text-white mb-1 px-5">{t('reading.title')}</h2>
 
       {readings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex flex-col items-center justify-center py-12 px-5">
           <ClipboardDocumentListIcon className="w-10 h-10 text-white/30 mb-2" />
           <p className="text-sm text-white/60">{t('reading.noReadings')}</p>
         </div>
       ) : (
         <>
           {/* Table header */}
-          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-3 bg-[#4b5b37] rounded">
+          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-5 bg-[#4b5b37]">
             <span>{t('reading.dateHeader')}</span>
             <span>{columnHeader}</span>
             <span>{t('reading.userTimeHeader')}</span>
           </div>
 
-          {/* Table rows */}
+          {/* Table rows — bg extends full width, content padded */}
           <div>
             {readings.map((reading, index) => {
               const date = new Date(reading.recordedAt);
@@ -70,11 +70,11 @@ const WellReadingsList = React.memo(function WellReadingsList({
                     type: 'button' as const,
                     onClick: () => onReadingClick(reading),
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-3 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
+                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-5 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
                   }
                 : {
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-3 ${altBg}`,
+                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-5 ${altBg}`,
                   };
 
               return (

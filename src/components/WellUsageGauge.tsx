@@ -80,7 +80,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
 
         {/* Right column: Usage stats + Status indicators */}
         <div className="flex-1">
-          <h3 className="inline-block text-white text-lg font-semibold uppercase tracking-wide border-b border-[#d5e8bd] pb-1 mb-1">
+          <h3 className="inline-block text-white text-base font-semibold uppercase tracking-wide border-b border-[#d5e8bd] pb-1 mb-1">
             {t('wellDetail.usage')}
           </h3>
           <div className="space-y-1 mt-1">
@@ -110,8 +110,8 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
               const color = healthy ? 'text-green-400' : 'text-orange-400';
               return (
                 <div key={label} className="flex items-center gap-1.5">
-                  <Icon className={`w-5 h-5 ${color}`} aria-hidden="true" />
-                  <span className="text-[#d5e8bd] text-sm font-semibold">{label}</span>
+                  <Icon className={`w-[18px] h-[18px] ${color}`} aria-hidden="true" />
+                  <span className="text-[#d5e8bd] text-xs font-semibold">{label}</span>
                 </div>
               );
             })}
