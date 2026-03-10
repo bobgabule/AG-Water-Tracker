@@ -74,18 +74,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Validate user is owner role
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
+    // Validate user role
+    const { data: memberRow, error: memberError } = await supabase
+      .from("farm_members")
       .select("farm_id, role")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single();
 
-    if (userError || !userRow?.farm_id) {
+    if (memberError || !memberRow?.farm_id) {
       return jsonResponse({ error: "User has no farm" }, 404);
     }
 
-    if (userRow.role !== "grower" && userRow.role !== "owner") {
+    if (memberRow.role !== "super_admin" && memberRow.role !== "owner") {
       return jsonResponse(
         { error: "Only farm owners can change the subscription plan" },
         403
@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
       .select(
         "stripe_customer_id, stripe_subscription_id, subscription_tier"
       )
-      .eq("id", userRow.farm_id)
+      .eq("id", memberRow.farm_id)
       .single();
 
     if (farmError || !farm) {
@@ -204,7 +204,7 @@ Deno.serve(async (req: Request) => {
           updated.current_period_end * 1000
         ).toISOString(),
       })
-      .eq("id", userRow.farm_id);
+      .eq("id", memberRow.farm_id);
 
     if (updateError) {
       console.error("Failed to update farm record:", updateError);

@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
 // canSelectAdmin logic — extracted from AddUserModal.tsx line 155
 // ---------------------------------------------------------------------------
-// The AddUserModal only shows the role toggle (Meter Checker / Admin) when
-// the caller is an owner or super_admin. Admins see a fixed "Meter Checker".
+// The AddUserModal only shows the role toggle (Meter Reader / Admin) when
+// the caller is an owner or super_admin. Admins see a fixed "Meter Reader".
 
 function canSelectAdmin(callerRole: string | null): boolean {
   return callerRole === 'owner' || callerRole === 'super_admin';
@@ -21,7 +21,7 @@ describe('Invite role selection: canSelectAdmin', () => {
     expect(canSelectAdmin('super_admin')).toBe(true);
   });
 
-  it('admin cannot select admin role (can only invite meter_checker)', () => {
+  it('admin cannot select admin role (can only invite meter_reader)', () => {
     expect(canSelectAdmin('admin')).toBe(false);
   });
 

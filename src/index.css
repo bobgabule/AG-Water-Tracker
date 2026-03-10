@@ -75,6 +75,15 @@
   .input-dark {
     @apply w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/40;
   }
+
+  .btn-primary {
+    @apply px-4 py-2.5 rounded-lg font-medium text-sm text-white bg-surface-header hover:bg-surface-header-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+}
+
+/* Prevent any background bleed below the map on notch devices */
+html {
+  background-color: #111827;
 }
 
 /* Custom scrollbar for readings list */

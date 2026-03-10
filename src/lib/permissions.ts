@@ -90,7 +90,7 @@ export const ROLE_DISPLAY_NAMES: Record<Role, string> = {
   super_admin: 'Super Admin',
   owner: 'Owner',
   admin: 'Admin',
-  meter_checker: 'Meter Checker',
+  meter_checker: 'Meter Reader',
 };
 
 // ---------------------------------------------------------------------------
@@ -98,7 +98,7 @@ export const ROLE_DISPLAY_NAMES: Record<Role, string> = {
 // ---------------------------------------------------------------------------
 
 const ROLE_DISPLAY_NAMES_I18N: Record<Locale, Record<Role, string>> = {
-  en: { super_admin: 'Super Admin', owner: 'Owner', admin: 'Admin', meter_checker: 'Meter Checker' },
+  en: { super_admin: 'Super Admin', owner: 'Owner', admin: 'Admin', meter_checker: 'Meter Reader' },
   es: { super_admin: 'Super Administrador', owner: 'Propietario', admin: 'Administrador', meter_checker: 'Lector de Medidores' },
 };
 

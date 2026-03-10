@@ -45,18 +45,18 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
     : null;
   const adminFull = seatUsage?.admin.isFull ?? false;
-  const meterCheckerFull = seatUsage?.meter_checker.isFull ?? false;
-  const allSeatsFull = adminFull && meterCheckerFull;
+  const meterReaderFull = seatUsage?.meter_checker.isFull ?? false;
+  const allSeatsFull = adminFull && meterReaderFull;
 
   // Auto-correct selected role if it becomes full
   useEffect(() => {
     if (!seatUsage) return;
-    if (role === 'admin' && adminFull && !meterCheckerFull) {
+    if (role === 'admin' && adminFull && !meterReaderFull) {
       setRole('meter_checker');
-    } else if (role === 'meter_checker' && meterCheckerFull && !adminFull) {
+    } else if (role === 'meter_checker' && meterReaderFull && !adminFull) {
       setRole('admin');
     }
-  }, [seatUsage, role, adminFull, meterCheckerFull]);
+  }, [seatUsage, role, adminFull, meterReaderFull]);
 
   const handleFirstNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFirstName(e.target.value);
@@ -302,13 +302,13 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       <button
                         type="button"
                         onClick={() => handleRoleChange('meter_checker')}
-                        disabled={meterCheckerFull}
+                        disabled={meterReaderFull}
                         className={`flex-1 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${role === 'meter_checker'
                           ? 'bg-control-active-alt text-white'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                           }`}
                       >
-                        {t('user.meterCheckerLabel')}{meterCheckerFull ? ` ${t('user.full')}` : ''}
+                        {t('user.meterReaderLabel')}{meterReaderFull ? ` ${t('user.full')}` : ''}
                       </button>
                       <button
                         type="button"
@@ -327,7 +327,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">{t('user.role')}</label>
                     <div className="py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
-                      {t('user.meterCheckerLabel')}{meterCheckerFull ? ` ${t('user.full')}` : ''}
+                      {t('user.meterReaderLabel')}{meterReaderFull ? ` ${t('user.full')}` : ''}
                     </div>
                   </div>
                 )}
@@ -348,8 +348,8 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || !farmId || !tier || (role === 'admin' ? adminFull : meterCheckerFull)}
-                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-header-hover transition-colors"
+                disabled={loading || !farmId || !tier || (role === 'admin' ? adminFull : meterReaderFull)}
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-header-hover hover:text-white transition-colors"
               >
                 {loading ? (
                   <>

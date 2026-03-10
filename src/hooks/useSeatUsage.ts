@@ -107,7 +107,7 @@ export function useSeatUsage(): SeatUsage {
 
     // Extract per-farm extra seats (from migration 039)
     const extraAdminSeats = farmData[0]?.extra_admin_seats ?? 0;
-    const extraMeterCheckerSeats = farmData[0]?.extra_meter_checker_seats ?? 0;
+    const extraMeterReaderSeats = farmData[0]?.extra_meter_checker_seats ?? 0;
 
     // Calculate usage for each seat-limited role
     function calcRole(role: string, tierLimit: number, extraSeats: number): RoleSeatUsage {
@@ -122,7 +122,7 @@ export function useSeatUsage(): SeatUsage {
 
     return {
       admin: calcRole('admin', tier?.maxAdmins ?? 0, extraAdminSeats),
-      meter_checker: calcRole('meter_checker', tier?.maxMeterCheckers ?? 0, extraMeterCheckerSeats),
+      meter_checker: calcRole('meter_checker', tier?.maxMeterReaders ?? 0, extraMeterReaderSeats),
     };
   }, [membersData, invitesData, tier, farmData]);
 }

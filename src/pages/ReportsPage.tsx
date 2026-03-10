@@ -369,7 +369,7 @@ export default function ReportsPage() {
         <button
           onClick={handleSendReport}
           disabled={sending || recipients.length === 0}
-          className="w-full py-3 bg-btn-action text-white rounded-lg font-semibold transition-colors hover:bg-btn-action/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full py-3 bg-surface-header text-white rounded-lg font-semibold transition-colors hover:bg-surface-header-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {sending ? (
             <>

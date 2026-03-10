@@ -88,8 +88,17 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
         >
           {/* Header */}
           <div className="bg-primary p-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-bold text-lg">{t('nav.menu')}</h2>
+            <div className="flex items-start justify-between">
+              {userProfile && (
+                <div>
+                  <p className="text-white font-medium">
+                    {userProfile.first_name} {userProfile.last_name}
+                  </p>
+                  {userProfile.email && (
+                    <p className="text-white/70 text-sm truncate">{userProfile.email}</p>
+                  )}
+                </div>
+              )}
               <button
                 onClick={onClose}
                 className="p-1 rounded-lg hover:bg-white/10 transition-colors"
@@ -98,16 +107,6 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
                 <XMarkIcon className="h-6 w-6 text-white" />
               </button>
             </div>
-            {userProfile && (
-              <div>
-                <p className="text-white font-medium">
-                  {userProfile.first_name} {userProfile.last_name}
-                </p>
-                {userProfile.email && (
-                  <p className="text-white/70 text-sm truncate">{userProfile.email}</p>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Nav items */}
@@ -133,7 +132,7 @@ export default function SideMenu({ open, onClose }: SideMenuProps) {
             )}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-5 py-3 text-status-danger hover:bg-red-800 rounded-lg transition-colors text-left"
+              className="w-full flex items-center gap-3 px-5 py-3 text-status-danger hover:bg-red-800 hover:text-white rounded-lg transition-colors text-left"
             >
               <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
               <span>{t('nav.logout')}</span>

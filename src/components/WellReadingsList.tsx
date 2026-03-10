@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
-import { FlagIcon } from '@heroicons/react/24/solid';
+import PennantFlagIcon from './PennantFlagIcon';
 import { useTranslation } from '../hooks/useTranslation';
 import type { ReadingWithName } from '../hooks/useWellReadingsWithNames';
 
@@ -33,8 +33,8 @@ const WellReadingsList = React.memo(function WellReadingsList({
   const columnHeader = getColumnHeader(unitLabel, t);
 
   return (
-    <div className="px-4 pt-5 pb-4">
-      <h2 className="text-2xl font-bold text-white mb-4">{t('reading.title')}</h2>
+    <div className="px-5 pt-3 pb-4 -mt-5">
+      <h2 className="text-lg font-bold text-white mb-3">{t('reading.title')}</h2>
 
       {readings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
@@ -44,7 +44,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
       ) : (
         <>
           {/* Table header */}
-          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-1 bg-[#4b5b37] rounded">
+          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-3 bg-[#4b5b37] rounded">
             <span>{t('reading.dateHeader')}</span>
             <span>{columnHeader}</span>
             <span>{t('reading.userTimeHeader')}</span>
@@ -70,11 +70,11 @@ const WellReadingsList = React.memo(function WellReadingsList({
                     type: 'button' as const,
                     onClick: () => onReadingClick(reading),
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
+                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-3 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
                   }
                 : {
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3 ${altBg}`,
+                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-3 ${altBg}`,
                   };
 
               return (
@@ -88,14 +88,14 @@ const WellReadingsList = React.memo(function WellReadingsList({
                       {reading.recorderName} at {timeStr}
                     </span>
                     {reading.isSimilarReading && (
-                      <FlagIcon
+                      <PennantFlagIcon
                         className="w-4 h-4 text-orange-400 flex-shrink-0"
                         role="img"
                         aria-label="Similar reading flagged"
                       />
                     )}
                     {!reading.isInRange && (
-                      <FlagIcon
+                      <PennantFlagIcon
                         className="w-4 h-4 text-yellow-400 flex-shrink-0"
                         role="img"
                         aria-label="Reading taken out of range"

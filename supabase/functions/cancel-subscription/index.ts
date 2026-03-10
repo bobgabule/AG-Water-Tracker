@@ -51,14 +51,14 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Not authenticated" }, 401);
     }
 
-    // Look up farm via user's farm_id
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
+    // Look up farm via farm_members
+    const { data: memberRow, error: memberError } = await supabase
+      .from("farm_members")
       .select("farm_id")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single();
 
-    if (userError || !userRow?.farm_id) {
+    if (memberError || !memberRow?.farm_id) {
       return jsonResponse({ error: "User has no farm" }, 404);
     }
 
@@ -68,7 +68,7 @@ Deno.serve(async (req: Request) => {
       .select(
         "stripe_customer_id, stripe_subscription_id, subscription_status, current_period_end, subscription_tier"
       )
-      .eq("id", userRow.farm_id)
+      .eq("id", memberRow.farm_id)
       .single();
 
     if (farmError || !farm) {

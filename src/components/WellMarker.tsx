@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { Marker } from 'react-map-gl/mapbox';
-import { MapPinIcon, FlagIcon } from '@heroicons/react/24/solid';
+import { MapPinIcon } from '@heroicons/react/24/solid';
+import PennantFlagIcon from './PennantFlagIcon';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellMarkerProps {
@@ -112,7 +113,7 @@ export default memo(function WellMarker({ well, allocationPercentage, flagColor,
             <div className="flex items-center gap-1">
               <p className="text-white text-xs font-bold leading-tight text-left">{well.name}</p>
               {flagColor && (
-                <FlagIcon
+                <PennantFlagIcon
                   className={`w-3 h-3 ${flagColor === 'orange' ? 'text-orange-500' : 'text-yellow-400'}`}
                 />
               )}

@@ -109,11 +109,11 @@ export default function UsersPage() {
       if (member.user_id === user?.id) return false;
       // super_admin can delete any other user
       if (userRole === 'super_admin') return true;
-      // owner can delete admin and meter_checker
+      // owner can delete admin and meter_reader
       if (userRole === 'owner') {
         return member.role === 'admin' || member.role === 'meter_checker';
       }
-      // admin can only delete meter_checker
+      // admin can only delete meter_reader
       if (userRole === 'admin') return member.role === 'meter_checker';
       return false;
     },

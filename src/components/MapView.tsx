@@ -156,6 +156,8 @@ export default function MapView({
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+        logoPosition="top-left"
+        attributionControl={false}
         onLoad={handleMapLoad}
         onError={handleMapError}
         onClick={handleMapClick}

@@ -50,7 +50,7 @@ describe('Owner vs other roles', () => {
     expect(hasPermission('admin', 'manage_farm')).toBe(false);
   });
 
-  it('owner has manage_users but meter_checker does not', () => {
+  it('owner has manage_users but meter_reader does not', () => {
     expect(hasPermission('owner', 'manage_users')).toBe(true);
     expect(hasPermission('meter_checker', 'manage_users')).toBe(false);
   });
@@ -95,7 +95,7 @@ describe('Permission matrix integrity', () => {
     expect(hasPermission('admin', 'manage_farm')).toBe(false);
   });
 
-  it('meter_checker can only record readings and view wells', () => {
+  it('meter_reader can only record readings and view wells', () => {
     const allowed: Action[] = [
       'record_reading',
       'view_wells',
@@ -111,7 +111,7 @@ describe('Permission matrix integrity', () => {
     }
   });
 
-  it('meter_checker cannot delete readings', () => {
+  it('meter_reader cannot delete readings', () => {
     expect(hasPermission('meter_checker', 'delete_reading')).toBe(false);
   });
 });

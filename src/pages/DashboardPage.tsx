@@ -13,8 +13,6 @@ import { useFarmState } from '../hooks/useFarmState';
 import { useToastStore } from '../stores/toastStore';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { useWellCount } from '../hooks/useWellCount';
-import { useAppSetting } from '../hooks/useAppSetting';
-import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useTranslation } from '../hooks/useTranslation';
@@ -39,12 +37,7 @@ export default function DashboardPage() {
   const farmState = useFarmState(farmId);
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
-  const subscriptionUrl = useAppSetting('subscription_website_url');
   const isOwner = role === 'owner' || role === 'super_admin';
-  const upgradeUrl =
-    subscriptionUrl && farmId && tier
-      ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
-      : null;
 
   // Geolocation permission + location
   const { permission, isResolved } = useGeolocationPermission();
@@ -276,7 +269,7 @@ export default function DashboardPage() {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className={`relative w-full h-dvh overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`relative w-full h-dvh min-h-screen bg-[#191a1a] overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {/* Map layer */}
       <ErrorBoundary
         FallbackComponent={MapErrorFallback}
@@ -301,7 +294,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Floating action buttons */}
-      <div className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-4 right-4 z-20 flex justify-between">
+      <div className="absolute bottom-3 left-4 right-4 z-20 flex justify-between pb-[env(safe-area-inset-bottom)]">
         <button
           onClick={handleWellList}
           className="
@@ -355,7 +348,6 @@ export default function DashboardPage() {
       <WellLimitModal
         open={showLimitModal}
         onClose={handleLimitModalClose}
-        upgradeUrl={upgradeUrl}
         isOwner={isOwner}
       />
 

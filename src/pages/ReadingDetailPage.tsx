@@ -2,7 +2,8 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { MapPinIcon, FlagIcon } from '@heroicons/react/24/solid';
+import { MapPinIcon } from '@heroicons/react/24/solid';
+import PennantFlagIcon from '../components/PennantFlagIcon';
 import { useWells } from '../hooks/useWells';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useActiveFarm } from '../hooks/useActiveFarm';
@@ -190,7 +191,7 @@ export default function ReadingDetailPage() {
           <div className="space-y-2 mb-6 mx-4">
             {!reading.isInRange && gpsDistanceFeet !== null && (
               <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <FlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                <PennantFlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                 <span className="text-[#d5e8bd] text-lg">
                   {t('readingDetail.gpsOffBy', { feet: gpsDistanceFeet })}
                 </span>
@@ -198,7 +199,7 @@ export default function ReadingDetailPage() {
             )}
             {reading.isSimilarReading && (
               <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <FlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <PennantFlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
                 <span className="text-[#d5e8bd] text-lg">
                   {t('readingDetail.similarReading')}
                 </span>

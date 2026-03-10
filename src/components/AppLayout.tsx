@@ -126,7 +126,7 @@ function AppLayoutContent() {
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900">
+    <div className="flex flex-col min-h-screen bg-surface-page">
       <Header farmName={farmName} onMenuOpen={handleMenuOpen} />
       <SideMenu open={menuOpen} onClose={handleMenuClose} />
       <main className="flex-1">

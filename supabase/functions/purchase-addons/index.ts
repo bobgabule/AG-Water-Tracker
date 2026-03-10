@@ -50,19 +50,6 @@ function getAddonPriceId(
   }
 }
 
-/** Maps add-on type to the farms table column name. */
-function getExtraColumn(
-  type: "wells" | "admin_seats" | "meter_checker_seats"
-): string {
-  switch (type) {
-    case "wells":
-      return "extra_wells";
-    case "admin_seats":
-      return "extra_admin_seats";
-    case "meter_checker_seats":
-      return "extra_meter_checker_seats";
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -125,21 +112,25 @@ Deno.serve(async (req: Request) => {
     }
 
     // -----------------------------------------------------------------------
-    // Validate user role (owner or grower)
+    // Validate user role (owner, admin, or grower)
     // -----------------------------------------------------------------------
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
+    const { data: memberRow, error: memberError } = await supabase
+      .from("farm_members")
       .select("farm_id, role")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single();
 
-    if (userError || !userRow?.farm_id) {
+    if (memberError || !memberRow?.farm_id) {
       return jsonResponse({ error: "User has no farm" }, 404);
     }
 
-    if (userRow.role !== "grower" && userRow.role !== "owner") {
+    if (
+      memberRow.role !== "super_admin" &&
+      memberRow.role !== "owner" &&
+      memberRow.role !== "admin"
+    ) {
       return jsonResponse(
-        { error: "Only farm owners can purchase add-ons" },
+        { error: "Only farm owners and admins can purchase add-ons" },
         403
       );
     }
@@ -152,7 +143,7 @@ Deno.serve(async (req: Request) => {
       .select(
         "stripe_subscription_id, extra_wells, extra_admin_seats, extra_meter_checker_seats"
       )
-      .eq("id", userRow.farm_id)
+      .eq("id", memberRow.farm_id)
       .single();
 
     if (farmError || !farm) {
@@ -264,7 +255,7 @@ Deno.serve(async (req: Request) => {
     const { error: updateError } = await supabase
       .from("farms")
       .update(updatePayload)
-      .eq("id", userRow.farm_id);
+      .eq("id", memberRow.farm_id);
 
     if (updateError) {
       console.error("Failed to update farm extra counts:", updateError);

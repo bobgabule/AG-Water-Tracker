@@ -1,21 +1,28 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon } from '@heroicons/react/24/solid';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface WellLimitModalProps {
   open: boolean;
   onClose: () => void;
-  upgradeUrl: string | null;
   isOwner: boolean;
 }
 
 export default function WellLimitModal({
   open,
   onClose,
-  upgradeUrl,
   isOwner,
 }: WellLimitModalProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleAddWells = useCallback(() => {
+    onClose();
+    navigate('/subscription');
+  }, [onClose, navigate]);
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
@@ -46,18 +53,13 @@ export default function WellLimitModal({
           </p>
 
           {isOwner && (
-            <a
-              href={upgradeUrl ?? '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-surface-header hover:bg-surface-header-hover transition-colors ${
-                upgradeUrl === null ? 'opacity-50 pointer-events-none' : ''
-              }`}
-              aria-disabled={upgradeUrl === null}
+            <button
+              onClick={handleAddWells}
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
-              <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-              {t('limit.upgradePlan')}
-            </a>
+              <PlusCircleIcon className="w-5 h-5" />
+              {t('limit.addMoreWells')}
+            </button>
           )}
         </DialogPanel>
       </div>

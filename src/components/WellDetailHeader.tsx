@@ -23,7 +23,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
 
   if (!well) {
     return (
-      <div className="relative h-56 bg-gray-800 flex items-center justify-center">
+      <div className="relative h-32 bg-gray-800 flex items-center justify-center">
         <button
           type="button"
           onClick={onClose}
@@ -51,11 +51,11 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
         <img
           src={mapUrl}
           alt={`Satellite view of ${well.name}`}
-          className="w-full h-56 object-cover"
+          className="w-full h-32 object-cover"
           draggable={false}
         />
       ) : (
-        <div className="w-full h-56 bg-gray-800" />
+        <div className="w-full h-32 bg-gray-800" />
       )}
 
       {/* Gradient overlay for text legibility */}
@@ -87,17 +87,20 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
           )}
         </div>
 
-        {/* Centered map pin */}
-        <div className="flex-1 flex items-center justify-center">
-          <MapPinIcon className="w-10 h-10 text-green-400 drop-shadow-lg" />
+        {/* Centered map pin — absolute so it doesn't affect layout */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <MapPinIcon className="w-8 h-8 text-green-400 drop-shadow-lg" />
         </div>
 
+        {/* Spacer to push bottom bar down */}
+        <div className="flex-1" />
+
         {/* Bottom bar: well info (left) + proximity (right) */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-2">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-white/70 text-xs">{farmName}</p>
-              <h1 className="text-white text-3xl font-bold leading-tight">{well.name}</h1>
+              <h1 className="text-white text-[1.75rem] font-bold leading-tight">{well.name}</h1>
             </div>
             {proximityInRange !== null && (
               <span

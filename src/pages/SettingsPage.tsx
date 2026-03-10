@@ -2,15 +2,13 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import {
   ArrowRightStartOnRectangleIcon,
-  ChevronRightIcon,
-  CreditCardIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { useUserProfile } from '../hooks/useUserProfile';
-import { hasPermission, getRoleDisplayName } from '../lib/permissions';
+import { hasPermission, getRoleDisplayName, ROLE_BADGE_STYLES } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
@@ -233,23 +231,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Subscription Section -- owners/super_admin only */}
-        {canManageFarm && (
-          <section className="mb-8">
-            <h2 className="text-lg font-semibold text-text-heading mb-4">{t('settings.subscription')}</h2>
-            <div className="bg-surface-card rounded-lg">
-              <button
-                onClick={() => navigate('/subscription', { viewTransition: true })}
-                className="w-full flex items-center gap-3 p-4 text-text-heading hover:bg-surface-card-hover transition-colors text-left rounded-lg"
-              >
-                <CreditCardIcon className="h-5 w-5 text-text-heading/60 flex-shrink-0" />
-                <span className="text-sm font-medium flex-1">{t('settings.manageSubscription')}</span>
-                <ChevronRightIcon className="h-4 w-4 text-text-heading/40" />
-              </button>
-            </div>
-          </section>
-        )}
-
         {/* Account Section */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-text-heading mb-4">{t('settings.account')}</h2>
@@ -272,14 +253,8 @@ export default function SettingsPage() {
               <div className="p-4">
                 <p className="text-sm text-text-heading/60">{t('settings.role')}</p>
                 <span
-                  className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                    userRole === 'super_admin'
-                      ? 'bg-purple-500/20 text-purple-400'
-                      : userRole === 'owner'
-                        ? 'bg-green-500/20 text-green-400'
-                        : userRole === 'admin'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : 'bg-blue-500/20 text-blue-400'
+                  className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    ROLE_BADGE_STYLES[userRole as Role] ?? 'bg-blue-500/20 text-blue-400'
                   }`}
                 >
                   {getRoleDisplayName(userRole as Role, locale)}

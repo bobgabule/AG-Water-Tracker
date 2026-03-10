@@ -22,8 +22,8 @@ export interface SubscriptionTierInfo {
   displayName: string;
   /** Max admin seats for this tier */
   maxAdmins: number;
-  /** Max meter checker seats for this tier */
-  maxMeterCheckers: number;
+  /** Max meter reader seats for this tier */
+  maxMeterReaders: number;
   /** Max wells allowed (base tier + add-ons) */
   maxWells: number;
 }
@@ -64,7 +64,7 @@ export function useSubscriptionTier(): SubscriptionTierInfo | null {
       slug: row.id,
       displayName: row.display_name,
       maxAdmins: row.max_admins,
-      maxMeterCheckers: row.max_meter_checkers,
+      maxMeterReaders: row.max_meter_checkers,
       maxWells: row.max_wells + (row.extra_wells ?? 0),
     };
   }, [tierData]);

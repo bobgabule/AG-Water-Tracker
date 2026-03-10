@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { MapIcon, PlusIcon, FlagIcon } from '@heroicons/react/24/solid';
+import { MapIcon, PlusIcon } from '@heroicons/react/24/solid';
+import PennantFlagIcon from '../components/PennantFlagIcon';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useWells, type WellWithReading } from '../hooks/useWells';
 import WellListSkeleton from '../components/skeletons/WellListSkeleton';
@@ -10,8 +11,6 @@ import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission } from '../lib/permissions';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { useWellCount } from '../hooks/useWellCount';
-import { useAppSetting } from '../hooks/useAppSetting';
-import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useCurrentAllocations } from '../hooks/useCurrentAllocations';
 import { useWellSimilarFlags } from '../hooks/useWellFlags';
 import { getWellFlagColor } from '../lib/wellFlags';
@@ -51,12 +50,7 @@ export default function WellListPage() {
   const canCreateWell = hasPermission(role, 'create_well');
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
-  const subscriptionUrl = useAppSetting('subscription_website_url');
   const isOwner = role === 'owner' || role === 'super_admin';
-  const upgradeUrl =
-    subscriptionUrl && farmId && tier
-      ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
-      : null;
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -175,7 +169,7 @@ export default function WellListPage() {
 
                 {/* Flag indicator */}
                 {flagColor && (
-                  <FlagIcon
+                  <PennantFlagIcon
                     className={`w-4 h-4 ${flagColor === 'orange' ? 'text-orange-500' : 'text-yellow-400'}`}
                   />
                 )}
@@ -198,7 +192,7 @@ export default function WellListPage() {
           {canCreateWell && (
             <button
               onClick={handleNewWell}
-              className="flex items-center gap-2 px-5 py-3 bg-teal rounded-full text-white font-medium shadow-sm hover:bg-teal-hover transition-colors"
+              className="flex items-center gap-2 px-5 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               {t('well.newWell')}
@@ -211,7 +205,6 @@ export default function WellListPage() {
       <WellLimitModal
         open={showLimitModal}
         onClose={handleLimitModalClose}
-        upgradeUrl={upgradeUrl}
         isOwner={isOwner}
       />
     </div>

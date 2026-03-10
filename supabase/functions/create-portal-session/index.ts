@@ -60,22 +60,22 @@ Deno.serve(async (req: Request) => {
       // No body or invalid JSON is fine — flow_type is optional
     }
 
-    // Look up farm via user's farm_id
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
+    // Look up farm via farm_members
+    const { data: memberRow, error: memberError } = await supabase
+      .from("farm_members")
       .select("farm_id")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single();
 
-    if (userError || !userRow?.farm_id) {
+    if (memberError || !memberRow?.farm_id) {
       return jsonResponse({ error: "User has no farm" }, 404);
     }
 
-    // Get farm's Stripe customer ID
+    // Get farm's Stripe customer ID and subscription ID (both needed)
     const { data: farm, error: farmError } = await supabase
       .from("farms")
-      .select("stripe_customer_id")
-      .eq("id", userRow.farm_id)
+      .select("stripe_customer_id, stripe_subscription_id")
+      .eq("id", memberRow.farm_id)
       .single();
 
     if (farmError || !farm) {
@@ -109,24 +109,18 @@ Deno.serve(async (req: Request) => {
         type: "payment_method_update",
       };
     } else if (flowType === "subscription_cancel") {
+      if (!farm.stripe_subscription_id) {
+        return jsonResponse(
+          { error: "No active subscription to cancel" },
+          400
+        );
+      }
       sessionParams.flow_data = {
         type: "subscription_cancel",
         subscription_cancel: {
-          subscription: "", // Will be filled below
+          subscription: farm.stripe_subscription_id,
         },
       };
-
-      // Need subscription ID for cancel flow
-      const { data: farmSub } = await supabase
-        .from("farms")
-        .select("stripe_subscription_id")
-        .eq("id", userRow.farm_id)
-        .single();
-
-      if (farmSub?.stripe_subscription_id) {
-        sessionParams.flow_data.subscription_cancel!.subscription =
-          farmSub.stripe_subscription_id;
-      }
     }
 
     const session = await stripe.billingPortal.sessions.create(sessionParams);

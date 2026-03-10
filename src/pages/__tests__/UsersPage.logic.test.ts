@@ -44,7 +44,7 @@ describe('Owner: canDeleteMember', () => {
     expect(canDeleteMember('owner', ME, member('admin'))).toBe(true);
   });
 
-  it('can delete a meter_checker', () => {
+  it('can delete a meter_reader', () => {
     expect(canDeleteMember('owner', ME, member('meter_checker'))).toBe(true);
   });
 
@@ -70,7 +70,7 @@ describe('Super admin: canDeleteMember', () => {
     expect(canDeleteMember('super_admin', ME, member('admin'))).toBe(true);
   });
 
-  it('can delete a meter_checker', () => {
+  it('can delete a meter_reader', () => {
     expect(canDeleteMember('super_admin', ME, member('meter_checker'))).toBe(true);
   });
 
@@ -84,7 +84,7 @@ describe('Super admin: canDeleteMember', () => {
 });
 
 describe('Admin: canDeleteMember', () => {
-  it('can delete a meter_checker', () => {
+  it('can delete a meter_reader', () => {
     expect(canDeleteMember('admin', ME, member('meter_checker'))).toBe(true);
   });
 
@@ -97,7 +97,7 @@ describe('Admin: canDeleteMember', () => {
   });
 });
 
-describe('Meter checker: canDeleteMember', () => {
+describe('Meter reader: canDeleteMember', () => {
   it('cannot delete anyone (no manage_users permission)', () => {
     expect(canDeleteMember('meter_checker', ME, member('meter_checker'))).toBe(false);
     expect(canDeleteMember('meter_checker', ME, member('admin'))).toBe(false);

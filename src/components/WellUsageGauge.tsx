@@ -48,17 +48,17 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   ];
 
   return (
-    <div className="bg-surface-dark px-5 py-5">
+    <div className="bg-surface-dark px-5 py-3">
       <div className="flex items-start gap-4">
         {/* Left column: Serial Number + WMIS */}
         <div className="flex-1 flex flex-col items-end">
-          <div className="inline-block text-right pb-3 border-b border-[#d5e8bd]">
+          <div className="inline-block text-right pb-2 border-b border-[#d5e8bd]">
             <p className="text-[#d5e8bd] text-sm font-semibold">{t('wellDetail.serialNumber')}</p>
             <p className="text-[#d5e8bd] text-sm font-semibold">
               {well.meterSerialNumber || '—'}
             </p>
           </div>
-          <div className="inline-block text-right pt-3">
+          <div className="inline-block text-right pt-2">
             <p className="text-[#d5e8bd] text-sm font-semibold">{t('wellDetail.wmis')}</p>
             <p className="text-[#d5e8bd] text-sm font-semibold">
               {well.wmisNumber || '—'}
@@ -67,7 +67,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
         </div>
 
         {/* Center: Vertical pill gauge — gas gauge style, full = all remaining */}
-        <div className="flex-shrink-0 w-14 h-36 rounded-full bg-[#39432a] overflow-hidden relative border border-white/10 p-[3px]">
+        <div className="flex-shrink-0 w-14 h-28 rounded-full bg-[#39432a] overflow-hidden relative border border-white/10 p-[3px]">
           <div className="w-full h-full rounded-full overflow-hidden relative">
             {remainingPercent > 0 && (
               <div
@@ -80,7 +80,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
 
         {/* Right column: Usage stats + Status indicators */}
         <div className="flex-1">
-          <h3 className="inline-block text-white text-2xl font-semibold uppercase tracking-wide border-b border-[#d5e8bd] pb-2 mb-2">
+          <h3 className="inline-block text-white text-lg font-semibold uppercase tracking-wide border-b border-[#d5e8bd] pb-1 mb-1">
             {t('wellDetail.usage')}
           </h3>
           <div className="space-y-1 mt-1">
@@ -104,7 +104,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
           </div>
 
           {/* Status indicators — vertically stacked below usage stats */}
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-2 space-y-1.5">
             {statusItems.map(({ label, healthy }) => {
               const Icon = healthy ? CheckCircleIcon : XCircleIcon;
               const color = healthy ? 'text-green-400' : 'text-orange-400';

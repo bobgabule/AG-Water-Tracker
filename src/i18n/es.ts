@@ -285,7 +285,7 @@ const es: Record<string, string> = {
   'user.allSeatsFull': 'Todos los puestos estan ocupados',
   'user.seatLimitDesc': 'Tu plan permite {{adminLimit}} administradores y {{mcLimit}} lectores de medidores.',
   'user.contactOwner': 'Contacta al propietario de tu finca para mejorar el plan',
-  'user.meterCheckerLabel': 'Lector de Medidores',
+  'user.meterReaderLabel': 'Lector de Medidores',
   'user.adminLabel': 'Administrador',
   'user.full': '(Lleno)',
 
@@ -330,47 +330,29 @@ const es: Record<string, string> = {
   // ---------------------------------------------------------------------------
   'subscription.title': 'SUSCRIPCION',
   'subscription.subtitle': 'Administra tu plan de finca y complementos',
-  'subscription.admins': 'Administradores',
-  'subscription.meterCheckers': 'Lectores de Medidores',
-  'subscription.wells': 'Pozos',
-  'subscription.full': 'Lleno',
-  'subscription.managePlan': 'Administrar Plan',
-  'subscription.currentPlan': 'Plan Actual',
   'subscription.active': 'Activo',
   'subscription.pastDue': 'Pago Atrasado',
   'subscription.canceled': 'Cancelado',
   'subscription.trial': 'Prueba',
-  'subscription.renewsOn': 'Se renueva el {{date}}',
-  'subscription.nextBilling': 'Proxima facturacion el {{date}}',
-  'subscription.upgradePlan': 'Mejorar Plan',
+  'subscription.nextBillingDate': 'Fecha de facturación: {{date}}',
   'subscription.currentUsage': 'Uso Actual',
   'subscription.activeWells': 'Pozos Activos',
   'subscription.admin': 'Admin',
-  'subscription.meterChecker': 'Lector de Medidores',
+  'subscription.meterReader': 'Lector de Medidores',
   'subscription.purchaseAddOns': 'Comprar Complementos',
+  'subscription.purchaseSuccess': '{{items}} comprados exitosamente!',
   'subscription.addOnSubtitle': 'Agrega capacidad extra a tu plan actual',
   'subscription.wellsAddon': 'Pozos Extra',
   'subscription.adminSeatsAddon': 'Asientos de Admin Extra',
-  'subscription.meterCheckersAddon': 'Asientos de Lectores Extra',
+  'subscription.meterReadersAddon': 'Asientos de Lectores Extra',
   'subscription.perMonth': '{{amount}}/mes',
   'subscription.totalDueToday': 'Total a pagar hoy: {{amount}}',
   'subscription.proratedNote': 'Prorrateado por el resto de tu ciclo de facturacion',
   'subscription.confirmPurchase': 'Confirmar Compra',
   'subscription.purchasing': 'Comprando...',
-  'subscription.purchaseSuccess': 'Complemento comprado exitosamente',
-  'subscription.upgradeTitle': 'Mejorar Tu Plan',
-  'subscription.upgradeDesc': 'Desbloquea mas pozos, asientos y funciones al mejorar tu plan.',
-  'subscription.confirmUpgrade': 'Confirmar Mejora',
-  'subscription.upgrading': 'Mejorando...',
   'subscription.payNow': 'Pagar Ahora',
   'subscription.cancelSubscription': 'Cancelar Suscripcion',
-  'subscription.addOns': 'Complementos',
-  'subscription.usage': 'Uso',
-  'subscription.manageSubscription': 'Administrar Suscripcion',
-  'subscription.portalDescription': 'Ver facturas, actualizar metodo de pago y administrar facturacion en el portal de Stripe.',
-  'subscription.openPortal': 'Abrir Portal de Facturacion',
   'subscription.paymentFailed': 'Tu pago fallo. Actualiza tu metodo de pago para continuar el servicio.',
-  'subscription.updatePayment': 'Actualizar Metodo de Pago',
 
   // ---------------------------------------------------------------------------
   // Reports
@@ -513,8 +495,9 @@ const es: Record<string, string> = {
   // ---------------------------------------------------------------------------
   // Limit Modals
   // ---------------------------------------------------------------------------
-  'limit.wellLimitReached': 'Limite de Pozos Alcanzado',
-  'limit.wellLimitDescription': 'Has alcanzado tu limite de pozos. Mejora tu plan para obtener mas pozos.',
+  'limit.wellLimitReached': 'Límite de Pozos Alcanzado',
+  'limit.wellLimitDescription': 'Has alcanzado el número de pozos incluidos en tu plan. Compra un complemento para agregar más pozos a esta cuenta.',
+  'limit.addMoreWells': 'Agregar Más Pozos',
   'limit.upgradePlan': 'Mejorar Plan',
 
   // ---------------------------------------------------------------------------
@@ -523,7 +506,7 @@ const es: Record<string, string> = {
   'role.superAdmin': 'Super Administrador',
   'role.owner': 'Propietario',
   'role.admin': 'Administrador',
-  'role.meterChecker': 'Lector de Medidores',
+  'role.meterReader': 'Lector de Medidores',
 };
 
 export default es;

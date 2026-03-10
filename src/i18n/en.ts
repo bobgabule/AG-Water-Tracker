@@ -283,9 +283,9 @@ const en: Record<string, string> = {
   'user.noLongerMember': 'This user is no longer a member',
   'user.loadingLimits': 'Loading plan limits...',
   'user.allSeatsFull': 'All seats are filled',
-  'user.seatLimitDesc': 'Your plan allows {{adminLimit}} admin and {{mcLimit}} meter checkers.',
+  'user.seatLimitDesc': 'Your plan allows {{adminLimit}} admin and {{mcLimit}} meter readers.',
   'user.contactOwner': 'Contact your farm owner to upgrade',
-  'user.meterCheckerLabel': 'Meter Checker',
+  'user.meterReaderLabel': 'Meter Reader',
   'user.adminLabel': 'Admin',
   'user.full': '(Full)',
 
@@ -330,47 +330,29 @@ const en: Record<string, string> = {
   // ---------------------------------------------------------------------------
   'subscription.title': 'SUBSCRIPTION',
   'subscription.subtitle': 'Manage your farm plan and add-ons',
-  'subscription.admins': 'Admins',
-  'subscription.meterCheckers': 'Meter Checkers',
-  'subscription.wells': 'Wells',
-  'subscription.full': 'Full',
-  'subscription.managePlan': 'Manage Plan',
-  'subscription.currentPlan': 'Current Plan',
   'subscription.active': 'Active',
   'subscription.pastDue': 'Past Due',
   'subscription.canceled': 'Canceled',
   'subscription.trial': 'Trial',
-  'subscription.renewsOn': 'Renews on {{date}}',
-  'subscription.nextBilling': 'Next billing on {{date}}',
-  'subscription.upgradePlan': 'Upgrade Plan',
+  'subscription.nextBillingDate': 'Next billing date: {{date}}',
   'subscription.currentUsage': 'Current Usage',
   'subscription.activeWells': 'Active Wells',
   'subscription.admin': 'Admin',
-  'subscription.meterChecker': 'Meter Checker',
+  'subscription.meterReader': 'Meter Reader',
   'subscription.purchaseAddOns': 'Purchase Add-Ons',
+  'subscription.purchaseSuccess': 'Purchased {{items}} successfully!',
   'subscription.addOnSubtitle': 'Add extra capacity to your current plan',
   'subscription.wellsAddon': 'Extra Wells',
   'subscription.adminSeatsAddon': 'Extra Admin Seats',
-  'subscription.meterCheckersAddon': 'Extra Meter Checker Seats',
+  'subscription.meterReadersAddon': 'Extra Meter Reader Seats',
   'subscription.perMonth': '{{amount}}/month',
   'subscription.totalDueToday': 'Total due today: {{amount}}',
   'subscription.proratedNote': 'Prorated for the remainder of your billing cycle',
   'subscription.confirmPurchase': 'Confirm Purchase',
   'subscription.purchasing': 'Purchasing...',
-  'subscription.purchaseSuccess': 'Add-on purchased successfully',
-  'subscription.upgradeTitle': 'Upgrade Your Plan',
-  'subscription.upgradeDesc': 'Unlock more wells, seats, and features by upgrading your plan.',
-  'subscription.confirmUpgrade': 'Confirm Upgrade',
-  'subscription.upgrading': 'Upgrading...',
   'subscription.payNow': 'Pay Now',
   'subscription.cancelSubscription': 'Cancel Subscription',
-  'subscription.addOns': 'Add-Ons',
-  'subscription.usage': 'Usage',
-  'subscription.manageSubscription': 'Manage Subscription',
-  'subscription.portalDescription': 'View invoices, update payment method, and manage billing in the Stripe portal.',
-  'subscription.openPortal': 'Open Billing Portal',
   'subscription.paymentFailed': 'Your payment failed. Update your payment method to continue service.',
-  'subscription.updatePayment': 'Update Payment Method',
 
   // ---------------------------------------------------------------------------
   // Reports
@@ -514,7 +496,8 @@ const en: Record<string, string> = {
   // Limit Modals
   // ---------------------------------------------------------------------------
   'limit.wellLimitReached': 'Well Limit Reached',
-  'limit.wellLimitDescription': "You've reached your well limit. Upgrade your plan for more wells.",
+  'limit.wellLimitDescription': "You've reached the number of wells included in your plan. Purchase an add-on to add more wells to this account.",
+  'limit.addMoreWells': 'Add More Wells',
   'limit.upgradePlan': 'Upgrade Plan',
 
   // ---------------------------------------------------------------------------
@@ -523,7 +506,7 @@ const en: Record<string, string> = {
   'role.superAdmin': 'Super Admin',
   'role.owner': 'Owner',
   'role.admin': 'Admin',
-  'role.meterChecker': 'Meter Checker',
+  'role.meterReader': 'Meter Reader',
 };
 
 export default en;
