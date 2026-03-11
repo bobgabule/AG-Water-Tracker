@@ -31,7 +31,7 @@ export default function UsersPage() {
   // Query farm members
   const { data: rawMembers } = useQuery<FarmMemberRow>(
     farmId
-      ? 'SELECT id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = ? ORDER BY created_at ASC'
+      ? "SELECT id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = ? AND role != 'super_admin' ORDER BY created_at ASC"
       : 'SELECT NULL WHERE 0',
     farmId ? [farmId] : []
   );

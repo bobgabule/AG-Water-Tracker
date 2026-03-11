@@ -12,16 +12,17 @@ import { supabase } from './supabase';
 import { disconnectAndClear } from './powersync';
 import { debugError, debugLog } from './debugLog';
 import { useActiveFarmStore } from '../stores/activeFarmStore';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const AUTH_STATUS_CACHE_KEY = 'ag-auth-status';
+import { AUTH_STATUS_CACHE_KEY, ROLE_CACHE_KEY } from './cacheKeys';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Parse cached AuthStatus JSON, normalising fields added in later versions. */
+function parseCachedAuthStatus(raw: string): AuthStatus {
+  const parsed = JSON.parse(raw);
+  return { ...parsed, role: parsed.role ?? null } as AuthStatus;
+}
 
 /**
  * Check if an RPC error indicates an invalid/expired session.
@@ -48,6 +49,7 @@ export interface AuthStatus {
   hasFarmMembership: boolean;
   farmId: string | null;
   farmName: string | null;
+  role: string | null;
 }
 
 export interface AuthContextType {
@@ -141,6 +143,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             hasFarmMembership: retryData.has_farm_membership ?? false,
             farmId: retryData.farm_id ?? null,
             farmName: retryData.farm_name ?? null,
+            role: retryData.role ?? null,
           };
           try { localStorage.setItem(AUTH_STATUS_CACHE_KEY, JSON.stringify(status)); } catch { /* non-critical */ }
           return status;
@@ -187,7 +190,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
             if (cached) {
               debugLog('Auth', 'Serving auth status from cache (RPC error)');
-              return JSON.parse(cached) as AuthStatus;
+              return parseCachedAuthStatus(cached);
             }
           } catch {
             // Cache read failed (invalid JSON, etc.) -- fall through
@@ -199,6 +202,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           hasFarmMembership: data?.has_farm_membership ?? false,
           farmId: data?.farm_id ?? null,
           farmName: data?.farm_name ?? null,
+          role: data?.role ?? null,
         };
 
         // Cache successful result for offline fallback
@@ -227,7 +231,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
           if (cached) {
             debugLog('Auth', 'Serving auth status from cache (network error)');
-            return JSON.parse(cached) as AuthStatus;
+            return parseCachedAuthStatus(cached);
           }
         } catch {
           // Cache read failed -- fall through
@@ -262,7 +266,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             try {
               const cached = localStorage.getItem(AUTH_STATUS_CACHE_KEY);
               if (cached) {
-                setAuthStatus(JSON.parse(cached) as AuthStatus);
+                setAuthStatus(parseCachedAuthStatus(cached));
                 hasCachedStatus = true;
               }
             } catch { /* ignore cache read errors */ }
@@ -443,9 +447,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Clear active farm override (super admin cross-farm state)
     useActiveFarmStore.getState().clearOverride();
 
-    // Clear auth status cache
+    // Clear auth status + role caches
     try {
       localStorage.removeItem(AUTH_STATUS_CACHE_KEY);
+      localStorage.removeItem(ROLE_CACHE_KEY);
     } catch {
       // Non-critical -- localStorage may be unavailable
     }

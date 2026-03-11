@@ -16,12 +16,12 @@ export default function Header({ farmName, onMenuOpen }: HeaderProps) {
   const headerBg = role === 'super_admin' ? 'bg-super-admin' : 'bg-surface-header';
 
   return (
-    <header className={`absolute top-0 inset-x-0 z-30 ${headerBg}`}>
+    <header className={`absolute top-0 inset-x-0 z-30 transition-colors duration-200 ${headerBg}`}>
       <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-1">
           <img src="/ag-logo-white.png" alt="AG" className="h-10" />
           <div className="flex flex-col justify-center leading-tight">
-            <span className="text-white text-xs">{t('app.waterTracker')}</span>
+            <span className="text-white text-xs">{t(role === 'super_admin' ? 'app.waterTrackerAdmin' : 'app.waterTracker')}</span>
             {canCrossFarm ? (
               <FarmSelector />
             ) : (

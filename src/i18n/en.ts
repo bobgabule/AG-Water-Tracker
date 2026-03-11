@@ -3,6 +3,7 @@ const en: Record<string, string> = {
   // App
   // ---------------------------------------------------------------------------
   'app.waterTracker': 'Water Tracker',
+  'app.waterTrackerAdmin': 'Water Tracker Admin',
 
   // ---------------------------------------------------------------------------
   // Navigation

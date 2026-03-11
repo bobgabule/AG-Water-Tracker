@@ -5,6 +5,7 @@ import { useQuery } from '@powersync/react';
 import { useAuth } from '../lib/AuthProvider';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useActiveFarmStore } from '../stores/activeFarmStore';
+import { useUserRole } from '../hooks/useUserRole';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,8 +31,10 @@ const FarmSelector = React.memo(function FarmSelector() {
   const { farmId: activeFarmId, farmName: activeFarmName, isOverride } = useActiveFarm();
   const setActiveFarm = useActiveFarmStore((s) => s.setActiveFarm);
   const clearOverride = useActiveFarmStore((s) => s.clearOverride);
+  const role = useUserRole();
 
-  const ownFarmId = authStatus?.farmId ?? null;
+  // Super_admin doesn't "own" any farm — all farms are equal
+  const ownFarmId = role === 'super_admin' ? null : (authStatus?.farmId ?? null);
   const ownFarmName = authStatus?.farmName ?? 'My Farm';
 
   // Query all farms for the dropdown
@@ -100,7 +103,7 @@ const FarmSelector = React.memo(function FarmSelector() {
             <span className="text-white text-lg font-bold truncate max-w-[180px]">
               {activeFarmName ?? 'Select Farm'}
             </span>
-            {isOverride && (
+            {isOverride && role !== 'super_admin' && (
               <span className="text-yellow-300 text-[10px] font-medium -mt-0.5">
                 (viewing)
               </span>
@@ -111,13 +114,17 @@ const FarmSelector = React.memo(function FarmSelector() {
 
         <ListboxOptions
           anchor="bottom start"
-          className="z-50 mt-1 w-64 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-xl focus:outline-none"
+          className={`z-50 mt-1 w-64 rounded-lg border py-1 shadow-xl focus:outline-none ${
+            role === 'super_admin'
+              ? 'bg-super-admin border-white/20'
+              : 'bg-surface-header border-white/20'
+          }`}
         >
           {options.map((option) => (
             <ListboxOption
               key={option.id}
               value={option}
-              className="cursor-pointer select-none px-3 py-2 text-sm text-white data-[focus]:bg-gray-700 data-[selected]:bg-surface-header/30"
+              className="cursor-pointer select-none px-3 py-2 text-sm text-white data-[focus]:bg-white/15 data-[selected]:bg-white/25"
             >
               <div className="flex items-center gap-2">
                 <span className="truncate font-medium">{option.name}</span>
