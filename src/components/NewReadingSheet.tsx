@@ -421,7 +421,7 @@ export default function NewReadingSheet({
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto px-4">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-4">
             {activeTab === 'reading' ? (
               <>
                 {/* Reading tab */}
@@ -435,7 +435,7 @@ export default function NewReadingSheet({
                         value={readingValue}
                         onChange={handleValueChange}
                         placeholder="0"
-                        className="flex-1 text-3xl font-bold text-white bg-white/10 rounded-xl px-4 py-3 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+                        className="flex-1 min-w-0 text-3xl font-bold text-white bg-white/10 rounded-xl px-4 py-3 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                       <span className="text-lg text-white/70 whitespace-nowrap">
                         {well.units} x {well.multiplier}
