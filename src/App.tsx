@@ -44,7 +44,7 @@ function LazyRoute({
 }
 
 export default function App() {
-  // Register SW and check for updates silently (autoUpdate mode)
+  // Register SW and check for updates in background (lazy update — no mid-session reloads)
   useServiceWorkerUpdate();
 
   return (

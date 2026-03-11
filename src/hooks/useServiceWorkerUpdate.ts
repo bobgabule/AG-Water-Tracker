@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
-const UPDATE_CHECK_COOLDOWN_MS = 15 * 60 * 1000 // 15 minutes
-const PERIODIC_CHECK_MS = 60 * 60 * 1000 // 1 hour
+const UPDATE_CHECK_COOLDOWN_MS = 30 * 60 * 1000 // 30 minutes
+const PERIODIC_CHECK_MS = 4 * 60 * 60 * 1000 // 4 hours
 
 /**
  * Registers the service worker and periodically checks for updates.
- * Uses autoUpdate mode — new SW activates silently, no user prompt needed.
  *
- * Visibility-change checks are debounced with a 15-min cooldown to
- * avoid excessive checks on iOS where system overlays trigger frequent
- * visibilitychange events.
+ * Uses "lazy update" strategy: new SWs are downloaded in the background
+ * but never activated mid-session (no skipWaiting, no reload). The new SW
+ * activates naturally on next app launch when all old clients are gone.
+ * This eliminates forced refreshes on both Chrome and iOS Safari.
  */
 export function useServiceWorkerUpdate() {
   const lastCheckRef = useRef(0)
@@ -22,9 +22,12 @@ export function useServiceWorkerUpdate() {
       registrationRef.current = registration
       navigator.storage?.persist()
     },
+    // New SW is waiting — do nothing. It will activate on next app launch.
+    onNeedRefresh() {},
   })
 
-  // Periodic update check + visibility-change listener with cleanup
+  // Periodic background check + visibility-change listener
+  // These only download the new SW; they never activate it or reload.
   useEffect(() => {
     const intervalId = setInterval(() => {
       registrationRef.current?.update().catch(() => {})
