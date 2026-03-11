@@ -36,9 +36,9 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
   const { t } = useTranslation();
   const allocated = parseFloat(allocatedAf ?? '') || 0;
   const used = parseFloat(usedAf ?? '') || 0;
-  const remaining = Math.max(0, allocated - used);
+  const remaining = allocated - used;
   const remainingPercent =
-    allocated > 0 ? Math.min((remaining / allocated) * 100, 100) : 0;
+    allocated > 0 ? Math.min(Math.max(0, (remaining / allocated) * 100), 100) : 0;
   const gaugeColor = getGaugeColor(remainingPercent);
 
   const statusItems = [
@@ -97,7 +97,7 @@ const WellUsageGauge = React.memo(function WellUsageGauge({
               {t('wellDetail.usedAf')}
             </p>
             <div className="inline-block rounded px-2 py-0.5 mt-1 bg-[#586a40]">
-              <span className="text-white text-sm font-semibold">
+              <span className={`text-sm font-semibold ${remaining < 0 ? 'text-red-400/70' : 'text-white'}`}>
                 {t('wellDetail.remainingAf', { value: formatAf(remaining) })}
               </span>
             </div>

@@ -23,7 +23,7 @@ interface NewReadingSheetProps {
 }
 
 type ActiveTab = 'reading' | 'problem';
-type ReadingView = 'form' | 'similar-warning' | 'range-warning' | 'gps-failed' | 'submitting';
+type ReadingView = 'form' | 'lower-warning' | 'similar-warning' | 'range-warning' | 'gps-failed' | 'submitting';
 
 interface MeterProblems {
   notWorking: boolean;
@@ -270,11 +270,17 @@ export default function NewReadingSheet({
     }
     setValidationError(null);
 
-    // Check for similar reading (threshold: 50 gallons equivalent)
+    // Check reading is not lower than previous (odometer-style: only goes up)
     if (readings.length > 0) {
       const lastValue = parseFloat(readings[0].value);
       const currentValue = parseFloat(readingValue.trim());
       if (!isNaN(lastValue) && !isNaN(currentValue)) {
+        if (currentValue < lastValue) {
+          setView('lower-warning');
+          return;
+        }
+
+        // Check for similar reading (threshold: 50 gallons equivalent)
         const diff = Math.abs(currentValue - lastValue);
         const multiplier = getMultiplierValue(well.multiplier);
         const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
@@ -288,7 +294,7 @@ export default function NewReadingSheet({
 
     // Proceed directly to GPS capture
     handleGpsCaptureAndSave();
-  }, [readingValue, readings, handleGpsCaptureAndSave]);
+  }, [readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave]);
 
   const handleSimilarContinue = useCallback(() => {
     handleGpsCaptureAndSave(true);
@@ -439,6 +445,27 @@ export default function NewReadingSheet({
                     {validationError && (
                       <p className="text-red-800 text-sm">{validationError}</p>
                     )}
+                  </div>
+                )}
+
+                {view === 'lower-warning' && (
+                  <div className="flex flex-col items-center text-center space-y-4 py-6">
+                    <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
+                    <h3 className="text-white text-xl font-bold">
+                      {t('reading.lowerTitle')}
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      {t('reading.lowerDescription')}
+                    </p>
+                    <div className="flex w-full pt-4">
+                      <button
+                        type="button"
+                        onClick={handleBackToForm}
+                        className="flex-1 py-3 text-white font-medium rounded-lg"
+                      >
+                        {t('reading.goBack')}
+                      </button>
+                    </div>
                   </div>
                 )}
 

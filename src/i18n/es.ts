@@ -171,6 +171,10 @@ const es: Record<string, string> = {
   'reading.inRange': 'En Rango',
   'reading.outOfRange': 'Fuera de Rango',
 
+  // Reading - Lower Warning
+  'reading.lowerTitle': 'Lectura Demasiado Baja',
+  'reading.lowerDescription': 'La lectura ingresada es menor que la lectura anterior. Por favor revisa el medidor e intenta de nuevo.',
+
   // Reading - Similar Warning
   'reading.similarTitle': 'Lectura Similar',
   'reading.similarDescription': 'Esta lectura esta dentro de 50 galones de la ultima lectura registrada',
