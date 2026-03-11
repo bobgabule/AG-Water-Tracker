@@ -44,7 +44,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
       ) : (
         <>
           {/* Table header */}
-          <div className="grid grid-cols-[5.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-5 bg-[#4b5b37]">
+          <div className="grid grid-cols-[7.5rem_1fr_1fr] text-xs text-[#acbc97] font-semibold uppercase tracking-wide py-2 px-5 bg-[#4b5b37]">
             <span>{t('reading.dateHeader')}</span>
             <span>{columnHeader}</span>
             <span>{t('reading.userTimeHeader')}</span>
@@ -55,8 +55,9 @@ const WellReadingsList = React.memo(function WellReadingsList({
             {readings.map((reading, index) => {
               const date = new Date(reading.recordedAt);
               const dateStr = date.toLocaleDateString(locale, {
-                month: 'long',
+                month: 'short',
                 day: 'numeric',
+                year: 'numeric',
               });
               const timeStr = date.toLocaleTimeString(locale, {
                 hour: 'numeric',
@@ -70,11 +71,11 @@ const WellReadingsList = React.memo(function WellReadingsList({
                     type: 'button' as const,
                     onClick: () => onReadingClick(reading),
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-5 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
+                      `grid grid-cols-[7.5rem_1fr_1fr] items-center py-3.5 px-5 w-full text-left active:bg-white/10 transition-colors ${altBg}`,
                   }
                 : {
                     className:
-                      `grid grid-cols-[5.5rem_1fr_1fr] items-center py-3.5 px-5 ${altBg}`,
+                      `grid grid-cols-[7.5rem_1fr_1fr] items-center py-3.5 px-5 ${altBg}`,
                   };
 
               return (
