@@ -304,7 +304,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Floating action buttons */}
-      <div className="absolute bottom-3 left-4 right-4 z-20 flex justify-between pb-[env(safe-area-inset-bottom)]">
+      <div className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-4 right-4 z-20 flex justify-between">
         <button
           onClick={handleWellList}
           className="
