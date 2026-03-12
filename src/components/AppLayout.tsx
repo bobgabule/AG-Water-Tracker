@@ -126,10 +126,10 @@ function AppLayoutContent() {
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface-page">
+    <div className="relative flex flex-col min-h-screen bg-surface-page">
       <Header farmName={farmName} onMenuOpen={handleMenuOpen} />
       <SideMenu open={menuOpen} onClose={handleMenuClose} />
-      <main className="flex-1">
+      <main className="relative z-0 flex-1">
         <PowerSyncGate />
       </main>
       <Toast />
