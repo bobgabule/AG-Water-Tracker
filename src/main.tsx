@@ -6,6 +6,16 @@ import App from './App.tsx'
 import { AuthProvider } from './lib/AuthProvider'
 import { preWarmPowerSync } from './lib/powersync'
 
+// Reload once when a new service worker takes control (defense-in-depth for iOS Safari)
+if ('serviceWorker' in navigator) {
+  let reloading = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return
+    reloading = true
+    window.location.reload()
+  })
+}
+
 // Start WASM + SQLite init in parallel with auth (saves ~200-500ms)
 preWarmPowerSync()
 

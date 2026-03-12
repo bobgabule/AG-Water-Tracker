@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'AG Water Tracker',
@@ -41,18 +41,20 @@ export default defineConfig({
         ],
       },
       workbox: {
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,webp}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
-          // Mapbox API (styles, sprites — not raw tile requests)
+          // Mapbox API (styles only — fonts/sprites handled by assets rule below)
           {
-            urlPattern: /^https:\/\/api\.mapbox\.com\/(styles|fonts|sprites)\/.*/i,
+            urlPattern: /^https:\/\/api\.mapbox\.com\/styles\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mapbox-api-v1',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
                 purgeOnQuotaError: true,
               },
@@ -61,14 +63,14 @@ export default defineConfig({
               },
             },
           },
-          // Mapbox vector tiles (separate subdomain) — limited for iOS ~50MB quota
+          // Mapbox vector tiles — limited for iOS ~50MB quota
           {
             urlPattern: /^https:\/\/.*\.tiles\.mapbox\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mapbox-tiles-v1',
               expiration: {
-                maxEntries: 500,
+                maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
                 purgeOnQuotaError: true,
               },
@@ -77,14 +79,14 @@ export default defineConfig({
               },
             },
           },
-          // Mapbox static assets (sprites, glyphs, fonts)
+          // Mapbox static assets (fonts, sprites, glyphs)
           {
             urlPattern: /^https:\/\/.*\.mapbox\.com\/(fonts|sprites)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mapbox-assets-v1',
               expiration: {
-                maxEntries: 50,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
                 purgeOnQuotaError: true,
               },
