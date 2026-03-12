@@ -16,7 +16,7 @@ export default function Header({ farmName, onMenuOpen }: HeaderProps) {
   const headerBg = role === 'super_admin' ? 'bg-super-admin' : 'bg-surface-header';
 
   return (
-    <header className={`absolute top-0 inset-x-0 z-30 transition-colors duration-200 ${headerBg}`}>
+    <header className={`fixed top-0 inset-x-0 z-30 transition-colors duration-200 ${headerBg}`}>
       <div className="flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-1">
           <img src="/ag-logo-white.png" alt="AG" className="h-10" />
