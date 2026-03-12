@@ -24,7 +24,7 @@ export default function DashboardSkeleton() {
       </div>
 
       {/* Floating action button outlines */}
-      <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-between pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] left-4 right-4 z-20 flex justify-between">
         <SkeletonBlock
           width="w-[120px]"
           height="h-12"

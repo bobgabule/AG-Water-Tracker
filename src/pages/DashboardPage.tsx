@@ -279,7 +279,7 @@ export default function DashboardPage() {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className={`relative w-full h-dvh bg-[#191a1a] overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`relative w-full h-dvh min-h-screen bg-[#191a1a] overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {/* Map layer */}
       <ErrorBoundary
         FallbackComponent={MapErrorFallback}
@@ -304,7 +304,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Floating action buttons */}
-      <div className="absolute bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] left-4 right-4 z-20 flex justify-between">
+      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] left-4 right-4 z-20 flex justify-between">
         <button
           onClick={handleWellList}
           className="
