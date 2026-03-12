@@ -1,4 +1,4 @@
-import { PowerSyncDatabase } from '@powersync/web';
+import { PowerSyncDatabase, WASQLiteOpenFactory, WASQLiteVFS } from '@powersync/web';
 import { AppSchema } from './powersync-schema.ts';
 import { SupabaseConnector } from './powersync-connector.ts';
 import { debugLog } from './debugLog';
@@ -23,11 +23,15 @@ export function setupPowerSync(): Promise<PowerSyncDatabase> {
 
       const db = new PowerSyncDatabase({
         schema: AppSchema,
-        database: {
+        database: new WASQLiteOpenFactory({
           dbFilename: 'ag-water-tracker.db',
-        },
+          vfs: WASQLiteVFS.OPFSCoopSyncVFS,
+          flags: {
+            enableMultiTabs: typeof SharedWorker !== 'undefined',
+          },
+        }),
         flags: {
-          useWebWorker: false,
+          enableMultiTabs: typeof SharedWorker !== 'undefined',
         },
       });
 
