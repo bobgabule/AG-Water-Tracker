@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const farmState = useFarmState(farmId);
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
-  const isOwner = role === 'owner' || role === 'super_admin';
+  const canManageAddons = hasPermission(role, 'view_subscription');
 
   // Geolocation permission + location
   const { permission, isResolved } = useGeolocationPermission();
@@ -358,7 +358,7 @@ export default function DashboardPage() {
       <WellLimitModal
         open={showLimitModal}
         onClose={handleLimitModalClose}
-        isOwner={isOwner}
+        canManageAddons={canManageAddons}
       />
 
       {/* Location Permission Modal */}

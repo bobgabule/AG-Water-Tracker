@@ -8,13 +8,13 @@ import { useTranslation } from '../hooks/useTranslation';
 interface WellLimitModalProps {
   open: boolean;
   onClose: () => void;
-  isOwner: boolean;
+  canManageAddons: boolean;
 }
 
 export default function WellLimitModal({
   open,
   onClose,
-  isOwner,
+  canManageAddons,
 }: WellLimitModalProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function WellLimitModal({
             {t('limit.wellLimitDescription')}
           </p>
 
-          {isOwner && (
+          {canManageAddons && (
             <button
               onClick={handleAddWells}
               className="btn-primary w-full flex items-center justify-center gap-2"

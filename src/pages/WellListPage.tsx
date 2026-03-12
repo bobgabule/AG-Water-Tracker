@@ -50,7 +50,7 @@ export default function WellListPage() {
   const canCreateWell = hasPermission(role, 'create_well');
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
-  const isOwner = role === 'owner' || role === 'super_admin';
+  const canManageAddons = hasPermission(role, 'view_subscription');
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -205,7 +205,7 @@ export default function WellListPage() {
       <WellLimitModal
         open={showLimitModal}
         onClose={handleLimitModalClose}
-        isOwner={isOwner}
+        canManageAddons={canManageAddons}
       />
     </div>
   );

@@ -168,6 +168,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   }, [onClose]);
 
   const canSelectAdmin = callerRole === 'owner' || callerRole === 'super_admin';
+  const canSeeUpgradeLink = callerRole === 'owner' || callerRole === 'super_admin' || callerRole === 'admin';
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
@@ -212,7 +213,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                 <p className="text-white/70 text-sm mb-4">
                   {t('user.seatLimitDesc', { adminLimit: String(seatUsage?.admin.limit ?? 0), mcLimit: String(seatUsage?.meter_checker.limit ?? 0) })}
                 </p>
-                {(callerRole === 'owner' || callerRole === 'super_admin') && upgradeUrl ? (
+                {canSeeUpgradeLink && upgradeUrl ? (
                   <a
                     href={upgradeUrl}
                     target="_blank"
@@ -222,7 +223,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     {t('limit.upgradePlan')}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </a>
-                ) : (callerRole === 'owner' || callerRole === 'super_admin') && !upgradeUrl ? (
+                ) : canSeeUpgradeLink && !upgradeUrl ? (
                   <span className="inline-flex items-center gap-1.5 text-sm text-btn-confirm/50 font-medium mt-2">
                     {t('limit.upgradePlan')}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
@@ -237,8 +238,8 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <div className="space-y-6">
                 {/* Error */}
                 {error && (
-                  <div className="bg-red-800 border border-red-800 rounded-lg p-3">
-                    <p className="text-red-800 text-sm">{error}</p>
+                  <div className="bg-red-900/50 border border-red-700 rounded-lg p-3">
+                    <p className="text-red-200 text-sm">{error}</p>
                   </div>
                 )}
 
