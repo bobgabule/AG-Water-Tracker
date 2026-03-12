@@ -164,7 +164,7 @@ export default function SettingsPage() {
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-sm placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-base placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   <div>
@@ -173,7 +173,7 @@ export default function SettingsPage() {
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-sm placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-base placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('settings.emailPlaceholder')}
-                    className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-sm placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-base placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">

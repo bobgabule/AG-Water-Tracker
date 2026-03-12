@@ -330,7 +330,7 @@ export default function ReportsPage() {
                   setAddError(null);
                 }}
                 placeholder="email@example.com"
-                className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-sm placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-surface-input border border-text-heading/15 rounded-lg text-text-heading text-base placeholder-text-heading/40 focus:outline-none focus:ring-2 focus:ring-primary"
                 autoFocus
                 onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
               />

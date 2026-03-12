@@ -222,7 +222,7 @@ export default function AddWellFormBottomSheet({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('well.wellNamePlaceholder')}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -235,7 +235,7 @@ export default function AddWellFormBottomSheet({
                     value={meterSerialNumber}
                     onChange={(e) => setMeterSerialNumber(e.target.value)}
                     placeholder={t('well.serialPlaceholder')}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex-1">
@@ -245,7 +245,7 @@ export default function AddWellFormBottomSheet({
                     value={wmisNumber}
                     onChange={(e) => setWmisNumber(e.target.value)}
                     placeholder={t('well.wmisPlaceholder')}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default function AddWellFormBottomSheet({
                     value={latitude.toFixed(6)}
                     onChange={handleLatitudeChange}
                     placeholder="0.000000"
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex-1">
@@ -271,7 +271,7 @@ export default function AddWellFormBottomSheet({
                     value={longitude.toFixed(6)}
                     onChange={handleLongitudeChange}
                     placeholder="0.000000"
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <button
@@ -341,7 +341,7 @@ export default function AddWellFormBottomSheet({
                     if (emailError) setEmailError(null);
                   }}
                   placeholder={t('well.waterDistrictEmailPlaceholder')}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {emailError && (
                   <p className="text-red-800 text-xs mt-1">{emailError}</p>
@@ -354,7 +354,7 @@ export default function AddWellFormBottomSheet({
                 <select
                   value={batteryState}
                   onChange={(e) => setBatteryState(e.target.value as WellFormData['batteryState'])}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {stateOptions.map((opt) => (
                     <option key={opt} value={opt}>
@@ -370,7 +370,7 @@ export default function AddWellFormBottomSheet({
                 <select
                   value={pumpState}
                   onChange={(e) => setPumpState(e.target.value as WellFormData['pumpState'])}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {stateOptions.map((opt) => (
                     <option key={opt} value={opt}>
@@ -386,7 +386,7 @@ export default function AddWellFormBottomSheet({
                 <select
                   value={meterStatus}
                   onChange={(e) => setMeterStatus(e.target.value as WellFormData['meterStatus'])}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {stateOptions.map((opt) => (
                     <option key={opt} value={opt}>

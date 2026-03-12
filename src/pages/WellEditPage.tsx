@@ -407,7 +407,7 @@ export default function WellEditPage() {
                 setNameError(null);
               }}
               placeholder={t('well.wellNamePlaceholder')}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {nameError && <p className="text-red-800 text-xs mt-1">{nameError}</p>}
           </div>
@@ -421,7 +421,7 @@ export default function WellEditPage() {
                 value={meterSerialNumber}
                 onChange={(e) => setMeterSerialNumber(e.target.value)}
                 placeholder={t('well.serialPlaceholder')}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div className="flex-1">
@@ -434,7 +434,7 @@ export default function WellEditPage() {
                   setWmisError(null);
                 }}
                 placeholder={t('well.wmisPlaceholder')}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
               {wmisError && <p className="text-red-800 text-xs mt-1">{wmisError}</p>}
             </div>
@@ -450,7 +450,7 @@ export default function WellEditPage() {
                 value={latitude.toFixed(6)}
                 onChange={handleLatitudeChange}
                 placeholder="0.000000"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div className="flex-1">
@@ -461,7 +461,7 @@ export default function WellEditPage() {
                 value={longitude.toFixed(6)}
                 onChange={handleLongitudeChange}
                 placeholder="0.000000"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <button
@@ -527,7 +527,7 @@ export default function WellEditPage() {
             <select
               value={batteryState}
               onChange={(e) => setBatteryState(e.target.value as EquipmentState)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {stateOptions.map((opt) => (
                 <option key={opt} value={opt}>
@@ -543,7 +543,7 @@ export default function WellEditPage() {
             <select
               value={pumpState}
               onChange={(e) => setPumpState(e.target.value as EquipmentState)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {stateOptions.map((opt) => (
                 <option key={opt} value={opt}>
@@ -559,7 +559,7 @@ export default function WellEditPage() {
             <select
               value={meterStatus}
               onChange={(e) => setMeterStatus(e.target.value as EquipmentState)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base appearance-none focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {stateOptions.map((opt) => (
                 <option key={opt} value={opt}>

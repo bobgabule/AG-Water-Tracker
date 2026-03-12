@@ -252,7 +252,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       onChange={handleFirstNameChange}
                       placeholder={t('user.firstNamePlaceholder')}
                       autoComplete="given-name"
-                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
                   </div>
                   <div className="flex-1">
@@ -263,7 +263,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                       onChange={handleLastNameChange}
                       placeholder={t('user.lastNamePlaceholder')}
                       autoComplete="family-name"
-                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                     />
                   </div>
                 </div>
@@ -276,7 +276,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     value={formatPhoneDisplay(phoneDigits)}
                     onChange={handlePhoneChange}
                     placeholder="(555) 123-4567"
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                   />
                   <p className="text-xs text-white mt-2">{t('auth.usPhoneHint')}</p>
                 </div>
@@ -290,7 +290,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                     onChange={handleEmailChange}
                     placeholder={t('user.emailPlaceholder')}
                     autoComplete="email"
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-surface-header/30"
                   />
                 </div>
 

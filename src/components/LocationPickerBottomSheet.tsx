@@ -123,7 +123,7 @@ export default function LocationPickerBottomSheet({
                 value={location?.latitude?.toFixed(6) ?? ''}
                 onChange={handleLatitudeChange}
                 placeholder="0.000000"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -138,7 +138,7 @@ export default function LocationPickerBottomSheet({
                 value={location?.longitude?.toFixed(6) ?? ''}
                 onChange={handleLongitudeChange}
                 placeholder="0.000000"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base text-[#759099] placeholder:text-[#759099] focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
