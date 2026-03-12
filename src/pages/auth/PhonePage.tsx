@@ -133,7 +133,7 @@ export default function PhonePage() {
       <form onSubmit={handleSubmit}>
         {/* Error message */}
         {error && (
-          <div className="bg-red-800/60 border border-red-800/40 text-red-800 text-sm rounded-lg p-3 mb-4">
+          <div className="bg-red-900/70 border border-red-500/30 text-red-100 text-sm rounded-lg p-3 mb-4">
             {error}
           </div>
         )}
