@@ -242,8 +242,8 @@ export default function DashboardPage() {
         ]
       );
 
-      // Add water district email to report recipients if checkbox is checked and email provided
-      if (wellData.sendMonthlyReport && wellData.waterDistrictEmail) {
+      // Add water district email to report recipients if email provided
+      if (wellData.waterDistrictEmail) {
         try {
           const email = wellData.waterDistrictEmail.toLowerCase();
           const existing = await db.getAll<{ id: string }>(

@@ -41,6 +41,39 @@ function toBase64(content: string): string {
   return btoa(binary);
 }
 
+/** Format a farm address from its parts, omitting null fields */
+function formatFarmAddress(farm: {
+  street_address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+}): string {
+  const parts = [
+    farm.street_address,
+    farm.city,
+    farm.state && farm.zip_code
+      ? `${farm.state} ${farm.zip_code}`
+      : (farm.state ?? farm.zip_code ?? null),
+  ].filter((p): p is string => Boolean(p));
+  return parts.join(", ");
+}
+
+/** Format GPS coordinates as "lat, lon" or empty string */
+function formatGps(lat: number | null, lon: number | null): string {
+  if (lat == null || lon == null) return "";
+  return `${lat}, ${lon}`;
+}
+
+/** Format ISO date as MM/DD/YYYY or empty string */
+function formatDate(iso: string | null): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
 interface FarmResult {
   farmId: string;
   farmName: string;
@@ -61,14 +94,20 @@ async function sendReportForFarm(
     .eq("farm_id", farmId);
 
   if (recipErr) throw recipErr;
-  // 2. Get farm name
-  const { data: farm } = await supabase
+
+  // 2. Get farm details (name + address)
+  const { data: farm, error: farmErr } = await supabase
     .from("farms")
-    .select("name")
+    .select("name, street_address, city, state, zip_code")
     .eq("id", farmId)
     .single();
 
+  if (farmErr) {
+    console.error("Failed to fetch farm details for", farmId, ":", farmErr.message);
+  }
+
   const farmName = farm?.name ?? "Your Farm";
+  const farmAddress = farm ? formatFarmAddress(farm) : "";
 
   if (!recipients || recipients.length === 0) {
     return { farmId, farmName, success: false, recipientCount: 0, error: "No recipients" };
@@ -77,71 +116,109 @@ async function sendReportForFarm(
   // 3. Get all wells for this farm
   const { data: wells, error: wellErr } = await supabase
     .from("wells")
-    .select("id, name, units, multiplier, wmis_number, meter_serial_number")
-    .eq("farm_id", farmId);
+    .select("id, name, wmis_number, latitude, longitude, units, multiplier")
+    .eq("farm_id", farmId)
+    .order("name");
 
   if (wellErr) throw wellErr;
 
-  // 4. Get readings for these wells (current month)
+  // 4. Date range: 15th of prior month to now
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+  const rangeStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15),
+  ).toISOString();
+  const rangeEnd = now.toISOString();
 
   const wellIds = (wells ?? []).map((w) => w.id);
 
+  // 5. Get readings in range, ordered newest first for deduplication
   let readings: Array<{
     well_id: string;
     value: string;
     recorded_at: string;
-    gps_latitude: number | null;
-    gps_longitude: number | null;
-    notes: string | null;
+    recorded_by: string | null;
   }> = [];
 
   if (wellIds.length > 0) {
     const { data: readingData, error: readingErr } = await supabase
       .from("readings")
-      .select("well_id, value, recorded_at, gps_latitude, gps_longitude, notes")
+      .select("well_id, value, recorded_at, recorded_by")
       .in("well_id", wellIds)
-      .gte("recorded_at", monthStart)
-      .lte("recorded_at", monthEnd)
-      .order("recorded_at", { ascending: true });
+      .gte("recorded_at", rangeStart)
+      .lte("recorded_at", rangeEnd)
+      .order("recorded_at", { ascending: false });
 
     if (readingErr) throw readingErr;
     readings = readingData ?? [];
   }
 
-  // 5. Generate CSV (RFC 4180 compliant)
-  const wellMap = new Map((wells ?? []).map((w) => [w.id, w]));
+  // Deduplicate: keep only the most recent reading per well
+  const latestByWell = new Map<string, (typeof readings)[0]>();
+  for (const r of readings) {
+    if (!latestByWell.has(r.well_id)) {
+      latestByWell.set(r.well_id, r);
+    }
+  }
 
-  const csvRows = [
-    "Well Name,WMIS Number,Meter Serial,Units,Multiplier,Reading Value,Recorded At,GPS Latitude,GPS Longitude,Notes",
+  // 6. Get recorder names from users table
+  const recorderIds = [
+    ...new Set(
+      [...latestByWell.values()]
+        .map((r) => r.recorded_by)
+        .filter((id): id is string => Boolean(id)),
+    ),
   ];
 
-  for (const reading of readings) {
-    const well = wellMap.get(reading.well_id);
+  const recorderMap = new Map<string, string>();
+  if (recorderIds.length > 0) {
+    const { data: userRows } = await supabase
+      .from("users")
+      .select("id, display_name, first_name, last_name")
+      .in("id", recorderIds);
+
+    for (const u of userRows ?? []) {
+      const name =
+        u.display_name ||
+        [u.first_name, u.last_name].filter(Boolean).join(" ") ||
+        "Unknown";
+      recorderMap.set(u.id, name);
+    }
+  }
+
+  // 7. Generate CSV — one row per well, most recent reading only
+  const csvRows = [
+    "Farm Name,Farm Address,Well Name,WMIS#,GPS Coordinates,Date of Reading,Reading Unit,Reading Unit Multiplier,Actual Reading,Reading Logged By",
+  ];
+
+  for (const well of wells ?? []) {
+    const reading = latestByWell.get(well.id);
+    const recorderName = reading?.recorded_by
+      ? (recorderMap.get(reading.recorded_by) ?? "Unknown")
+      : "";
+
     csvRows.push(
       [
-        csvField(well?.name),
-        csvField(well?.wmis_number),
-        csvField(well?.meter_serial_number),
-        csvField(well?.units),
-        csvField(well?.multiplier),
-        csvField(reading.value),
-        csvField(reading.recorded_at),
-        csvField(reading.gps_latitude),
-        csvField(reading.gps_longitude),
-        csvField(reading.notes),
+        csvField(farmName),
+        csvField(farmAddress),
+        csvField(well.name),
+        csvField(well.wmis_number),
+        csvField(formatGps(well.latitude, well.longitude)),
+        csvField(reading ? formatDate(reading.recorded_at) : ""),
+        csvField(well.units),
+        csvField(well.multiplier),
+        csvField(reading?.value ?? ""),
+        csvField(recorderName),
       ].join(","),
     );
   }
 
   const csvBase64 = toBase64(csvRows.join("\n"));
 
-  // 6. Send email via Resend
+  // 8. Send email via Resend
   const emailAddresses = recipients.map((r) => r.email);
   const monthName = now.toLocaleString("en-US", { month: "long", year: "numeric" });
   const safeFileName = farmName.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const wellsWithReadings = latestByWell.size;
 
   const resendResponse = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -155,9 +232,10 @@ async function sendReportForFarm(
       to: emailAddresses,
       subject: `${farmName} - Monthly Well Report - ${monthName}`,
       html: [
-        `<p>Attached is the monthly well reading report for <strong>${escapeHtml(farmName)}</strong> for ${monthName}.</p>`,
-        `<p>Wells included: ${(wells ?? []).length}</p>`,
-        `<p>Total readings: ${readings.length}</p>`,
+        `<p>Attached is the monthly well reading report for <strong>${escapeHtml(farmName)}</strong>.</p>`,
+        `<p>Report period: ${formatDate(rangeStart)} \u2013 ${formatDate(rangeEnd)}</p>`,
+        `<p>Wells in report: ${(wells ?? []).length}</p>`,
+        `<p>Wells with readings: ${wellsWithReadings}</p>`,
       ].join(""),
       attachments: [
         {

@@ -141,68 +141,130 @@ export default function ReportsPage() {
     setSendResult(null);
 
     try {
-      const wellRows = await db.getAll<{
-        id: string;
+      // 1. Farm details
+      const farmRows = await db.getAll<{
         name: string;
-        wmis_number: string | null;
-        meter_serial_number: string | null;
-        units: string;
-        multiplier: string;
+        street_address: string | null;
+        city: string | null;
+        state: string | null;
+        zip_code: string | null;
       }>(
-        'SELECT id, name, wmis_number, meter_serial_number, units, multiplier FROM wells WHERE farm_id = ?',
+        'SELECT name, street_address, city, state, zip_code FROM farms WHERE id = ?',
         [farmId],
       );
+      const farm = farmRows[0];
+      const farmName = farm?.name ?? farmNameLabel ?? 'Farm';
+      const farmAddress = [
+        farm?.street_address,
+        farm?.city,
+        farm?.state && farm?.zip_code
+          ? `${farm.state} ${farm.zip_code}`
+          : (farm?.state ?? farm?.zip_code),
+      ]
+        .filter(Boolean)
+        .join(', ');
 
+      // 2. Date range: 15th of prior month (UTC) to now
       const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+      const rangeStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15),
+      ).toISOString();
+      const rangeEnd = now.toISOString();
 
-      const readingRows = await db.getAll<{
-        well_id: string;
-        value: string;
-        recorded_at: string;
-        gps_latitude: number | null;
-        gps_longitude: number | null;
-        notes: string | null;
+      // 3. Wells with most recent reading in range + recorder name
+      const rows = await db.getAll<{
+        well_name: string;
+        wmis_number: string | null;
+        well_latitude: number | null;
+        well_longitude: number | null;
+        units: string;
+        multiplier: string;
+        reading_value: string | null;
+        recorded_at: string | null;
+        recorded_by_name: string | null;
       }>(
-        'SELECT well_id, value, recorded_at, gps_latitude, gps_longitude, notes FROM readings WHERE farm_id = ? AND recorded_at >= ? AND recorded_at <= ? ORDER BY recorded_at ASC',
-        [farmId, monthStart, monthEnd],
+        `SELECT
+          w.name        AS well_name,
+          w.wmis_number,
+          w.latitude    AS well_latitude,
+          w.longitude   AS well_longitude,
+          w.units,
+          w.multiplier,
+          r.value       AS reading_value,
+          r.recorded_at,
+          COALESCE(fm.full_name, 'Unknown') AS recorded_by_name
+        FROM wells w
+        LEFT JOIN (
+          SELECT r1.*
+          FROM readings r1
+          INNER JOIN (
+            SELECT well_id, MAX(recorded_at) AS max_ra
+            FROM readings
+            WHERE farm_id = ? AND recorded_at >= ? AND recorded_at <= ?
+            GROUP BY well_id
+          ) latest ON r1.well_id = latest.well_id AND r1.recorded_at = latest.max_ra
+          WHERE r1.farm_id = ?
+            AND r1.id = (
+              SELECT MIN(r2.id) FROM readings r2
+              WHERE r2.well_id = r1.well_id AND r2.recorded_at = latest.max_ra
+            )
+        ) r ON r.well_id = w.id
+        LEFT JOIN farm_members fm ON fm.user_id = r.recorded_by AND fm.farm_id = w.farm_id
+        WHERE w.farm_id = ?
+        ORDER BY w.name ASC`,
+        [farmId, rangeStart, rangeEnd, farmId, farmId],
       );
 
-      const wellMap = new Map(wellRows.map((w) => [w.id, w]));
-
+      // 4. Build CSV
       function csvField(val: string | number | null | undefined): string {
         const str = String(val ?? '');
         return `"${str.replace(/"/g, '""')}"`;
       }
 
+      function formatDate(iso: string | null): string {
+        if (!iso) return '';
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+      }
+
+      function formatGps(
+        lat: number | null,
+        lon: number | null,
+      ): string {
+        if (lat == null || lon == null) return '';
+        return `${lat}, ${lon}`;
+      }
+
       const csvRows = [
-        'Well Name,WMIS Number,Meter Serial,Units,Multiplier,Reading Value,Recorded At,GPS Latitude,GPS Longitude,Notes',
+        'Farm Name,Farm Address,Well Name,WMIS#,GPS Coordinates,Date of Reading,Reading Unit,Reading Unit Multiplier,Actual Reading,Reading Logged By',
       ];
 
-      for (const reading of readingRows) {
-        const well = wellMap.get(reading.well_id);
+      for (const row of rows) {
         csvRows.push(
           [
-            csvField(well?.name),
-            csvField(well?.wmis_number),
-            csvField(well?.meter_serial_number),
-            csvField(well?.units),
-            csvField(well?.multiplier),
-            csvField(reading.value),
-            csvField(reading.recorded_at),
-            csvField(reading.gps_latitude),
-            csvField(reading.gps_longitude),
-            csvField(reading.notes),
+            csvField(farmName),
+            csvField(farmAddress),
+            csvField(row.well_name),
+            csvField(row.wmis_number),
+            csvField(formatGps(row.well_latitude, row.well_longitude)),
+            csvField(formatDate(row.recorded_at)),
+            csvField(row.units),
+            csvField(row.multiplier),
+            csvField(row.reading_value),
+            csvField(row.recorded_by_name),
           ].join(','),
         );
       }
 
+      // 5. Trigger download
       const csvContent = '\uFEFF' + csvRows.join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const farmName = farmNameLabel ?? 'Farm';
       const safeName = farmName.replace(/[^a-zA-Z0-9_-]/g, '_');
       const dateSlug = now.toISOString().slice(0, 7);
 
@@ -214,9 +276,10 @@ export default function ReportsPage() {
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 100);
 
+      const wellsWithReadings = rows.filter((r) => r.reading_value != null).length;
       setSendResult({
         type: 'success',
-        message: t('reports.downloadSuccess', { wellCount: String(wellRows.length), readingCount: String(readingRows.length) }),
+        message: t('reports.downloadSuccess', { wellCount: String(rows.length), readingCount: String(wellsWithReadings) }),
       });
     } catch (err: unknown) {
       const message =
