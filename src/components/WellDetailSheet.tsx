@@ -111,7 +111,7 @@ export default function WellDetailSheet({
   }, [navigate, well]);
 
   return (
-      <div className="fixed inset-x-0 top-14 bottom-0 z-40 flex flex-col bg-surface-dark">
+      <div className="fixed inset-0 z-40 flex flex-col bg-surface-dark">
         {/* Fixed header area — does not scroll */}
         <div className="flex-shrink-0">
           <WellDetailHeader

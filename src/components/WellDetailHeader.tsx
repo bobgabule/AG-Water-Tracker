@@ -64,7 +64,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
       {/* Overlay content */}
       <div className="absolute inset-0 flex flex-col">
         {/* Nav bar: Back / Edit */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <div className="flex items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
           <button
             type="button"
             onClick={onClose}

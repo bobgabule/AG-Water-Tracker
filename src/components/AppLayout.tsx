@@ -129,7 +129,7 @@ function AppLayoutContent() {
     <div className="relative flex flex-col min-h-screen bg-surface-page">
       <Header farmName={farmName} onMenuOpen={handleMenuOpen} />
       <SideMenu open={menuOpen} onClose={handleMenuClose} />
-      <main className="relative z-0 flex-1">
+      <main className="relative flex-1">
         <PowerSyncGate />
       </main>
       <Toast />
