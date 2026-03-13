@@ -3,6 +3,36 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
 status: in-progress
+stopped_at: Completed 43-01-PLAN.md
+last_updated: "2026-03-13T06:26:38.519Z"
+last_activity: 2026-03-13 — Completed 43-01-PLAN.md
+progress:
+  total_phases: 43
+  completed_phases: 33
+  total_plans: 77
+  completed_plans: 76
+---
+
+---
+gsd_state_version: 1.0
+milestone: v4.0
+milestone_name: -- Performance & Perceived Speed
+status: in-progress
+stopped_at: Phase 43 context gathered
+last_updated: "2026-03-13T06:25:23.680Z"
+last_activity: 2026-03-09 — Completed 42-03-PLAN.md
+progress:
+  total_phases: 43
+  completed_phases: 33
+  total_plans: 77
+  completed_plans: 76
+---
+
+---
+gsd_state_version: 1.0
+milestone: v4.0
+milestone_name: -- Performance & Perceived Speed
+status: in-progress
 last_updated: "2026-03-09T10:46:27Z"
 progress:
   total_phases: 42
@@ -18,21 +48,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 42 in progress — Redesign subscription page with add-on purchasing
+**Current focus:** Phase 43 in progress — Super admin farm isolation
 
 ## Current Position
 
-Phase: 42
-Plan: 3 of 3
-Status: Complete
-Last activity: 2026-03-09 — Completed 42-03-PLAN.md
+Phase: 43
+Plan: 1 of 2
+Status: In Progress
+Last activity: 2026-03-13 — Completed 43-01-PLAN.md
 
-Progress: Phase 42: ██████████ 100% (3/3 plans complete)
+Progress: Phase 43: [█████-----] 50% (1/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 74 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42)
+- Total plans completed: 76 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 1 P43)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -75,6 +105,7 @@ Progress: Phase 42: ██████████ 100% (3/3 plans complete)
 | Phase 42 P01 | 4min | 3 | 6 |
 | Phase 42 P02 | 3min | 2 | 5 |
 | Phase 42 P03 | 3min | 3 | 3 |
+| Phase 43 P01 | 2min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -146,6 +177,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 42-02: Admin role sees full page content but purchase/upgrade/cancel actions hidden behind isOwner check
 - Phase 42-03: Used 'finca' instead of 'granja' in Spanish subtitle for consistency with existing translations
 - Phase 42-03: Removed 4 unused keys and added 22 new subscription keys for add-on purchasing and upgrade flow
+- Phase 43-01: Read overrideFarmId via getState() inside effect to avoid dependency loops on override changes
+- Phase 43-01: Auto-select effect depends on [hydrated, role, options] only -- intentionally excludes overrideFarmId
+- Phase 43-01: No-farms label uses static div (not Listbox) since there are no options to select
 
 ### Pending Todos (manual steps)
 
@@ -181,7 +215,7 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-03-09
-Stopped at: Completed 42-02-PLAN.md (all 42 plans now complete)
-Resume file: N/A
-Next action: Phase 42 complete
+Last session: 2026-03-13T06:24:28Z
+Stopped at: Completed 43-01-PLAN.md
+Resume file: .planning/phases/43-super-admin-farm-isolation/43-01-SUMMARY.md
+Next action: Execute 43-02-PLAN.md

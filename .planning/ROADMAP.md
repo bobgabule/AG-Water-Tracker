@@ -513,7 +513,7 @@ Plans:
 
 **Goal:** Ensure super_admin is a silent member of all farms with strict per-farm isolation — auto-select first farm on login, disable farm features when no farms exist, and audit all operations to scope exclusively to the selected farm.
 **Depends on:** None (independent fix)
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 43-01-PLAN.md — Auto-select first farm for super_admin, deleted-farm fallback, no-farms empty state on dashboard and FarmSelector
