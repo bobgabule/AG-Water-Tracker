@@ -3,6 +3,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { MapPinIcon, CheckIcon } from '@heroicons/react/24/outline';
 import SegmentedControl from './SegmentedControl';
 import { useTranslation } from '../hooks/useTranslation';
+import { useUserRole } from '../hooks/useUserRole';
 import { getCoordinateValidationError } from '../lib/validation';
 
 export interface WellFormData {
@@ -54,6 +55,7 @@ export default function AddWellFormBottomSheet({
   isSaving = false,
 }: AddWellFormBottomSheetProps) {
   const { t } = useTranslation();
+  const role = useUserRole();
   const [name, setName] = useState('');
   const [meterSerialNumber, setMeterSerialNumber] = useState('');
   const [wmisNumber, setWmisNumber] = useState('');
@@ -202,8 +204,8 @@ export default function AddWellFormBottomSheet({
           {/* Header */}
           <div className="bg-surface-header p-4 pt-6 flex-shrink-0">
             <div>
-              {farmName && (
-                <p className="text-white text-xs">{farmName}</p>
+              {role === 'super_admin' && farmName && (
+                <p className="text-white/60 text-xs">Adding to: {farmName}</p>
               )}
               <h2 className="text-white font-bold text-lg tracking-wide">
                 {t('well.addNewWell')}

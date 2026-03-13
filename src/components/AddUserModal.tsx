@@ -9,6 +9,7 @@ import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useTranslation } from '../hooks/useTranslation';
+import { useUserRole } from '../hooks/useUserRole';
 
 interface AddUserBottomSheetProps {
   open: boolean;
@@ -26,6 +27,7 @@ function formatPhoneDisplay(digits: string): string {
 
 export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
   const { t } = useTranslation();
+  const userRole = useUserRole();
   const { farmId, farmName } = useActiveFarm();
 
   const [firstName, setFirstName] = useState('');
@@ -186,6 +188,9 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
             <h2 className="text-white font-bold text-lg tracking-wide">
               {success ? t('user.inviteSent') : t('user.addNewUser')}
             </h2>
+            {userRole === 'super_admin' && farmName && (
+              <p className="text-white/60 text-sm -mt-1 mb-2">Inviting to: {farmName}</p>
+            )}
           </div>
 
           {/* Body */}
