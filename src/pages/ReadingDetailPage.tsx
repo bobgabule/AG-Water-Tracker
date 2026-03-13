@@ -135,12 +135,12 @@ export default function ReadingDetailPage() {
 
   // Loading / not found
   if (wellsLoading || readingsLoading || !reading || !well) {
-    return <div className="fixed inset-0 bg-surface-dark" />;
+    return <div className="fixed inset-x-0 top-14 bottom-0 bg-surface-dark" />;
   }
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex flex-col bg-surface-dark">
+      <div className="fixed inset-x-0 top-14 bottom-0 z-40 flex flex-col bg-surface-dark">
         {/* Satellite map header */}
         <div className="relative flex-shrink-0">
           {mapUrl ? (
@@ -160,7 +160,7 @@ export default function ReadingDetailPage() {
           {/* Overlay content */}
           <div className="absolute inset-0 flex flex-col">
             {/* Back button */}
-            <div className="px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+            <div className="px-4 pt-3 pb-2">
               <button
                 type="button"
                 onClick={handleBack}

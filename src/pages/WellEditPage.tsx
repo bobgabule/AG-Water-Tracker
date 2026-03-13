@@ -376,9 +376,9 @@ export default function WellEditPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-surface-header">
+    <div className="min-h-screen flex flex-col pt-14 bg-surface-header">
       {/* Header */}
-      <div className="bg-surface-header p-4 pt-6 flex-shrink-0 flex items-center gap-3">
+      <div className="bg-surface-header p-4 pt-2 flex-shrink-0 flex items-center gap-3">
         <button
           type="button"
           onClick={handleBack}

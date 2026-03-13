@@ -320,7 +320,7 @@ export default function WellAllocationsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-surface-dark">
+    <div className="min-h-screen flex flex-col pt-14 bg-surface-dark">
       {/* Map preview with well info */}
       <div className="relative h-32 flex-shrink-0">
         {mapUrl ? (
