@@ -45,7 +45,6 @@ export default function WellAllocationsPage() {
   const { readings } = useWellReadings(id ?? null);
   const { farmId: activeFarmId, farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
-  const farmId = activeFarmId ?? '';
 
   const well = useMemo(() => wells.find((w) => w.id === id) ?? null, [wells, id]);
 
@@ -227,7 +226,7 @@ export default function WellAllocationsPage() {
           [
             allocationId,
             id,
-            farmId,
+            activeFarmId,
             formStart,
             formEnd,
             formAllocatedAf,
@@ -269,7 +268,7 @@ export default function WellAllocationsPage() {
     formStartingReading,
     selectedId,
     id,
-    farmId,
+    activeFarmId,
     db,
     checkOverlap,
   ]);
@@ -301,6 +300,15 @@ export default function WellAllocationsPage() {
     () => allocations.find((a) => a.id === selectedId) ?? null,
     [allocations, selectedId],
   );
+
+  // No farm selected guard (super_admin with no override)
+  if (!activeFarmId) {
+    return (
+      <div className="min-h-screen bg-surface-page flex items-center justify-center">
+        <p className="text-white/60">No farm selected</p>
+      </div>
+    );
+  }
 
   // Loading state
   if (!well && wells.length === 0) {
