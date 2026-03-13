@@ -157,6 +157,7 @@ export default function DashboardPage() {
 
   // New Well flow handlers
   const handleNewWell = useCallback(() => {
+    if (!farmId) return; // Defensive guard: no farm selected
     // Allow creation if tier data hasn't loaded (offline edge case per user decision)
     if (tier && wellCount >= tier.maxWells) {
       setShowLimitModal(true);
@@ -278,6 +279,17 @@ export default function DashboardPage() {
   // Show skeleton while wells data is loading
   if (loading) return <DashboardSkeleton />;
 
+  // Super admin with no farms — show centered empty state
+  if (role === 'super_admin' && !farmId) {
+    return (
+      <div className="relative w-full h-dvh min-h-screen bg-[#191a1a] flex items-center justify-center">
+        <div className="text-center px-6">
+          <p className="text-white/60 text-lg">No farms created yet.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative w-full h-dvh min-h-screen bg-[#191a1a] overflow-hidden transition-opacity duration-200 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {/* Map layer */}
@@ -322,10 +334,10 @@ export default function DashboardPage() {
         {canCreateWell && (
           <button
             onClick={handleNewWell}
-            className="px-5 py-3 rounded-full flex items-center gap-2 bg-surface-header
-           text-white text-sm font-semibold
-           shadow-xl
-           active:scale-95 transition"
+            disabled={!farmId}
+            className={`px-5 py-3 rounded-full flex items-center gap-2
+              ${!farmId ? 'bg-surface-header/50 text-white/30 cursor-not-allowed' : 'bg-surface-header text-white active:scale-95'}
+              text-sm font-semibold shadow-xl transition`}
           >
             <PlusIcon className="w-5 h-5" />
             {t('dashboard.newWell')}
