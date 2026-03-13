@@ -173,6 +173,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 40 added: Update subscription page with hybrid approach for upgrading, downgrading, seat limits, payment method, transactions, and plan status
 - Phase 41 added: Robust farm account data structure — unified schema for registration, invites, Stripe billing, add-on wells/seats, cancellation, and login flow
 - Phase 42 added: Redesign subscription page with add-on purchasing, upgrade flow, and payment failure handling
+- Phase 43 added: Super admin farm isolation — auto-select farm on login, disable features when no farms, audit all operations for strict per-farm scoping
 
 ### Blockers/Concerns
 

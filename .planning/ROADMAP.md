@@ -508,3 +508,21 @@ Plans:
 - [x] 42-01-PLAN.md -- Purchase-addons edge function, simplified cancel-subscription, simplified useStripeSubscription hook
 - [x] 42-02-PLAN.md -- Subscription page rewrite with 2-col layout, add-on purchasing, upgrade dialog, view_subscription permission
 - [x] 42-03-PLAN.md -- Translation keys and sync rules for subscription features
+
+### Phase 43: Super admin farm isolation
+
+**Goal:** Ensure super_admin is a silent member of all farms with strict per-farm isolation — auto-select first farm on login, disable farm features when no farms exist, and audit all operations to scope exclusively to the selected farm.
+**Depends on:** None (independent fix)
+**Plans:** 2 plans
+
+Plans:
+- [ ] 43-01-PLAN.md — Auto-select first farm for super_admin, deleted-farm fallback, no-farms empty state on dashboard and FarmSelector
+- [ ] 43-02-PLAN.md — Super_admin-only farm name indicators on write forms, WellAllocationsPage null farmId bug fix
+
+**Success Criteria** (what must be TRUE):
+  1. Super admin auto-selects first available farm on login (no null farmId gap)
+  2. If no farms exist, dashboard loads but farm-related features are disabled with clear messaging
+  3. Adding a reading creates exactly 1 record for the selected farm
+  4. Adding wells, users, allocations all scope to selected farm only
+  5. Switching farms in header immediately changes all data views and write targets
+  6. No cross-farm data leakage in any operation
