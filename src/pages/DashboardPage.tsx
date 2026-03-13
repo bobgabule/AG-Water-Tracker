@@ -307,6 +307,7 @@ export default function DashboardPage() {
           pickedLocation={pickedLocation}
           isPickingLocation={currentStep === 'location'}
           userLocation={userLocation}
+          isSuperAdmin={role === 'super_admin'}
         />
       </ErrorBoundary>
 
