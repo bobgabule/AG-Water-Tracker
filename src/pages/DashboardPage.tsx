@@ -25,6 +25,9 @@ import WellLimitModal from '../components/WellLimitModal';
 import LocationSoftAskModal from '../components/LocationSoftAskModal';
 import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
+const LS_LOCATION_ALLOWED = 'location-previously-allowed';
+const LS_LOCATION_DENIED = 'location-previously-denied';
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const { wells, loading } = useWells();
@@ -41,7 +44,7 @@ export default function DashboardPage() {
 
   // Geolocation permission + location
   const { permission, isResolved } = useGeolocationPermission();
-  const { location: userLocation, requestLocation } = useGeolocation({
+  const { location: userLocation, requestLocation, error: locationError } = useGeolocation({
     enableHighAccuracy: true,
     timeout: 10000,
     enableCache: true,
@@ -52,28 +55,57 @@ export default function DashboardPage() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<'new-well' | null>(null);
   const modalAutoShownRef = useRef(false);
+  const safariDenialShownRef = useRef(false);
 
   // Auto-request location when permission is already granted.
   // Also check localStorage fallback for Safari, which may report 'prompt'
   // even after the user previously granted access (Permissions API unsupported).
+  // When previouslyDenied is set, silently test if the user re-enabled in Settings.
   // Skip if the soft-ask modal is visible to avoid racing with the Allow button.
   useEffect(() => {
-    if (!isResolved || userLocation || showLocationModal) return;
-    const previouslyAllowed = localStorage.getItem('location-previously-allowed') === 'true';
-    if (permission === 'granted' || (previouslyAllowed && permission !== 'denied')) {
+    if (!isResolved || userLocation || showLocationModal || locationError) return;
+    const previouslyAllowed = localStorage.getItem(LS_LOCATION_ALLOWED) === 'true';
+    const previouslyDenied = localStorage.getItem(LS_LOCATION_DENIED) === 'true';
+    if (permission === 'granted' || ((previouslyAllowed || previouslyDenied) && permission !== 'denied')) {
       requestLocation();
     }
-  }, [isResolved, permission, userLocation, requestLocation, showLocationModal]);
+  }, [isResolved, permission, userLocation, requestLocation, showLocationModal, locationError]);
 
-  // Auto-show location modal once on mount when permission not granted
+  // Auto-show location modal on mount when permission not granted.
+  // Skip when previouslyAllowed/previouslyDenied — Effect 1 handles those
+  // via silent GPS test. Override with permission === 'denied' (Chrome) so
+  // a stale previouslyAllowed flag can't suppress the denied modal.
   useEffect(() => {
     if (!isResolved || modalAutoShownRef.current) return;
-    const dismissed = localStorage.getItem('location-modal-dismissed') === 'true';
-    if (permission !== 'granted' && !dismissed) {
+    const previouslyAllowed = localStorage.getItem(LS_LOCATION_ALLOWED) === 'true';
+    const previouslyDenied = localStorage.getItem(LS_LOCATION_DENIED) === 'true';
+    const shouldShow = permission === 'denied'
+      || (permission !== 'granted' && !userLocation && !previouslyAllowed && !previouslyDenied);
+    if (shouldShow) {
       modalAutoShownRef.current = true;
       setShowLocationModal(true);
     }
-  }, [isResolved, permission]);
+  }, [isResolved, permission, userLocation]);
+
+  // Detect Safari/iOS location denial — Safari's Permissions API always returns
+  // 'prompt', so a PERMISSION_DENIED GPS error is the only signal. Show the
+  // denied modal and clear the stale localStorage flag to stop retrying.
+  useEffect(() => {
+    if (locationError?.code === 1 && !safariDenialShownRef.current) {
+      safariDenialShownRef.current = true;
+      localStorage.removeItem(LS_LOCATION_ALLOWED);
+      localStorage.setItem(LS_LOCATION_DENIED, 'true');
+      setShowLocationModal(true);
+    }
+  }, [locationError]);
+
+  // Clear Safari denial flag when GPS succeeds (user re-enabled location in Settings)
+  useEffect(() => {
+    if (userLocation && localStorage.getItem(LS_LOCATION_DENIED) === 'true') {
+      localStorage.removeItem(LS_LOCATION_DENIED);
+      localStorage.setItem(LS_LOCATION_ALLOWED, 'true');
+    }
+  }, [userLocation]);
 
   // Execute pending action after permission is granted
   // Check both permission state AND userLocation — Safari doesn't fire
@@ -93,14 +125,13 @@ export default function DashboardPage() {
 
   const handleLocationAllow = useCallback(() => {
     setShowLocationModal(false);
-    localStorage.setItem('location-modal-dismissed', 'true');
-    localStorage.setItem('location-previously-allowed', 'true');
+    localStorage.setItem(LS_LOCATION_ALLOWED, 'true');
+    localStorage.removeItem(LS_LOCATION_DENIED);
     requestLocation();
   }, [requestLocation]);
 
   const handleLocationModalClose = useCallback(() => {
     setShowLocationModal(false);
-    localStorage.setItem('location-modal-dismissed', 'true');
     setPendingAction(null);
   }, []);
 
@@ -276,6 +307,11 @@ export default function DashboardPage() {
     }
   }, [db, farmId, role, user, showToast]);
 
+  // Derive denied mode for the location modal — avoids reading localStorage in JSX
+  const locationDeniedMode = permission === 'denied'
+    || locationError?.code === 1
+    || localStorage.getItem(LS_LOCATION_DENIED) === 'true';
+
   // Show skeleton while wells data is loading
   if (loading) return <DashboardSkeleton />;
 
@@ -379,7 +415,7 @@ export default function DashboardPage() {
         open={showLocationModal}
         onClose={handleLocationModalClose}
         onAllow={handleLocationAllow}
-        mode={permission === 'denied' ? 'denied' : 'prompt'}
+        mode={locationDeniedMode ? 'denied' : 'prompt'}
       />
     </div>
   );
