@@ -350,7 +350,7 @@ const en: Record<string, string> = {
   'subscription.wellsAddon': 'Extra Wells',
   'subscription.adminSeatsAddon': 'Extra Admin Seats',
   'subscription.meterReadersAddon': 'Extra Meter Reader Seats',
-  'subscription.perMonth': '{{amount}}/month',
+  'subscription.perYear': '{{amount}}/year',
   'subscription.totalDueToday': 'Total due today: {{amount}}',
   'subscription.proratedNote': 'Prorated for the remainder of your billing cycle',
   'subscription.confirmPurchase': 'Confirm Purchase',

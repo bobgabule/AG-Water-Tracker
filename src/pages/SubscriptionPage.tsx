@@ -143,9 +143,9 @@ function SkeletonCard({ lines }: { lines: number }) {
 // Add-on pricing constants
 // ---------------------------------------------------------------------------
 
-const ADDON_WELL_PRICE = 10000; // $100/mo in cents
-const ADDON_ADMIN_PRICE = 10000; // $100/mo in cents
-const ADDON_METER_READER_PRICE = 5000; // $50/mo in cents
+const ADDON_WELL_PRICE = 10000; // $100/yr in cents
+const ADDON_ADMIN_PRICE = 10000; // $100/yr in cents
+const ADDON_METER_READER_PRICE = 5000; // $50/yr in cents
 
 // ---------------------------------------------------------------------------
 // Page Component
@@ -411,7 +411,7 @@ export default function SubscriptionPage() {
                     <p className="text-sm text-text-heading font-medium">
                       {t('subscription.wellsAddon')}
                     </p>
-                    <p className="text-xs text-text-heading/70">{t('subscription.perMonth', { amount: formatCurrency(ADDON_WELL_PRICE, 'usd') })}</p>
+                    <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_WELL_PRICE, 'usd') })}</p>
                   </div>
                   {canPurchase ? (
                     <QuantityCounter value={addonWells} onChange={setAddonWells} />
@@ -426,7 +426,7 @@ export default function SubscriptionPage() {
                     <p className="text-sm text-text-heading font-medium">
                       {t('subscription.adminSeatsAddon')}
                     </p>
-                    <p className="text-xs text-text-heading/70">{t('subscription.perMonth', { amount: formatCurrency(ADDON_ADMIN_PRICE, 'usd') })}</p>
+                    <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_ADMIN_PRICE, 'usd') })}</p>
                   </div>
                   {canPurchase ? (
                     <QuantityCounter value={addonAdmins} onChange={setAddonAdmins} />
@@ -441,7 +441,7 @@ export default function SubscriptionPage() {
                     <p className="text-sm text-text-heading font-medium">
                       {t('subscription.meterReadersAddon')}
                     </p>
-                    <p className="text-xs text-text-heading/70">{t('subscription.perMonth', { amount: formatCurrency(ADDON_METER_READER_PRICE, 'usd') })}</p>
+                    <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_METER_READER_PRICE, 'usd') })}</p>
                   </div>
                   {canPurchase ? (
                     <QuantityCounter

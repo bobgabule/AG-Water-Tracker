@@ -349,7 +349,7 @@ const es: Record<string, string> = {
   'subscription.wellsAddon': 'Pozos Extra',
   'subscription.adminSeatsAddon': 'Asientos de Admin Extra',
   'subscription.meterReadersAddon': 'Asientos de Lectores Extra',
-  'subscription.perMonth': '{{amount}}/mes',
+  'subscription.perYear': '{{amount}}/año',
   'subscription.totalDueToday': 'Total a pagar hoy: {{amount}}',
   'subscription.proratedNote': 'Prorrateado por el resto de tu ciclo de facturacion',
   'subscription.confirmPurchase': 'Confirmar Compra',
