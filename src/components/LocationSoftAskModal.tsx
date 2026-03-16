@@ -1,5 +1,5 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface LocationSoftAskModalProps {
@@ -43,15 +43,13 @@ export default function LocationSoftAskModal({
               {mode === 'prompt' ? t('location.useLocation') : t('location.locationBlocked')}
             </DialogTitle>
 
-            <p className="text-white/60 text-sm mb-6">
-              {mode === 'prompt'
-                ? t('location.promptDescription')
-                : t('location.deniedDescription')}
-            </p>
+            {mode === 'prompt' ? (
+              <>
+                <p className="text-white/60 text-sm mb-6">
+                  {t('location.promptDescription')}
+                </p>
 
-            <div className="flex gap-3 w-full">
-              {mode === 'prompt' ? (
-                <>
+                <div className="flex gap-3 w-full">
                   <button
                     type="button"
                     onClick={onClose}
@@ -67,18 +65,39 @@ export default function LocationSoftAskModal({
                   >
                     {t('location.allow')}
                   </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  autoFocus
-                  className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
-                >
-                  {t('location.gotIt')}
-                </button>
-              )}
-            </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-white/60 text-sm mb-4">
+                  {t('location.deniedDescription')}
+                </p>
+
+                <div className="w-full rounded-lg bg-btn-confirm/10 border border-btn-confirm/30 p-3 mb-4">
+                  <p className="text-btn-confirm text-sm font-medium leading-relaxed">
+                    {t('location.deniedInstructions')}
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-2 w-full mb-6">
+                  <InformationCircleIcon className="h-5 w-5 text-white/40 shrink-0 mt-0.5" />
+                  <p className="text-white/40 text-xs leading-relaxed">
+                    {t('location.deniedHint')}
+                  </p>
+                </div>
+
+                <div className="flex w-full">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    autoFocus
+                    className="flex-1 py-2.5 rounded-lg font-medium text-white/70 bg-surface-modal-lighter hover:bg-surface-header transition-colors"
+                  >
+                    {t('location.gotIt')}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </DialogPanel>
       </div>
