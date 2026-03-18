@@ -356,6 +356,7 @@ const en: Record<string, string> = {
   'subscription.proratedNote': 'Prorated for the remainder of your billing cycle',
   'subscription.confirmPurchase': 'Confirm Purchase',
   'subscription.purchasing': 'Purchasing...',
+  'subscription.purchaseFailed': 'Unable to complete purchase. Please try again.',
   'subscription.payNow': 'Pay Now',
   'subscription.cancelSubscription': 'Cancel Subscription',
   'subscription.paymentFailed': 'Your payment failed. Update your payment method to continue service.',

@@ -224,7 +224,7 @@ export default function SubscriptionPage() {
       );
 
       if (error || data?.error) {
-        setPurchaseError(error?.message || data?.error || 'Purchase failed');
+        setPurchaseError(t('subscription.purchaseFailed'));
         return;
       }
 
@@ -242,7 +242,7 @@ export default function SubscriptionPage() {
       useToastStore.getState().show(t('subscription.purchaseSuccess', { items: summary }));
       refetch();
     } catch (err) {
-      setPurchaseError(err instanceof Error ? err.message : 'Unexpected error');
+      setPurchaseError(t('subscription.purchaseFailed'));
     } finally {
       setPurchasing(false);
     }
@@ -494,7 +494,9 @@ export default function SubscriptionPage() {
                   </p>
 
                   {purchaseError && (
-                    <p className="text-sm text-red-400 mb-2">{purchaseError}</p>
+                    <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 mb-2">
+                      <p className="text-red-200 text-sm">{purchaseError}</p>
+                    </div>
                   )}
 
                   <button
