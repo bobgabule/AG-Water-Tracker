@@ -1,12 +1,11 @@
-import { useMemo, useState, useCallback } from 'react';
-import { useQuery } from '@powersync/react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface FarmInviteRow {
-  id: string;           // actually the invite code (mapped via sync rules: SELECT code AS id)
+  code: string;
   farm_id: string;
   role: string;
   invited_phone: string;
@@ -35,14 +34,35 @@ export default function PendingInvitesList() {
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rawInvites, setRawInvites] = useState<FarmInviteRow[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Query phone-based invites from PowerSync
-  const { data: rawInvites } = useQuery<FarmInviteRow>(
-    farmId
-      ? `SELECT id, farm_id, role, invited_phone, invited_first_name, invited_last_name, expires_at, uses_count, created_at FROM farm_invites WHERE farm_id = ? AND invited_phone IS NOT NULL ORDER BY created_at DESC`
-      : 'SELECT NULL WHERE 0',
-    farmId ? [farmId] : []
-  );
+  // Fetch invites from Supabase (farm_invites removed from PowerSync sync)
+  useEffect(() => {
+    if (!farmId) {
+      setRawInvites([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    supabase
+      .from('farm_invites')
+      .select('code, farm_id, role, invited_phone, invited_first_name, invited_last_name, expires_at, uses_count, created_at')
+      .eq('farm_id', farmId)
+      .not('invited_phone', 'is', null)
+      .order('created_at', { ascending: false })
+      .then(({ data, error: fetchError }) => {
+        if (cancelled) return;
+        if (fetchError || !data) {
+          setRawInvites([]);
+          return;
+        }
+        setRawInvites(data as FarmInviteRow[]);
+      });
+
+    return () => { cancelled = true; };
+  }, [farmId, refreshKey]);
 
   // Memoize mapped invites with computed status
   const invites = useMemo<MappedInvite[]>(() => {
@@ -70,13 +90,14 @@ export default function PendingInvitesList() {
       });
 
       if (revokeError) throw revokeError;
+      setRefreshKey((k) => k + 1);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('invite.failedRevoke');
       setError(message);
     } finally {
       setRevokingId(null);
     }
-  }, []);
+  }, [t]);
 
   if (invites.length === 0) return null;
 
@@ -91,18 +112,18 @@ export default function PendingInvitesList() {
       <h2 className="text-lg font-semibold text-text-heading mb-3">{t('invite.title')}</h2>
 
       {error && (
-        <div className="bg-red-800 border border-red-800 rounded-lg p-3 mb-3">
+        <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
           <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
 
       <div className="space-y-2">
         {invites.map((invite) => {
-          const isRevoking = revokingId === invite.id;
+          const isRevoking = revokingId === invite.code;
 
           return (
             <div
-              key={invite.id}
+              key={invite.code}
               className={`bg-surface-card rounded-lg px-4 py-3 flex items-center justify-between ${
                 invite.status === 'Expired' ? 'opacity-60' : ''
               }`}
@@ -121,7 +142,7 @@ export default function PendingInvitesList() {
                 </span>
                 {invite.status === 'Pending' && (
                   <button
-                    onClick={() => handleRevoke(invite.id)}
+                    onClick={() => handleRevoke(invite.code)}
                     disabled={isRevoking}
                     className="p-1 rounded text-text-heading/40 hover:text-red-800 transition-colors disabled:opacity-50"
                     aria-label={`Revoke invite for ${invite.invited_first_name}`}

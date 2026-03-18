@@ -16,33 +16,14 @@
 #   triggers from migration 025). This means all farm-scoped buckets
 #   naturally include all farms for super_admin users -- no special
 #   sync rule logic is needed.
+#
+# Offline Scope:
+#   Only tables needed for offline field work are synced. Admin/office
+#   features (subscription tiers, app settings, farm invites, report
+#   email recipients) now use direct Supabase queries instead.
 # =============================================================================
 
 bucket_definitions:
-
-  # ---------------------------------------------------------------------------
-  # Subscription Tiers (Global)
-  # ---------------------------------------------------------------------------
-  # All authenticated users receive all tier definitions.
-  # Small dataset (2-3 rows) — no farm filtering needed.
-  # PK mapping: slug → id (same pattern as farm_invites.code)
-  # ---------------------------------------------------------------------------
-  subscription_tiers_global:
-    parameters: SELECT 'global' as scope
-    data:
-      - SELECT slug AS id, display_name, max_admins, max_meter_checkers, max_wells, sort_order, created_at, updated_at FROM subscription_tiers WHERE 'global' = bucket.scope
-
-  # ---------------------------------------------------------------------------
-  # App Settings (Global)
-  # ---------------------------------------------------------------------------
-  # All authenticated users receive all app settings.
-  # Small dataset — global key-value config.
-  # PK mapping: key → id
-  # ---------------------------------------------------------------------------
-  app_settings_global:
-    parameters: SELECT 'global' as scope
-    data:
-      - SELECT key AS id, value, created_at, updated_at FROM app_settings WHERE 'global' = bucket.scope
 
   # ---------------------------------------------------------------------------
   # Farms (via farm_members join table)
@@ -67,18 +48,6 @@ bucket_definitions:
       - SELECT id, farm_id, user_id, role, full_name, created_at FROM farm_members WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
-  # Farm Invites (all farm members)
-  # ---------------------------------------------------------------------------
-  # Syncs farm_invites for all farms the user belongs to.
-  # UI handles permission checks for who can view/manage invites.
-  # PK mapping: code → id
-  # ---------------------------------------------------------------------------
-  farm_invites:
-    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
-    data:
-      - SELECT code AS id, farm_id, created_by, role, invited_phone, invited_first_name, invited_last_name, invited_email, expires_at, max_uses, uses_count, created_at FROM farm_invites WHERE farm_id = bucket.farm_id
-
-  # ---------------------------------------------------------------------------
   # Wells (via farm_members join table)
   # ---------------------------------------------------------------------------
   # Syncs wells for farms where the user has a membership.
@@ -90,22 +59,10 @@ bucket_definitions:
       - SELECT id, farm_id, name, meter_serial_number, wmis_number, latitude, longitude, units, multiplier, battery_state, pump_state, meter_status, status, created_by, created_at, updated_at FROM wells WHERE farm_id = bucket.farm_id
 
   # ---------------------------------------------------------------------------
-  # Report Email Recipients (via farm_members join table)
-  # ---------------------------------------------------------------------------
-  # Syncs report_email_recipients for farms where the user has a membership.
-  # Same pattern as farm_wells.
-  # ---------------------------------------------------------------------------
-  farm_report_recipients:
-    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
-    data:
-      - SELECT id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at FROM report_email_recipients WHERE farm_id = bucket.farm_id
-
-  # ---------------------------------------------------------------------------
   # Readings (via denormalized farm_id)
   # ---------------------------------------------------------------------------
   # Syncs readings for farms where the user has a membership.
   # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
-  # Same pattern as farm_wells.
   # ---------------------------------------------------------------------------
   farm_readings:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
@@ -116,8 +73,8 @@ bucket_definitions:
   # Allocations (via denormalized farm_id)
   # ---------------------------------------------------------------------------
   # Syncs allocations for farms where the user has a membership.
-  # Uses denormalized farm_id column for direct bucket filtering (no subqueries).
-  # Same pattern as farm_wells and farm_readings.
+  # Read-only sync — CRUD goes through direct Supabase calls.
+  # NewReadingSheet can still UPDATE used_af via PowerSync (field task).
   # ---------------------------------------------------------------------------
   farm_allocations:
     parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
@@ -136,6 +93,21 @@ bucket_definitions:
       - SELECT id, phone, display_name, first_name, last_name, email, created_at, updated_at FROM users WHERE id = bucket.user_id
 
 # =============================================================================
+# Removed Buckets (now using direct Supabase queries)
+# =============================================================================
+#
+# The following buckets were removed because these tables are only used by
+# admin/office features that always have internet connectivity:
+#
+# - subscription_tiers_global: Billing info → useSubscriptionTier() now uses Supabase
+# - app_settings_global: Config → useAppSetting() now uses Supabase
+# - farm_invites: Team admin → PendingInvitesList now uses Supabase
+# - farm_report_recipients: Report admin → useReportEmailRecipients() now uses Supabase
+#
+# IMPORTANT: Remove these from the PowerSync dashboard AFTER deploying the
+# client code changes. If removed before, existing app installs will break.
+#
+# =============================================================================
 # Implementation Notes
 # =============================================================================
 #
@@ -145,8 +117,6 @@ bucket_definitions:
 #
 # 2. Parameter Query Pattern:
 #    Farm-scoped buckets: SELECT farm_id FROM farm_members
-#    Global buckets: SELECT 'global' as scope (creates one shared bucket for all users)
-#    Global data queries use WHERE 'global' = bucket.scope (always-true equality)
 #    This avoids subqueries which are not supported by PowerSync.
 #
 # 3. Denormalized Columns:
@@ -157,18 +127,14 @@ bucket_definitions:
 # 4. Data Query Requirements:
 #    - Must SELECT from a single table (no joins)
 #    - Must include the table's primary key column (usually 'id')
-#    - PK mapping: farm_invites uses code AS id, subscription_tiers uses slug AS id,
-#      app_settings uses key AS id
 #    - Use bucket.<param> to filter
 #
 # 5. Bucket Granularity:
 #    - user_profile: 1 bucket per user
-#    - subscription_tiers_global, app_settings_global: 1 shared bucket (global data)
 #    - All other buckets: 1 bucket per farm membership
 #
 # 6. Security:
 #    - These sync rules work in conjunction with Supabase RLS policies
-#    - subscription_tiers and app_settings are read-only (no INSERT/UPDATE/DELETE RLS)
 #
 # =============================================================================
 # Dashboard Configuration Steps

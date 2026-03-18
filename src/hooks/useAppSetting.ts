@@ -1,26 +1,34 @@
-import { useMemo } from 'react';
-import { useQuery } from '@powersync/react';
-
-interface AppSettingRow {
-  id: string;   // key mapped to id via sync rules (SELECT key AS id)
-  value: string;
-}
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 /**
- * Returns a single app setting value by key.
- * Returns `defaultValue` (default: null) when the key is not found or not yet synced.
+ * Returns a single app setting value by key from Supabase.
+ * Returns `defaultValue` (default: null) when the key is not found or while loading.
  *
- * The app_settings table uses `key` as PK in Supabase, mapped to `id` in PowerSync
- * via sync rules (SELECT key AS id). Always query by `id` column client-side.
+ * The app_settings table uses `key` as PK in Supabase.
  */
 export function useAppSetting(key: string, defaultValue: string | null = null): string | null {
-  const { data } = useQuery<AppSettingRow>(
-    `SELECT id, value FROM app_settings WHERE id = ?`,
-    [key]
-  );
+  const [value, setValue] = useState<string | null>(defaultValue);
 
-  return useMemo(
-    () => (data.length > 0 ? data[0].value : defaultValue),
-    [data, defaultValue]
-  );
+  useEffect(() => {
+    let cancelled = false;
+
+    supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', key)
+      .single()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) {
+          setValue(defaultValue);
+          return;
+        }
+        setValue((data as { value: string }).value);
+      });
+
+    return () => { cancelled = true; };
+  }, [key, defaultValue]);
+
+  return value;
 }

@@ -38,21 +38,6 @@ const farm_members = new TableV2({
   created_at: column.text,
 });
 
-const farm_invites = new TableV2({
-  code: column.text,
-  farm_id: column.text,
-  role: column.text,
-  invited_phone: column.text,
-  invited_first_name: column.text,
-  invited_last_name: column.text,
-  invited_email: column.text,
-  expires_at: column.text,
-  max_uses: column.integer,
-  uses_count: column.integer,
-  created_by: column.text,
-  created_at: column.text,
-});
-
 const wells = new TableV2({
   farm_id: column.text,
   name: column.text,
@@ -99,52 +84,19 @@ const allocations = new TableV2({
   updated_at: column.text,
 });
 
-const subscription_tiers = new TableV2({
-  display_name: column.text,
-  max_admins: column.integer,
-  max_meter_checkers: column.integer,
-  max_wells: column.integer,
-  sort_order: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const app_settings = new TableV2({
-  value: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const report_email_recipients = new TableV2({
-  farm_id: column.text,
-  email: column.text,
-  is_auto_added: column.integer, // 0/1 boolean (PowerSync has no BOOLEAN)
-  source_user_id: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
 export const AppSchema = new Schema({
   farms,
   users,
   farm_members,
-  farm_invites,
   wells,
   readings,
   allocations,
-  subscription_tiers,
-  app_settings,
-  report_email_recipients,
 });
 
 export type Database = (typeof AppSchema)['types'];
 export type Farm = Database['farms'];
 export type User = Database['users'];
 export type FarmMember = Database['farm_members'];
-export type FarmInvite = Database['farm_invites'];
 export type Well = Database['wells'];
 export type ReadingRow = Database['readings'];
 export type AllocationRow = Database['allocations'];
-export type SubscriptionTier = Database['subscription_tiers'];
-export type AppSetting = Database['app_settings'];
-export type ReportEmailRecipient = Database['report_email_recipients'];
