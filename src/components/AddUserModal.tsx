@@ -1,14 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
-import { CheckIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/outline';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
-import { useAppSetting } from '../hooks/useAppSetting';
 import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
-import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
 import { useTranslation } from '../hooks/useTranslation';
 import { useUserRole } from '../hooks/useUserRole';
 
@@ -28,6 +27,7 @@ function formatPhoneDisplay(digits: string): string {
 
 export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { isReadOnly } = useFarmReadOnly();
   const userRole = useUserRole();
   const { farmId, farmName } = useActiveFarm();
@@ -44,10 +44,6 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
 
   const tier = useSubscriptionTier();
   const seatUsage = useSeatUsage();
-  const subscriptionUrl = useAppSetting('subscription_website_url');
-  const upgradeUrl = subscriptionUrl && farmId && tier
-    ? buildSubscriptionUrl(subscriptionUrl, farmId, tier.slug)
-    : null;
   const adminFull = seatUsage?.admin.isFull ?? false;
   const meterReaderFull = seatUsage?.meter_checker.isFull ?? false;
   const allSeatsFull = adminFull && meterReaderFull;
@@ -172,8 +168,12 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     onClose();
   }, [onClose]);
 
+  const handleGoToSubscription = useCallback(() => {
+    handleClose();
+    navigate('/subscription');
+  }, [handleClose, navigate]);
+
   const canSelectAdmin = callerRole === 'owner' || callerRole === 'super_admin';
-  const canSeeUpgradeLink = callerRole === 'owner' || callerRole === 'super_admin' || callerRole === 'admin';
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
@@ -218,29 +218,16 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
             ) : allSeatsFull ? (
               <div className="py-8 text-center">
                 <p className="text-white font-medium mb-2">{t('user.allSeatsFull')}</p>
-                <p className="text-white/70 text-sm mb-4">
-                  {t('user.seatLimitDesc', { adminLimit: String(seatUsage?.admin.limit ?? 0), mcLimit: String(seatUsage?.meter_checker.limit ?? 0) })}
+                <p className="text-white/70 text-sm mb-4 whitespace-pre-line">
+                  {t('user.seatLimitDesc')}
                 </p>
-                {canSeeUpgradeLink && upgradeUrl ? (
-                  <a
-                    href={upgradeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-btn-confirm font-medium mt-2 hover:text-white transition-colors"
-                  >
-                    {t('limit.upgradePlan')}
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                  </a>
-                ) : canSeeUpgradeLink && !upgradeUrl ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-btn-confirm/50 font-medium mt-2">
-                    {t('limit.upgradePlan')}
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                  </span>
-                ) : (
-                  <p className="text-yellow-300 text-sm font-medium">
-                    {t('user.contactOwner')}
-                  </p>
-                )}
+                <button
+                  type="button"
+                  onClick={handleGoToSubscription}
+                  className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium hover:bg-surface-header-hover hover:text-white transition-colors"
+                >
+                  {t('user.addUserSeats')}
+                </button>
               </div>
             ) : (
               <div className="space-y-6">
@@ -353,7 +340,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
             >
               {success ? t('user.done') : t('common.cancel')}
             </button>
-            {!success && (
+            {!success && !allSeatsFull && (
               <button
                 type="button"
                 onClick={handleSubmit}
