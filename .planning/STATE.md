@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
 status: in-progress
-stopped_at: Completed 44-02-PLAN.md
-last_updated: "2026-03-18T03:07:02.174Z"
-last_activity: 2026-03-18 — Completed 44-02-PLAN.md
+stopped_at: Completed 44-03-PLAN.md
+last_updated: "2026-03-18T03:13:37.952Z"
+last_activity: 2026-03-18 — Completed 44-03-PLAN.md
 progress:
   total_phases: 22
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 30
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 ---
@@ -56,16 +56,16 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 44
-Plan: 2 of 3
-Status: In Progress
-Last activity: 2026-03-18 — Completed 44-02-PLAN.md
+Plan: 3 of 3
+Status: Complete
+Last activity: 2026-03-18 — Completed 44-03-PLAN.md
 
-Progress: Phase 44: [███████░░░] 67% (2/3 plans complete)
+Progress: Phase 44: [██████████] 100% (3/3 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 79 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43 + 2 P44)
+- Total plans completed: 80 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43 + 3 P44)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -112,6 +112,7 @@ Progress: Phase 44: [███████░░░] 67% (2/3 plans complete)
 | Phase 43 P02 | 2min | 2 | 3 |
 | Phase 44 P01 | 2min | 2 | 2 |
 | Phase 44 P02 | 5min | 2 tasks | 12 files |
+| Phase 44 P03 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -196,6 +197,9 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - [Phase 44]: Deletion date computed client-side as current_period_end + 1 year
 - [Phase 44]: Read-only banner only on SubscriptionPage for owner role; other pages show disabled buttons without messaging
 - [Phase 44]: openPortal() with no flow_type for renew button opens general Stripe Customer Portal
+- [Phase 44]: Edge function handles both deletion and warnings via action dispatch (simpler than separate functions)
+- [Phase 44]: Auth accounts only deleted for users with no remaining farm memberships (orphan check)
+- [Phase 44]: Date windows use full UTC day range for email warnings to catch all farms regardless of exact time
 
 ### Pending Todos (manual steps)
 
@@ -212,6 +216,8 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Stripe webhook endpoint needs creating in Stripe Dashboard (customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid)
 - Deploy stripe-webhook edge function: `npx supabase functions deploy stripe-webhook --no-verify-jwt`
 - PowerSync Dashboard sync rules may need updating with canceled_at, scheduled_delete_at columns
+- Deploy send-deletion-warning edge function: `npx supabase functions deploy send-deletion-warning --no-verify-jwt`
+- Verify RESEND_API_KEY is set as Supabase Edge Function secret (may already exist from send-monthly-report)
 
 ### Roadmap Evolution
 
@@ -236,7 +242,7 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-03-18T03:07:02.168Z
-Stopped at: Completed 44-02-PLAN.md
+Last session: 2026-03-18T03:13:37.942Z
+Stopped at: Completed 44-03-PLAN.md
 Resume file: None
-Next action: Execute 44-02-PLAN.md (frontend read-only hooks and banners)
+Next action: Phase 44 complete (all 3 plans done)

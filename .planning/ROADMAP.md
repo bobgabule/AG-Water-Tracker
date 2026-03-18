@@ -532,7 +532,7 @@ Plans:
 **Goal:** When a farm's subscription is canceled and the paid period ends, transition to read-only mode for 1 year (backend-enforced via RLS, not just UI), show renewal messaging with a Stripe portal renew button, and auto-delete farm data after the retention period via daily pg_cron job
 **Requirements**: CANCEL-01, CANCEL-02, CANCEL-03, CANCEL-04, CANCEL-05, CANCEL-06, CANCEL-07
 **Depends on:** Phase 42
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 44-01-PLAN.md — Database migration (cancellation columns + read-only RLS enforcement) + Stripe webhook edge function
