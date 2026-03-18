@@ -59,6 +59,7 @@ export default function DashboardPage() {
   const [pendingAction, setPendingAction] = useState<'new-well' | null>(null);
   const modalAutoShownRef = useRef(false);
   const safariDenialShownRef = useRef(false);
+  const gpsRetryCountRef = useRef(0);
 
   // Auto-request location when permission is already granted.
   // Also check localStorage fallback for Safari, which may report 'prompt'
@@ -66,10 +67,14 @@ export default function DashboardPage() {
   // When previouslyDenied is set, silently test if the user re-enabled in Settings.
   // Skip if the soft-ask modal is visible to avoid racing with the Allow button.
   useEffect(() => {
-    if (!isResolved || userLocation || showLocationModal || locationError) return;
+    if (!isResolved || userLocation || showLocationModal) return;
+    // Stop retrying after 2 failed attempts (timeout/unavailable), but never
+    // block here for permission-denied — Safari Effect 3 handles that via modal.
+    if (locationError && locationError.code !== 1 && gpsRetryCountRef.current >= 2) return;
     const previouslyAllowed = localStorage.getItem(LS_LOCATION_ALLOWED) === 'true';
     const previouslyDenied = localStorage.getItem(LS_LOCATION_DENIED) === 'true';
     if (permission === 'granted' || ((previouslyAllowed || previouslyDenied) && permission !== 'denied')) {
+      gpsRetryCountRef.current++;
       requestLocation();
     }
   }, [isResolved, permission, userLocation, requestLocation, showLocationModal, locationError]);
