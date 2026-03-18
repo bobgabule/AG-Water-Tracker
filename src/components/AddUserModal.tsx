@@ -192,7 +192,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               {success ? t('user.inviteSent') : t('user.addNewUser')}
             </h2>
             {userRole === 'super_admin' && farmName && (
-              <p className="text-white/60 text-sm -mt-1 mb-2">Inviting to: {farmName}</p>
+              <p className="text-white/60 text-sm -mt-1 mb-2">{t('user.invitingTo', { farm: farmName })}</p>
             )}
           </div>
 

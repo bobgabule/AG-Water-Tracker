@@ -172,7 +172,7 @@ export default function WellEditPage() {
   // GPS handler (same as AddWellFormBottomSheet)
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by this browser.');
+      setGpsError(t('location.notSupported'));
       return;
     }
     setGpsLoading(true);
@@ -187,15 +187,15 @@ export default function WellEditPage() {
         setGpsLoading(false);
         const message =
           error.code === error.PERMISSION_DENIED
-            ? 'Location permission denied'
+            ? t('location.permissionDenied')
             : error.code === error.TIMEOUT
-              ? 'Location request timed out'
-              : 'Unable to get location';
+              ? t('location.requestTimedOut')
+              : t('location.unableToGet');
         setGpsError(message);
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
-  }, []);
+  }, [t]);
 
   // Coordinate input handlers (same as AddWellFormBottomSheet)
   const handleLatitudeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,7 +270,7 @@ export default function WellEditPage() {
 
     const coordError = getCoordinateValidationError(latitude, longitude);
     if (coordError) {
-      setGpsError(coordError);
+      setGpsError(t(coordError));
       return;
     }
 
@@ -332,6 +332,7 @@ export default function WellEditPage() {
     isOnline,
     navigate,
     isReadOnly,
+    t,
   ]);
 
   // Delete handler
@@ -493,7 +494,7 @@ export default function WellEditPage() {
           </div>
           {gpsError && <p className="text-red-800 text-xs mt-1">{gpsError}</p>}
           {coordinateError && !gpsError && (
-            <p className="text-red-800 text-xs mt-1">{coordinateError}</p>
+            <p className="text-red-800 text-xs mt-1">{t(coordinateError)}</p>
           )}
 
           {/* Allocations link */}
@@ -623,7 +624,7 @@ export default function WellEditPage() {
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteWell}
         title={t('well.deleteWell')}
-        description={<>Delete <span className="text-white font-medium">{well.name}</span> and all its readings and allocations? This cannot be undone.</>}
+        description={t('well.deleteConfirm', { name: well.name })}
         confirmText={t('confirm.delete')}
         confirmLoadingText={t('confirm.deleting')}
         loading={deleteLoading}

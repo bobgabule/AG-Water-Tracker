@@ -15,12 +15,16 @@ export function isWithinUSBounds(lat: number, lng: number): boolean {
   );
 }
 
+/**
+ * Returns an i18n translation key for the coordinate validation error, or null if valid.
+ * Callers should wrap the returned key with t() from useTranslation.
+ */
 export function getCoordinateValidationError(lat: number, lng: number): string | null {
-  if (isNaN(lat) || isNaN(lng)) return 'Invalid coordinates';
-  if (lat < -90 || lat > 90) return 'Latitude must be between -90 and 90';
-  if (lng < -180 || lng > 180) return 'Longitude must be between -180 and 180';
+  if (isNaN(lat) || isNaN(lng)) return 'validation.invalidCoordinates';
+  if (lat < -90 || lat > 90) return 'validation.latitudeRange';
+  if (lng < -180 || lng > 180) return 'validation.longitudeRange';
   if (ENFORCE_US_BOUNDS && !isWithinUSBounds(lat, lng)) {
-    return 'Coordinates must be within the United States';
+    return 'validation.withinUS';
   }
   return null;
 }

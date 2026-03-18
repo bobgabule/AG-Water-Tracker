@@ -4,6 +4,8 @@ import type { CrudEntry } from '@powersync/web';
 import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from './supabase.ts';
 import { debugError, debugWarn } from './debugLog';
+import { translations } from '../i18n/index';
+import { useLanguageStore } from '../stores/languageStore';
 import { useToastStore } from '../stores/toastStore';
 
 /** Tables the connector is allowed to write to Supabase via PowerSync.
@@ -95,7 +97,9 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
               // Best-effort rollback — ignore if already deleted
             }
             if (!wellFailureNotified) {
-              useToastStore.getState().show('Well could not be saved. Please try again.', 'error');
+              const locale = useLanguageStore.getState().locale;
+              const msg = translations[locale]['well.wellAddFailed'] ?? translations.en['well.wellAddFailed'];
+              useToastStore.getState().show(msg, 'error');
               wellFailureNotified = true;
             }
           }

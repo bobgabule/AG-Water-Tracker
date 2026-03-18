@@ -214,7 +214,7 @@ export default function UsersPage() {
         onClose={handleDeleteClose}
         onConfirm={handleDeleteConfirm}
         title={t('user.removeUser')}
-        description={<>Remove <span className="text-white font-medium">{deleteTarget?.full_name ?? 'this member'}</span> from your farm? They will lose access and can be re-invited later.</>}
+        description={t('user.removeConfirm', { name: deleteTarget?.full_name ?? t('user.unknown') })}
         confirmText={t('user.removeButton')}
         confirmLoadingText={t('user.removing')}
         loading={deleteLoading}

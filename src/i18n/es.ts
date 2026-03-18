@@ -3,6 +3,7 @@ const es: Record<string, string> = {
   // App
   // ---------------------------------------------------------------------------
   'app.waterTracker': 'Rastreador de Agua',
+  'app.waterTrackerAdmin': 'Rastreador de Agua Admin',
 
   // ---------------------------------------------------------------------------
   // Navigation
@@ -52,6 +53,15 @@ const es: Record<string, string> = {
   'auth.noFarmDescription': 'Tu numero de telefono no esta asociado a ninguna finca. Pide a tu administrador que te agregue, o suscribete para crear tu propia finca.',
   'auth.signedInAs': 'Conectado como {{phone}}',
   'auth.visitSubscription': 'Visitar sitio de suscripcion',
+
+  // ---------------------------------------------------------------------------
+  // Farm
+  // ---------------------------------------------------------------------------
+  'farm.noFarms': 'No hay fincas disponibles',
+  'farm.selectFarm': 'Seleccionar Finca',
+  'farm.viewing': '(viendo)',
+  'farm.myFarm': '(mi finca)',
+  'farm.noFarmsCreated': 'Aun no se han creado fincas.',
 
   // ---------------------------------------------------------------------------
   // Dashboard
@@ -107,6 +117,7 @@ const es: Record<string, string> = {
   'well.unitsLockedHint': 'No se pueden cambiar unidades o multiplicador despues de registrar lecturas',
   'well.pickLocation': 'SELECCIONAR UBICACION DEL POZO',
   'well.next': 'Siguiente',
+  'well.addingTo': 'Agregando a: {{farm}}',
 
   // Well status
   'well.status.active': 'Activo',
@@ -293,6 +304,7 @@ const es: Record<string, string> = {
   'user.meterReaderLabel': 'Lector de Medidores',
   'user.adminLabel': 'Administrador',
   'user.full': '(Lleno)',
+  'user.invitingTo': 'Invitando a: {{farm}}',
 
   // ---------------------------------------------------------------------------
   // Pending Invites
@@ -361,6 +373,13 @@ const es: Record<string, string> = {
   'subscription.readOnlyBanner': 'Su suscripcion ha sido cancelada. Sus datos seran eliminados permanentemente el {{date}}. Renueve antes de esa fecha para conservar sus datos.',
   'subscription.renewSubscription': 'Renovar Suscripcion',
   'subscription.readOnly': 'Solo Lectura',
+  'subscription.purchaseFailed': 'No se pudo completar la compra. Intenta de nuevo.',
+  'subscription.wellItem_one': '{{count}} pozo',
+  'subscription.wellItem_other': '{{count}} pozos',
+  'subscription.adminSeatItem_one': '{{count}} puesto de admin',
+  'subscription.adminSeatItem_other': '{{count}} puestos de admin',
+  'subscription.meterReaderSeatItem_one': '{{count}} puesto de lector',
+  'subscription.meterReaderSeatItem_other': '{{count}} puestos de lector',
 
   // ---------------------------------------------------------------------------
   // Reports
@@ -408,6 +427,11 @@ const es: Record<string, string> = {
   'error.offlineCheck': 'Parece que no tienes conexion. Revisa tu conexion e intenta de nuevo.',
   'error.reload': 'Recargar',
   'error.signOutFailed': 'Error al cerrar sesion. Intenta de nuevo.',
+  'error.dbConnectionFailed': 'Error de conexion a la base de datos. Algunas funciones pueden no estar disponibles.',
+  'error.retrying': 'Reintentando...',
+  'error.retry': 'Reintentar',
+  'error.unexpected': 'Error inesperado',
+  'error.subscriptionLoadFailed': 'Error al cargar los detalles de la suscripcion',
 
   // ---------------------------------------------------------------------------
   // Location
@@ -416,6 +440,8 @@ const es: Record<string, string> = {
   'location.locationBlocked': 'Acceso a ubicacion bloqueado',
   'location.promptDescription': 'Tu ubicacion ayuda a centrar el mapa y encontrar pozos cercanos. Solo la usamos mientras la app esta abierta.',
   'location.deniedDescription': 'El permiso de ubicacion fue denegado. Para habilitarlo, abre la configuracion de tu navegador y permite el acceso a la ubicacion para este sitio.',
+  'location.deniedInstructions': 'Abre la Configuracion de tu dispositivo, ve a Aplicaciones, busca esta app, luego toca Permisos \u2192 Ubicacion y selecciona "Permitir mientras se usa la app".',
+  'location.deniedHint': 'Aun no funciona? Asegurate de que la Ubicacion / GPS este activada en la configuracion principal de tu dispositivo.',
   'location.allow': 'Permitir',
   'location.noThanks': 'No Gracias',
   'location.gotIt': 'Entendido',
@@ -516,6 +542,14 @@ const es: Record<string, string> = {
   'role.owner': 'Propietario',
   'role.admin': 'Administrador',
   'role.meterReader': 'Lector de Medidores',
+
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
+  'validation.invalidCoordinates': 'Coordenadas invalidas',
+  'validation.latitudeRange': 'La latitud debe estar entre -90 y 90',
+  'validation.longitudeRange': 'La longitud debe estar entre -180 y 180',
+  'validation.withinUS': 'Las coordenadas deben estar dentro de los Estados Unidos',
 };
 
 export default es;

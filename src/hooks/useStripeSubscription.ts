@@ -47,7 +47,7 @@ export function useStripeSubscription(): UseStripeSubscriptionResult {
       );
 
       if (fnError) {
-        setError(fnError.message || 'Failed to load subscription details');
+        setError(fnError.message || 'error.subscriptionLoadFailed');
         setData(null);
         return;
       }
@@ -73,7 +73,7 @@ export function useStripeSubscription(): UseStripeSubscriptionResult {
 
       setData(mapped);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error');
+      setError(err instanceof Error ? err.message : 'error.unexpected');
       setData(null);
     } finally {
       setLoading(false);

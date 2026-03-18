@@ -230,9 +230,9 @@ export default function SubscriptionPage() {
 
       // Build dynamic success message listing what was purchased
       const parts: string[] = [];
-      if (addonWells > 0) parts.push(addonWells === 1 ? `1 well` : `${addonWells} wells`);
-      if (addonAdmins > 0) parts.push(addonAdmins === 1 ? `1 admin seat` : `${addonAdmins} admin seats`);
-      if (addonMeterReaders > 0) parts.push(addonMeterReaders === 1 ? `1 meter reader seat` : `${addonMeterReaders} meter reader seats`);
+      if (addonWells > 0) parts.push(t('subscription.wellItem', { count: addonWells }));
+      if (addonAdmins > 0) parts.push(t('subscription.adminSeatItem', { count: addonAdmins }));
+      if (addonMeterReaders > 0) parts.push(t('subscription.meterReaderSeatItem', { count: addonMeterReaders }));
       const summary = parts.join(', ');
 
       // Reset quantities, show success toast, and refresh
@@ -246,7 +246,7 @@ export default function SubscriptionPage() {
     } finally {
       setPurchasing(false);
     }
-  }, [addonWells, addonAdmins, addonMeterReaders, refetch]);
+  }, [addonWells, addonAdmins, addonMeterReaders, refetch, t]);
 
   return (
     <div className="min-h-screen bg-surface-page pt-14">

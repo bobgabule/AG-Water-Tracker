@@ -55,6 +55,15 @@ const en: Record<string, string> = {
   'auth.visitSubscription': 'Visit subscription site',
 
   // ---------------------------------------------------------------------------
+  // Farm
+  // ---------------------------------------------------------------------------
+  'farm.noFarms': 'No available farms',
+  'farm.selectFarm': 'Select Farm',
+  'farm.viewing': '(viewing)',
+  'farm.myFarm': '(my farm)',
+  'farm.noFarmsCreated': 'No farms created yet.',
+
+  // ---------------------------------------------------------------------------
   // Dashboard
   // ---------------------------------------------------------------------------
   'dashboard.wellList': 'Well List',
@@ -108,6 +117,7 @@ const en: Record<string, string> = {
   'well.unitsLockedHint': 'Cannot change units or multiplier after readings have been recorded',
   'well.pickLocation': 'PICK WELL LOCATION',
   'well.next': 'Next',
+  'well.addingTo': 'Adding to: {{farm}}',
 
   // Well status
   'well.status.active': 'Active',
@@ -294,6 +304,7 @@ const en: Record<string, string> = {
   'user.meterReaderLabel': 'Meter Reader',
   'user.adminLabel': 'Admin',
   'user.full': '(Full)',
+  'user.invitingTo': 'Inviting to: {{farm}}',
 
   // ---------------------------------------------------------------------------
   // Pending Invites
@@ -363,6 +374,12 @@ const en: Record<string, string> = {
   'subscription.readOnlyBanner': 'Your subscription has been canceled. Your data will be permanently deleted on {{date}}. Renew before then to keep your data.',
   'subscription.renewSubscription': 'Renew Subscription',
   'subscription.readOnly': 'Read Only',
+  'subscription.wellItem_one': '{{count}} well',
+  'subscription.wellItem_other': '{{count}} wells',
+  'subscription.adminSeatItem_one': '{{count}} admin seat',
+  'subscription.adminSeatItem_other': '{{count}} admin seats',
+  'subscription.meterReaderSeatItem_one': '{{count}} meter reader seat',
+  'subscription.meterReaderSeatItem_other': '{{count}} meter reader seats',
 
   // ---------------------------------------------------------------------------
   // Reports
@@ -410,6 +427,11 @@ const en: Record<string, string> = {
   'error.offlineCheck': 'You appear to be offline. Check your connection and try again.',
   'error.reload': 'Reload',
   'error.signOutFailed': 'Failed to sign out. Please try again.',
+  'error.dbConnectionFailed': 'Database connection failed. Some features may be unavailable.',
+  'error.retrying': 'Retrying...',
+  'error.retry': 'Retry',
+  'error.unexpected': 'Unexpected error',
+  'error.subscriptionLoadFailed': 'Failed to load subscription details',
 
   // ---------------------------------------------------------------------------
   // Location
@@ -520,6 +542,14 @@ const en: Record<string, string> = {
   'role.owner': 'Owner',
   'role.admin': 'Admin',
   'role.meterReader': 'Meter Reader',
+
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
+  'validation.invalidCoordinates': 'Invalid coordinates',
+  'validation.latitudeRange': 'Latitude must be between -90 and 90',
+  'validation.longitudeRange': 'Longitude must be between -180 and 180',
+  'validation.withinUS': 'Coordinates must be within the United States',
 };
 
 export default en;

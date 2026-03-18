@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { PowerSyncDatabase } from '@powersync/web';
 import { PowerSyncContext as PSContext } from '@powersync/react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 import { setupPowerSync } from './powersync.ts';
 
 interface PowerSyncState {
@@ -28,12 +29,14 @@ function PowerSyncErrorBanner({
   onRetry: () => void;
   isRetrying: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4 bg-red-800/95 text-white flex items-center justify-between gap-3 shadow-lg">
       <div className="flex items-center gap-3 min-w-0">
         <ArrowPathIcon className="h-5 w-5 shrink-0" />
         <p className="text-sm truncate">
-          Database connection failed. Some features may be unavailable.
+          {t('error.dbConnectionFailed')}
         </p>
       </div>
       <button
@@ -41,7 +44,7 @@ function PowerSyncErrorBanner({
         disabled={isRetrying}
         className="shrink-0 px-4 py-1.5 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm font-medium transition-colors"
       >
-        {isRetrying ? 'Retrying...' : 'Retry'}
+        {isRetrying ? t('error.retrying') : t('error.retry')}
       </button>
     </div>
   );

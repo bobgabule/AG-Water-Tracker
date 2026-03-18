@@ -93,7 +93,7 @@ export default function AddWellFormBottomSheet({
 
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by this browser.');
+      setGpsError(t('location.notSupported'));
       return;
     }
     setGpsLoading(true);
@@ -108,15 +108,15 @@ export default function AddWellFormBottomSheet({
         setGpsLoading(false);
         const message =
           error.code === error.PERMISSION_DENIED
-            ? 'Location permission denied'
+            ? t('location.permissionDenied')
             : error.code === error.TIMEOUT
-              ? 'Location request timed out'
-              : 'Unable to get location';
+              ? t('location.requestTimedOut')
+              : t('location.unableToGet');
         setGpsError(message);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, []);
+  }, [t]);
 
   const handleLatitudeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
@@ -205,7 +205,7 @@ export default function AddWellFormBottomSheet({
           <div className="bg-surface-header p-4 pt-6 flex-shrink-0">
             <div>
               {role === 'super_admin' && farmName && (
-                <p className="text-white/60 text-xs">Adding to: {farmName}</p>
+                <p className="text-white/60 text-xs">{t('well.addingTo', { farm: farmName })}</p>
               )}
               <h2 className="text-white font-bold text-lg tracking-wide">
                 {t('well.addNewWell')}
@@ -294,7 +294,7 @@ export default function AddWellFormBottomSheet({
                 <p className="text-red-800 text-xs mt-1">{gpsError}</p>
               )}
               {coordinateError && !gpsError && (
-                <p className="text-red-800 text-xs mt-1">{coordinateError}</p>
+                <p className="text-red-800 text-xs mt-1">{t(coordinateError)}</p>
               )}
 
               {/* Allocations disabled card */}

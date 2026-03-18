@@ -5,6 +5,7 @@ import { useQuery } from '@powersync/react';
 import { useAuth } from '../lib/AuthProvider';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useActiveFarmStore } from '../stores/activeFarmStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { useUserRole } from '../hooks/useUserRole';
 
 // ---------------------------------------------------------------------------
@@ -27,6 +28,7 @@ interface FarmOption {
 // ---------------------------------------------------------------------------
 
 const FarmSelector = React.memo(function FarmSelector() {
+  const { t } = useTranslation();
   const { authStatus } = useAuth();
   const { farmId: activeFarmId, farmName: activeFarmName, isOverride } = useActiveFarm();
   const setActiveFarm = useActiveFarmStore((s) => s.setActiveFarm);
@@ -132,7 +134,7 @@ const FarmSelector = React.memo(function FarmSelector() {
       <div className="flex items-center gap-1.5 px-2 py-1 min-w-0">
         <BuildingOfficeIcon className="h-4 w-4 text-white/70 shrink-0" />
         <span className="text-white/50 text-lg font-bold truncate max-w-[180px]">
-          No available farms
+          {t('farm.noFarms')}
         </span>
       </div>
     );
@@ -145,11 +147,11 @@ const FarmSelector = React.memo(function FarmSelector() {
           <BuildingOfficeIcon className="h-4 w-4 text-white/70 shrink-0" />
           <div className="flex flex-col items-start leading-tight min-w-0">
             <span className="text-white text-lg font-bold truncate max-w-[180px]">
-              {activeFarmName ?? 'Select Farm'}
+              {activeFarmName ?? t('farm.selectFarm')}
             </span>
             {isOverride && role !== 'super_admin' && (
               <span className="text-yellow-300 text-[10px] font-medium -mt-0.5">
-                (viewing)
+                {t('farm.viewing')}
               </span>
             )}
           </div>
@@ -173,7 +175,7 @@ const FarmSelector = React.memo(function FarmSelector() {
               <div className="flex items-center gap-2">
                 <span className="truncate font-medium">{option.name}</span>
                 {option.isOwnFarm && (
-                  <span className="text-xs text-white/50 shrink-0">(my farm)</span>
+                  <span className="text-xs text-white/50 shrink-0">{t('farm.myFarm')}</span>
                 )}
               </div>
             </ListboxOption>

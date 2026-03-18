@@ -326,7 +326,7 @@ export default function DashboardPage() {
     return (
       <div className="relative w-full h-dvh min-h-screen bg-[#191a1a] flex items-center justify-center">
         <div className="text-center px-6">
-          <p className="text-white/60 text-lg">No farms created yet.</p>
+          <p className="text-white/60 text-lg">{t('farm.noFarmsCreated')}</p>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
+import { useTranslation } from '../hooks/useTranslation';
 import { getCoordinateValidationError } from '../lib/validation';
 
 interface LocationPickerBottomSheetProps {
@@ -18,6 +19,7 @@ export default function LocationPickerBottomSheet({
   location,
   onLocationChange,
 }: LocationPickerBottomSheetProps) {
+  const { t } = useTranslation();
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const { permission } = useGeolocationPermission();
@@ -25,12 +27,12 @@ export default function LocationPickerBottomSheet({
   const handleGetLocation = useCallback(() => {
     // If permission is denied, show error immediately without calling API
     if (permission === 'denied') {
-      setGpsError('Location permission denied. Please enable location access in your browser settings.');
+      setGpsError(t('location.permissionDeniedLong'));
       return;
     }
 
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by this browser.');
+      setGpsError(t('location.notSupported'));
       return;
     }
     setGpsLoading(true);
@@ -47,15 +49,15 @@ export default function LocationPickerBottomSheet({
         setGpsLoading(false);
         const message =
           error.code === error.PERMISSION_DENIED
-            ? 'Location permission denied. Please enable location access in your browser settings.'
+            ? t('location.permissionDeniedLong')
             : error.code === error.TIMEOUT
-              ? 'Location request timed out. Try again.'
-              : 'Unable to get location. Please enter manually.';
+              ? t('location.timedOutRetry')
+              : t('location.unableManual');
         setGpsError(message);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, [onLocationChange, permission]);
+  }, [onLocationChange, permission, t]);
 
   const handleLatitudeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +107,7 @@ export default function LocationPickerBottomSheet({
         {/* Header */}
         <div className="bg-surface-header p-4 pt-4 pb-0">
           <h2 className="text-white font-semibold text-lg tracking-wide">
-            PICK WELL LOCATION
+            {t('well.pickLocation')}
           </h2>
         </div>
 
@@ -115,7 +117,7 @@ export default function LocationPickerBottomSheet({
             {/* Latitude input */}
             <div className="flex-1">
               <label className="text-xs text-white mb-1 block">
-                Latitude
+                {t('well.latitude')}
               </label>
               <input
                 type="text"
@@ -130,7 +132,7 @@ export default function LocationPickerBottomSheet({
             {/* Longitude input */}
             <div className="flex-1">
               <label className="text-xs text-white mb-1 block">
-                Longitude
+                {t('well.longitude')}
               </label>
               <input
                 type="text"
@@ -163,7 +165,7 @@ export default function LocationPickerBottomSheet({
             <p className="text-red-800 text-xs mt-2">{gpsError}</p>
           )}
           {coordinateError && !gpsError && (
-            <p className="text-red-800 text-xs mt-2">{coordinateError}</p>
+            <p className="text-red-800 text-xs mt-2">{t(coordinateError)}</p>
           )}
         </div>
 
@@ -174,7 +176,7 @@ export default function LocationPickerBottomSheet({
             onClick={onClose}
             className="px-6 py-2.5 text-white font-medium"
           >
-            Cancel
+            {t('well.cancel')}
           </button>
           <button
             type="button"
@@ -182,7 +184,7 @@ export default function LocationPickerBottomSheet({
             disabled={isNextDisabled}
             className="px-6 py-2.5 bg-teal-btn text-teal-btn-text rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
+            {t('well.next')}
           </button>
         </div>
       </div>
