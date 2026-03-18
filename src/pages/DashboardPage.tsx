@@ -173,7 +173,7 @@ export default function DashboardPage() {
           setShowLimitModal(true);
         } else if (permission === 'denied') {
           setShowLocationModal(true);
-        } else if (permission !== 'granted' && !userLocation) {
+        } else if (permission !== 'granted' && !userLocation && localStorage.getItem(LS_LOCATION_ALLOWED) !== 'true') {
           setPendingAction('new-well');
           setShowLocationModal(true);
         } else {
@@ -201,7 +201,8 @@ export default function DashboardPage() {
       setShowLocationModal(true);
       return;
     }
-    if (permission !== 'granted' && !userLocation) {
+    const previouslyAllowed = localStorage.getItem(LS_LOCATION_ALLOWED) === 'true';
+    if (permission !== 'granted' && !userLocation && !previouslyAllowed) {
       setPendingAction('new-well');
       setShowLocationModal(true);
       return;
