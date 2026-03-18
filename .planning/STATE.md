@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
 status: in-progress
-stopped_at: Completed 43-02-PLAN.md
-last_updated: "2026-03-13T06:37:39.748Z"
-last_activity: 2026-03-13 — Completed 43-02-PLAN.md
+stopped_at: Completed 44-02-PLAN.md
+last_updated: "2026-03-18T03:07:02.174Z"
+last_activity: 2026-03-18 — Completed 44-02-PLAN.md
 progress:
-  total_phases: 43
-  completed_phases: 34
-  total_plans: 77
-  completed_plans: 77
+  total_phases: 22
+  completed_phases: 12
+  total_plans: 30
+  completed_plans: 27
 ---
 
 ---
@@ -18,15 +18,30 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
 status: in-progress
-stopped_at: Completed 43-02-PLAN.md
-last_updated: "2026-03-13T06:31:00Z"
-last_activity: 2026-03-13 — Completed 43-02-PLAN.md
+stopped_at: Completed 44-01-PLAN.md
+last_updated: "2026-03-18T03:05:49.413Z"
+last_activity: 2026-03-18 — Completed 44-01-PLAN.md
 progress:
-  total_phases: 43
+  total_phases: 22
+  completed_phases: 12
+  total_plans: 30
+  completed_plans: 27
+  percent: 90
+---
+
+---
+gsd_state_version: 1.0
+milestone: v4.0
+milestone_name: -- Performance & Perceived Speed
+status: in-progress
+stopped_at: Completed 44-01-PLAN.md
+last_updated: "2026-03-18T03:02:16Z"
+last_activity: 2026-03-18 — Completed 44-01-PLAN.md
+progress:
+  [█████████░] 90%
   completed_phases: 34
-  total_plans: 77
-  completed_plans: 77
-  percent: 100
+  total_plans: 78
+  completed_plans: 78
 ---
 
 # Project State
@@ -36,21 +51,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 43 complete — Super admin farm isolation
+**Current focus:** Phase 44 in progress — Farm subscription cancellation lifecycle
 
 ## Current Position
 
-Phase: 43
-Plan: 2 of 2
-Status: Complete
-Last activity: 2026-03-13 — Completed 43-02-PLAN.md
+Phase: 44
+Plan: 2 of 3
+Status: In Progress
+Last activity: 2026-03-18 — Completed 44-02-PLAN.md
 
-Progress: Phase 43: [██████████] 100% (2/2 plans complete)
+Progress: Phase 44: [███████░░░] 67% (2/3 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 77 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43)
+- Total plans completed: 79 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43 + 2 P44)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -95,6 +110,8 @@ Progress: Phase 43: [██████████] 100% (2/2 plans complete)
 | Phase 42 P03 | 3min | 3 | 3 |
 | Phase 43 P01 | 2min | 2 | 2 |
 | Phase 43 P02 | 2min | 2 | 3 |
+| Phase 44 P01 | 2min | 2 | 2 |
+| Phase 44 P02 | 5min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -172,6 +189,13 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 43-02: Farm name indicators use hardcoded English strings (super_admin is internal-only)
 - Phase 43-02: WellAllocationsPage uses activeFarmId directly instead of fallback to empty string
 - Phase 43-02: Early return guard placed after all hooks to comply with React rules of hooks
+- Phase 44-01: Used correct current policy names from migrations 018/031/032 instead of stale plan references
+- Phase 44-01: Preserved existing permission models: wells use get_user_farm_ids(), readings UPDATE/DELETE use get_user_admin_farm_ids()
+- Phase 44-01: Stripe webhook uses SERVICE_ROLE_KEY and module-level supabaseAdmin client (no user JWT on webhooks)
+- [Phase 44]: useFarmReadOnly reads from PowerSync (not direct Supabase) for offline-capable status detection
+- [Phase 44]: Deletion date computed client-side as current_period_end + 1 year
+- [Phase 44]: Read-only banner only on SubscriptionPage for owner role; other pages show disabled buttons without messaging
+- [Phase 44]: openPortal() with no flow_type for renew button opens general Stripe Customer Portal
 
 ### Pending Todos (manual steps)
 
@@ -184,6 +208,10 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Stripe add-on prices need creating and STRIPE_ADDON_WELL_PRICE_ID, STRIPE_ADDON_ADMIN_PRICE_ID, STRIPE_ADDON_METER_CHECKER_PRICE_ID need setting as Supabase Edge Function secrets
 - Deploy purchase-addons edge function: `npx supabase functions deploy purchase-addons --no-verify-jwt`
 - PowerSync Dashboard sync rules need updating with extra_wells, subscription_status, current_period_end columns in user_farms bucket
+- STRIPE_WEBHOOK_SECRET needs setting as Supabase Edge Function secret
+- Stripe webhook endpoint needs creating in Stripe Dashboard (customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid)
+- Deploy stripe-webhook edge function: `npx supabase functions deploy stripe-webhook --no-verify-jwt`
+- PowerSync Dashboard sync rules may need updating with canceled_at, scheduled_delete_at columns
 
 ### Roadmap Evolution
 
@@ -200,6 +228,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 41 added: Robust farm account data structure — unified schema for registration, invites, Stripe billing, add-on wells/seats, cancellation, and login flow
 - Phase 42 added: Redesign subscription page with add-on purchasing, upgrade flow, and payment failure handling
 - Phase 43 added: Super admin farm isolation — auto-select farm on login, disable features when no farms, audit all operations for strict per-farm scoping
+- Phase 44 added: Farm subscription cancellation lifecycle with read-only retention and auto-deletion
 
 ### Blockers/Concerns
 
@@ -207,7 +236,7 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-03-13T06:31:00Z
-Stopped at: Completed 43-02-PLAN.md
-Resume file: .planning/phases/43-super-admin-farm-isolation/43-02-SUMMARY.md
-Next action: Phase 43 complete (all plans done)
+Last session: 2026-03-18T03:07:02.168Z
+Stopped at: Completed 44-02-PLAN.md
+Resume file: None
+Next action: Execute 44-02-PLAN.md (frontend read-only hooks and banners)

@@ -526,3 +526,24 @@ Plans:
   4. Adding wells, users, allocations all scope to selected farm only
   5. Switching farms in header immediately changes all data views and write targets
   6. No cross-farm data leakage in any operation
+
+### Phase 44: Farm subscription cancellation lifecycle with read-only retention and auto-deletion
+
+**Goal:** When a farm's subscription is canceled and the paid period ends, transition to read-only mode for 1 year (backend-enforced via RLS, not just UI), show renewal messaging with a Stripe portal renew button, and auto-delete farm data after the retention period via daily pg_cron job
+**Requirements**: CANCEL-01, CANCEL-02, CANCEL-03, CANCEL-04, CANCEL-05, CANCEL-06, CANCEL-07
+**Depends on:** Phase 42
+**Plans:** 2/3 plans executed
+
+Plans:
+- [x] 44-01-PLAN.md — Database migration (cancellation columns + read-only RLS enforcement) + Stripe webhook edge function
+- [ ] 44-02-PLAN.md — useFarmReadOnly hook, subscription page read-only banner, disable write actions across 8 components, i18n
+- [ ] 44-03-PLAN.md — pg_cron daily deletion job + send-deletion-warning edge function for email warnings
+
+**Success Criteria** (what must be TRUE):
+  1. Stripe webhook handles subscription.updated, subscription.deleted, invoice.payment_failed, and invoice.paid events
+  2. RLS policies block INSERT/UPDATE/DELETE on wells, readings, allocations, and farms when subscription is canceled and period ended
+  3. All SELECT operations continue to work in read-only mode (data still readable)
+  4. Farm owner sees read-only banner on subscription page with deletion date and renew button
+  5. All write-action buttons (add well, save reading, edit well, delete well, allocations, invite user, reports, delete reading) are disabled when read-only
+  6. Daily pg_cron job deletes farms where scheduled_delete_at <= NOW() and cleans up auth accounts
+  7. Email warnings sent to farm owner at 30 and 7 days before deletion
