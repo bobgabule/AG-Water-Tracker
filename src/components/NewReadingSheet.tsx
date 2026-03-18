@@ -99,6 +99,7 @@ export default function NewReadingSheet({
   const [problems, setProblems] = useState<MeterProblems>(INITIAL_PROBLEMS);
   const [problemsSubmitting, setProblemsSubmitting] = useState(false);
   const [pendingSimilar, setPendingSimilar] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Real-time proximity indicator from cached location
   const proximityInfo = useMemo(() => {
@@ -119,6 +120,7 @@ export default function NewReadingSheet({
     setProblems(INITIAL_PROBLEMS);
     setProblemsSubmitting(false);
     setPendingSimilar(false);
+    setIsSaving(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -226,6 +228,7 @@ export default function NewReadingSheet({
       } catch {
         useToastStore.getState().show(t('reading.saveFailed'), 'error');
         setView('form');
+        setIsSaving(false);
       }
     },
     [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose, isReadOnly],
@@ -266,6 +269,8 @@ export default function NewReadingSheet({
   }, [saveReading, pendingSimilar]);
 
   const handleSubmit = useCallback(() => {
+    if (isSaving) return;
+
     const error = validateReadingValue(readingValue, t);
     if (error) {
       setValidationError(error);
@@ -296,8 +301,9 @@ export default function NewReadingSheet({
     }
 
     // Proceed directly to GPS capture
+    setIsSaving(true);
     handleGpsCaptureAndSave();
-  }, [readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave]);
+  }, [isSaving, readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave]);
 
   const handleSimilarContinue = useCallback(() => {
     handleGpsCaptureAndSave(true);
@@ -638,7 +644,7 @@ export default function NewReadingSheet({
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isReadOnly}
+                disabled={isReadOnly || isSaving}
                 className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CheckIcon className="w-5 h-5" />
