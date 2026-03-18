@@ -8,18 +8,6 @@ export interface UserProfile {
   last_name: string | null;
   email: string | null;
   phone: string | null;
-  farm_id: string | null;
-  role: string | null;
-}
-
-interface UserRow {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  farm_id: string | null;
-  role: string | null;
 }
 
 /**
@@ -32,11 +20,11 @@ export function useUserProfile(): UserProfile | null {
 
   // Guard against empty userId to avoid unnecessary database queries
   const query = userId
-    ? `SELECT id, first_name, last_name, email, phone, farm_id, role
+    ? `SELECT id, first_name, last_name, email, phone
        FROM users WHERE id = ?`
     : 'SELECT NULL WHERE 0';
 
-  const { data } = useQuery<UserRow>(query, userId ? [userId] : []);
+  const { data } = useQuery<UserProfile>(query, userId ? [userId] : []);
 
   return useMemo(() => {
     if (!data || data.length === 0) return null;

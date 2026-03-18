@@ -10,8 +10,6 @@ const farms = new TableV2({
   extra_admin_seats: column.integer,
   extra_meter_checker_seats: column.integer,
   extra_wells: column.integer,
-  stripe_customer_id: column.text,
-  stripe_subscription_id: column.text,
   subscription_status: column.text,
   current_period_end: column.text,
   created_at: column.text,
@@ -19,8 +17,6 @@ const farms = new TableV2({
 });
 
 const users = new TableV2({
-  farm_id: column.text,
-  role: column.text,
   display_name: column.text,
   first_name: column.text,
   last_name: column.text,
