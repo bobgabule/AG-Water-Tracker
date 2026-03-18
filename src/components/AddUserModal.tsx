@@ -321,7 +321,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
                   </div>
                 ) : (
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">{t('user.role')}</label>
+                    <label className="text-xs text-white mb-1 block">{t('user.role')}</label>
                     <div className="py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
                       {t('user.meterReaderLabel')}{meterReaderFull ? ` ${t('user.full')}` : ''}
                     </div>
