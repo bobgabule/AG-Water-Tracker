@@ -16,6 +16,7 @@ function WaterDropIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
@@ -159,6 +160,8 @@ export default function SubscriptionPage() {
   const wellCount = useWellCount();
   const { data: stripeData, refetch } = useStripeSubscription();
 
+  const { isReadOnly, deletionDate } = useFarmReadOnly();
+  const isOwner = role === 'owner' || role === 'super_admin';
   const canPurchase = role === 'owner' || role === 'super_admin' || role === 'admin';
   const planBadge = stripeData
     ? getStatusBadge(stripeData.status, t)
@@ -252,6 +255,28 @@ export default function SubscriptionPage() {
           {t('subscription.title')}
         </h1>
         <p className="text-sm text-text-heading/70 mb-4">{t('subscription.subtitle')}</p>
+
+        {/* ----------------------------------------------------------------
+            Read-Only Banner (canceled + period ended, owner only)
+        ---------------------------------------------------------------- */}
+        {isReadOnly && isOwner && (
+          <div className="bg-red-800/90 rounded-xl p-4 mb-4 flex items-start gap-3 sticky top-14 z-10">
+            <ExclamationTriangleIcon className="h-5 w-5 text-white shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-white text-sm mb-2">
+                {t('subscription.readOnlyBanner', {
+                  date: deletionDate ? formatDate(deletionDate, locale) : '',
+                })}
+              </p>
+              <button
+                onClick={() => openPortal()}
+                className="text-sm font-semibold text-white bg-red-600 hover:bg-red-500 px-4 py-1.5 rounded-lg transition-colors"
+              >
+                {t('subscription.renewSubscription')}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ----------------------------------------------------------------
             Failed Payment Banner (conditional)
@@ -413,7 +438,7 @@ export default function SubscriptionPage() {
                     </p>
                     <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_WELL_PRICE, 'usd') })}</p>
                   </div>
-                  {canPurchase ? (
+                  {canPurchase && !isReadOnly ? (
                     <QuantityCounter value={addonWells} onChange={setAddonWells} />
                   ) : (
                     <span className="text-xs text-text-heading/60">--</span>
@@ -428,7 +453,7 @@ export default function SubscriptionPage() {
                     </p>
                     <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_ADMIN_PRICE, 'usd') })}</p>
                   </div>
-                  {canPurchase ? (
+                  {canPurchase && !isReadOnly ? (
                     <QuantityCounter value={addonAdmins} onChange={setAddonAdmins} />
                   ) : (
                     <span className="text-xs text-text-heading/60">--</span>
@@ -443,7 +468,7 @@ export default function SubscriptionPage() {
                     </p>
                     <p className="text-xs text-text-heading/70">{t('subscription.perYear', { amount: formatCurrency(ADDON_METER_READER_PRICE, 'usd') })}</p>
                   </div>
-                  {canPurchase ? (
+                  {canPurchase && !isReadOnly ? (
                     <QuantityCounter
                       value={addonMeterReaders}
                       onChange={setAddonMeterReaders}
@@ -474,7 +499,7 @@ export default function SubscriptionPage() {
 
                   <button
                     onClick={handlePurchaseAddons}
-                    disabled={totalAddonCents === 0 || purchasing}
+                    disabled={totalAddonCents === 0 || purchasing || isReadOnly}
                     className="btn-primary w-full"
                   >
                     {purchasing
