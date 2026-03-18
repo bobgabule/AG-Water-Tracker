@@ -6,6 +6,7 @@ import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
 import { hasPermission, ROLE_BADGE_STYLES, getRoleDisplayName } from '../lib/permissions';
 import type { Role } from '../lib/permissions';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useTranslation } from '../hooks/useTranslation';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
@@ -26,6 +27,7 @@ export default function UsersPage() {
   const { user } = useAuth();
   const { farmId } = useActiveFarm();
   const userRole = useUserRole();
+  const { isReadOnly } = useFarmReadOnly();
   const canManageUsers = hasPermission(userRole, 'manage_users');
 
   // Query farm members
@@ -47,8 +49,9 @@ export default function UsersPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleOpenInviteSheet = useCallback(() => {
+    if (isReadOnly) return;
     setShowInviteSheet(true);
-  }, []);
+  }, [isReadOnly]);
 
   const handleCloseInviteSheet = useCallback(() => {
     setShowInviteSheet(false);
@@ -67,6 +70,7 @@ export default function UsersPage() {
   }, []);
 
   const handleDeleteConfirm = useCallback(async () => {
+    if (isReadOnly) return;
     if (!deleteTarget || !farmId) return;
 
     try {
@@ -100,7 +104,7 @@ export default function UsersPage() {
     } finally {
       setDeleteLoading(false);
     }
-  }, [deleteTarget, farmId]);
+  }, [deleteTarget, farmId, isReadOnly]);
 
   const canDeleteMember = useCallback(
     (member: FarmMemberRow): boolean => {
@@ -187,7 +191,8 @@ export default function UsersPage() {
           <div className="flex justify-center">
             <button
               onClick={handleOpenInviteSheet}
-              className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
+              disabled={isReadOnly}
+              className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PlusIcon className="w-5 h-5" />
               {t('user.newUser')}

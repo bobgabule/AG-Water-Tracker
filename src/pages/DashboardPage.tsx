@@ -11,11 +11,13 @@ import { hasPermission } from '../lib/permissions';
 import { debugError } from '../lib/debugLog';
 import { useFarmState } from '../hooks/useFarmState';
 import { useToastStore } from '../stores/toastStore';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { useWellCount } from '../hooks/useWellCount';
 import { useGeolocationPermission } from '../hooks/useGeolocationPermission';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useTranslation } from '../hooks/useTranslation';
+import { supabase } from '../lib/supabase';
 import MapView from '../components/MapView';
 import { MapErrorFallback } from '../components/ErrorFallback';
 import SyncStatusBanner from '../components/SyncStatusBanner';
@@ -40,6 +42,7 @@ export default function DashboardPage() {
   const farmState = useFarmState(farmId);
   const tier = useSubscriptionTier();
   const wellCount = useWellCount();
+  const { isReadOnly } = useFarmReadOnly();
   const canManageAddons = hasPermission(role, 'view_subscription');
 
   // Geolocation permission + location
@@ -188,7 +191,7 @@ export default function DashboardPage() {
 
   // New Well flow handlers
   const handleNewWell = useCallback(() => {
-    if (!farmId) return; // Defensive guard: no farm selected
+    if (!farmId || isReadOnly) return; // Defensive guard: no farm selected or read-only
     // Allow creation if tier data hasn't loaded (offline edge case per user decision)
     if (tier && wellCount >= tier.maxWells) {
       setShowLimitModal(true);
@@ -204,7 +207,7 @@ export default function DashboardPage() {
       return;
     }
     setCurrentStep('location');
-  }, [tier, wellCount, permission, userLocation]);
+  }, [tier, wellCount, permission, userLocation, isReadOnly]);
 
   const handleLimitModalClose = useCallback(() => {
     setShowLimitModal(false);
@@ -230,6 +233,7 @@ export default function DashboardPage() {
   }, []);
 
   const handleSaveWell = useCallback(async (wellData: WellFormData) => {
+    if (isReadOnly) return;
     if (!hasPermission(role, 'create_well')) {
       debugError('Dashboard', 'Attempted well creation without permission');
       return;
@@ -274,21 +278,23 @@ export default function DashboardPage() {
         ]
       );
 
-      // Add water district email to report recipients if email provided
+      // Add water district email to report recipients if email provided (via Supabase)
       if (wellData.waterDistrictEmail) {
         try {
           const email = wellData.waterDistrictEmail.toLowerCase();
-          const existing = await db.getAll<{ id: string }>(
-            'SELECT id FROM report_email_recipients WHERE farm_id = ? AND LOWER(email) = ?',
-            [farmId, email],
-          );
-          if (existing.length === 0) {
-            const recipientId = crypto.randomUUID();
-            await db.execute(
-              `INSERT INTO report_email_recipients (id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at)
-               VALUES (?, ?, ?, 0, NULL, ?, ?)`,
-              [recipientId, farmId, email, now, now],
-            );
+          const { data: existing } = await supabase
+            .from('report_email_recipients')
+            .select('id')
+            .eq('farm_id', farmId)
+            .ilike('email', email);
+          if (!existing || existing.length === 0) {
+            await supabase.from('report_email_recipients').insert({
+              id: crypto.randomUUID(),
+              farm_id: farmId,
+              email,
+              is_auto_added: false,
+              source_user_id: null,
+            });
           }
         } catch (emailErr) {
           debugError('Dashboard', 'Failed to add water district email:', emailErr);
@@ -305,7 +311,7 @@ export default function DashboardPage() {
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [db, farmId, role, user, showToast]);
+  }, [db, farmId, role, user, showToast, isReadOnly]);
 
   // Derive denied mode for the location modal — avoids reading localStorage in JSX
   const locationDeniedMode = permission === 'denied'
@@ -371,9 +377,9 @@ export default function DashboardPage() {
         {canCreateWell && (
           <button
             onClick={handleNewWell}
-            disabled={!farmId}
+            disabled={!farmId || isReadOnly}
             className={`px-5 py-3 rounded-full flex items-center gap-2
-              ${!farmId ? 'bg-surface-header/50 text-white/30 cursor-not-allowed' : 'bg-surface-header text-white active:scale-95'}
+              ${!farmId || isReadOnly ? 'bg-surface-header/50 text-white/30 cursor-not-allowed' : 'bg-surface-header text-white active:scale-95'}
               text-sm font-semibold shadow-xl transition`}
           >
             <PlusIcon className="w-5 h-5" />

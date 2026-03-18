@@ -5,6 +5,7 @@ import { useActiveFarm } from '../hooks/useActiveFarm';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
 import { useAppSetting } from '../hooks/useAppSetting';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useSeatUsage } from '../hooks/useSeatUsage';
 import { useSubscriptionTier } from '../hooks/useSubscriptionTier';
 import { buildSubscriptionUrl } from '../lib/subscriptionUrls';
@@ -27,6 +28,7 @@ function formatPhoneDisplay(digits: string): string {
 
 export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
   const { t } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
   const userRole = useUserRole();
   const { farmId, farmName } = useActiveFarm();
 
@@ -82,6 +84,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   }, []);
 
   const handleSubmit = useCallback(async () => {
+    if (isReadOnly) return;
     if (!farmId) return;
 
     if (!firstName.trim()) {
@@ -154,7 +157,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     } finally {
       setLoading(false);
     }
-  }, [farmId, farmName, firstName, lastName, phoneDigits, email, role, t]);
+  }, [farmId, farmName, firstName, lastName, phoneDigits, email, role, t, isReadOnly]);
 
   const handleClose = useCallback(() => {
     setFirstName('');
@@ -354,7 +357,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || !farmId || !tier || (role === 'admin' ? adminFull : meterReaderFull)}
+                disabled={loading || !farmId || !tier || isReadOnly || (role === 'admin' ? adminFull : meterReaderFull)}
                 className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-header-hover hover:text-white transition-colors"
               >
                 {loading ? (

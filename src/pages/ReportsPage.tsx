@@ -2,16 +2,20 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useActiveFarm } from '../hooks/useActiveFarm';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useReportEmailRecipients } from '../hooks/useReportEmailRecipients';
 import { useFarmAdminEmails } from '../hooks/useFarmAdminEmails';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
 
 export default function ReportsPage() {
   const { t } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
   const db = usePowerSync();
   const { farmId, farmName: farmNameLabel } = useActiveFarm();
-  const { recipients, loading: recipientsLoading } = useReportEmailRecipients();
+  const isOnline = useOnlineStatus();
+  const { recipients, loading: recipientsLoading, refetch: refetchRecipients } = useReportEmailRecipients();
   const adminEmails = useFarmAdminEmails();
 
   const [showAddInput, setShowAddInput] = useState(false);
@@ -41,25 +45,34 @@ export default function ReportsPage() {
 
     const existingEmails = new Set(recipients.map((r) => r.email.toLowerCase()));
 
-    const insertions = adminEmails
+    const toInsert = adminEmails
       .filter((admin) => !existingEmails.has(admin.email.toLowerCase()))
-      .map((admin) => {
-        const id = crypto.randomUUID();
-        const now = new Date().toISOString();
-        return db.execute(
-          `INSERT INTO report_email_recipients (id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at)
-           VALUES (?, ?, ?, 1, ?, ?, ?)`,
-          [id, farmId, admin.email.toLowerCase(), admin.userId, now, now],
-        );
-      });
+      .map((admin) => ({
+        id: crypto.randomUUID(),
+        farm_id: farmId,
+        email: admin.email.toLowerCase(),
+        is_auto_added: true,
+        source_user_id: admin.userId,
+      }));
 
-    Promise.all(insertions).catch((err) =>
-      console.error('Failed to auto-add admin emails:', err),
-    );
-  }, [farmId, adminEmails, recipients, recipientsLoading, db]);
+    if (toInsert.length > 0) {
+      supabase
+        .from('report_email_recipients')
+        .insert(toInsert)
+        .then(({ error }) => {
+          if (error) console.error('Failed to auto-add admin emails:', error);
+          else refetchRecipients();
+        });
+    }
+  }, [farmId, adminEmails, recipients, recipientsLoading, refetchRecipients]);
 
   const handleAddEmail = useCallback(async () => {
+    if (isReadOnly) return;
     if (!farmId || !newEmail.trim()) return;
+    if (!isOnline) {
+      setAddError(t('common.requiresInternet'));
+      return;
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail.trim())) {
@@ -77,34 +90,39 @@ export default function ReportsPage() {
     }
 
     try {
-      const id = crypto.randomUUID();
-      const now = new Date().toISOString();
-
-      await db.execute(
-        `INSERT INTO report_email_recipients (id, farm_id, email, is_auto_added, source_user_id, created_at, updated_at)
-         VALUES (?, ?, ?, 0, NULL, ?, ?)`,
-        [id, farmId, newEmail.trim().toLowerCase(), now, now],
-      );
+      const { error } = await supabase.from('report_email_recipients').insert({
+        id: crypto.randomUUID(),
+        farm_id: farmId,
+        email: newEmail.trim().toLowerCase(),
+        is_auto_added: false,
+        source_user_id: null,
+      });
+      if (error) throw error;
 
       setNewEmail('');
       setShowAddInput(false);
       setAddError(null);
+      refetchRecipients();
     } catch {
       setAddError(t('reports.addEmailFailed'));
     }
-  }, [db, farmId, newEmail, recipients]);
+  }, [farmId, newEmail, recipients, refetchRecipients, isOnline, t, isReadOnly]);
 
   const handleRemoveEmail = useCallback(
     async (recipientId: string) => {
+      if (isReadOnly) return;
       try {
-        await db.execute('DELETE FROM report_email_recipients WHERE id = ?', [
-          recipientId,
-        ]);
+        const { error } = await supabase
+          .from('report_email_recipients')
+          .delete()
+          .eq('id', recipientId);
+        if (error) throw error;
+        refetchRecipients();
       } catch (err) {
         console.error('Failed to remove email recipient:', err);
       }
     },
-    [db],
+    [refetchRecipients, isReadOnly],
   );
 
   const handleSendReport = useCallback(async () => {
@@ -373,7 +391,8 @@ export default function ReportsPage() {
                 </span>
                 <button
                   onClick={() => handleRemoveEmail(recipient.id)}
-                  className="text-text-heading/40 hover:text-red-800 transition-colors flex-shrink-0"
+                  disabled={isReadOnly}
+                  className="text-text-heading/40 hover:text-red-800 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label={`Remove ${recipient.email}`}
                 >
                   <XMarkIcon className="w-5 h-5" />
@@ -419,8 +438,9 @@ export default function ReportsPage() {
             </div>
           ) : (
             <button
-              onClick={() => setShowAddInput(true)}
-              className="mt-3 flex items-center gap-1.5 text-sm text-text-heading/60 hover:text-text-heading transition-colors"
+              onClick={() => { if (!isReadOnly) setShowAddInput(true); }}
+              disabled={isReadOnly}
+              className="mt-3 flex items-center gap-1.5 text-sm text-text-heading/60 hover:text-text-heading transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PlusIcon className="w-4 h-4" />
               {t('reports.addEmail')}

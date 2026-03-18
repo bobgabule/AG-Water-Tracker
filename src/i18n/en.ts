@@ -358,6 +358,9 @@ const en: Record<string, string> = {
   'subscription.payNow': 'Pay Now',
   'subscription.cancelSubscription': 'Cancel Subscription',
   'subscription.paymentFailed': 'Your payment failed. Update your payment method to continue service.',
+  'subscription.readOnlyBanner': 'Your subscription has been canceled. Your data will be permanently deleted on {{date}}. Renew before then to keep your data.',
+  'subscription.renewSubscription': 'Renew Subscription',
+  'subscription.readOnly': 'Read Only',
 
   // ---------------------------------------------------------------------------
   // Reports
@@ -486,6 +489,7 @@ const en: Record<string, string> = {
   'common.none': 'None',
   'common.required': 'Required',
   'common.optional': 'Optional',
+  'common.requiresInternet': 'This action requires an internet connection.',
 
   // ---------------------------------------------------------------------------
   // Toast

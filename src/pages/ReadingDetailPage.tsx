@@ -1,6 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { usePowerSync } from '@powersync/react';
 import { ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import PennantFlagIcon from '../components/PennantFlagIcon';
@@ -8,21 +7,25 @@ import { useWells } from '../hooks/useWells';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useTranslation } from '../hooks/useTranslation';
 import { hasPermission } from '../lib/permissions';
 import { getDistanceToWell } from '../lib/gps-proximity';
 import { useToastStore } from '../stores/toastStore';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { supabase } from '../lib/supabase';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function ReadingDetailPage() {
   const { id, readingId } = useParams<{ id: string; readingId: string }>();
   const navigate = useNavigate();
-  const db = usePowerSync();
+  const isOnline = useOnlineStatus();
   const { t, locale } = useTranslation();
   const { wells, loading: wellsLoading } = useWells();
   const { farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
   const role = useUserRole();
+  const { isReadOnly } = useFarmReadOnly();
   const canDelete = hasPermission(role, 'delete_reading');
 
   const { readings, loading: readingsLoading } = useWellReadingsWithNames(id ?? null);
@@ -116,10 +119,16 @@ export default function ReadingDetailPage() {
   );
 
   const handleDelete = useCallback(async () => {
+    if (isReadOnly) return;
     if (!readingId) return;
+    if (!isOnline) {
+      useToastStore.getState().show(t('common.requiresInternet'), 'error');
+      return;
+    }
     setDeleting(true);
     try {
-      await db.execute('DELETE FROM readings WHERE id = ?', [readingId]);
+      const { error } = await supabase.from('readings').delete().eq('id', readingId);
+      if (error) throw error;
       useToastStore.getState().show(t('reading.deleted'));
       setShowDeleteConfirm(false);
       navigate(`/wells/${id}`, { viewTransition: true, replace: true });
@@ -128,7 +137,7 @@ export default function ReadingDetailPage() {
     } finally {
       setDeleting(false);
     }
-  }, [db, readingId, navigate, id, t]);
+  }, [readingId, isOnline, navigate, id, t, isReadOnly]);
 
   const handleOpenDelete = useCallback(() => setShowDeleteConfirm(true), []);
   const handleCloseDelete = useCallback(() => setShowDeleteConfirm(false), []);
@@ -241,7 +250,8 @@ export default function ReadingDetailPage() {
             <button
               type="button"
               onClick={handleOpenDelete}
-              className="w-full py-3 bg-red-800 text-white font-medium text-lg uppercase rounded-full flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
+              disabled={isReadOnly}
+              className="w-full py-3 bg-red-800 text-white font-medium text-lg uppercase rounded-full flex items-center justify-center gap-2 active:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <TrashIcon className="w-5 h-5" />
               {t('readingDetail.deleteReading')}

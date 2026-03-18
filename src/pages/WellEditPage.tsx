@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { usePowerSync, useQuery } from '@powersync/react';
+import { useQuery } from '@powersync/react';
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -17,9 +17,12 @@ import {
   isWellNameUnique,
   isWmisUnique,
 } from '../lib/validation';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useToastStore } from '../stores/toastStore';
 import { useWellEditDraftStore } from '../stores/wellEditDraftStore';
 import { useActiveFarm } from '../hooks/useActiveFarm';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { supabase } from '../lib/supabase';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 type Units = 'AF' | 'GAL' | 'CF';
@@ -44,9 +47,10 @@ const stateOptions = ['Ok', 'Low', 'Critical', 'Dead', 'Unknown'] as const;
 
 export default function WellEditPage() {
   const { t } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const db = usePowerSync();
+  const isOnline = useOnlineStatus();
   const { wells } = useWells();
   const { allocations } = useWellAllocations(id ?? null);
   const readingsCheck = useQuery<{ n: number }>(
@@ -249,6 +253,7 @@ export default function WellEditPage() {
 
   // Save handler
   const handleSave = useCallback(async () => {
+    if (isReadOnly) return;
     // Clear previous errors
     setNameError(null);
     setWmisError(null);
@@ -279,29 +284,30 @@ export default function WellEditPage() {
       return;
     }
 
+    if (!isOnline) {
+      useToastStore.getState().show(t('common.requiresInternet'), 'error');
+      return;
+    }
+
     setSaving(true);
     try {
-      const now = new Date().toISOString();
-      await db.execute(
-        `UPDATE wells SET name = ?, meter_serial_number = ?, wmis_number = ?,
-         latitude = ?, longitude = ?, units = ?, multiplier = ?,
-         battery_state = ?, pump_state = ?,
-         meter_status = ?, updated_at = ? WHERE id = ?`,
-        [
-          name.trim(),
-          meterSerialNumber.trim() || null,
-          wmisNumber.trim(),
+      const { error } = await supabase
+        .from('wells')
+        .update({
+          name: name.trim(),
+          meter_serial_number: meterSerialNumber.trim() || null,
+          wmis_number: wmisNumber.trim(),
           latitude,
           longitude,
           units,
           multiplier,
-          batteryState,
-          pumpState,
-          meterStatus,
-          now,
-          id,
-        ],
-      );
+          battery_state: batteryState,
+          pump_state: pumpState,
+          meter_status: meterStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (error) throw error;
       useWellEditDraftStore.getState().clearDraft();
       useToastStore.getState().show(t('well.wellUpdated'));
       navigate(`/wells/${id}`, { viewTransition: true });
@@ -323,19 +329,26 @@ export default function WellEditPage() {
     meterStatus,
     wells,
     id,
-    db,
+    isOnline,
     navigate,
+    isReadOnly,
   ]);
 
   // Delete handler
   const handleDeleteWell = useCallback(async () => {
+    if (isReadOnly) return;
+    if (!isOnline) {
+      useToastStore.getState().show(t('common.requiresInternet'), 'error');
+      return;
+    }
+
     setDeleteLoading(true);
     try {
-      await db.writeTransaction(async (tx) => {
-        await tx.execute('DELETE FROM readings WHERE well_id = ?', [id]);
-        await tx.execute('DELETE FROM allocations WHERE well_id = ?', [id]);
-        await tx.execute('DELETE FROM wells WHERE id = ?', [id]);
-      });
+      // Cascade delete: readings → allocations → well
+      await supabase.from('readings').delete().eq('well_id', id);
+      await supabase.from('allocations').delete().eq('well_id', id);
+      const { error } = await supabase.from('wells').delete().eq('id', id);
+      if (error) throw error;
       useWellEditDraftStore.getState().clearDraft();
       useToastStore.getState().show(t('well.wellDeleted'));
       navigate('/', { viewTransition: true });
@@ -345,7 +358,7 @@ export default function WellEditPage() {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
     }
-  }, [db, id, navigate]);
+  }, [isOnline, id, navigate, t, isReadOnly]);
 
   // Back navigation handler
   const handleBack = useCallback(() => {
@@ -579,7 +592,7 @@ export default function WellEditPage() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={!isFormValid || saving}
+          disabled={!isFormValid || saving || isReadOnly}
           className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? (
@@ -596,7 +609,8 @@ export default function WellEditPage() {
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="w-full py-3 text-red-800 font-medium flex items-center justify-center gap-2"
+          disabled={isReadOnly}
+          className="w-full py-3 text-red-800 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <TrashIcon className="w-5 h-5" />
           {t('well.deleteWell')}

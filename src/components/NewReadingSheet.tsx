@@ -10,6 +10,7 @@ import { useWellReadings } from '../hooks/useWellReadings';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { getMultiplierValue, CONVERSION_TO_AF, calculateUsageAf } from '../lib/usage-calculation';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useToastStore } from '../stores/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
@@ -85,6 +86,7 @@ export default function NewReadingSheet({
   userId,
 }: NewReadingSheetProps) {
   const { t } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
   const db = usePowerSync();
   const { readings } = useWellReadings(well.id);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
@@ -129,6 +131,7 @@ export default function NewReadingSheet({
 
   const saveReading = useCallback(
     async (gps: GpsResult | null, forceOutOfRange?: boolean, isSimilar = false) => {
+      if (isReadOnly) return;
       try {
         const readingId = crypto.randomUUID();
         const now = new Date().toISOString();
@@ -225,7 +228,7 @@ export default function NewReadingSheet({
         setView('form');
       }
     },
-    [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose],
+    [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose, isReadOnly],
   );
 
   const handleGpsCaptureAndSave = useCallback(async (isSimilar = false) => {
@@ -635,7 +638,8 @@ export default function NewReadingSheet({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2"
+                disabled={isReadOnly}
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CheckIcon className="w-5 h-5" />
                 {t('reading.save')}
