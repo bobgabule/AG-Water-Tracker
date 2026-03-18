@@ -42,7 +42,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
   const [success, setSuccess] = useState(false);
   const [smsWarning, setSmsWarning] = useState(false);
 
-  const tier = useSubscriptionTier();
+  const { tier } = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const adminFull = seatUsage?.admin.isFull ?? false;
   const meterReaderFull = seatUsage?.meter_checker.isFull ?? false;

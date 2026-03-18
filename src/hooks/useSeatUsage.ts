@@ -55,7 +55,7 @@ const ROLES_PLACEHOLDER = SEAT_LIMITED_ROLES.map(() => '?').join(', ');
  */
 export function useSeatUsage(): SeatUsage {
   const { farmId } = useActiveFarm();
-  const tier = useSubscriptionTier();
+  const { tier } = useSubscriptionTier();
 
   // --- Farm extra seats query (PowerSync — farms table still synced) ---
   const farmQuery = farmId

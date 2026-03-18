@@ -48,7 +48,7 @@ export default function WellListPage() {
   const similarWellIds = useWellSimilarFlags(farmId);
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
-  const tier = useSubscriptionTier();
+  const { tier } = useSubscriptionTier();
   const wellCount = useWellCount();
   const canManageAddons = hasPermission(role, 'view_subscription');
   const [showLimitModal, setShowLimitModal] = useState(false);

@@ -40,7 +40,7 @@ export default function DashboardPage() {
   const role = useUserRole();
   const canCreateWell = hasPermission(role, 'create_well');
   const farmState = useFarmState(farmId);
-  const tier = useSubscriptionTier();
+  const { tier } = useSubscriptionTier();
   const wellCount = useWellCount();
   const { isReadOnly } = useFarmReadOnly();
   const canManageAddons = hasPermission(role, 'view_subscription');

@@ -155,7 +155,7 @@ const ADDON_METER_READER_PRICE = 5000; // $50/yr in cents
 export default function SubscriptionPage() {
   const { t, locale } = useTranslation();
   const role = useUserRole();
-  const tier = useSubscriptionTier();
+  const { tier, refetch: refetchTier } = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const wellCount = useWellCount();
   const { data: stripeData, refetch } = useStripeSubscription();
@@ -240,13 +240,14 @@ export default function SubscriptionPage() {
       setAddonAdmins(0);
       setAddonMeterReaders(0);
       useToastStore.getState().show(t('subscription.purchaseSuccess', { items: summary }));
+      refetchTier();
       refetch();
     } catch (err) {
       setPurchaseError(t('subscription.purchaseFailed'));
     } finally {
       setPurchasing(false);
     }
-  }, [addonWells, addonAdmins, addonMeterReaders, refetch, t]);
+  }, [addonWells, addonAdmins, addonMeterReaders, refetchTier, refetch, t]);
 
   return (
     <div className="min-h-screen bg-surface-page pt-14">

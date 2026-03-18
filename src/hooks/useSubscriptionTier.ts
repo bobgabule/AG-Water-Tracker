@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useActiveFarm } from './useActiveFarm';
 import { supabase } from '../lib/supabase';
 
@@ -30,18 +30,17 @@ export interface SubscriptionTierInfo {
  * farms.subscription_tier → subscription_tiers.slug).
  *
  * Returns `null` while loading or if no farm is available.
+ * Call `refetch` to re-query after mutations (e.g. add-on purchase).
  */
-export function useSubscriptionTier(): SubscriptionTierInfo | null {
+export function useSubscriptionTier(): { tier: SubscriptionTierInfo | null; refetch: () => void } {
   const { farmId } = useActiveFarm();
   const [tier, setTier] = useState<SubscriptionTierInfo | null>(null);
 
-  useEffect(() => {
+  const fetchTier = useCallback(() => {
     if (!farmId) {
       setTier(null);
       return;
     }
-
-    let cancelled = false;
 
     supabase
       .from('farms')
@@ -49,7 +48,6 @@ export function useSubscriptionTier(): SubscriptionTierInfo | null {
       .eq('id', farmId)
       .single()
       .then(({ data, error }) => {
-        if (cancelled) return;
         if (error || !data) {
           setTier(null);
           return;
@@ -73,9 +71,11 @@ export function useSubscriptionTier(): SubscriptionTierInfo | null {
           maxWells: st.max_wells + ((data.extra_wells ?? 0) as number),
         });
       });
-
-    return () => { cancelled = true; };
   }, [farmId]);
 
-  return tier;
+  useEffect(() => {
+    fetchTier();
+  }, [fetchTier]);
+
+  return { tier, refetch: fetchTier };
 }
