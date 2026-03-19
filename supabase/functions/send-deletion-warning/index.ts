@@ -38,11 +38,13 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
 async function deleteExpiredFarms(
   supabaseAdmin: SupabaseClient
 ): Promise<{ deleted: number; auth_deleted: number }> {
+  const nowIso = new Date().toISOString();
+
   const { data: expiredFarms, error } = await supabaseAdmin
     .from("farms")
-    .select("id, name")
+    .select("id, name, scheduled_delete_at")
     .not("scheduled_delete_at", "is", null)
-    .lte("scheduled_delete_at", new Date().toISOString());
+    .lte("scheduled_delete_at", nowIso);
 
   if (error) {
     console.error("Failed to query expired farms:", error);
@@ -50,7 +52,6 @@ async function deleteExpiredFarms(
   }
 
   if (!expiredFarms || expiredFarms.length === 0) {
-    console.log("No expired farms to delete");
     return { deleted: 0, auth_deleted: 0 };
   }
 
