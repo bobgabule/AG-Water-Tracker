@@ -11,7 +11,6 @@ import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
-import { calculateUsageAf } from '../lib/usage-calculation';
 import type { WellWithReading } from '../hooks/useWells';
 
 function formatRelativeDate(isoDate: string, t: (key: string, params?: Record<string, string | number>) => string, locale: string): string {
@@ -58,37 +57,8 @@ export default function WellDetailSheet({
     );
   }, [allocations]);
 
-  // Calculate usage: latest reading minus starting reading, converted to AF
-  // Falls back to stored used_af from allocation when readings can't produce a value
-  const currentYearUsageAf = useMemo(() => {
-    const storedUsedAf = currentAllocation?.usedAf ?? '0';
-
-    if (!well || readings.length === 0) return storedUsedAf;
-
-    // Latest reading (readings are sorted DESC by recorded_at)
-    const latest = readings[0];
-
-    // Baseline: prefer allocation's starting_reading, else earliest reading this year
-    let baseline: string;
-    if (currentAllocation?.startingReading) {
-      baseline = currentAllocation.startingReading;
-    } else {
-      const currentYear = new Date().getFullYear();
-      const yearReadings = readings.filter(
-        (r) => new Date(r.recordedAt).getFullYear() === currentYear,
-      );
-      if (yearReadings.length < 2) return storedUsedAf;
-      baseline = yearReadings[yearReadings.length - 1].value;
-    }
-
-    const usage = calculateUsageAf(
-      latest.value,
-      baseline,
-      well.multiplier,
-      well.units,
-    );
-    return usage.toFixed(2);
-  }, [readings, well, currentAllocation]);
+  // Use stored used_af from allocation (auto-updated by NewReadingSheet on each reading save)
+  const currentYearUsageAf = currentAllocation?.usedAf ?? '0';
 
   // GPS proximity
   const proximityInRange = useMemo(() => {
