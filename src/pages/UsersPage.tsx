@@ -162,7 +162,7 @@ export default function UsersPage() {
                   </span>
 
                   {/* Delete button */}
-                  {canDeleteMember(member) && (
+                  {canDeleteMember(member) && !isReadOnly && (
                     <button
                       onClick={() => handleDeleteClick(member)}
                       className="p-1 rounded text-text-heading/40 hover:text-red-800 transition-colors"
@@ -186,13 +186,12 @@ export default function UsersPage() {
       </div>
 
       {/* Fixed bottom "+ New User" button */}
-      {canManageUsers && (
+      {canManageUsers && !isReadOnly && (
         <div className="fixed bottom-0 left-0 right-0 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-surface-page via-surface-page to-transparent">
           <div className="flex justify-center">
             <button
               onClick={handleOpenInviteSheet}
-              disabled={isReadOnly}
-              className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               {t('user.newUser')}

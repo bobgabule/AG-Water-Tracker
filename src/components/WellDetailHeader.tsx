@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../hooks/useTranslation';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import type { WellWithReading } from '../hooks/useWells';
 
 interface WellDetailHeaderProps {
@@ -20,6 +21,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
   onEdit,
 }: WellDetailHeaderProps) {
   const { t } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
 
   if (!well) {
     return (
@@ -74,7 +76,7 @@ const WellDetailHeader = React.memo(function WellDetailHeader({
             <ArrowLeftIcon className="w-4 h-4" />
             <span className="text-sm font-medium">{t('wellDetail.back')}</span>
           </button>
-          {onEdit && (
+          {onEdit && !isReadOnly && (
             <button
               type="button"
               onClick={onEdit}

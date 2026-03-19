@@ -641,15 +641,17 @@ export default function NewReadingSheet({
               >
                 {t('common.cancel')}
               </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isReadOnly || isSaving}
-                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <CheckIcon className="w-5 h-5" />
-                {t('reading.save')}
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSaving}
+                  className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <CheckIcon className="w-5 h-5" />
+                  {t('reading.save')}
+                </button>
+              )}
             </div>
           )}
 
@@ -663,15 +665,17 @@ export default function NewReadingSheet({
               >
                 {t('common.cancel')}
               </button>
-              <button
-                type="button"
-                onClick={handleProblemSubmit}
-                disabled={!hasProblemsSelected}
-                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
-              >
-                <CheckIcon className="w-5 h-5" />
-                {t('reading.submit')}
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={handleProblemSubmit}
+                  disabled={!hasProblemsSelected}
+                  className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
+                >
+                  <CheckIcon className="w-5 h-5" />
+                  {t('reading.submit')}
+                </button>
+              )}
             </div>
           )}
         </DialogPanel>

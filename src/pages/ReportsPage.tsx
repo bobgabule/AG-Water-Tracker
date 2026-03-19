@@ -389,14 +389,15 @@ export default function ReportsPage() {
                 <span className="flex-1 text-text-heading text-sm truncate">
                   {recipient.email}
                 </span>
-                <button
-                  onClick={() => handleRemoveEmail(recipient.id)}
-                  disabled={isReadOnly}
-                  className="text-text-heading/40 hover:text-red-800 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label={`Remove ${recipient.email}`}
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                </button>
+                {!isReadOnly && (
+                  <button
+                    onClick={() => handleRemoveEmail(recipient.id)}
+                    className="text-text-heading/40 hover:text-red-800 transition-colors flex-shrink-0"
+                    aria-label={`Remove ${recipient.email}`}
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -437,14 +438,15 @@ export default function ReportsPage() {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => { if (!isReadOnly) setShowAddInput(true); }}
-              disabled={isReadOnly}
-              className="mt-3 flex items-center gap-1.5 text-sm text-text-heading/60 hover:text-text-heading transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <PlusIcon className="w-4 h-4" />
-              {t('reports.addEmail')}
-            </button>
+            !isReadOnly && (
+              <button
+                onClick={() => setShowAddInput(true)}
+                className="mt-3 flex items-center gap-1.5 text-sm text-text-heading/60 hover:text-text-heading transition-colors"
+              >
+                <PlusIcon className="w-4 h-4" />
+                {t('reports.addEmail')}
+              </button>
+            )
           )}
         </section>
 

@@ -590,33 +590,36 @@ export default function WellEditPage() {
         <button type="button" onClick={handleCancel} className="px-6 py-2.5 text-white font-medium">
           {t('well.cancel')}
         </button>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!isFormValid || saving || isReadOnly}
-          className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-btn-confirm-text border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <CheckIcon className="w-5 h-5" />
-          )}
-          {t('well.save')}
-        </button>
+        {!isReadOnly && (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!isFormValid || saving}
+            className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <div className="w-5 h-5 border-2 border-btn-confirm-text border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <CheckIcon className="w-5 h-5" />
+            )}
+            {t('well.save')}
+          </button>
+        )}
       </div>
 
       {/* Delete Well button */}
-      <div className="px-4 pb-4">
-        <button
-          type="button"
-          onClick={() => setShowDeleteConfirm(true)}
-          disabled={isReadOnly}
-          className="w-full py-3 text-red-800 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <TrashIcon className="w-5 h-5" />
-          {t('well.deleteWell')}
-        </button>
-      </div>
+      {!isReadOnly && (
+        <div className="px-4 pb-4">
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full py-3 text-red-800 font-medium flex items-center justify-center gap-2"
+          >
+            <TrashIcon className="w-5 h-5" />
+            {t('well.deleteWell')}
+          </button>
+        </div>
+      )}
 
       {/* Delete confirmation dialog */}
       <ConfirmDialog

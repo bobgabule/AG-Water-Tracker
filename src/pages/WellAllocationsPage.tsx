@@ -490,28 +490,29 @@ export default function WellAllocationsPage() {
                 >
                   {t('common.close')}
                 </button>
-                {selectedId !== null && (
+                {selectedId !== null && !isReadOnly && (
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isReadOnly}
-                    className="py-2.5 px-4 rounded-lg font-medium text-red-800 bg-white/10 active:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="py-2.5 px-4 rounded-lg font-medium text-red-800 bg-white/10 active:bg-white/20 transition-colors"
                   >
                     {t('common.delete')}
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving || isReadOnly}
-                  className="flex-1 py-2.5 rounded-lg font-medium text-white bg-btn-dark active:bg-btn-dark-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    t('common.save')
-                  )}
-                </button>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-lg font-medium text-white bg-btn-dark active:bg-btn-dark-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {saving ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      t('common.save')
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -583,15 +584,16 @@ export default function WellAllocationsPage() {
         >
           {t('allocation.backToWell')}
         </button>
-        <button
-          type="button"
-          onClick={handleAddAllocation}
-          disabled={isReadOnly}
-          className="bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 px-6 flex items-center gap-2 active:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <PlusIcon className="w-5 h-5" />
-          {t('allocation.addAllocation')}
-        </button>
+        {!isReadOnly && (
+          <button
+            type="button"
+            onClick={handleAddAllocation}
+            className="bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 px-6 flex items-center gap-2 active:opacity-80 transition-opacity"
+          >
+            <PlusIcon className="w-5 h-5" />
+            {t('allocation.addAllocation')}
+          </button>
+        )}
       </div>
 
       {/* Delete confirmation dialog */}

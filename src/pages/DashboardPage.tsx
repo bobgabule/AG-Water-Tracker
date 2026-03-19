@@ -380,12 +380,12 @@ export default function DashboardPage() {
           <ListBulletIcon className="w-5 h-5" />
           {t('dashboard.wellList')}
         </button>
-        {canCreateWell && (
+        {canCreateWell && !isReadOnly && (
           <button
             onClick={handleNewWell}
-            disabled={!farmId || isReadOnly}
+            disabled={!farmId}
             className={`px-5 py-3 rounded-full flex items-center gap-2
-              ${!farmId || isReadOnly ? 'bg-surface-header/50 text-white/30 cursor-not-allowed' : 'bg-surface-header text-white active:scale-95'}
+              ${!farmId ? 'bg-surface-header/50 text-white/30 cursor-not-allowed' : 'bg-surface-header text-white active:scale-95'}
               text-sm font-semibold shadow-xl transition`}
           >
             <PlusIcon className="w-5 h-5" />

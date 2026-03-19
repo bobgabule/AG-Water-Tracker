@@ -9,6 +9,7 @@ import WellReadingsList from './WellReadingsList';
 import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { calculateUsageAf } from '../lib/usage-calculation';
 import type { WellWithReading } from '../hooks/useWells';
@@ -42,6 +43,7 @@ export default function WellDetailSheet({
   onNewReading,
 }: WellDetailSheetProps) {
   const { t, locale } = useTranslation();
+  const { isReadOnly } = useFarmReadOnly();
   const { allocations } = useWellAllocations(well?.id ?? null);
   const { readings } = useWellReadingsWithNames(well?.id ?? null);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
@@ -152,17 +154,19 @@ export default function WellDetailSheet({
           </div>
         )}
 
-        {/* Fixed bottom: New Reading button */}
-        <div className="flex-shrink-0 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
-          <button
-            type="button"
-            onClick={onNewReading}
-            className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-          >
-            <PlusIcon className="w-5 h-5" />
-            {t('reading.newReading')}
-          </button>
-        </div>
+        {/* Fixed bottom: New Reading button (hidden in read-only mode) */}
+        {!isReadOnly && (
+          <div className="flex-shrink-0 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
+            <button
+              type="button"
+              onClick={onNewReading}
+              className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+            >
+              <PlusIcon className="w-5 h-5" />
+              {t('reading.newReading')}
+            </button>
+          </div>
+        )}
       </div>
   );
 }

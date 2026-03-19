@@ -245,13 +245,12 @@ export default function ReadingDetailPage() {
         </div>
 
         {/* Delete button (admin/owner only) */}
-        {canDelete && (
+        {canDelete && !isReadOnly && (
           <div className="flex-shrink-0 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={handleOpenDelete}
-              disabled={isReadOnly}
-              className="w-full py-3 bg-red-800 text-white font-medium text-lg uppercase rounded-full flex items-center justify-center gap-2 active:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-red-800 text-white font-medium text-lg uppercase rounded-full flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
             >
               <TrashIcon className="w-5 h-5" />
               {t('readingDetail.deleteReading')}
