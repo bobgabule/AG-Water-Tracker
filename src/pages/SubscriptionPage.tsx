@@ -202,7 +202,7 @@ export default function SubscriptionPage() {
       }
 
       if (data?.url) {
-        window.open(data.url, '_blank');
+        window.location.href = data.url;
       }
     } catch (err) {
       console.error('Failed to open portal:', err);
