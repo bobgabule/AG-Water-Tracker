@@ -305,7 +305,7 @@ export default function SubscriptionPage() {
         {/* ----------------------------------------------------------------
             Canceled-but-Active Banner (canceled, period not yet ended)
         ---------------------------------------------------------------- */}
-        {isCanceledButActive && isOwner && (
+        {isCanceledButActive && canPurchase && (
           <div className="bg-amber-700/90 rounded-xl p-4 mb-4 flex items-start gap-3 sticky top-14 z-10">
             <ExclamationTriangleIcon className="h-5 w-5 text-white shrink-0 mt-0.5" />
             <div className="flex-1">
@@ -560,7 +560,7 @@ export default function SubscriptionPage() {
             </button>
           </div>
         )}
-        {isCanceledButActive && isOwner && (
+        {isCanceledButActive && canPurchase && (
           <div className="mt-8 mb-4 text-center">
             <button
               onClick={() => openPortal()}
