@@ -25,7 +25,7 @@ export function useFarmReadOnly(): FarmReadOnlyState {
 
   return useMemo(() => {
     if (isLoading || !data || data.length === 0) {
-      return { isReadOnly: false, deletionDate: null, loaded: !isLoading };
+      return { isReadOnly: true, deletionDate: null, loaded: !isLoading };
     }
 
     const row = data[0];

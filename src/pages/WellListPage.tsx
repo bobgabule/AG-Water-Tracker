@@ -15,6 +15,7 @@ import { useCurrentAllocations } from '../hooks/useCurrentAllocations';
 import { useWellSimilarFlags } from '../hooks/useWellFlags';
 import { getWellFlagColor } from '../lib/wellFlags';
 import { useTranslation } from '../hooks/useTranslation';
+import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import WellLimitModal from '../components/WellLimitModal';
 
 interface WellDisplayData {
@@ -51,6 +52,7 @@ export default function WellListPage() {
   const { tier } = useSubscriptionTier();
   const wellCount = useWellCount();
   const canManageAddons = hasPermission(role, 'view_subscription');
+  const { isReadOnly } = useFarmReadOnly();
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -189,7 +191,7 @@ export default function WellListPage() {
             <MapIcon className="w-5 h-5" />
             {t('well.wellMap')}
           </button>
-          {canCreateWell && (
+          {canCreateWell && !isReadOnly && (
             <button
               onClick={handleNewWell}
               className="flex items-center gap-2 px-5 py-3 bg-surface-header rounded-full text-white font-medium shadow-sm hover:bg-surface-header-hover transition-colors"
