@@ -373,6 +373,8 @@ const en: Record<string, string> = {
   'subscription.paymentFailed': 'Your payment failed. Update your payment method to continue service.',
   'subscription.readOnlyBanner': 'Your subscription has been canceled. Your data will be permanently deleted on {{date}}. Renew before then to keep your data.',
   'subscription.renewSubscription': 'Renew Subscription',
+  'subscription.canceledBanner': "Your subscription is canceled. You'll have access until {{date}}. Renew anytime to keep your plan.",
+  'subscription.accessUntil': 'Access until: {{date}}',
   'subscription.readOnly': 'Read Only',
   'subscription.wellItem_one': '{{count}} well',
   'subscription.wellItem_other': '{{count}} wells',

@@ -158,14 +158,17 @@ export default function SubscriptionPage() {
   const { tier, refetch: refetchTier } = useSubscriptionTier();
   const seatUsage = useSeatUsage();
   const wellCount = useWellCount();
-  const { data: stripeData, refetch } = useStripeSubscription();
+  const { data: stripeData, loading: stripeLoading, refetch } = useStripeSubscription();
 
-  const { isReadOnly, deletionDate } = useFarmReadOnly();
+  const { isReadOnly, deletionDate, loaded: farmLoaded } = useFarmReadOnly();
   const isOwner = role === 'owner' || role === 'super_admin';
   const canPurchase = role === 'owner' || role === 'super_admin' || role === 'admin';
   const planBadge = stripeData
     ? getStatusBadge(stripeData.status, t)
-    : getStatusBadge('active', t);
+    : null; // null while loading — prevents "Active" flash
+
+  const isCanceledButActive =
+    !stripeLoading && stripeData?.status === 'canceled' && farmLoaded && !isReadOnly;
 
   // ------ Add-on quantities ------
   const [addonWells, setAddonWells] = useState(0);
@@ -300,6 +303,30 @@ export default function SubscriptionPage() {
         )}
 
         {/* ----------------------------------------------------------------
+            Canceled-but-Active Banner (canceled, period not yet ended)
+        ---------------------------------------------------------------- */}
+        {isCanceledButActive && isOwner && (
+          <div className="bg-amber-700/90 rounded-xl p-4 mb-4 flex items-start gap-3 sticky top-14 z-10">
+            <ExclamationTriangleIcon className="h-5 w-5 text-white shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-white text-sm mb-2">
+                {t('subscription.canceledBanner', {
+                  date: stripeData?.currentPeriodEnd
+                    ? formatDate(stripeData.currentPeriodEnd, locale)
+                    : '',
+                })}
+              </p>
+              <button
+                onClick={() => openPortal()}
+                className="text-sm font-semibold text-white bg-amber-600 hover:bg-amber-500 px-4 py-1.5 rounded-lg transition-colors"
+              >
+                {t('subscription.renewSubscription')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------------------------------------------------------
             2-Column Grid (desktop only)
         ---------------------------------------------------------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -310,18 +337,22 @@ export default function SubscriptionPage() {
             {/* ---- Plan Card ---- */}
             {tier ? (
               <div className="bg-surface-card rounded-xl p-5">
-                <span
-                  className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full mb-3 ${planBadge.className}`}
-                >
-                  {planBadge.label}
-                </span>
+                {planBadge ? (
+                  <span
+                    className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full mb-3 ${planBadge.className}`}
+                  >
+                    {planBadge.label}
+                  </span>
+                ) : (
+                  <span className="inline-block h-5 w-16 bg-text-heading/15 rounded-full mb-3 animate-pulse" />
+                )}
 
                 <p className="text-2xl font-bold text-text-heading mb-1">
                   {tier.displayName}
                 </p>
                 {stripeData?.currentPeriodEnd && (
                   <p className="text-sm text-text-heading/75">
-                    {t('subscription.nextBillingDate', {
+                    {t(isCanceledButActive ? 'subscription.accessUntil' : 'subscription.nextBillingDate', {
                       date: formatDate(stripeData.currentPeriodEnd, locale),
                     })}
                   </p>
@@ -517,7 +548,7 @@ export default function SubscriptionPage() {
         </div>
 
         {/* ----------------------------------------------------------------
-            Cancel Subscription Link (bottom, subtle)
+            Cancel / Renew Link (bottom, subtle)
         ---------------------------------------------------------------- */}
         {canPurchase && stripeData?.status !== 'canceled' && (
           <div className="mt-8 mb-4 text-center">
@@ -526,6 +557,16 @@ export default function SubscriptionPage() {
               className="text-sm text-text-heading/70 hover:text-text-heading transition-colors cursor-pointer"
             >
               {t('subscription.cancelSubscription')}
+            </button>
+          </div>
+        )}
+        {isCanceledButActive && isOwner && (
+          <div className="mt-8 mb-4 text-center">
+            <button
+              onClick={() => openPortal()}
+              className="text-sm text-text-heading font-medium hover:text-text-heading/80 transition-colors cursor-pointer"
+            >
+              {t('subscription.renewSubscription')}
             </button>
           </div>
         )}

@@ -372,6 +372,8 @@ const es: Record<string, string> = {
   'subscription.paymentFailed': 'Tu pago fallo. Actualiza tu metodo de pago para continuar el servicio.',
   'subscription.readOnlyBanner': 'Su suscripcion ha sido cancelada. Sus datos seran eliminados permanentemente el {{date}}. Renueve antes de esa fecha para conservar sus datos.',
   'subscription.renewSubscription': 'Renovar Suscripcion',
+  'subscription.canceledBanner': 'Tu suscripcion esta cancelada. Tendras acceso hasta el {{date}}. Renueva en cualquier momento para mantener tu plan.',
+  'subscription.accessUntil': 'Acceso hasta: {{date}}',
   'subscription.readOnly': 'Solo Lectura',
   'subscription.purchaseFailed': 'No se pudo completar la compra. Intenta de nuevo.',
   'subscription.wellItem_one': '{{count}} pozo',
