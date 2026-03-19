@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { usePowerSync } from '@powersync/react';
 import { useWellReadings } from '../hooks/useWellReadings';
+import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
 import { getMultiplierValue, CONVERSION_TO_AF, calculateUsageAf } from '../lib/usage-calculation';
@@ -89,7 +90,14 @@ export default function NewReadingSheet({
   const { isReadOnly } = useFarmReadOnly();
   const db = usePowerSync();
   const { readings } = useWellReadings(well.id);
+  const { allocations } = useWellAllocations(well.id);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
+
+  const currentStartingReading = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const current = allocations.find((a) => a.periodStart <= today && a.periodEnd >= today) ?? null;
+    return current?.startingReading ? parseFloat(current.startingReading) : null;
+  }, [allocations]);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('reading');
   const [view, setView] = useState<ReadingView>('form');
@@ -214,7 +222,7 @@ export default function NewReadingSheet({
                 well.multiplier,
                 well.units,
               );
-              if (isFinite(usedAf)) {
+              if (isFinite(usedAf) && usedAf > 0) {
                 await db.execute(
                   `UPDATE allocations SET used_af = ?, updated_at = ? WHERE id = ?`,
                   [usedAf.toFixed(2), now, alloc.id],
@@ -278,21 +286,32 @@ export default function NewReadingSheet({
     }
     setValidationError(null);
 
+    const currentValue = parseFloat(readingValue.trim());
+    const multiplier = getMultiplierValue(well.multiplier);
+    const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
+
+    // Check reading against allocation starting_reading first (most fundamental baseline)
+    if (currentStartingReading !== null && !isNaN(currentValue)) {
+      if (currentValue < currentStartingReading) {
+        setView('lower-warning');
+        return;
+      }
+      const diffGallons = Math.abs(currentValue - currentStartingReading) * multiplier * afPerUnit * 325851;
+      if (diffGallons <= SIMILAR_THRESHOLD_GALLONS) {
+        setView('similar-warning');
+        return;
+      }
+    }
+
     // Check reading is not lower than previous (odometer-style: only goes up)
     if (readings.length > 0) {
       const lastValue = parseFloat(readings[0].value);
-      const currentValue = parseFloat(readingValue.trim());
       if (!isNaN(lastValue) && !isNaN(currentValue)) {
         if (currentValue < lastValue) {
           setView('lower-warning');
           return;
         }
-
-        // Check for similar reading (threshold: 50 gallons equivalent)
-        const diff = Math.abs(currentValue - lastValue);
-        const multiplier = getMultiplierValue(well.multiplier);
-        const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
-        const diffGallons = diff * multiplier * afPerUnit * 325851;
+        const diffGallons = Math.abs(currentValue - lastValue) * multiplier * afPerUnit * 325851;
         if (diffGallons <= SIMILAR_THRESHOLD_GALLONS) {
           setView('similar-warning');
           return;
@@ -303,7 +322,7 @@ export default function NewReadingSheet({
     // Proceed directly to GPS capture
     setIsSaving(true);
     handleGpsCaptureAndSave();
-  }, [isSaving, readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave]);
+  }, [isSaving, readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave, currentStartingReading]);
 
   const handleSimilarContinue = useCallback(() => {
     handleGpsCaptureAndSave(true);
@@ -315,6 +334,7 @@ export default function NewReadingSheet({
 
   const handleBackToForm = useCallback(() => {
     setView('form');
+    setIsSaving(false);
   }, []);
 
   const handleValueChange = useCallback(
