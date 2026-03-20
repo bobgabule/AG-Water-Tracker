@@ -168,7 +168,8 @@ export default function SubscriptionPage() {
     : null; // null while loading — prevents "Active" flash
 
   const isCanceledButActive =
-    !stripeLoading && stripeData?.status === 'canceled' && farmLoaded && !isReadOnly;
+    !stripeLoading && farmLoaded && !isReadOnly &&
+    (stripeData?.status === 'canceled' || stripeData?.cancelAtPeriodEnd === true);
 
   // ------ Add-on quantities ------
   const [addonWells, setAddonWells] = useState(0);
@@ -550,7 +551,7 @@ export default function SubscriptionPage() {
         {/* ----------------------------------------------------------------
             Cancel / Renew Link (bottom, subtle)
         ---------------------------------------------------------------- */}
-        {canPurchase && stripeData?.status !== 'canceled' && (
+        {canPurchase && stripeData?.status !== 'canceled' && !stripeData?.cancelAtPeriodEnd && (
           <div className="mt-8 mb-4 text-center">
             <button
               onClick={() => openPortal('subscription_cancel')}

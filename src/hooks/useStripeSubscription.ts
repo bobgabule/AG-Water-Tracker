@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 export interface StripeSubscriptionData {
   status: 'active' | 'past_due' | 'canceled' | 'trialing' | 'incomplete' | 'unpaid';
   currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
   planName: string;
   unitAmount: number; // cents
   currency: string;
@@ -66,6 +67,7 @@ export function useStripeSubscription(): UseStripeSubscriptionResult {
             ? new Date(response.current_period_end * 1000).toISOString()
             : response.current_period_end
           : '',
+        cancelAtPeriodEnd: response.cancel_at_period_end ?? false,
         planName: response.plan_name ?? '',
         unitAmount: response.unit_amount ?? 0,
         currency: response.currency ?? 'usd',

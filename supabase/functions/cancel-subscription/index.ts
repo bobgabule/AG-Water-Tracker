@@ -113,6 +113,7 @@ Deno.serve(async (req: Request) => {
       {
         subscription_status: subscription?.status ?? farm.subscription_status,
         current_period_end: subscription?.current_period_end ?? null,
+        cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
         plan_name: planName,
         unit_amount: unitAmount,
         currency: currency,
