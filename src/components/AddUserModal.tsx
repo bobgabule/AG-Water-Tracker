@@ -173,7 +173,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
     navigate('/subscription');
   }, [handleClose, navigate]);
 
-  const canSelectAdmin = callerRole === 'owner' || callerRole === 'super_admin';
+  const canSelectAdmin = callerRole === 'owner' || callerRole === 'super_admin' || callerRole === 'admin';
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
