@@ -109,9 +109,10 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Detect pending cancellation: cancel_at_period_end OR cancel_at set
+    // Detect pending cancellation: cancel_at_period_end OR cancel_at in the future
+    const nowEpoch = Math.floor(Date.now() / 1000);
     const cancelAtPeriodEnd = subscription?.cancel_at_period_end === true
-      || (subscription?.cancel_at != null && subscription?.cancel_at > 0);
+      || (typeof subscription?.cancel_at === 'number' && subscription.cancel_at > nowEpoch);
 
     console.log('Subscription cancel state:', {
       cancel_at_period_end: subscription?.cancel_at_period_end,

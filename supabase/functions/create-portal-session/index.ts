@@ -7,7 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-const APP_URL = Deno.env.get("APP_URL") ?? "https://app.example.com";
+const APP_URL = Deno.env.get("APP_URL") ?? "https://app.agwatertracker.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
