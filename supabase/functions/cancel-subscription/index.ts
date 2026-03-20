@@ -109,11 +109,23 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Detect pending cancellation: cancel_at_period_end OR cancel_at set
+    const cancelAtPeriodEnd = subscription?.cancel_at_period_end === true
+      || (subscription?.cancel_at != null && subscription?.cancel_at > 0);
+
+    console.log('Subscription cancel state:', {
+      cancel_at_period_end: subscription?.cancel_at_period_end,
+      cancel_at: subscription?.cancel_at,
+      status: subscription?.status,
+      computed: cancelAtPeriodEnd,
+    });
+
     return jsonResponse(
       {
         subscription_status: subscription?.status ?? farm.subscription_status,
         current_period_end: subscription?.current_period_end ?? null,
-        cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
+        cancel_at_period_end: cancelAtPeriodEnd,
+        cancel_at: subscription?.cancel_at ?? null,
         plan_name: planName,
         unit_amount: unitAmount,
         currency: currency,

@@ -561,16 +561,6 @@ export default function SubscriptionPage() {
             </button>
           </div>
         )}
-        {isCanceledButActive && canPurchase && (
-          <div className="mt-8 mb-4 text-center">
-            <button
-              onClick={() => openPortal()}
-              className="text-sm text-text-heading font-medium hover:text-text-heading/80 transition-colors cursor-pointer"
-            >
-              {t('subscription.renewSubscription')}
-            </button>
-          </div>
-        )}
       </div>
 
     </div>
