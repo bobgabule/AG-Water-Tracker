@@ -10,7 +10,7 @@ import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useTranslation } from '../hooks/useTranslation';
 import { supabase } from '../lib/supabase';
 import { debugError } from '../lib/debugLog';
-import PendingInvitesList from '../components/PendingInvitesList';
+import PendingInvitesList, { type FarmInviteRow } from '../components/PendingInvitesList';
 import AddUserBottomSheet from '../components/AddUserModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -42,6 +42,11 @@ export default function UsersPage() {
 
   // Bottom sheet state
   const [showInviteSheet, setShowInviteSheet] = useState(false);
+  const [optimisticInvite, setOptimisticInvite] = useState<FarmInviteRow | null>(null);
+
+  const handleInviteSent = useCallback((invite: FarmInviteRow) => {
+    setOptimisticInvite(invite);
+  }, []);
 
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<FarmMemberRow | null>(null);
@@ -180,7 +185,7 @@ export default function UsersPage() {
         {/* Pending Invites Section */}
         {canManageUsers && (
           <section className="mb-24">
-            <PendingInvitesList />
+            <PendingInvitesList optimisticInvite={optimisticInvite} />
           </section>
         )}
       </div>
@@ -205,6 +210,7 @@ export default function UsersPage() {
         open={showInviteSheet}
         onClose={handleCloseInviteSheet}
         callerRole={userRole}
+        onInviteSent={handleInviteSent}
       />
 
       {/* Confirm Delete Dialog */}

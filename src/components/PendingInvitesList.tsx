@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../hooks/useTranslation';
 
-interface FarmInviteRow {
+export interface FarmInviteRow {
   code: string;
   farm_id: string;
   role: string;
@@ -28,7 +28,7 @@ function formatPhone(phone: string): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-export default function PendingInvitesList() {
+export default function PendingInvitesList({ optimisticInvite }: { optimisticInvite?: FarmInviteRow | null }) {
   const { t } = useTranslation();
   const { farmId } = useActiveFarm();
 
@@ -36,6 +36,13 @@ export default function PendingInvitesList() {
   const [error, setError] = useState<string | null>(null);
   const [rawInvites, setRawInvites] = useState<FarmInviteRow[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Inject optimistic invite when it arrives
+  useEffect(() => {
+    if (optimisticInvite) {
+      setRawInvites((prev) => [optimisticInvite, ...prev]);
+    }
+  }, [optimisticInvite]);
 
   // Fetch invites from Supabase (farm_invites removed from PowerSync sync)
   useEffect(() => {

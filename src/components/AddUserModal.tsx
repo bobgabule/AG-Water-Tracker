@@ -15,6 +15,7 @@ interface AddUserBottomSheetProps {
   open: boolean;
   onClose: () => void;
   callerRole: string | null;
+  onInviteSent?: (invite: { code: string; farm_id: string; role: string; invited_phone: string; invited_first_name: string; invited_last_name: string; expires_at: string; uses_count: number; created_at: string }) => void;
 }
 
 type Role = 'meter_checker' | 'admin';
@@ -25,7 +26,7 @@ function formatPhoneDisplay(digits: string): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUserBottomSheetProps) {
+export default function AddUserBottomSheet({ open, onClose, callerRole, onInviteSent }: AddUserBottomSheetProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isReadOnly } = useFarmReadOnly();
@@ -106,7 +107,7 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
       setLoading(true);
       setError('');
 
-      const { error: rpcError } = await supabase.rpc('invite_user_by_phone', {
+      const { data: inviteCode, error: rpcError } = await supabase.rpc('invite_user_by_phone', {
         p_farm_id: farmId,
         p_phone: fullPhone,
         p_first_name: firstName.trim(),
@@ -116,6 +117,19 @@ export default function AddUserBottomSheet({ open, onClose, callerRole }: AddUse
       });
 
       if (rpcError) throw rpcError;
+
+      // Optimistically inject the new invite into the list
+      onInviteSent?.({
+        code: inviteCode ?? crypto.randomUUID(),
+        farm_id: farmId,
+        role,
+        invited_phone: fullPhone,
+        invited_first_name: firstName.trim(),
+        invited_last_name: lastName.trim(),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        uses_count: 0,
+        created_at: new Date().toISOString(),
+      });
 
       // Attempt SMS
       try {
