@@ -183,7 +183,7 @@ export default function NewReadingSheet({
         resetForm();
         onClose();
 
-        // Auto-update used_af on the current allocation (fire-and-forget)
+        // Auto-update used_af on the current allocation (fire-and-forget, additive)
         try {
           const today = now.split('T')[0];
           const allocRows = await db.getAll<{
@@ -200,32 +200,38 @@ export default function NewReadingSheet({
 
           if (allocRows.length > 0) {
             const alloc = allocRows[0];
-            let baseline: string | null = alloc.starting_reading;
 
-            // Fallback: earliest reading in the allocation period (exclude just-inserted)
-            if (!baseline) {
-              const earliestRows = await db.getAll<{ value: string }>(
-                `SELECT value FROM readings
-                 WHERE well_id = ? AND recorded_at >= ? AND id != ?
-                 ORDER BY recorded_at ASC LIMIT 1`,
-                [well.id, alloc.period_start, readingId],
-              );
-              if (earliestRows.length > 0) {
-                baseline = earliestRows[0].value;
-              }
+            // Get the previous reading within this allocation period
+            const prevRows = await db.getAll<{ value: string }>(
+              `SELECT value FROM readings
+               WHERE well_id = ? AND id != ? AND recorded_at >= ?
+               ORDER BY recorded_at DESC LIMIT 1`,
+              [well.id, readingId, alloc.period_start],
+            );
+
+            let baseline: string | null;
+            if (prevRows.length > 0) {
+              // Delta from previous reading in this period
+              baseline = prevRows[0].value;
+            } else {
+              // First reading in period — delta from starting_reading
+              baseline = alloc.starting_reading;
             }
 
             if (baseline) {
-              const usedAf = calculateUsageAf(
+              const delta = calculateUsageAf(
                 readingValue.trim(),
                 baseline,
                 well.multiplier,
                 well.units,
               );
-              if (isFinite(usedAf) && usedAf > 0) {
+              if (isFinite(delta) && delta > 0) {
                 await db.execute(
-                  `UPDATE allocations SET used_af = ?, updated_at = ? WHERE id = ?`,
-                  [usedAf.toFixed(2), now, alloc.id],
+                  `UPDATE allocations
+                   SET used_af = CAST(ROUND(COALESCE(CAST(used_af AS REAL), 0) + ?, 2) AS TEXT),
+                       updated_at = ?
+                   WHERE id = ?`,
+                  [delta, now, alloc.id],
                 );
               }
             }
