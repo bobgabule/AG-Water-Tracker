@@ -51,7 +51,8 @@ export default function PhonePage() {
   // If already logged in, redirect to dashboard or no-subscription
   useEffect(() => {
     if (isAuthReady && session && authStatus) {
-      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
+      const canEnter = authStatus.hasFarmMembership || authStatus.role === 'super_admin';
+      navigate(canEnter ? '/' : '/no-subscription', { replace: true, viewTransition: true });
     }
   }, [isAuthReady, session, authStatus, navigate]);
 

@@ -38,7 +38,9 @@ export default function VerifyPage() {
   // Redirect if already logged in (only when status is loaded to avoid flash)
   useEffect(() => {
     if (isAuthReady && user && authStatus) {
-      navigate(authStatus.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
+      const jwtRole = user.app_metadata?.user_role;
+      const canEnter = authStatus.hasFarmMembership || authStatus.role === 'super_admin' || jwtRole === 'super_admin';
+      navigate(canEnter ? '/' : '/no-subscription', { replace: true, viewTransition: true });
     }
   }, [isAuthReady, user, authStatus, navigate]);
 
@@ -101,7 +103,8 @@ export default function VerifyPage() {
         await verifyOtp(phone, fullCode);
         const status = await refreshAuthStatus();
         prefetchDashboard();
-        navigate(status?.hasFarmMembership ? '/' : '/no-subscription', { replace: true, viewTransition: true });
+        const canEnter = status?.hasFarmMembership || status?.role === 'super_admin';
+        navigate(canEnter ? '/' : '/no-subscription', { replace: true, viewTransition: true });
       } catch (err) {
         if (!navigator.onLine) {
           setError(t('auth.noInternetVerify'));
