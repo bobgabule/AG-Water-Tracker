@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthProvider';
+import type { Role } from '../lib/permissions';
 
 interface RequireOnboardedProps {
   children?: React.ReactNode;
 }
 
 export default function RequireOnboarded({ children }: RequireOnboardedProps) {
-  const { authStatus, isFetchingAuth, session, refreshAuthStatus } = useAuth();
+  const { user, authStatus, isFetchingAuth, session, refreshAuthStatus } = useAuth();
   const [isRetrying, setIsRetrying] = useState(false);
 
   // Auth status fetch still in-flight - show loading spinner (not error UI)
@@ -66,7 +67,10 @@ export default function RequireOnboarded({ children }: RequireOnboardedProps) {
   }
 
   // No farm membership - redirect to no-subscription page
-  if (!authStatus.hasFarmMembership) {
+  // Super admins bypass this check (they're auto-added to farms when farms are created)
+  const jwtRole = (user?.app_metadata?.user_role as Role) ?? null;
+  const isSuperAdmin = authStatus.role === 'super_admin' || jwtRole === 'super_admin';
+  if (!authStatus.hasFarmMembership && !isSuperAdmin) {
     return <Navigate to="/no-subscription" replace />;
   }
 
