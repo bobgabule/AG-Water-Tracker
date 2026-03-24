@@ -250,6 +250,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 42 added: Redesign subscription page with add-on purchasing, upgrade flow, and payment failure handling
 - Phase 43 added: Super admin farm isolation — auto-select farm on login, disable features when no farms, audit all operations for strict per-farm scoping
 - Phase 44 added: Farm subscription cancellation lifecycle with read-only retention and auto-deletion
+- Phase 45 added: when meter reading is deleted by super admin, owner or admin, the gauge does not revert or update
 
 ### Blockers/Concerns
 

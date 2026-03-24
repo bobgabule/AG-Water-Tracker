@@ -547,3 +547,13 @@ Plans:
   5. All write-action buttons (add well, save reading, edit well, delete well, allocations, invite user, reports, delete reading) are disabled when read-only
   6. Daily pg_cron job deletes farms where scheduled_delete_at <= NOW() and cleans up auth accounts
   7. Email warnings sent to farm owner at 30 and 7 days before deletion
+
+### Phase 45: when meter reading is deleted by super admin, owner or admin, the gauge does not revert or update
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 44
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 45 to break down)

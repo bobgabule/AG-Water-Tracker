@@ -14,6 +14,7 @@ import { getDistanceToWell } from '../lib/gps-proximity';
 import { useToastStore } from '../stores/toastStore';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { supabase } from '../lib/supabase';
+import { calculateUsageAf } from '../lib/usage-calculation';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function ReadingDetailPage() {
@@ -120,7 +121,7 @@ export default function ReadingDetailPage() {
 
   const handleDelete = useCallback(async () => {
     if (isReadOnly) return;
-    if (!readingId) return;
+    if (!readingId || !reading || !well) return;
     if (!isOnline) {
       useToastStore.getState().show(t('common.requiresInternet'), 'error');
       return;
@@ -129,6 +130,63 @@ export default function ReadingDetailPage() {
     try {
       const { error } = await supabase.from('readings').delete().eq('id', readingId);
       if (error) throw error;
+
+      // Recalculate used_af on affected allocation (fire-and-forget)
+      try {
+        const deletedDate = reading.recordedAt.split('T')[0];
+
+        const { data: allocData } = await supabase
+          .from('allocations')
+          .select('id, starting_reading, period_start, period_end')
+          .eq('well_id', well.id)
+          .lte('period_start', deletedDate)
+          .gte('period_end', deletedDate)
+          .order('period_start', { ascending: false })
+          .limit(1);
+
+        if (allocData && allocData.length > 0) {
+          const alloc = allocData[0];
+
+          const { data: latestReadings } = await supabase
+            .from('readings')
+            .select('value')
+            .eq('well_id', well.id)
+            .gte('recorded_at', alloc.period_start)
+            .lte('recorded_at', alloc.period_end + 'T23:59:59')
+            .order('recorded_at', { ascending: false })
+            .limit(1);
+
+          if (!alloc.starting_reading) {
+            // No starting_reading — can't recalculate, preserve existing used_af
+          } else if (!latestReadings?.length) {
+            // No readings left in period — zero out usage
+            await supabase
+              .from('allocations')
+              .update({
+                used_af: 0,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', alloc.id);
+          } else {
+            const newUsedAf = calculateUsageAf(
+              latestReadings[0].value,
+              alloc.starting_reading,
+              well.multiplier,
+              well.units,
+            );
+            await supabase
+              .from('allocations')
+              .update({
+                used_af: Math.round(newUsedAf * 100) / 100,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', alloc.id);
+          }
+        }
+      } catch {
+        // Allocation recalculation is non-critical; reading was already deleted
+      }
+
       useToastStore.getState().show(t('reading.deleted'));
       setShowDeleteConfirm(false);
       navigate(`/wells/${id}`, { viewTransition: true, replace: true });
@@ -137,7 +195,7 @@ export default function ReadingDetailPage() {
     } finally {
       setDeleting(false);
     }
-  }, [readingId, isOnline, navigate, id, t, isReadOnly]);
+  }, [readingId, reading, well, isOnline, navigate, id, t, isReadOnly]);
 
   const handleOpenDelete = useCallback(() => setShowDeleteConfirm(true), []);
   const handleCloseDelete = useCallback(() => setShowDeleteConfirm(false), []);
