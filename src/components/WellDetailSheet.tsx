@@ -47,7 +47,7 @@ export default function WellDetailSheet({
 }: WellDetailSheetProps) {
   const { t, locale } = useTranslation();
   const { isReadOnly } = useFarmReadOnly();
-  const { allocations } = useWellAllocations(well?.id ?? null);
+  const { allocations, loading: allocationsLoading } = useWellAllocations(well?.id ?? null);
   const { readings } = useWellReadingsWithNames(well?.id ?? null);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
 
@@ -61,7 +61,7 @@ export default function WellDetailSheet({
     );
   }, [allocations]);
 
-  const showAllocationCta = allocations.length === 0 && canManageAllocations === true;
+  const showAllocationCta = !allocationsLoading && allocations.length === 0 && canManageAllocations === true;
 
   // Use stored used_af from allocation (auto-updated by NewReadingSheet on each reading save)
   const currentYearUsageAf = currentAllocation?.usedAf ?? '0';

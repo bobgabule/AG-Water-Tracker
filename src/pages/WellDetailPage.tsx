@@ -61,7 +61,7 @@ export default function WellDetailPage() {
         onEdit={canEdit ? handleEdit : undefined}
         onNewReading={handleNewReading}
         canManageAllocations={canManageAllocations}
-        onAddAllocation={handleAddAllocation}
+        onAddAllocation={canManageAllocations ? handleAddAllocation : undefined}
       />
       {readingSheetOpen && currentWell && user && farmId && (
         <NewReadingSheet
