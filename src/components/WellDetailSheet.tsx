@@ -32,6 +32,8 @@ interface WellDetailSheetProps {
   onClose: () => void;
   onEdit?: () => void;
   onNewReading: () => void;
+  canManageAllocations?: boolean;
+  onAddAllocation?: () => void;
 }
 
 export default function WellDetailSheet({
@@ -40,6 +42,8 @@ export default function WellDetailSheet({
   onClose,
   onEdit,
   onNewReading,
+  canManageAllocations,
+  onAddAllocation,
 }: WellDetailSheetProps) {
   const { t, locale } = useTranslation();
   const { isReadOnly } = useFarmReadOnly();
@@ -56,6 +60,8 @@ export default function WellDetailSheet({
       null
     );
   }, [allocations]);
+
+  const showAllocationCta = allocations.length === 0 && canManageAllocations === true;
 
   // Use stored used_af from allocation (auto-updated by NewReadingSheet on each reading save)
   const currentYearUsageAf = currentAllocation?.usedAf ?? '0';
@@ -124,17 +130,29 @@ export default function WellDetailSheet({
           </div>
         )}
 
-        {/* Fixed bottom: New Reading button (hidden in read-only mode) */}
+        {/* Fixed bottom: Action buttons (hidden in read-only mode) */}
         {!isReadOnly && (
           <div className="flex-shrink-0 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 bg-surface-dark">
-            <button
-              type="button"
-              onClick={onNewReading}
-              className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-            >
-              <PlusIcon className="w-5 h-5" />
-              {t('reading.newReading')}
-            </button>
+            <div className={showAllocationCta ? 'grid grid-cols-2 gap-3' : ''}>
+              <button
+                type="button"
+                onClick={onNewReading}
+                className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+              >
+                <PlusIcon className="w-5 h-5" />
+                {t('reading.newReading')}
+              </button>
+              {showAllocationCta && onAddAllocation && (
+                <button
+                  type="button"
+                  onClick={onAddAllocation}
+                  className="w-full bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                  {t('allocation.addAllocation')}
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -20,6 +20,7 @@ export default function WellDetailPage() {
 
   const role = useUserRole();
   const canEdit = hasPermission(role, 'edit_well');
+  const canManageAllocations = hasPermission(role, 'manage_allocations');
 
   const [readingSheetOpen, setReadingSheetOpen] = useState(false);
 
@@ -43,6 +44,10 @@ export default function WellDetailPage() {
   );
   const handleNewReading = useCallback(() => setReadingSheetOpen(true), []);
   const handleReadingClose = useCallback(() => setReadingSheetOpen(false), []);
+  const handleAddAllocation = useCallback(
+    () => id && navigate(`/wells/${id}/allocations`, { viewTransition: true }),
+    [navigate, id],
+  );
 
   // Show skeleton while wells data is loading
   if (loading) return <WellDetailSkeleton />;
@@ -55,6 +60,8 @@ export default function WellDetailPage() {
         onClose={handleClose}
         onEdit={canEdit ? handleEdit : undefined}
         onNewReading={handleNewReading}
+        canManageAllocations={canManageAllocations}
+        onAddAllocation={handleAddAllocation}
       />
       {readingSheetOpen && currentWell && user && farmId && (
         <NewReadingSheet
