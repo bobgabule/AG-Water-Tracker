@@ -224,6 +224,21 @@ const es: Record<string, string> = {
   'readingDetail.submittedBy': 'ENVIADO POR',
   'readingDetail.deleteReading': 'Eliminar',
 
+  // Meter Replacement
+  'meter.replaceMeter': 'Reemplazar Medidor',
+  'meter.newSerialNumber': 'Nuevo Numero de Serie',
+  'meter.newStartingReading': 'Nueva Lectura Inicial',
+  'meter.replaceHelp': 'El uso existente se conserva. La nueva lectura inicial se convierte en la linea base para futuras lecturas.',
+  'meter.replaced': 'Medidor Reemplazado',
+  'meter.serialRequired': 'Se requiere nuevo numero de serie',
+  'meter.readingRequired': 'Se requiere nueva lectura inicial',
+  'meter.readingMustBePositive': 'La lectura inicial debe ser un numero positivo',
+  'meter.replacementRecorded': 'Reemplazo de medidor registrado',
+  'meter.currentSerial': 'Numero de Serie Actual',
+  'meter.newBaseline': 'Nueva linea base',
+  'meter.oldSerial': 'Numero de serie anterior',
+  'meter.saveReplacement': 'Guardar Reemplazo',
+
   // ---------------------------------------------------------------------------
   // Allocations
   // ---------------------------------------------------------------------------
