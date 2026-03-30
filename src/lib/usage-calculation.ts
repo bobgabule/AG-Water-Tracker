@@ -51,3 +51,49 @@ export function calculateUsageAf(
   const rawUsage = diff * getMultiplierValue(multiplier);
   return rawUsage * (CONVERSION_TO_AF[units] ?? 1);
 }
+
+/**
+ * Calculates total usage in acre-feet for an allocation period,
+ * handling any number of meter replacement boundaries.
+ *
+ * Entries are processed newest-first. Each meter_replacement entry marks a
+ * segment boundary: usage in a segment = (segment latest reading - segment baseline).
+ * The oldest segment uses the allocation's starting_reading as baseline.
+ *
+ * @param entries All readings + meter_replacements in the period, sorted by recorded_at DESC
+ * @param startingReading The allocation's starting_reading (baseline for the oldest segment)
+ * @param multiplier Well's multiplier value
+ * @param units Well's unit type
+ * @returns Usage in acre-feet (always >= 0)
+ */
+export function calculateAllocationUsage(
+  entries: { value: string; type: string }[],
+  startingReading: string,
+  multiplier: string,
+  units: string,
+): number {
+  let total = 0;
+  let segmentLatest: string | null = null;
+
+  for (const entry of entries) {
+    if (entry.type === 'meter_replacement') {
+      // This replacement's value is the new meter's starting point (baseline for the newer segment)
+      if (segmentLatest !== null) {
+        total += calculateUsageAf(segmentLatest, entry.value, multiplier, units);
+      }
+      segmentLatest = null; // reset — next older readings belong to the previous segment
+    } else {
+      // Normal reading
+      if (segmentLatest === null) {
+        segmentLatest = entry.value; // latest reading in this segment
+      }
+    }
+  }
+
+  // Oldest segment: use allocation's starting_reading as baseline
+  if (segmentLatest !== null) {
+    total += calculateUsageAf(segmentLatest, startingReading, multiplier, units);
+  }
+
+  return total;
+}
