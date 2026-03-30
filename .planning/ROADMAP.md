@@ -578,11 +578,11 @@ Plans:
 **Goal:** Add meter replacement workflow for super admins, owners, and admins. Record "Meter Replaced" entries in readings timeline, establish new baselines without disrupting usage data, and consolidate usage calculation into a single centralized function replacing 3 scattered locations.
 **Requirements**: METER-REPLACE-01
 **Depends on:** Phase 46
-**Plans:** 1/2 plans complete
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 47-01-PLAN.md — Data layer: Supabase migration (type column), PowerSync schema, centralized calculateAllocationUsage(), hook updates, replace 3 calculation locations
-- [ ] 47-02-PLAN.md — UI layer: MeterReplacementSheet bottom sheet, WellEditPage button, WellReadingsList type-aware rendering, ReadingDetailPage replacement view, translations
+- [x] 47-02-PLAN.md — UI layer: MeterReplacementSheet bottom sheet, WellEditPage button, WellReadingsList type-aware rendering, ReadingDetailPage replacement view, translations
 
 **Success Criteria** (what must be TRUE):
   1. `readings.type` column exists with CHECK constraint (`'reading'`, `'meter_replacement'`)
