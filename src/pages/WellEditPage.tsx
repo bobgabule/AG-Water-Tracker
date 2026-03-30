@@ -461,18 +461,6 @@ export default function WellEditPage() {
             </div>
           </div>
 
-          {/* Replace Meter button */}
-          {!isReadOnly && (
-            <button
-              type="button"
-              onClick={() => setShowReplaceMeter(true)}
-              className="flex items-center gap-2 text-white/70 text-sm font-medium border border-white/30 rounded-lg px-3 py-2 active:bg-white/10 transition-colors"
-            >
-              <ArrowPathIcon className="w-4 h-4" />
-              {t('meter.replaceMeter')}
-            </button>
-          )}
-
           {/* Latitude, Longitude, GPS */}
           <div className="flex gap-3 items-end">
             <div className="flex-1">
@@ -552,6 +540,18 @@ export default function WellEditPage() {
           />
           {hasReadings && (
             <p className="text-white/60 text-xs -mt-1">{t('well.unitsLockedHint')}</p>
+          )}
+
+          {/* Replace Meter button */}
+          {!isReadOnly && (
+            <button
+              type="button"
+              onClick={() => setShowReplaceMeter(true)}
+              className="flex items-center gap-2 text-white/70 text-sm font-medium border border-white/30 rounded-lg px-3 py-2 active:bg-white/10 transition-colors"
+            >
+              <ArrowPathIcon className="w-4 h-4" />
+              {t('meter.replaceMeter')}
+            </button>
           )}
 
           {/* Battery State */}
