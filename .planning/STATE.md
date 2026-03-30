@@ -2,61 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: -- Performance & Perceived Speed
-status: in-progress
-stopped_at: Completed 44-03-PLAN.md
-last_updated: "2026-03-18T03:19:51.933Z"
-last_activity: 2026-03-18 — Completed 44-03-PLAN.md
+status: executing
+stopped_at: Completed 47-01-PLAN.md
+last_updated: "2026-03-30T01:59:00Z"
+last_activity: 2026-03-30 -- Phase 47 Plan 01 complete
 progress:
   total_phases: 22
-  completed_phases: 13
-  total_plans: 30
-  completed_plans: 28
----
-
----
-gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: -- Performance & Perceived Speed
-status: in-progress
-stopped_at: Completed 44-03-PLAN.md
-last_updated: "2026-03-18T03:13:37.952Z"
-last_activity: 2026-03-18 — Completed 44-03-PLAN.md
-progress:
-  total_phases: 22
-  completed_phases: 13
-  total_plans: 30
-  completed_plans: 28
----
-
----
-gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: -- Performance & Perceived Speed
-status: in-progress
-stopped_at: Completed 44-01-PLAN.md
-last_updated: "2026-03-18T03:05:49.413Z"
-last_activity: 2026-03-18 — Completed 44-01-PLAN.md
-progress:
-  total_phases: 22
-  completed_phases: 12
-  total_plans: 30
-  completed_plans: 27
-  percent: 90
----
-
----
-gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: -- Performance & Perceived Speed
-status: in-progress
-stopped_at: Completed 44-01-PLAN.md
-last_updated: "2026-03-18T03:02:16Z"
-last_activity: 2026-03-18 — Completed 44-01-PLAN.md
-progress:
-  [█████████░] 90%
-  completed_phases: 34
-  total_plans: 78
-  completed_plans: 78
+  completed_phases: 22
+  total_plans: 50
+  completed_plans: 53
+  percent: 50
 ---
 
 # Project State
@@ -66,21 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Field agents can reliably record water meter readings offline, and data syncs automatically when online
-**Current focus:** Phase 44 in progress — Farm subscription cancellation lifecycle
+**Current focus:** Phase 47 — meter-replacement-clean-data-architecture
 
 ## Current Position
 
-Phase: 44
-Plan: 3 of 3
-Status: Complete
-Last activity: 2026-03-18 — Completed 44-03-PLAN.md
+Phase: 47 (meter-replacement-clean-data-architecture) — EXECUTING
+Plan: 2 of 2
+Status: Executing Phase 47
+Last activity: 2026-03-30 -- Phase 47 Plan 01 complete
 
-Progress: Phase 44: [██████████] 100% (3/3 plans complete)
+Progress: Phase 47: [█████░░░░░] 50% (1/2 plans executed)
+
+**To execute:** `/gsd:execute-phase 47` (after clearing context)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 80 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43 + 3 P44)
+
+- Total plans completed: 82 (25 v1.0 + 3 v1.1 + 12 v2.0 + 9 v3.0 + 6 v4.0 + 2 v4.1 + 2 P27 + 1 P30 + 2 P31 + 3 P32 + 1 P36 + 3 P37 + 2 P40 + 3 P42 + 2 P43 + 3 P44 + 1 P45 + 1 P46)
 - Average duration: ~4min
 - Total execution time: ~2.5 hours
 
@@ -128,6 +86,8 @@ Progress: Phase 44: [██████████] 100% (3/3 plans complete)
 | Phase 44 P01 | 2min | 2 | 2 |
 | Phase 44 P02 | 5min | 2 tasks | 12 files |
 | Phase 44 P03 | 3min | 2 tasks | 2 files |
+| Phase 46 P01 | 2min | 2 tasks | 2 files |
+| Phase 47 P01 | 5min | 7 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -216,6 +176,11 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - [Phase 44]: Auth accounts only deleted for users with no remaining farm memberships (orphan check)
 - [Phase 44]: Date windows use full UTC day range for email warnings to catch all farms regardless of exact time
 
+- Phase 47-01: Segment-based algorithm processes entries newest-first; meter_replacement entries split segments with their value as the newer segment's baseline
+- Phase 47-01: INSERT includes explicit type='reading' column for forward compatibility
+- Phase 47-01: Delete recalculation uses PowerSync (not Supabase) for consistency with local-first pattern
+- Phase 47-01: Hide delete button for meter_replacement readings to protect data integrity
+
 ### Pending Todos (manual steps)
 
 - PowerSync Dashboard sync rules need updating with `farm_readings` and `farm_allocations` buckets
@@ -233,6 +198,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - PowerSync Dashboard sync rules may need updating with canceled_at, scheduled_delete_at columns
 - Deploy send-deletion-warning edge function: `npx supabase functions deploy send-deletion-warning --no-verify-jwt`
 - Verify RESEND_API_KEY is set as Supabase Edge Function secret (may already exist from send-monthly-report)
+- PowerSync Dashboard sync rules need updating with `type` column in readings bucket SELECT
 
 ### Roadmap Evolution
 
@@ -251,6 +217,7 @@ All decisions logged in PROJECT.md Key Decisions table (31 decisions).
 - Phase 43 added: Super admin farm isolation — auto-select farm on login, disable features when no farms, audit all operations for strict per-farm scoping
 - Phase 44 added: Farm subscription cancellation lifecycle with read-only retention and auto-deletion
 - Phase 45 added: when meter reading is deleted by super admin, owner or admin, the gauge does not revert or update
+- Phase 46 added: Well detail page allocation CTA button
 
 ### Blockers/Concerns
 
@@ -258,7 +225,7 @@ None currently.
 
 ## Session Continuity
 
-Last session: 2026-03-18T03:13:37.942Z
-Stopped at: Completed 44-03-PLAN.md
+Last session: 2026-03-30T01:59:00Z
+Stopped at: Completed 47-01-PLAN.md
 Resume file: None
-Next action: Phase 44 complete (all 3 plans done)
+Next action: Execute Phase 47 Plan 02

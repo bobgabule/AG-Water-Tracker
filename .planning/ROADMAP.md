@@ -352,6 +352,11 @@ Plans:
 | 33. Wells Page Gauge Fixes | — | — | Pending | — |
 | 34. Modal Dark Green Theme | — | 1/1 | Complete | 2026-02-27 |
 | 42. Subscription Redesign & Add-Ons | 3/3 | Complete   | 2026-03-09 | — |
+| 43. Super Admin Farm Isolation | 2/2 | Complete | 2026-03-12 | — |
+| 44. Subscription Cancellation Lifecycle | 3/3 | Complete | 2026-03-18 | — |
+| 45. Reading Deletion Gauge Fix | 1/1 | Complete | 2026-03-27 | — |
+| 46. Well Detail Allocation CTA | 1/1 | Complete | 2026-03-27 | — |
+| 47. Meter Replacement + Clean Data Architecture | 2/2 | Planned | — | — |
 
 ### Phase 30: Drop Dead Invite Code
 **Goal**: Remove unused generic invite code RPCs (create_invite_code, join_farm_with_code) from the database — no client code references them, and they add unnecessary API surface
@@ -557,3 +562,35 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 45 to break down)
+
+### Phase 46: Well detail page allocation CTA button
+
+**Goal:** On the well detail page, show an "Add Allocation" CTA button beside "New Reading" when no allocations exist (equal-width two-column layout). Hide the CTA when an allocation exists, letting "New Reading" take full width.
+**Requirements**: ALLOC-CTA-01
+**Depends on:** Phase 44
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 46-01-PLAN.md — Permission-gated Add Allocation CTA with conditional two-column grid footer layout
+
+### Phase 47: Meter Replacement + Clean Data Architecture
+
+**Goal:** Add meter replacement workflow for super admins, owners, and admins. Record "Meter Replaced" entries in readings timeline, establish new baselines without disrupting usage data, and consolidate usage calculation into a single centralized function replacing 3 scattered locations.
+**Requirements**: METER-REPLACE-01
+**Depends on:** Phase 46
+**Plans:** 1/2 plans complete
+
+Plans:
+- [x] 47-01-PLAN.md — Data layer: Supabase migration (type column), PowerSync schema, centralized calculateAllocationUsage(), hook updates, replace 3 calculation locations
+- [ ] 47-02-PLAN.md — UI layer: MeterReplacementSheet bottom sheet, WellEditPage button, WellReadingsList type-aware rendering, ReadingDetailPage replacement view, translations
+
+**Success Criteria** (what must be TRUE):
+  1. `readings.type` column exists with CHECK constraint (`'reading'`, `'meter_replacement'`)
+  2. Meter replacement from well edit page inserts a `type='meter_replacement'` reading with new baseline value
+  3. "Meter Replaced" appears in readings list with admin name and date (value column shows translated text, not the number)
+  4. Allocation `used_af` is unchanged after meter replacement
+  5. New readings after replacement calculate delta from the replacement baseline (not old starting_reading)
+  6. Reading deletion triggers segment-aware recalculation via `calculateAllocationUsage()`
+  7. Meter replacement entries cannot be deleted from ReadingDetailPage
+  8. `WHERE type = 'reading'` cleanly filters out replacements for reporting
+  9. `npx tsc -b --noEmit` passes with zero errors
