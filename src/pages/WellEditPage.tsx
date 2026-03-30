@@ -7,9 +7,12 @@ import {
   TrashIcon,
   MapPinIcon,
   PencilSquareIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import SegmentedControl from '../components/SegmentedControl';
+import MeterReplacementSheet from '../components/MeterReplacementSheet';
 import { useTranslation } from '../hooks/useTranslation';
+import { useAuth } from '../lib/AuthProvider';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations } from '../hooks/useWellAllocations';
 import {
@@ -48,6 +51,7 @@ const stateOptions = ['Ok', 'Low', 'Critical', 'Dead', 'Unknown'] as const;
 export default function WellEditPage() {
   const { t } = useTranslation();
   const { isReadOnly } = useFarmReadOnly();
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
@@ -58,7 +62,7 @@ export default function WellEditPage() {
     id ? [id] : [],
   );
   const hasReadings = (readingsCheck.data?.length ?? 0) > 0;
-  const { farmName: activeFarmName } = useActiveFarm();
+  const { farmId, farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
 
   const well = wells.find((w) => w.id === id) ?? null;
@@ -81,6 +85,9 @@ export default function WellEditPage() {
   const [nameError, setNameError] = useState<string | null>(null);
   const [wmisError, setWmisError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Meter replacement state
+  const [showReplaceMeter, setShowReplaceMeter] = useState(false);
 
   // Delete state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -454,6 +461,18 @@ export default function WellEditPage() {
             </div>
           </div>
 
+          {/* Replace Meter button */}
+          {!isReadOnly && (
+            <button
+              type="button"
+              onClick={() => setShowReplaceMeter(true)}
+              className="flex items-center gap-2 text-white/70 text-sm font-medium border border-white/30 rounded-lg px-3 py-2 active:bg-white/10 transition-colors"
+            >
+              <ArrowPathIcon className="w-4 h-4" />
+              {t('meter.replaceMeter')}
+            </button>
+          )}
+
           {/* Latitude, Longitude, GPS */}
           <div className="flex gap-3 items-end">
             <div className="flex-1">
@@ -632,6 +651,22 @@ export default function WellEditPage() {
         confirmLoadingText={t('confirm.deleting')}
         loading={deleteLoading}
       />
+
+      {/* Meter replacement sheet */}
+      {showReplaceMeter && well && (
+        <MeterReplacementSheet
+          well={well}
+          farmId={farmId ?? ''}
+          userId={user?.id ?? ''}
+          onClose={() => setShowReplaceMeter(false)}
+          onComplete={() => {
+            setShowReplaceMeter(false);
+            // Update the local serial number state to reflect the change
+            // Navigate back to well detail to see updated data
+            navigate(`/wells/${id}`, { viewTransition: true });
+          }}
+        />
+      )}
     </div>
   );
 }
