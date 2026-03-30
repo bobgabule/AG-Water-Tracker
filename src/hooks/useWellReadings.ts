@@ -7,6 +7,7 @@ export interface Reading {
   wellId: string;
   farmId: string;
   value: string;
+  type: string;
   recordedBy: string;
   recordedAt: string;
   gpsLatitude: number | null;
@@ -19,7 +20,7 @@ export interface Reading {
 
 export function useWellReadings(wellId: string | null) {
   const query = wellId
-    ? `SELECT id, well_id, farm_id, value, recorded_by, recorded_at,
+    ? `SELECT id, well_id, farm_id, value, type, recorded_by, recorded_at,
        gps_latitude, gps_longitude, is_in_range, notes, created_at, updated_at
        FROM readings WHERE well_id = ? ORDER BY recorded_at DESC`
     : 'SELECT NULL WHERE 0';
@@ -36,6 +37,7 @@ export function useWellReadings(wellId: string | null) {
         wellId: row.well_id ?? '',
         farmId: row.farm_id ?? '',
         value: row.value ?? '',
+        type: row.type ?? 'reading',
         recordedBy: row.recorded_by ?? '',
         recordedAt: row.recorded_at ?? '',
         gpsLatitude: row.gps_latitude,

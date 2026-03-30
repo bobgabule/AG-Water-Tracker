@@ -5,6 +5,7 @@ export interface ReadingWithName {
   id: string;
   wellId: string;
   value: string;
+  type: string;
   recordedBy: string;
   recordedAt: string;
   recorderName: string;
@@ -19,6 +20,7 @@ interface ReadingWithNameRow {
   id: string;
   well_id: string | null;
   value: string | null;
+  type: string | null;
   recorded_by: string | null;
   recorded_at: string | null;
   recorder_name: string | null;
@@ -31,7 +33,7 @@ interface ReadingWithNameRow {
 
 export function useWellReadingsWithNames(wellId: string | null) {
   const query = wellId
-    ? `SELECT r.id, r.well_id, r.value, r.recorded_by, r.recorded_at,
+    ? `SELECT r.id, r.well_id, r.value, r.type, r.recorded_by, r.recorded_at,
          r.gps_latitude, r.gps_longitude, r.is_in_range, r.is_similar_reading, r.notes,
          COALESCE(fm.full_name, 'Unknown') as recorder_name
        FROM readings r
@@ -51,6 +53,7 @@ export function useWellReadingsWithNames(wellId: string | null) {
         id: row.id,
         wellId: row.well_id ?? '',
         value: row.value ?? '',
+        type: row.type ?? 'reading',
         recordedBy: row.recorded_by ?? '',
         recordedAt: row.recorded_at ?? '',
         recorderName: row.recorder_name ?? 'Unknown',
