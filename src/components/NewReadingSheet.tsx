@@ -9,7 +9,7 @@ import { usePowerSync } from '@powersync/react';
 import { useWellReadings } from '../hooks/useWellReadings';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
-import { getMultiplierValue, CONVERSION_TO_AF, calculateUsageAf } from '../lib/usage-calculation';
+import { getMultiplierValue, CONVERSION_TO_AF, calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
@@ -146,14 +146,15 @@ export default function NewReadingSheet({
         }
 
         await db.execute(
-          `INSERT INTO readings (id, well_id, farm_id, value, recorded_by, recorded_at,
+          `INSERT INTO readings (id, well_id, farm_id, value, type, recorded_by, recorded_at,
             gps_latitude, gps_longitude, is_in_range, is_similar_reading, notes, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             readingId,
             well.id,
             farmId,
             readingValue.trim(),
+            'reading',
             userId,
             now,
             gps?.lat ?? null,
@@ -177,8 +178,9 @@ export default function NewReadingSheet({
             id: string;
             starting_reading: string | null;
             period_start: string;
+            period_end: string;
           }>(
-            `SELECT id, starting_reading, period_start
+            `SELECT id, starting_reading, period_start, period_end
              FROM allocations
              WHERE well_id = ? AND period_start <= ? AND period_end >= ?
              ORDER BY period_start DESC LIMIT 1`,
@@ -187,31 +189,25 @@ export default function NewReadingSheet({
 
           if (allocRows.length > 0) {
             const alloc = allocRows[0];
-            let baseline: string | null = alloc.starting_reading;
 
-            // Fallback: earliest reading in the allocation period (exclude just-inserted)
-            if (!baseline) {
-              const earliestRows = await db.getAll<{ value: string }>(
-                `SELECT value FROM readings
-                 WHERE well_id = ? AND recorded_at >= ? AND id != ?
-                 ORDER BY recorded_at ASC LIMIT 1`,
-                [well.id, alloc.period_start, readingId],
+            if (alloc.starting_reading) {
+              // Query ALL entries in the current allocation period (including the new one)
+              const entries = await db.getAll<{ value: string; type: string }>(
+                `SELECT value, type FROM readings
+                 WHERE well_id = ? AND recorded_at >= ? AND recorded_at <= ?
+                 ORDER BY recorded_at DESC`,
+                [well.id, alloc.period_start, alloc.period_end + 'T23:59:59'],
               );
-              if (earliestRows.length > 0) {
-                baseline = earliestRows[0].value;
-              }
-            }
 
-            if (baseline) {
-              const usedAf = calculateUsageAf(
-                readingValue.trim(),
-                baseline,
+              const usedAf = calculateAllocationUsage(
+                entries,
+                alloc.starting_reading,
                 well.multiplier,
                 well.units,
               );
               if (isFinite(usedAf)) {
                 await db.execute(
-                  `UPDATE allocations SET used_af = ?, updated_at = ? WHERE id = ?`,
+                  `UPDATE allocations SET used_af = CAST(ROUND(?, 2) AS TEXT), updated_at = ? WHERE id = ?`,
                   [usedAf.toFixed(2), now, alloc.id],
                 );
               }
