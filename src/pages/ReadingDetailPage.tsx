@@ -69,7 +69,9 @@ export default function ReadingDetailPage() {
     return Math.round(dist);
   }, [reading?.gpsLatitude, reading?.gpsLongitude, well?.location]);
 
-  // Formatted title: "Well Name - Month Day"
+  const isMeterReplacement = reading?.type === 'meter_replacement';
+
+  // Formatted title: "Well Name - Month Day" or "Meter Replaced" for replacements
   const titleDate = useMemo(() => {
     if (!well || !reading) return '';
     const date = new Date(reading.recordedAt);
@@ -77,8 +79,10 @@ export default function ReadingDetailPage() {
       month: 'long',
       day: 'numeric',
     });
-    return `${well.name} - ${monthDay}`;
-  }, [well, reading, locale]);
+    return isMeterReplacement
+      ? `${well.name} - ${t('meter.replaced')}`
+      : `${well.name} - ${monthDay}`;
+  }, [well, reading, locale, isMeterReplacement, t]);
 
   // Formatted date for detail field: "June 19, 2025 at 2:00 PM"
   const formattedDate = useMemo(() => {
@@ -243,25 +247,27 @@ export default function ReadingDetailPage() {
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 pt-4">
-          {/* Warning banners */}
-          <div className="space-y-2 mb-6 mx-4">
-            {!reading.isInRange && gpsDistanceFeet !== null && (
-              <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <FlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
-                <span className="text-[#d5e8bd] text-lg">
-                  {t('readingDetail.gpsOffBy', { feet: gpsDistanceFeet })}
-                </span>
-              </div>
-            )}
-            {reading.isSimilarReading && (
-              <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <FlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
-                <span className="text-[#d5e8bd] text-lg">
-                  {t('readingDetail.similarReading')}
-                </span>
-              </div>
-            )}
-          </div>
+          {/* Warning banners (not shown for meter replacements) */}
+          {!isMeterReplacement && (
+            <div className="space-y-2 mb-6 mx-4">
+              {!reading.isInRange && gpsDistanceFeet !== null && (
+                <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
+                  <FlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                  <span className="text-[#d5e8bd] text-lg">
+                    {t('readingDetail.gpsOffBy', { feet: gpsDistanceFeet })}
+                  </span>
+                </div>
+              )}
+              {reading.isSimilarReading && (
+                <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
+                  <FlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                  <span className="text-[#d5e8bd] text-lg">
+                    {t('readingDetail.similarReading')}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Detail fields */}
           <div className="space-y-6 px-4">
@@ -273,21 +279,55 @@ export default function ReadingDetailPage() {
               <p className="text-[#d5e8bd] text-lg">{formattedDate}</p>
             </div>
 
-            {/* Meter Reading */}
-            <div>
-              <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
-                {t('readingDetail.meterReading')}
-              </p>
-              <p className="text-[#d5e8bd] text-lg">{reading.value}</p>
-            </div>
+            {isMeterReplacement ? (
+              <>
+                {/* New baseline value */}
+                <div>
+                  <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
+                    {t('meter.newBaseline')}
+                  </p>
+                  <p className="text-[#d5e8bd] text-lg">{reading.value}</p>
+                </div>
 
-            {/* SUBMITTED BY */}
-            <div>
-              <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
-                {t('readingDetail.submittedBy')}
-              </p>
-              <p className="text-[#d5e8bd] text-lg">{reading.recorderName}</p>
-            </div>
+                {/* Old serial from notes (parsed from "Old S/N: ...") */}
+                {reading.notes && (
+                  <div>
+                    <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
+                      {t('meter.oldSerial')}
+                    </p>
+                    <p className="text-[#d5e8bd] text-lg">
+                      {reading.notes.replace(/^Old S\/N:\s*/, '')}
+                    </p>
+                  </div>
+                )}
+
+                {/* Performed by */}
+                <div>
+                  <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
+                    {t('readingDetail.submittedBy')}
+                  </p>
+                  <p className="text-[#d5e8bd] text-lg">{reading.recorderName}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Meter Reading */}
+                <div>
+                  <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
+                    {t('readingDetail.meterReading')}
+                  </p>
+                  <p className="text-[#d5e8bd] text-lg">{reading.value}</p>
+                </div>
+
+                {/* SUBMITTED BY */}
+                <div>
+                  <p className="text-[#acbc97] text-lg font-semibold uppercase tracking-wide mb-1">
+                    {t('readingDetail.submittedBy')}
+                  </p>
+                  <p className="text-[#d5e8bd] text-lg">{reading.recorderName}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
