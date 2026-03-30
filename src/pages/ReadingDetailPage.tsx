@@ -10,6 +10,7 @@ import { useUserRole } from '../hooks/useUserRole';
 import { useTranslation } from '../hooks/useTranslation';
 import { hasPermission } from '../lib/permissions';
 import { getDistanceToWell } from '../lib/gps-proximity';
+import { calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -115,10 +116,66 @@ export default function ReadingDetailPage() {
   );
 
   const handleDelete = useCallback(async () => {
-    if (!readingId) return;
+    if (!readingId || !reading || !well) return;
     setDeleting(true);
     try {
       await db.execute('DELETE FROM readings WHERE id = ?', [readingId]);
+
+      // Recalculate used_af on the affected allocation
+      try {
+        const recordedDate = reading.recordedAt.split('T')[0];
+        const allocRows = await db.getAll<{
+          id: string;
+          starting_reading: string | null;
+          period_start: string;
+          period_end: string;
+        }>(
+          `SELECT id, starting_reading, period_start, period_end
+           FROM allocations
+           WHERE well_id = ? AND period_start <= ? AND period_end >= ?
+           ORDER BY period_start DESC LIMIT 1`,
+          [well.id, recordedDate, recordedDate],
+        );
+
+        if (allocRows.length > 0) {
+          const alloc = allocRows[0];
+          const now = new Date().toISOString();
+
+          if (!alloc.starting_reading) {
+            // No starting_reading — preserve existing used_af
+          } else {
+            // Query remaining entries in the allocation period
+            const entries = await db.getAll<{ value: string; type: string }>(
+              `SELECT value, type FROM readings
+               WHERE well_id = ? AND recorded_at >= ? AND recorded_at <= ?
+               ORDER BY recorded_at DESC`,
+              [well.id, alloc.period_start, alloc.period_end + 'T23:59:59'],
+            );
+
+            if (entries.length === 0) {
+              // No entries remain — set used_af to 0
+              await db.execute(
+                `UPDATE allocations SET used_af = '0', updated_at = ? WHERE id = ?`,
+                [now, alloc.id],
+              );
+            } else {
+              const usedAf = calculateAllocationUsage(
+                entries,
+                alloc.starting_reading,
+                well.multiplier,
+                well.units,
+              );
+              await db.execute(
+                `UPDATE allocations SET used_af = CAST(ROUND(?, 2) AS TEXT), updated_at = ? WHERE id = ?`,
+                [usedAf.toFixed(2), now, alloc.id],
+              );
+            }
+          }
+        }
+      } catch {
+        // Recalculation is non-critical; reading was already deleted
+      }
+
       useToastStore.getState().show(t('reading.deleted'));
       setShowDeleteConfirm(false);
       navigate(`/wells/${id}`, { viewTransition: true, replace: true });
@@ -127,7 +184,7 @@ export default function ReadingDetailPage() {
     } finally {
       setDeleting(false);
     }
-  }, [db, readingId, navigate, id, t]);
+  }, [db, readingId, reading, well, navigate, id, t]);
 
   const handleOpenDelete = useCallback(() => setShowDeleteConfirm(true), []);
   const handleCloseDelete = useCallback(() => setShowDeleteConfirm(false), []);
@@ -234,8 +291,8 @@ export default function ReadingDetailPage() {
           </div>
         </div>
 
-        {/* Delete button (admin/owner only) */}
-        {canDelete && (
+        {/* Delete button (admin/owner only, not for meter replacements) */}
+        {canDelete && reading.type !== 'meter_replacement' && (
           <div className="flex-shrink-0 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
