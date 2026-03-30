@@ -83,7 +83,7 @@ const WellReadingsList = React.memo(function WellReadingsList({
                   <span className="text-[#d5e8bd] text-sm">{dateStr}</span>
                   <span className="text-[#d5e8bd] text-sm font-medium">
                     {reading.type === 'meter_replacement'
-                      ? <span className="italic text-amber-300">{t('meter.replaced')}</span>
+                      ? <span className="text-amber-300">{t('meter.replaced')}</span>
                       : reading.value}
                   </span>
                   <div className="flex items-center justify-between">
