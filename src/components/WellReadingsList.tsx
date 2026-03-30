@@ -82,25 +82,31 @@ const WellReadingsList = React.memo(function WellReadingsList({
                 <Row key={reading.id} {...rowProps}>
                   <span className="text-[#d5e8bd] text-sm">{dateStr}</span>
                   <span className="text-[#d5e8bd] text-sm font-medium">
-                    {reading.value}
+                    {reading.type === 'meter_replacement'
+                      ? <span className="italic text-amber-300">{t('meter.replaced')}</span>
+                      : reading.value}
                   </span>
                   <div className="flex items-center justify-between">
                     <span className="text-[#d5e8bd]/70 text-sm">
                       {reading.recorderName} at {timeStr}
                     </span>
-                    {reading.isSimilarReading && (
-                      <PennantFlagIcon
-                        className="w-4 h-4 text-orange-400 flex-shrink-0"
-                        role="img"
-                        aria-label="Similar reading flagged"
-                      />
-                    )}
-                    {!reading.isInRange && (
-                      <PennantFlagIcon
-                        className="w-4 h-4 text-yellow-400 flex-shrink-0"
-                        role="img"
-                        aria-label="Reading taken out of range"
-                      />
+                    {reading.type !== 'meter_replacement' && (
+                      <>
+                        {reading.isSimilarReading && (
+                          <PennantFlagIcon
+                            className="w-4 h-4 text-orange-400 flex-shrink-0"
+                            role="img"
+                            aria-label="Similar reading flagged"
+                          />
+                        )}
+                        {!reading.isInRange && (
+                          <PennantFlagIcon
+                            className="w-4 h-4 text-yellow-400 flex-shrink-0"
+                            role="img"
+                            aria-label="Reading taken out of range"
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 </Row>
