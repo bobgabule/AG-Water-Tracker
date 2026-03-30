@@ -8,7 +8,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations, type Allocation } from '../hooks/useWellAllocations';
 import { useWellReadings } from '../hooks/useWellReadings';
-import { calculateUsageAf } from '../lib/usage-calculation';
+import { calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useTranslation } from '../hooks/useTranslation';
@@ -94,7 +94,7 @@ export default function WellAllocationsPage() {
     return `${formEndYear}-${formEndMonth}-${String(lastDay).padStart(2, '0')}`;
   }, [formEndYear, formEndMonth]);
 
-  // Auto-calculate usage from readings within the period
+  // Auto-calculate usage from readings within the period (handles meter replacements)
   useEffect(() => {
     if (!well) return;
 
@@ -104,20 +104,19 @@ export default function WellAllocationsPage() {
       return;
     }
 
-    // Find the latest reading within the period
-    const readingsInPeriod = readings.filter(
-      (r) => r.recordedAt >= formStart && r.recordedAt <= formEnd,
-    );
-    const latestReading = readingsInPeriod.length > 0 ? readingsInPeriod[0] : null;
+    // Filter entries for the form's date range (include meter_replacements)
+    const entriesInPeriod = readings
+      .filter((r) => r.recordedAt >= formStart && r.recordedAt <= formEnd)
+      .map((r) => ({ value: r.value, type: r.type ?? 'reading' }));
 
-    if (latestReading) {
-      const autoUsed = calculateUsageAf(
-        latestReading.value,
+    if (entriesInPeriod.length > 0) {
+      const usage = calculateAllocationUsage(
+        entriesInPeriod,
         formStartingReading,
         well.multiplier,
         well.units,
       );
-      setFormUsedAf(autoUsed.toFixed(2));
+      setFormUsedAf(usage.toFixed(2));
     } else {
       setFormUsedAf('0.00');
     }
