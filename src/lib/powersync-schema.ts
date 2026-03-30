@@ -56,6 +56,7 @@ const readings = new TableV2({
   well_id: column.text,
   farm_id: column.text, // denormalized for sync rules filtering
   value: column.text, // TEXT preserves decimal precision (v2.0 decision)
+  type: column.text, // 'reading' | 'meter_replacement'
   recorded_by: column.text,
   recorded_at: column.text,
   gps_latitude: column.real,

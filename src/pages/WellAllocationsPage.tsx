@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { usePowerSync } from '@powersync/react';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import { PlusIcon, CalendarDaysIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import MonthYearPicker from '../components/MonthYearPicker';
@@ -7,12 +8,9 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { useWells } from '../hooks/useWells';
 import { useWellAllocations, type Allocation } from '../hooks/useWellAllocations';
 import { useWellReadings } from '../hooks/useWellReadings';
-import { calculateUsageAf } from '../lib/usage-calculation';
-import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
+import { calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useActiveFarm } from '../hooks/useActiveFarm';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { supabase } from '../lib/supabase';
 import { useTranslation } from '../hooks/useTranslation';
 
 function formatPeriodDate(dateStr: string, locale: string): string {
@@ -39,15 +37,15 @@ function formatValue(val: string): string {
 
 export default function WellAllocationsPage() {
   const { t, locale } = useTranslation();
-  const { isReadOnly } = useFarmReadOnly();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isOnline = useOnlineStatus();
+  const db = usePowerSync();
   const { wells } = useWells();
   const { allocations } = useWellAllocations(id ?? null);
   const { readings } = useWellReadings(id ?? null);
   const { farmId: activeFarmId, farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
+  const farmId = activeFarmId ?? '';
 
   const well = useMemo(() => wells.find((w) => w.id === id) ?? null, [wells, id]);
 
@@ -96,7 +94,7 @@ export default function WellAllocationsPage() {
     return `${formEndYear}-${formEndMonth}-${String(lastDay).padStart(2, '0')}`;
   }, [formEndYear, formEndMonth]);
 
-  // Auto-calculate usage from readings within the period
+  // Auto-calculate usage from readings within the period (handles meter replacements)
   useEffect(() => {
     if (!well) return;
 
@@ -106,20 +104,19 @@ export default function WellAllocationsPage() {
       return;
     }
 
-    // Find the latest reading within the period
-    const readingsInPeriod = readings.filter(
-      (r) => r.recordedAt >= formStart && r.recordedAt <= formEnd,
-    );
-    const latestReading = readingsInPeriod.length > 0 ? readingsInPeriod[0] : null;
+    // Filter entries for the form's date range (include meter_replacements)
+    const entriesInPeriod = readings
+      .filter((r) => r.recordedAt >= formStart && r.recordedAt <= formEnd)
+      .map((r) => ({ value: r.value, type: r.type ?? 'reading' }));
 
-    if (latestReading) {
-      const autoUsed = calculateUsageAf(
-        latestReading.value,
+    if (entriesInPeriod.length > 0) {
+      const usage = calculateAllocationUsage(
+        entriesInPeriod,
         formStartingReading,
         well.multiplier,
         well.units,
       );
-      setFormUsedAf(autoUsed.toFixed(2));
+      setFormUsedAf(usage.toFixed(2));
     } else {
       setFormUsedAf('0.00');
     }
@@ -168,11 +165,10 @@ export default function WellAllocationsPage() {
 
   // Add new allocation
   const handleAddAllocation = useCallback(() => {
-    if (isReadOnly) return;
     resetForm();
     setSelectedId(null);
     setFormVisible(true);
-  }, [resetForm, isReadOnly]);
+  }, [resetForm]);
 
   // Close form
   const handleCloseForm = useCallback(() => {
@@ -195,7 +191,6 @@ export default function WellAllocationsPage() {
 
   // Save handler
   const handleSave = useCallback(async () => {
-    if (isReadOnly) return;
     setOverlapError(null);
 
     // Validate date order
@@ -217,11 +212,6 @@ export default function WellAllocationsPage() {
       return;
     }
 
-    if (!isOnline) {
-      useToastStore.getState().show(t('common.requiresInternet'), 'error');
-      return;
-    }
-
     setSaving(true);
     try {
       const nowIso = new Date().toISOString();
@@ -230,36 +220,39 @@ export default function WellAllocationsPage() {
       if (selectedId === null) {
         // Create new
         const allocationId = crypto.randomUUID();
-        const { error } = await supabase.from('allocations').insert({
-          id: allocationId,
-          well_id: id,
-          farm_id: activeFarmId,
-          period_start: formStart,
-          period_end: formEnd,
-          allocated_af: formAllocatedAf,
-          used_af: usedVal,
-          starting_reading: formStartingReading || null,
-          notes: null,
-          created_at: nowIso,
-          updated_at: nowIso,
-        });
-        if (error) throw error;
+        await db.execute(
+          `INSERT INTO allocations (id, well_id, farm_id, period_start, period_end, allocated_af, used_af, starting_reading, notes, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            allocationId,
+            id,
+            farmId,
+            formStart,
+            formEnd,
+            formAllocatedAf,
+            usedVal,
+            formStartingReading || null,
+            null,
+            nowIso,
+            nowIso,
+          ],
+        );
         useToastStore.getState().show(t('allocation.saved'));
         setSelectedId(allocationId);
       } else {
         // Update existing
-        const { error } = await supabase
-          .from('allocations')
-          .update({
-            period_start: formStart,
-            period_end: formEnd,
-            allocated_af: formAllocatedAf,
-            used_af: usedVal,
-            starting_reading: formStartingReading || null,
-            updated_at: nowIso,
-          })
-          .eq('id', selectedId);
-        if (error) throw error;
+        await db.execute(
+          `UPDATE allocations SET period_start = ?, period_end = ?, allocated_af = ?, used_af = ?, starting_reading = ?, updated_at = ? WHERE id = ?`,
+          [
+            formStart,
+            formEnd,
+            formAllocatedAf,
+            usedVal,
+            formStartingReading || null,
+            nowIso,
+            selectedId,
+          ],
+        );
         useToastStore.getState().show(t('allocation.saved'));
       }
     } catch {
@@ -275,25 +268,17 @@ export default function WellAllocationsPage() {
     formStartingReading,
     selectedId,
     id,
-    activeFarmId,
-    isOnline,
+    farmId,
+    db,
     checkOverlap,
-    t,
-    isReadOnly,
   ]);
 
   // Delete handler
   const handleDeleteAllocation = useCallback(async () => {
-    if (isReadOnly) return;
     if (!selectedId) return;
-    if (!isOnline) {
-      useToastStore.getState().show(t('common.requiresInternet'), 'error');
-      return;
-    }
     setDeleteLoading(true);
     try {
-      const { error } = await supabase.from('allocations').delete().eq('id', selectedId);
-      if (error) throw error;
+      await db.execute('DELETE FROM allocations WHERE id = ?', [selectedId]);
       useToastStore.getState().show(t('allocation.deleted'));
       setFormVisible(false);
       setSelectedId(null);
@@ -303,7 +288,7 @@ export default function WellAllocationsPage() {
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
     }
-  }, [isOnline, selectedId, t, isReadOnly]);
+  }, [db, selectedId]);
 
   // Back navigation
   const handleBack = useCallback(() => {
@@ -316,15 +301,6 @@ export default function WellAllocationsPage() {
     [allocations, selectedId],
   );
 
-  // No farm selected guard (super_admin with no override)
-  if (!activeFarmId) {
-    return (
-      <div className="min-h-screen bg-surface-page flex items-center justify-center">
-        <p className="text-white/60">No farm selected</p>
-      </div>
-    );
-  }
-
   // Loading state
   if (!well && wells.length === 0) {
     return (
@@ -335,7 +311,7 @@ export default function WellAllocationsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pt-14 bg-surface-dark">
+    <div className="min-h-screen flex flex-col bg-surface-dark">
       {/* Map preview with well info */}
       <div className="relative h-32 flex-shrink-0">
         {mapUrl ? (
@@ -490,7 +466,7 @@ export default function WellAllocationsPage() {
                 >
                   {t('common.close')}
                 </button>
-                {selectedId !== null && !isReadOnly && (
+                {selectedId !== null && (
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
@@ -499,20 +475,18 @@ export default function WellAllocationsPage() {
                     {t('common.delete')}
                   </button>
                 )}
-                {!isReadOnly && (
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex-1 py-2.5 rounded-lg font-medium text-white bg-btn-dark active:bg-btn-dark-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {saving ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      t('common.save')
-                    )}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 py-2.5 rounded-lg font-medium text-white bg-btn-dark active:bg-btn-dark-active transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    t('common.save')
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -584,16 +558,14 @@ export default function WellAllocationsPage() {
         >
           {t('allocation.backToWell')}
         </button>
-        {!isReadOnly && (
-          <button
-            type="button"
-            onClick={handleAddAllocation}
-            className="bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 px-6 flex items-center gap-2 active:opacity-80 transition-opacity"
-          >
-            <PlusIcon className="w-5 h-5" />
-            {t('allocation.addAllocation')}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleAddAllocation}
+          className="bg-btn-confirm text-btn-confirm-text rounded-full font-bold text-base py-3 px-6 flex items-center gap-2 active:opacity-80 transition-opacity"
+        >
+          <PlusIcon className="w-5 h-5" />
+          {t('allocation.addAllocation')}
+        </button>
       </div>
 
       {/* Delete confirmation dialog */}

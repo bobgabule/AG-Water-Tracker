@@ -7,11 +7,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { usePowerSync } from '@powersync/react';
 import { useWellReadings } from '../hooks/useWellReadings';
-import { useWellAllocations } from '../hooks/useWellAllocations';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { getDistanceToWell, isInRange } from '../lib/gps-proximity';
-import { getMultiplierValue, CONVERSION_TO_AF, calculateUsageAf } from '../lib/usage-calculation';
-import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
+import { getMultiplierValue, CONVERSION_TO_AF, calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
 import type { WellWithReading } from '../hooks/useWells';
@@ -25,7 +23,7 @@ interface NewReadingSheetProps {
 }
 
 type ActiveTab = 'reading' | 'problem';
-type ReadingView = 'form' | 'lower-warning' | 'similar-warning' | 'range-warning' | 'gps-failed' | 'submitting';
+type ReadingView = 'form' | 'similar-warning' | 'range-warning' | 'gps-failed' | 'submitting';
 
 interface MeterProblems {
   notWorking: boolean;
@@ -87,17 +85,9 @@ export default function NewReadingSheet({
   userId,
 }: NewReadingSheetProps) {
   const { t } = useTranslation();
-  const { isReadOnly } = useFarmReadOnly();
   const db = usePowerSync();
   const { readings } = useWellReadings(well.id);
-  const { allocations } = useWellAllocations(well.id);
   const { location: userLocation } = useGeolocation({ autoRequest: false });
-
-  const currentStartingReading = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const current = allocations.find((a) => a.periodStart <= today && a.periodEnd >= today) ?? null;
-    return current?.startingReading ? parseFloat(current.startingReading) : null;
-  }, [allocations]);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('reading');
   const [view, setView] = useState<ReadingView>('form');
@@ -107,7 +97,6 @@ export default function NewReadingSheet({
   const [problems, setProblems] = useState<MeterProblems>(INITIAL_PROBLEMS);
   const [problemsSubmitting, setProblemsSubmitting] = useState(false);
   const [pendingSimilar, setPendingSimilar] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   // Real-time proximity indicator from cached location
   const proximityInfo = useMemo(() => {
@@ -128,7 +117,6 @@ export default function NewReadingSheet({
     setProblems(INITIAL_PROBLEMS);
     setProblemsSubmitting(false);
     setPendingSimilar(false);
-    setIsSaving(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -141,7 +129,6 @@ export default function NewReadingSheet({
 
   const saveReading = useCallback(
     async (gps: GpsResult | null, forceOutOfRange?: boolean, isSimilar = false) => {
-      if (isReadOnly) return;
       try {
         const readingId = crypto.randomUUID();
         const now = new Date().toISOString();
@@ -159,14 +146,15 @@ export default function NewReadingSheet({
         }
 
         await db.execute(
-          `INSERT INTO readings (id, well_id, farm_id, value, recorded_by, recorded_at,
+          `INSERT INTO readings (id, well_id, farm_id, value, type, recorded_by, recorded_at,
             gps_latitude, gps_longitude, is_in_range, is_similar_reading, notes, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             readingId,
             well.id,
             farmId,
             readingValue.trim(),
+            'reading',
             userId,
             now,
             gps?.lat ?? null,
@@ -183,15 +171,16 @@ export default function NewReadingSheet({
         resetForm();
         onClose();
 
-        // Auto-update used_af on the current allocation (fire-and-forget, additive)
+        // Auto-update used_af on the current allocation (fire-and-forget)
         try {
           const today = now.split('T')[0];
           const allocRows = await db.getAll<{
             id: string;
             starting_reading: string | null;
             period_start: string;
+            period_end: string;
           }>(
-            `SELECT id, starting_reading, period_start
+            `SELECT id, starting_reading, period_start, period_end
              FROM allocations
              WHERE well_id = ? AND period_start <= ? AND period_end >= ?
              ORDER BY period_start DESC LIMIT 1`,
@@ -201,37 +190,25 @@ export default function NewReadingSheet({
           if (allocRows.length > 0) {
             const alloc = allocRows[0];
 
-            // Get the previous reading within this allocation period
-            const prevRows = await db.getAll<{ value: string }>(
-              `SELECT value FROM readings
-               WHERE well_id = ? AND id != ? AND recorded_at >= ?
-               ORDER BY recorded_at DESC LIMIT 1`,
-              [well.id, readingId, alloc.period_start],
-            );
+            if (alloc.starting_reading) {
+              // Query ALL entries in the current allocation period (including the new one)
+              const entries = await db.getAll<{ value: string; type: string }>(
+                `SELECT value, type FROM readings
+                 WHERE well_id = ? AND recorded_at >= ? AND recorded_at <= ?
+                 ORDER BY recorded_at DESC`,
+                [well.id, alloc.period_start, alloc.period_end + 'T23:59:59'],
+              );
 
-            let baseline: string | null;
-            if (prevRows.length > 0) {
-              // Delta from previous reading in this period
-              baseline = prevRows[0].value;
-            } else {
-              // First reading in period — delta from starting_reading
-              baseline = alloc.starting_reading;
-            }
-
-            if (baseline) {
-              const delta = calculateUsageAf(
-                readingValue.trim(),
-                baseline,
+              const usedAf = calculateAllocationUsage(
+                entries,
+                alloc.starting_reading,
                 well.multiplier,
                 well.units,
               );
-              if (isFinite(delta) && delta > 0) {
+              if (isFinite(usedAf)) {
                 await db.execute(
-                  `UPDATE allocations
-                   SET used_af = CAST(ROUND(COALESCE(CAST(used_af AS REAL), 0) + ?, 2) AS TEXT),
-                       updated_at = ?
-                   WHERE id = ?`,
-                  [delta, now, alloc.id],
+                  `UPDATE allocations SET used_af = CAST(ROUND(?, 2) AS TEXT), updated_at = ? WHERE id = ?`,
+                  [usedAf.toFixed(2), now, alloc.id],
                 );
               }
             }
@@ -242,10 +219,9 @@ export default function NewReadingSheet({
       } catch {
         useToastStore.getState().show(t('reading.saveFailed'), 'error');
         setView('form');
-        setIsSaving(false);
       }
     },
-    [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose, isReadOnly],
+    [db, well.id, well.location, well.multiplier, well.units, farmId, userId, readingValue, resetForm, onClose],
   );
 
   const handleGpsCaptureAndSave = useCallback(async (isSimilar = false) => {
@@ -283,8 +259,6 @@ export default function NewReadingSheet({
   }, [saveReading, pendingSimilar]);
 
   const handleSubmit = useCallback(() => {
-    if (isSaving) return;
-
     const error = validateReadingValue(readingValue, t);
     if (error) {
       setValidationError(error);
@@ -292,32 +266,15 @@ export default function NewReadingSheet({
     }
     setValidationError(null);
 
-    const currentValue = parseFloat(readingValue.trim());
-    const multiplier = getMultiplierValue(well.multiplier);
-    const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
-
-    // Check reading against allocation starting_reading first (most fundamental baseline)
-    if (currentStartingReading !== null && !isNaN(currentValue)) {
-      if (currentValue < currentStartingReading) {
-        setView('lower-warning');
-        return;
-      }
-      const diffGallons = Math.abs(currentValue - currentStartingReading) * multiplier * afPerUnit * 325851;
-      if (diffGallons <= SIMILAR_THRESHOLD_GALLONS) {
-        setView('similar-warning');
-        return;
-      }
-    }
-
-    // Check reading is not lower than previous (odometer-style: only goes up)
+    // Check for similar reading (threshold: 50 gallons equivalent)
     if (readings.length > 0) {
       const lastValue = parseFloat(readings[0].value);
+      const currentValue = parseFloat(readingValue.trim());
       if (!isNaN(lastValue) && !isNaN(currentValue)) {
-        if (currentValue < lastValue) {
-          setView('lower-warning');
-          return;
-        }
-        const diffGallons = Math.abs(currentValue - lastValue) * multiplier * afPerUnit * 325851;
+        const diff = Math.abs(currentValue - lastValue);
+        const multiplier = getMultiplierValue(well.multiplier);
+        const afPerUnit = CONVERSION_TO_AF[well.units] ?? 1;
+        const diffGallons = diff * multiplier * afPerUnit * 325851;
         if (diffGallons <= SIMILAR_THRESHOLD_GALLONS) {
           setView('similar-warning');
           return;
@@ -326,9 +283,8 @@ export default function NewReadingSheet({
     }
 
     // Proceed directly to GPS capture
-    setIsSaving(true);
     handleGpsCaptureAndSave();
-  }, [isSaving, readingValue, readings, well.multiplier, well.units, t, handleGpsCaptureAndSave, currentStartingReading]);
+  }, [readingValue, readings, handleGpsCaptureAndSave]);
 
   const handleSimilarContinue = useCallback(() => {
     handleGpsCaptureAndSave(true);
@@ -340,7 +296,6 @@ export default function NewReadingSheet({
 
   const handleBackToForm = useCallback(() => {
     setView('form');
-    setIsSaving(false);
   }, []);
 
   const handleValueChange = useCallback(
@@ -456,7 +411,7 @@ export default function NewReadingSheet({
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-4">
+          <div className="flex-1 overflow-y-auto px-4">
             {activeTab === 'reading' ? (
               <>
                 {/* Reading tab */}
@@ -470,7 +425,7 @@ export default function NewReadingSheet({
                         value={readingValue}
                         onChange={handleValueChange}
                         placeholder="0"
-                        className="flex-1 min-w-0 text-3xl font-bold text-white bg-white/10 rounded-xl px-4 py-3 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+                        className="flex-1 text-3xl font-bold text-white bg-white/10 rounded-xl px-4 py-3 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
                       />
                       <span className="text-lg text-white/70 whitespace-nowrap">
                         {well.units} x {well.multiplier}
@@ -480,27 +435,6 @@ export default function NewReadingSheet({
                     {validationError && (
                       <p className="text-red-800 text-sm">{validationError}</p>
                     )}
-                  </div>
-                )}
-
-                {view === 'lower-warning' && (
-                  <div className="flex flex-col items-center text-center space-y-4 py-6">
-                    <ExclamationTriangleIcon className="w-12 h-12 text-yellow-400" />
-                    <h3 className="text-white text-xl font-bold">
-                      {t('reading.lowerTitle')}
-                    </h3>
-                    <p className="text-white/70 text-sm">
-                      {t('reading.lowerDescription')}
-                    </p>
-                    <div className="flex w-full pt-4">
-                      <button
-                        type="button"
-                        onClick={handleBackToForm}
-                        className="flex-1 py-3 text-white font-medium rounded-lg"
-                      >
-                        {t('reading.goBack')}
-                      </button>
-                    </div>
                   </div>
                 )}
 
@@ -667,17 +601,14 @@ export default function NewReadingSheet({
               >
                 {t('common.cancel')}
               </button>
-              {!isReadOnly && (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSaving}
-                  className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <CheckIcon className="w-5 h-5" />
-                  {t('reading.save')}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2"
+              >
+                <CheckIcon className="w-5 h-5" />
+                {t('reading.save')}
+              </button>
             </div>
           )}
 
@@ -691,17 +622,15 @@ export default function NewReadingSheet({
               >
                 {t('common.cancel')}
               </button>
-              {!isReadOnly && (
-                <button
-                  type="button"
-                  onClick={handleProblemSubmit}
-                  disabled={!hasProblemsSelected}
-                  className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
-                >
-                  <CheckIcon className="w-5 h-5" />
-                  {t('reading.submit')}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleProblemSubmit}
+                disabled={!hasProblemsSelected}
+                className="px-6 py-2.5 bg-btn-confirm text-btn-confirm-text rounded-lg font-medium flex items-center gap-2 disabled:opacity-40"
+              >
+                <CheckIcon className="w-5 h-5" />
+                {t('reading.submit')}
+              </button>
             </div>
           )}
         </DialogPanel>

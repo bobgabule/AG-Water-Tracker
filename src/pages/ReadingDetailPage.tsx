@@ -1,32 +1,28 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { usePowerSync } from '@powersync/react';
 import { ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { MapPinIcon } from '@heroicons/react/24/solid';
-import PennantFlagIcon from '../components/PennantFlagIcon';
+import { MapPinIcon, FlagIcon } from '@heroicons/react/24/solid';
 import { useWells } from '../hooks/useWells';
 import { useWellReadingsWithNames } from '../hooks/useWellReadingsWithNames';
 import { useActiveFarm } from '../hooks/useActiveFarm';
 import { useUserRole } from '../hooks/useUserRole';
-import { useFarmReadOnly } from '../hooks/useFarmReadOnly';
 import { useTranslation } from '../hooks/useTranslation';
 import { hasPermission } from '../lib/permissions';
 import { getDistanceToWell } from '../lib/gps-proximity';
+import { calculateAllocationUsage } from '../lib/usage-calculation';
 import { useToastStore } from '../stores/toastStore';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { supabase } from '../lib/supabase';
-import { calculateUsageAf } from '../lib/usage-calculation';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function ReadingDetailPage() {
   const { id, readingId } = useParams<{ id: string; readingId: string }>();
   const navigate = useNavigate();
-  const isOnline = useOnlineStatus();
+  const db = usePowerSync();
   const { t, locale } = useTranslation();
   const { wells, loading: wellsLoading } = useWells();
   const { farmName: activeFarmName } = useActiveFarm();
   const farmName = activeFarmName ?? '';
   const role = useUserRole();
-  const { isReadOnly } = useFarmReadOnly();
   const canDelete = hasPermission(role, 'delete_reading');
 
   const { readings, loading: readingsLoading } = useWellReadingsWithNames(id ?? null);
@@ -120,71 +116,64 @@ export default function ReadingDetailPage() {
   );
 
   const handleDelete = useCallback(async () => {
-    if (isReadOnly) return;
     if (!readingId || !reading || !well) return;
-    if (!isOnline) {
-      useToastStore.getState().show(t('common.requiresInternet'), 'error');
-      return;
-    }
     setDeleting(true);
     try {
-      const { error } = await supabase.from('readings').delete().eq('id', readingId);
-      if (error) throw error;
+      await db.execute('DELETE FROM readings WHERE id = ?', [readingId]);
 
-      // Recalculate used_af on affected allocation (fire-and-forget)
+      // Recalculate used_af on the affected allocation
       try {
-        const deletedDate = reading.recordedAt.split('T')[0];
+        const recordedDate = reading.recordedAt.split('T')[0];
+        const allocRows = await db.getAll<{
+          id: string;
+          starting_reading: string | null;
+          period_start: string;
+          period_end: string;
+        }>(
+          `SELECT id, starting_reading, period_start, period_end
+           FROM allocations
+           WHERE well_id = ? AND period_start <= ? AND period_end >= ?
+           ORDER BY period_start DESC LIMIT 1`,
+          [well.id, recordedDate, recordedDate],
+        );
 
-        const { data: allocData } = await supabase
-          .from('allocations')
-          .select('id, starting_reading, period_start, period_end')
-          .eq('well_id', well.id)
-          .lte('period_start', deletedDate)
-          .gte('period_end', deletedDate)
-          .order('period_start', { ascending: false })
-          .limit(1);
-
-        if (allocData && allocData.length > 0) {
-          const alloc = allocData[0];
-
-          const { data: latestReadings } = await supabase
-            .from('readings')
-            .select('value')
-            .eq('well_id', well.id)
-            .gte('recorded_at', alloc.period_start)
-            .lte('recorded_at', alloc.period_end + 'T23:59:59')
-            .order('recorded_at', { ascending: false })
-            .limit(1);
+        if (allocRows.length > 0) {
+          const alloc = allocRows[0];
+          const now = new Date().toISOString();
 
           if (!alloc.starting_reading) {
-            // No starting_reading — can't recalculate, preserve existing used_af
-          } else if (!latestReadings?.length) {
-            // No readings left in period — zero out usage
-            await supabase
-              .from('allocations')
-              .update({
-                used_af: 0,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', alloc.id);
+            // No starting_reading — preserve existing used_af
           } else {
-            const newUsedAf = calculateUsageAf(
-              latestReadings[0].value,
-              alloc.starting_reading,
-              well.multiplier,
-              well.units,
+            // Query remaining entries in the allocation period
+            const entries = await db.getAll<{ value: string; type: string }>(
+              `SELECT value, type FROM readings
+               WHERE well_id = ? AND recorded_at >= ? AND recorded_at <= ?
+               ORDER BY recorded_at DESC`,
+              [well.id, alloc.period_start, alloc.period_end + 'T23:59:59'],
             );
-            await supabase
-              .from('allocations')
-              .update({
-                used_af: Math.round(newUsedAf * 100) / 100,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', alloc.id);
+
+            if (entries.length === 0) {
+              // No entries remain — set used_af to 0
+              await db.execute(
+                `UPDATE allocations SET used_af = '0', updated_at = ? WHERE id = ?`,
+                [now, alloc.id],
+              );
+            } else {
+              const usedAf = calculateAllocationUsage(
+                entries,
+                alloc.starting_reading,
+                well.multiplier,
+                well.units,
+              );
+              await db.execute(
+                `UPDATE allocations SET used_af = CAST(ROUND(?, 2) AS TEXT), updated_at = ? WHERE id = ?`,
+                [usedAf.toFixed(2), now, alloc.id],
+              );
+            }
           }
         }
       } catch {
-        // Allocation recalculation is non-critical; reading was already deleted
+        // Recalculation is non-critical; reading was already deleted
       }
 
       useToastStore.getState().show(t('reading.deleted'));
@@ -195,7 +184,7 @@ export default function ReadingDetailPage() {
     } finally {
       setDeleting(false);
     }
-  }, [readingId, reading, well, isOnline, navigate, id, t, isReadOnly]);
+  }, [db, readingId, reading, well, navigate, id, t]);
 
   const handleOpenDelete = useCallback(() => setShowDeleteConfirm(true), []);
   const handleCloseDelete = useCallback(() => setShowDeleteConfirm(false), []);
@@ -258,7 +247,7 @@ export default function ReadingDetailPage() {
           <div className="space-y-2 mb-6 mx-4">
             {!reading.isInRange && gpsDistanceFeet !== null && (
               <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <PennantFlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                <FlagIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                 <span className="text-[#d5e8bd] text-lg">
                   {t('readingDetail.gpsOffBy', { feet: gpsDistanceFeet })}
                 </span>
@@ -266,7 +255,7 @@ export default function ReadingDetailPage() {
             )}
             {reading.isSimilarReading && (
               <div className="flex items-center gap-3 bg-[#4b5b37] rounded-xl px-8 py-4">
-                <PennantFlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <FlagIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
                 <span className="text-[#d5e8bd] text-lg">
                   {t('readingDetail.similarReading')}
                 </span>
@@ -302,8 +291,8 @@ export default function ReadingDetailPage() {
           </div>
         </div>
 
-        {/* Delete button (admin/owner only) */}
-        {canDelete && !isReadOnly && (
+        {/* Delete button (admin/owner only, not for meter replacements) */}
+        {canDelete && reading.type !== 'meter_replacement' && (
           <div className="flex-shrink-0 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
