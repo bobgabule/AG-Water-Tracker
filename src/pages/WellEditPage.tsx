@@ -397,7 +397,7 @@ export default function WellEditPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pt-14 bg-surface-header">
+    <div className="fixed inset-0 z-40 flex flex-col bg-surface-header">
       {/* Header */}
       <div className="bg-surface-header p-4 pt-2 flex-shrink-0 flex items-center gap-3">
         <button
